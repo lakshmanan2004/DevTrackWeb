@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { api, getToken, setToken } from '../api/client';
-import { connectSocket, disconnectSocket } from '../api/socket';
+import { connectSocket, disconnectSocket, onSocketEvent } from '../api/socket';
+import { playAlertSound, showWindowsNotification } from '../utils/audioAlerts';
 
 export interface AuthUser {
   id: string;
@@ -84,6 +85,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (getToken()) connectSocket();
     });
   }, [refresh]);
+
+  // Real-time audio and desktop popup notification listeners
+  useEffect(() => {
+    if (!user) return;
+    const unsub1 = onSocketEvent('alert:new', (payload: any) => {
+      refresh();
+      playAlertSound('urgent');
+      showWindowsNotification('DevTrack Alert', payload?.title || 'New alert received');
+    });
+    const unsub2 = onSocketEvent('task:assigned', (payload: any) => {
+      refresh();
+      playAlertSound('notification');
+      showWindowsNotification(
+        'New Task Assigned',
+        payload?.title ? `Task: ${payload.title}` : 'A new task was assigned to you'
+      );
+    });
+    const unsub3 = onSocketEvent('log:status', (payload: any) => {
+      refresh();
+      playAlertSound('pop');
+      const statusText = payload?.status === 'approved' ? 'Log Approved ✓' : 'Log Status Update';
+      showWindowsNotification('DevTrack Work Log', statusText);
+    });
+    const unsub4 = onSocketEvent('log:submitted', () => {
+      refresh();
+    });
+
+    return () => {
+      unsub1();
+      unsub2();
+      unsub3();
+      unsub4();
+    };
+  }, [user, refresh]);
 
   // keep sidebar badges fresh when alerts/tasks change server-side
   useEffect(() => {

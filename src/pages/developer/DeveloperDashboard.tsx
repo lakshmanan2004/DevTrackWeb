@@ -104,7 +104,7 @@ export function DeveloperDashboard() {
     });
   };
 
-  const lastAlertRef = useRef<{ slot: number; minute: number } | null>(null);
+  const lastAlertRef = useRef<{ slot: number; level: string } | null>(null);
 
   // Background monitor for 20m, 10m, 5m audio pop/chime sounds & Windows desktop notifications + Screen Pop-up Modal
   useEffect(() => {
@@ -117,54 +117,44 @@ export function DeveloperDashboard() {
       const slot = stats?.currentSlot ?? d.getHours();
       const min = d.getMinutes();
       const remainingMins = 60 - min;
-      const isWorkday = slot >= 8 && slot <= 16 && slot !== 12;
       const unlogged = !logs.some((log: any) => log.hourSlot === slot);
 
-      if (!isWorkday || !unlogged) return;
-
-      if (lastAlertRef.current?.slot === slot && lastAlertRef.current?.minute === min) {
-        return;
-      }
+      if (!unlogged) return;
 
       const slotLabel = `${slot > 12 ? slot - 12 : slot} ${slot >= 12 ? 'PM' : 'AM'}`;
 
-      if (remainingMins === 20 || min === 40) {
-        lastAlertRef.current = { slot, minute: min };
+      if (remainingMins <= 20 && remainingMins > 10) {
+        if (lastAlertRef.current?.slot === slot && lastAlertRef.current?.level === 'pop') return;
+        lastAlertRef.current = { slot, level: 'pop' };
         playAlertSound('pop');
         showWindowsNotification(
           'DevTrack Reminder: 20 Mins Left!',
-          `You have 20 minutes remaining to submit your work log for the ${slotLabel} hour slot.`
+          `You have ${remainingMins} minutes remaining to submit your work log for ${slotLabel}.`
         );
         setAlertModalState({ open: true, level: 'pop', slotLabel, minsLeft: remainingMins });
-      } else if (remainingMins === 10 || min === 50) {
-        lastAlertRef.current = { slot, minute: min };
+      } else if (remainingMins <= 10 && remainingMins > 5) {
+        if (lastAlertRef.current?.slot === slot && lastAlertRef.current?.level === 'warning') return;
+        lastAlertRef.current = { slot, level: 'warning' };
         playAlertSound('notification');
         showWindowsNotification(
           'DevTrack Warning: 10 Mins Left!',
-          `Only 10 minutes remaining! Submit your work log for ${slotLabel} before time runs out.`
+          `Only ${remainingMins} minutes remaining! Submit your work log for ${slotLabel} before time runs out.`
         );
         setAlertModalState({ open: true, level: 'warning', slotLabel, minsLeft: remainingMins });
-      } else if (remainingMins === 5 || min === 55) {
-        lastAlertRef.current = { slot, minute: min };
+      } else if (remainingMins <= 5 && remainingMins > 0) {
+        if (lastAlertRef.current?.slot === slot && lastAlertRef.current?.level === 'urgent') return;
+        lastAlertRef.current = { slot, level: 'urgent' };
         playAlertSound('urgent');
         showWindowsNotification(
           'DevTrack URGENT: 5 Mins Left!',
-          `Dead time approaching! Only 5 minutes left to submit your ${slotLabel} check-in!`
+          `Dead time approaching! Only ${remainingMins} minutes left to submit your ${slotLabel} check-in!`
         );
         setAlertModalState({ open: true, level: 'urgent', slotLabel, minsLeft: remainingMins });
-      } else if (min === 0) {
-        lastAlertRef.current = { slot, minute: min };
-        playAlertSound('late');
-        showWindowsNotification(
-          'DevTrack: Hour Slot Closed (Late Submission)',
-          'The deadline for the previous hour slot has passed. Please submit your late log now.'
-        );
-        setAlertModalState({ open: true, level: 'late', slotLabel, minsLeft: 0 });
       }
     }, 5000);
 
     return () => clearInterval(checkTimer);
-  }, [logs, stats?.currentSlot]);
+  }, [stats?.currentSlot, logs]);
 
   const firstName = user?.name?.split(' ')[0] || 'there';
 
