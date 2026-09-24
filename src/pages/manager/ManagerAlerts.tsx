@@ -1,0 +1,173 @@
+import React, { useState } from 'react';
+import {
+  BellIcon,
+  AlertTriangleIcon,
+  UserXIcon,
+  SendIcon,
+  PlusIcon,
+  CheckCircle2Icon
+} from 'lucide-react';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { Banner } from '../../components/ui/Banner';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
+import { FilterPills } from '../../components/ui/FilterPills';
+import { AssignTaskModal } from '../../components/common/AssignTaskModal';
+import { useAlerts, useLive } from '../../hooks/useLive';
+import { api } from '../../api/client';
+
+export function ManagerAlerts() {
+  const { data, refetch } = useAlerts();
+  const { data: dir } = useLive<{ users: any[] }>('/api/directory', [], 0);
+  const devOptions = (dir?.users || [])
+    .filter((u: any) => u.role === 'developer')
+    .map((u: any) => ({ id: u.id, name: u.name, team: u.teamName, project: '' }));
+  const alerts = data?.alerts || [];
+  const [filter, setFilter] = useState('all');
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [targetDevId, setTargetDevId] = useState<string | undefined>();
+  const [toastMessage, setToastMessage] = useState('');
+
+  const handleDismiss = async (id: string) => {
+    await api(`/api/alerts/${id}/action`, { method: 'POST', body: { action: 'Mark Seen' } });
+    refetch();
+  };
+
+  const handleSendPing = async (alert: any) => {
+    await api(`/api/alerts/${alert.id}/action`, { method: 'POST', body: { action: 'Send Reminder' } });
+    setToastMessage(`Ping & reminder notification sent to ${alert.who}!`);
+    setTimeout(() => setToastMessage(''), 2500);
+    refetch();
+  };
+
+  const filteredAlerts = filter === 'all'
+    ? alerts
+    : filter === 'idle'
+    ? alerts.filter((a: any) => a.category === 'Idle')
+    : alerts.filter((a: any) => a.category === 'Missed Check-in');
+
+  return (
+    <>
+      <PageHeader
+        title="Developer Idle Alerts"
+        subtitle="Real-time activity monitoring & alerts for your projects"
+        actions={
+          <span className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm">
+            <BellIcon className="h-3.5 w-3.5" />
+            {alerts.filter((a: any) => a.unread).length} Active Alerts
+          </span>
+        }
+      />
+
+      <div className="flex-1 space-y-5 p-6">
+        <Banner tone="yellow" icon={<AlertTriangleIcon className="h-4 w-4 text-amber-600" />}>
+          Automated session heartbeats detect when developers are idle or miss check-ins. You can ping developers or assign tasks directly — they receive it instantly.
+        </Banner>
+
+        {toastMessage && (
+          <div className="flex items-center gap-2 rounded-xl bg-green-700 p-3 text-xs font-bold text-white shadow-md animate-in fade-in">
+            <CheckCircle2Icon className="h-4 w-4" />
+            {toastMessage}
+          </div>
+        )}
+
+        <FilterPills
+          ariaLabel="Filter alerts"
+          value={filter}
+          onChange={setFilter}
+          options={[
+            { id: 'all', label: 'All Alerts', count: alerts.length },
+            { id: 'idle', label: 'Idle Developers', count: alerts.filter((a: any) => a.category === 'Idle').length },
+            { id: 'missed', label: 'Missed Check-ins', count: alerts.filter((a: any) => a.category === 'Missed Check-in').length }
+          ]}
+        />
+
+        <div className="space-y-4">
+          {filteredAlerts.map((alert: any) => (
+            <div
+              key={alert.id}
+              className={`rounded-card border bg-white p-5 shadow-card transition-all ${
+                alert.unread
+                  ? alert.category === 'Idle' ? 'border-amber-300 border-l-4 border-l-amber-500' : 'border-red-200 border-l-4 border-l-red-500'
+                  : 'border-hairline'
+              }`}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                    alert.category === 'Idle' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                  }`}>
+                    <UserXIcon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-navy">{alert.who} — {alert.category}</h3>
+                      <Badge tone={alert.category === 'Idle' ? 'amber' : 'red'}>
+                        {alert.category === 'Idle' ? `Idle ${alert.idleTime}` : 'Critical'}
+                      </Badge>
+                      {!alert.unread && <Badge tone="grey">Seen</Badge>}
+                    </div>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      {alert.meta || alert.time} · Last Active: {alert.lastActive || 'unknown'}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-400">Pushed via Socket.IO</span>
+              </div>
+
+              <p className="mt-3 text-xs leading-relaxed text-gray-700 bg-canvas p-3 rounded-lg border border-hairline">
+                <span className="font-bold text-navy">Detection Log:</span> {alert.body}
+                {alert.detection ? ` — ${alert.detection}` : ''}
+              </p>
+
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => handleSendPing(alert)}
+                    icon={<SendIcon className="h-3.5 w-3.5" />}
+                  >
+                    Send Ping Reminder
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="purple"
+                    onClick={() => {
+                      setTargetDevId(alert.developerId || undefined);
+                      setAssignModalOpen(true);
+                    }}
+                    icon={<PlusIcon className="h-3.5 w-3.5" />}
+                  >
+                    Assign Pending Task
+                  </Button>
+                </div>
+                <button
+                  onClick={() => handleDismiss(alert.id)}
+                  className="text-xs font-semibold text-gray-400 hover:text-navy hover:underline"
+                >
+                  Dismiss Alert
+                </button>
+              </div>
+            </div>
+          ))}
+          {filteredAlerts.length === 0 && (
+            <div className="rounded-card border border-hairline bg-white p-8 text-center">
+              <CheckCircle2Icon className="mx-auto h-8 w-8 text-green-500" />
+              <h3 className="mt-2 text-sm font-bold text-navy">No Active Idle Alerts</h3>
+              <p className="mt-1 text-xs text-gray-500">All developers on your managed teams are active or on schedule.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <AssignTaskModal
+        isOpen={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        defaultDeveloperId={targetDevId}
+        assignerRole="PM"
+        assignerName="Project Manager"
+        developers={devOptions}
+      />
+    </>
+  );
+}

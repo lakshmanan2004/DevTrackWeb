@@ -1,0 +1,171 @@
+import { Project } from '../types';
+
+export const projects: Project[] = [
+  {
+    id: 'erp',
+    name: 'College ERP System',
+    description: 'Centralized enterprise platform for student administration, course registrations, timetable generation, and department workflow automation.',
+    status: 'ongoing',
+    manager: 'Senthil P',
+    leader: 'Karthik M',
+    team: 'Team Alpha',
+    developers: 4,
+    developerNames: ['Ravi Kumar', 'Anita Roy', 'Priya S', 'Suresh M'],
+    started: 'Aug 1, 2026',
+    targetDate: 'Dec 20, 2026',
+    progress: 65,
+    health: 'On Track',
+    tasksDone: 28,
+    blockers: 6,
+    activeDevs: 3,
+    inProgress: 2
+  },
+  {
+    id: 'attendance',
+    name: 'Attendance App',
+    description: 'Biometric & QR-based mobile attendance tracker for students and faculty with real-time sync and automated anomaly alerts.',
+    status: 'ongoing',
+    manager: 'Senthil P',
+    leader: 'Senthil K',
+    team: 'Team Beta',
+    developers: 3,
+    developerNames: ['Vikram R', 'Meera N', 'Arun Kumar'],
+    started: 'Sep 1, 2026',
+    targetDate: 'Nov 15, 2026',
+    progress: 30,
+    health: 'Slightly Behind',
+    tasksDone: 11,
+    blockers: 2,
+    activeDevs: 2,
+    inProgress: 3
+  },
+  {
+    id: 'library',
+    name: 'Library Management System',
+    description: 'Digital cataloging, book issuance, automated fine calculation, and e-resource repository system for campus libraries.',
+    status: 'ongoing',
+    manager: 'Vijay R',
+    leader: 'Vijay S',
+    team: 'Team Gamma',
+    developers: 3,
+    developerNames: ['Deepak V', 'Kavitha P', 'Siddharth T'],
+    started: 'Jul 15, 2026',
+    targetDate: 'Oct 30, 2026',
+    progress: 80,
+    health: 'On Track',
+    tasksDone: 42,
+    blockers: 1,
+    activeDevs: 3,
+    inProgress: 2
+  },
+  {
+    id: 'fee',
+    name: 'Fee Payment System',
+    description: 'Secure payment gateway integration for tuition, hostel, and exam fees with instant receipt generation and ERP ledger sync.',
+    status: 'ongoing',
+    manager: 'Vijay R',
+    leader: 'Kumar M',
+    team: 'Team Delta',
+    developers: 5,
+    developerNames: ['Rohan Gupta', 'Neha Sharma', 'Aakash V', 'Divya M', 'Karan S'],
+    started: 'Sep 5, 2026',
+    targetDate: 'Jan 15, 2027',
+    progress: 15,
+    health: 'Behind',
+    tasksDone: 4,
+    blockers: 3,
+    activeDevs: 4,
+    inProgress: 5
+  },
+  {
+    id: 'portal',
+    name: 'Student Portal',
+    description: 'Self-service web portal for students to check grades, request official transcripts, download hall tickets, and track attendance.',
+    status: 'completed',
+    manager: 'Vijay R',
+    leader: 'Vijay S',
+    team: 'Team Alpha',
+    developers: 3,
+    developerNames: ['Anita Roy', 'Ravi Kumar', 'Priya S'],
+    started: 'Aug 1, 2026',
+    ended: 'Aug 30, 2026',
+    targetDate: 'Aug 31, 2026',
+    progress: 100,
+    health: 'Delivered on time',
+    tasksDone: 56,
+    blockers: 0,
+    activeDevs: 0,
+    inProgress: 0
+  },
+  {
+    id: 'hostel',
+    name: 'Hostel Management System',
+    description: 'Allotment engine, gate pass workflow, mess billing, and room inventory management for campus accommodation.',
+    status: 'completed',
+    manager: 'Senthil P',
+    leader: 'Karthik M',
+    team: 'Team Beta',
+    developers: 4,
+    developerNames: ['Vikram R', 'Meera N', 'Suresh M', 'Arun Kumar'],
+    started: 'Jul 1, 2026',
+    ended: 'Jul 20, 2026',
+    targetDate: 'Jul 25, 2026',
+    progress: 100,
+    health: 'Delivered on time',
+    tasksDone: 38,
+    blockers: 0,
+    activeDevs: 0,
+    inProgress: 0
+  },
+  {
+    id: 'transport',
+    name: 'Transport Tracking App',
+    description: 'Live GPS location tracking, route management, and driver assignment system for university shuttle buses.',
+    status: 'hold',
+    manager: 'Vijay R',
+    leader: 'Kumar M',
+    team: 'Team Gamma',
+    developers: 2,
+    developerNames: ['Deepak V', 'Kavitha P'],
+    started: 'Aug 20, 2026',
+    targetDate: 'Nov 30, 2026',
+    progress: 22,
+    health: 'Behind',
+    tasksDone: 6,
+    blockers: 2,
+    activeDevs: 0,
+    inProgress: 1
+  }
+];
+
+
+export const projectWeeks = [
+{ label: 'Week 1', tasks: 8, blockers: 1, health: 'Good' as const },
+{ label: 'Week 2', tasks: 10, blockers: 0, health: 'Good' as const },
+{ label: 'Week 3', tasks: 6, blockers: 3, health: 'Slow' as const },
+{ label: 'Week 4', tasks: 4, blockers: 2, health: 'Slow' as const },
+{ label: 'This Week', tasks: 3, blockers: 3, health: 'Behind' as const }];
+
+
+export const activeBlockers = [
+{
+  id: 'b1',
+  title: 'API integration issue',
+  since: 'Since Sep 6',
+  team: 'Team Alpha',
+  state: 'Unresolved' as const
+},
+{
+  id: 'b2',
+  title: 'Server access needed',
+  since: 'Since Sep 7',
+  team: 'Team Alpha',
+  state: 'Unresolved' as const
+},
+{
+  id: 'b3',
+  title: 'Design approval pending',
+  since: 'Since Sep 5',
+  team: 'Team Alpha',
+  state: 'In Discussion' as const
+}];
