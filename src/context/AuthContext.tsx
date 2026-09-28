@@ -111,12 +111,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsub4 = onSocketEvent('log:submitted', () => {
       refresh();
     });
+    const unsub5 = onSocketEvent('task:new', () => {
+      refresh();
+    });
+    const unsub6 = onSocketEvent('task:update', () => {
+      refresh();
+    });
+    const unsub7 = onSocketEvent('log:review', () => {
+      refresh();
+    });
 
     return () => {
       unsub1();
       unsub2();
       unsub3();
       unsub4();
+      unsub5();
+      unsub6();
+      unsub7();
     };
   }, [user, refresh]);
 

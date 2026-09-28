@@ -128,6 +128,26 @@ router.get('/reports/performance', ah(async (req, res) => {
       }
     }
 
+    // Compute past 4 weeks historical trend dynamically
+    const weeklyTrend = [];
+    const now = new Date();
+    for (let w = 3; w >= 0; w--) {
+      const startDay = addDays(now, -w * 7 - 4);
+      const endDay = addDays(now, -w * 7);
+      const startDs = dayStr(startDay);
+      const endDs = dayStr(endDay);
+      const weekLogs = logs.filter((l) => l.date >= startDs && l.date <= endDs);
+      const weekCommits = commits.filter((c) => c.date >= startDs && c.date <= endDs).length;
+      const weekEods = eods.filter((e) => e.date >= startDs && e.date <= endDs).length;
+      const weekScore = weekLogs.length
+        ? Math.max(0, Math.min(100, Math.round(50 + weekLogs.length * 2.5 + weekCommits * 2 + weekEods * 5)))
+        : Math.max(40, Math.round(50 - w * 3));
+      weeklyTrend.push({
+        week: `Wk ${4 - w}`,
+        score: weekScore
+      });
+    }
+
     const logRate = Math.min(100, Math.round((logs.length / Math.max(1, required.length * 5)) * 100));
     const onTime = logs.filter((l) => {
       const d = new Date(l.submittedAt);
@@ -137,8 +157,13 @@ router.get('/reports/performance', ah(async (req, res) => {
     const commitCount = commits.length;
     const eodRate = Math.min(100, Math.round((eods.length / 5) * 100));
     const completion = logs.length ? Math.round((logs.filter((l) => l.status === 'done').length / logs.length) * 100) : 0;
-    const resolved = tasks.filter((t) => t.status === 'completed').length;
-    const resolutionRate = tasks.length ? Math.round((resolved / tasks.length) * 100) : 100;
+
+    const devDoneLogs = logs.filter((l) => l.status === 'done').length;
+    const devPendingLogs = logs.filter((l) => l.status === 'progress' || l.status === 'blocked').length;
+    const totalAssignedTasks = tasks.length + devPendingLogs.length + devDoneLogs.length;
+    const resolved = tasks.filter((t) => t.status === 'completed').length + devDoneLogs.length;
+    const resolutionRate = totalAssignedTasks ? Math.round((resolved / totalAssignedTasks) * 100) : 100;
+
     const totalReviews = logs.filter((l) => l.review !== 'pending').length;
     const changesRequested = logs.filter((l) => l.review === 'changes_requested' || l.review === 'rejected').length;
     const changeRatio = totalReviews ? Math.round((changesRequested / totalReviews) * 100) : 0;
@@ -188,7 +213,7 @@ router.get('/reports/performance', ah(async (req, res) => {
         leaveStatus: days.every((d) => d.status === 'Present') ? `Present All ${days.length} Days` : 'Some absences'
       },
       pendingWorks: {
-        assigned: tasks.length,
+        assigned: totalAssignedTasks,
         resolved,
         resolutionRate,
         teamAvgResolutionRate: 0,
@@ -199,12 +224,7 @@ router.get('/reports/performance', ah(async (req, res) => {
           : 'Significant backlog of assigned tasks.'
       },
       dailyTrend: days,
-      weeklyTrend: [
-        { week: 'Wk 1', score: Math.max(0, score - 6) },
-        { week: 'Wk 2', score: Math.max(0, score - 3) },
-        { week: 'Wk 3', score: Math.max(0, score - 1) },
-        { week: 'Wk 4', score: score }
-      ],
+      weeklyTrend,
       batchSubmissionsCount: batchAlerts
     };
     drafts.push(draft);
@@ -212,20 +232,27 @@ router.get('/reports/performance', ah(async (req, res) => {
   }
 
   const teamAvg = teamScores.length ? Math.round(teamScores.reduce((a, b) => a + b, 0) / teamScores.length) : 0;
+  const avgLogRate = drafts.length ? Math.round(drafts.reduce((s, d) => s + d.metrics.logRate.value, 0) / drafts.length) : 0;
+  const avgOntimeRate = drafts.length ? Math.round(drafts.reduce((s, d) => s + d.metrics.ontimeRate.value, 0) / drafts.length) : 0;
+  const avgCommits = drafts.length ? Math.round(drafts.reduce((s, d) => s + d.metrics.commits.value, 0) / drafts.length) : 0;
+  const avgEodRate = drafts.length ? Math.round(drafts.reduce((s, d) => s + d.metrics.eodConsistency.value, 0) / drafts.length) : 0;
+  const avgResolutionRate = drafts.length ? Math.round(drafts.reduce((s, d) => s + d.pendingWorks.resolutionRate, 0) / drafts.length) : 0;
+  const avgChangeRatio = drafts.length ? Math.round(drafts.reduce((s, d) => s + d.changeRatio.ratio, 0) / drafts.length) : 0;
+
   for (const d of drafts) {
     d.tier = d.score >= 85 ? 'Excellent' : d.score >= 70 ? 'Good' : d.score >= 50 ? 'Average' : 'Poor';
     d.avatarBg = d.tier === 'Excellent' ? 'bg-emerald-600 text-white'
       : d.tier === 'Good' ? 'bg-blue-600 text-white'
       : d.tier === 'Average' ? 'bg-amber-500 text-white'
       : 'bg-red-500 text-white';
-    d.metrics.logRate.teamAvg = teamAvg;
-    d.metrics.ontimeRate.teamAvg = teamAvg;
-    d.metrics.commits.teamAvg = teamAvg;
-    d.metrics.eodConsistency.teamAvg = teamAvg;
-    d.metrics.taskCompletion.teamAvg = teamAvg;
-    d.metrics.pendingResolution.teamAvg = teamAvg;
-    d.pendingWorks.teamAvgResolutionRate = teamAvg;
-    d.changeRatio.teamAvgRatio = 30;
+    d.metrics.logRate.teamAvg = avgLogRate;
+    d.metrics.ontimeRate.teamAvg = avgOntimeRate;
+    d.metrics.commits.teamAvg = avgCommits;
+    d.metrics.eodConsistency.teamAvg = avgEodRate;
+    d.metrics.taskCompletion.teamAvg = avgResolutionRate;
+    d.metrics.pendingResolution.teamAvg = avgResolutionRate;
+    d.pendingWorks.teamAvgResolutionRate = avgResolutionRate;
+    d.changeRatio.teamAvgRatio = avgChangeRatio;
     d.recommendation = d.score >= 85
       ? 'Benchmark performer — consider for mentoring others.'
       : d.score >= 70

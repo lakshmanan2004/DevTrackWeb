@@ -35,6 +35,9 @@ function workLogDto(log, extra = {}) {
     blocker: log.blocker || '',
     wordCount: log.wordCount,
     project: extra.projectName || '',
+    linkedTask: log.linkedTask ? String(log.linkedTask) : undefined,
+    isAssignedTask: !!(log.linkedTask || log.isAssignedTask),
+    assignedTaskTitle: log.assignedTaskTitle || extra.assignedTaskTitle || '',
     resubmissions: (log.resubmissions || []).map((r) => ({ text: r.text, at: fmtTime(r.at) }))
   };
 }
@@ -174,6 +177,18 @@ function projectDto(project, team, stats = {}) {
     targetDate: project.targetDate ? fmtDateMDY(project.targetDate) : '',
     ended: project.endedAt ? fmtDateMDY(project.endedAt) : '',
     repoUrl: project.repoUrl || '',
+    modules: (project.modules || []).map((m) => ({
+      id: String(m._id || m.id),
+      name: m.name,
+      description: m.description || '',
+      weightPercentage: m.weightPercentage || 0,
+      status: m.status || 'todo',
+      completedAt: m.completedAt ? fmtDateMDY(m.completedAt) : undefined,
+      completedBy: m.completedBy ? String(m.completedBy) : undefined,
+      logsCount: m.logsCount || 0,
+      totalMinutes: m.totalMinutes || 0,
+      submittedLogs: m.submittedLogs || []
+    })),
     // live-computed stats (fallback to 0)
     progress: stats.progress ?? 0,
     health: stats.health ?? 'On Track',

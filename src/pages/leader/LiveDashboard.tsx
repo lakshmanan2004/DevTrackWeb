@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { BellIcon, InfoIcon } from 'lucide-react';
+import { BellIcon, InfoIcon, LayersIcon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Banner } from '../../components/ui/Banner';
 import { DeveloperCard } from '../../components/leader/DeveloperCard';
 import { DeveloperDetailPanel } from '../../components/leader/DeveloperDetailPanel';
-import { useDevelopers, useDeveloperDetail, useAlerts } from '../../hooks/useLive';
+import { ProjectModulesSection } from '../../components/project/ProjectModulesSection';
+import { useDevelopers, useDeveloperDetail, useAlerts, useProjects } from '../../hooks/useLive';
 import { useAuth } from '../../context/AuthContext';
 import { useSocketConnected } from '../../api/socket';
 
@@ -12,6 +13,13 @@ export function LiveDashboard() {
   const { user } = useAuth();
   const { data, refetch } = useDevelopers();
   const { data: alertData } = useAlerts();
+  const { data: projData, refetch: refetchProjects } = useProjects('mine');
+  const leaderProjects = projData?.projects || [];
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+
+  const activeProjectId = selectedProjectId || leaderProjects[0]?.id;
+  const activeProject = leaderProjects.find((p: any) => p.id === activeProjectId) || leaderProjects[0];
+
   const developers = data?.developers || [];
   const unreadAlerts = (alertData?.alerts || []).filter((a: any) => a.unread).length;
   const logsToday = developers.reduce((s: number, d: any) => s + d.logs, 0);
@@ -47,7 +55,7 @@ export function LiveDashboard() {
     <>
       <PageHeader
         title="Live Dashboard"
-        subtitle={`${user?.projectName || 'Project'} · ${user?.teamName || 'Team'}`}
+        subtitle={`${activeProject?.name || user?.projectName || 'Project'} · ${user?.teamName || 'Team'}`}
         actions={
           <>
             <span className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-danger-soft px-3 py-1.5 text-xs font-bold text-danger">
@@ -72,9 +80,21 @@ export function LiveDashboard() {
 
       <div className="flex-1 space-y-5 p-6">
         <Banner tone="blue" icon={<InfoIcon className="h-4 w-4" />}>
-          You are viewing {user?.teamName} assigned to {user?.projectName} only. Other project teams are not
-          visible to you. Updates stream in real time.
+          You are viewing {user?.teamName} assigned to <strong className="underline">{activeProject?.name || user?.projectName || 'Project'}</strong>. Updates stream in real time.
         </Banner>
+
+        {activeProject && (
+          <ProjectModulesSection
+            project={activeProject}
+            allProjects={leaderProjects}
+            onSelectProject={(id) => setSelectedProjectId(id)}
+            canUpdate={true}
+            onModuleUpdated={() => {
+              refetchProjects();
+              refetch();
+            }}
+          />
+        )}
 
         <dl className="flex flex-wrap gap-3">
           {pills.map((pill) => (

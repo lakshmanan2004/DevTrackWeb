@@ -41,11 +41,11 @@ export function navFor(role: Role, badges: Badges = { alerts: 0, approvals: 0, p
     return [
       { to: '/developer', label: 'My Dashboard', icon: <LayoutDashboardIcon className={size} /> },
       { to: '/developer/projects', label: 'My Projects', icon: <FolderKanbanIcon className={size} /> },
-      { to: '/developer/pending', label: 'My Pending Works', icon: <ClockIcon className={size} />, badge: String(badges.pendingWorks + badges.approvals) },
+      { to: '/developer/pending', label: 'My Pending Works', icon: <ClockIcon className={size} />, badge: badges.pendingWorks > 0 ? String(badges.pendingWorks) : undefined },
       { to: '/developer/logs', label: 'My Work Logs', icon: <ListChecksIcon className={size} /> },
       { to: '/developer/commits', label: 'My Commits', icon: <GitCommitVerticalIcon className={size} /> },
       { to: '/developer/eod', label: 'EOD Report', icon: <FileTextIcon className={size} /> },
-      { to: '/developer/alerts', label: 'My Alerts', icon: <BellIcon className={size} />, badge: String(badges.alerts) },
+      { to: '/developer/alerts', label: 'My Alerts', icon: <BellIcon className={size} />, badge: badges.alerts > 0 ? String(badges.alerts) : undefined },
       { to: '/developer/profile', label: 'My Profile', icon: <UserIcon className={size} /> }
     ];
   }
@@ -53,10 +53,10 @@ export function navFor(role: Role, badges: Badges = { alerts: 0, approvals: 0, p
     return [
       { to: '/leader', label: 'Live Dashboard', icon: <RadioIcon className={size} /> },
       { to: '/leader/developers', label: 'All Developers', icon: <UsersIcon className={size} /> },
-      { to: '/leader/alerts', label: 'Alerts', icon: <BellIcon className={size} />, badge: String(badges.alerts) },
+      { to: '/leader/alerts', label: 'Alerts', icon: <BellIcon className={size} />, badge: badges.alerts > 0 ? String(badges.alerts) : undefined },
       { to: '/leader/reports', label: 'Weekly Reports', icon: <TrendingUpIcon className={size} /> },
       { to: '/leader/commits', label: 'Commits Overview', icon: <GitCommitVerticalIcon className={size} /> },
-      { to: '/leader/approvals', label: 'Log Approvals', icon: <CheckSquareIcon className={size} />, badge: String(badges.approvals) }
+      { to: '/leader/approvals', label: 'Log Approvals', icon: <CheckSquareIcon className={size} />, badge: badges.approvals > 0 ? String(badges.approvals) : undefined }
     ];
   }
   if (role === 'manager') {
@@ -65,7 +65,7 @@ export function navFor(role: Role, badges: Badges = { alerts: 0, approvals: 0, p
       { to: '/manager/create', label: 'Create Project', icon: <FilePlus2Icon className={size} /> },
       { to: '/manager/teams', label: 'Manage Teams', icon: <UsersRoundIcon className={size} /> },
       { to: '/manager/overview', label: 'Project Overview', icon: <TrendingUpIcon className={size} /> },
-      { to: '/manager/alerts', label: 'Alerts', icon: <BellIcon className={size} />, badge: String(badges.alerts) }
+      { to: '/manager/alerts', label: 'Alerts', icon: <BellIcon className={size} />, badge: badges.alerts > 0 ? String(badges.alerts) : undefined }
     ];
   }
   return [

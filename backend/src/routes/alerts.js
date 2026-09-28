@@ -72,6 +72,50 @@ router.post('/read-all', ah(async (req, res) => {
     query = { audience: { $in: ['leader', 'manager'] } };
   }
   await Alert.updateMany({ ...query, read: false }, { read: true });
+  emitToRoles(['leader', 'manager', 'developer', 'admin'], 'alert:update', {});
+  res.json({ ok: true });
+}));
+
+// DELETE /api/alerts/clear-all — clear all alerts for current user's role scope
+router.delete('/clear-all', ah(async (req, res) => {
+  let query;
+  if (req.user.role === 'developer') {
+    query = { audience: 'developer', user: req.user._id };
+  } else if (req.user.role === 'leader') {
+    const { scopeFor } = require('../util/scope');
+    const scope = await scopeFor(req.user);
+    query = {
+      audience: 'leader',
+      $or: [
+        { user: req.user._id },
+        { developerId: { $in: scope.developerIds } },
+        { team: { $in: scope.teamIds } }
+      ]
+    };
+  } else if (req.user.role === 'manager') {
+    const { scopeFor } = require('../util/scope');
+    const scope = await scopeFor(req.user);
+    query = {
+      audience: 'manager',
+      $or: [
+        { user: req.user._id },
+        { managerScope: req.user._id },
+        { developerId: { $in: scope.developerIds } }
+      ]
+    };
+  } else {
+    query = { audience: { $in: ['leader', 'manager'] } };
+  }
+  await Alert.deleteMany(query);
+  emitToRoles(['leader', 'manager', 'developer', 'admin'], 'alert:update', {});
+  res.json({ ok: true });
+}));
+
+// DELETE /api/alerts/:id — delete a single alert
+router.delete('/:id', ah(async (req, res) => {
+  const alert = await Alert.findByIdAndDelete(req.params.id);
+  if (!alert) return res.status(404).json({ error: 'Alert not found' });
+  emitToRoles(['leader', 'manager', 'developer', 'admin'], 'alert:update', { id: req.params.id });
   res.json({ ok: true });
 }));
 
@@ -82,13 +126,21 @@ router.post('/:id/action', ah(async (req, res) => {
 
   const action = req.body?.action || 'Mark Seen';
   if (action === 'Send Reminder') {
-    if (alert.developerId) {
+    let devId = alert.developerId;
+    if (!devId && alert.who) {
+      const dev = await User.findOne({
+        role: 'developer',
+        name: new RegExp('^' + alert.who.replace(/[-\s].*/, '').trim(), 'i')
+      });
+      if (dev) devId = dev._id;
+    }
+    if (devId) {
       await Alert.create({
-        audience: 'developer', user: alert.developerId, kind: 'reminder', unread: true,
+        audience: 'developer', user: devId, kind: 'reminder', unread: true,
         title: `Reminder from ${req.user.name}`,
         body: alert.body || 'Please submit your pending work log.'
       });
-      emitToUser(String(alert.developerId), 'alert:new', { kind: 'reminder' });
+      emitToUser(String(devId), 'alert:new', { kind: 'reminder' });
     }
     alert.read = true;
     await alert.save();
@@ -98,13 +150,21 @@ router.post('/:id/action', ah(async (req, res) => {
   } else if (action === 'Reject All') {
     alert.read = true;
     await alert.save();
-    if (alert.developerId) {
+    let devId = alert.developerId;
+    if (!devId && alert.who) {
+      const dev = await User.findOne({
+        role: 'developer',
+        name: new RegExp('^' + alert.who.replace(/[-\s].*/, '').trim(), 'i')
+      });
+      if (dev) devId = dev._id;
+    }
+    if (devId) {
       await Alert.create({
-        audience: 'developer', user: alert.developerId, kind: 'rejection', unread: true,
+        audience: 'developer', user: devId, kind: 'rejection', unread: true,
         title: 'Batch Submission Flagged',
         body: 'Your rapid batch of logs was flagged. Please submit logs hourly with real proof.'
       });
-      emitToUser(String(alert.developerId), 'alert:new', { kind: 'rejection' });
+      emitToUser(String(devId), 'alert:new', { kind: 'rejection' });
     }
   } else {
     // View / Review actions just mark it seen; navigation happens client-side

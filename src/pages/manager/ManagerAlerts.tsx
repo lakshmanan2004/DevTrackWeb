@@ -5,7 +5,9 @@ import {
   UserXIcon,
   SendIcon,
   PlusIcon,
-  CheckCircle2Icon
+  CheckCircle2Icon,
+  CheckCheckIcon,
+  Trash2Icon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Banner } from '../../components/ui/Banner';
@@ -28,9 +30,34 @@ export function ManagerAlerts() {
   const [targetDevId, setTargetDevId] = useState<string | undefined>();
   const [toastMessage, setToastMessage] = useState('');
 
+  const unreadCount = alerts.filter((a: any) => a.unread).length;
+
   const handleDismiss = async (id: string) => {
     await api(`/api/alerts/${id}/action`, { method: 'POST', body: { action: 'Mark Seen' } });
     refetch();
+  };
+
+  const handleDelete = async (id: string) => {
+    await api(`/api/alerts/${id}`, { method: 'DELETE' });
+    refetch();
+    setToastMessage('Alert deleted.');
+    setTimeout(() => setToastMessage(''), 2500);
+  };
+
+  const handleMarkAllRead = async () => {
+    if (!unreadCount) return;
+    await api('/api/alerts/read-all', { method: 'POST' });
+    refetch();
+    setToastMessage('All alerts marked as read.');
+    setTimeout(() => setToastMessage(''), 2500);
+  };
+
+  const handleClearAll = async () => {
+    if (!alerts.length) return;
+    await api('/api/alerts/clear-all', { method: 'DELETE' });
+    refetch();
+    setToastMessage('All alerts cleared.');
+    setTimeout(() => setToastMessage(''), 2500);
   };
 
   const handleSendPing = async (alert: any) => {
@@ -52,10 +79,32 @@ export function ManagerAlerts() {
         title="Developer Idle Alerts"
         subtitle="Real-time activity monitoring & alerts for your projects"
         actions={
-          <span className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm">
-            <BellIcon className="h-3.5 w-3.5" />
-            {alerts.filter((a: any) => a.unread).length} Active Alerts
-          </span>
+          <div className="flex items-center gap-2.5">
+            {unreadCount > 0 && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleMarkAllRead}
+                icon={<CheckCheckIcon className="h-3.5 w-3.5 text-brand" />}
+              >
+                Mark All as Read
+              </Button>
+            )}
+            {alerts.length > 0 && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleClearAll}
+                icon={<Trash2Icon className="h-3.5 w-3.5 text-danger" />}
+              >
+                Clear All
+              </Button>
+            )}
+            <span className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm">
+              <BellIcon className="h-3.5 w-3.5" />
+              {unreadCount} Active Alerts
+            </span>
+          </div>
         }
       />
 
@@ -112,7 +161,17 @@ export function ManagerAlerts() {
                     </p>
                   </div>
                 </div>
-                <span className="text-xs text-gray-400">Pushed via Socket.IO</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">Pushed via Socket.IO</span>
+                  <button
+                    onClick={() => handleDelete(alert.id)}
+                    title="Delete Alert"
+                    aria-label="Delete Alert"
+                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-danger transition-colors"
+                  >
+                    <Trash2Icon className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               <p className="mt-3 text-xs leading-relaxed text-gray-700 bg-canvas p-3 rounded-lg border border-hairline">
@@ -141,12 +200,22 @@ export function ManagerAlerts() {
                     Assign Pending Task
                   </Button>
                 </div>
-                <button
-                  onClick={() => handleDismiss(alert.id)}
-                  className="text-xs font-semibold text-gray-400 hover:text-navy hover:underline"
-                >
-                  Dismiss Alert
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => handleDismiss(alert.id)}
+                    className="text-xs font-semibold text-gray-400 hover:text-navy hover:underline"
+                  >
+                    Dismiss Alert
+                  </button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleDelete(alert.id)}
+                    icon={<Trash2Icon className="h-3.5 w-3.5 text-danger" />}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

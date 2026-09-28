@@ -94,7 +94,7 @@ router.get('/', ah(async (req, res) => {
 // ---------- POST /api/logs (developer hourly check-in) ----------
 router.post('/', requireRole('developer'), upload.single('attachment'), ah(async (req, res) => {
   const settings = await Setting.get();
-  const { projectId, task, description, status, blocker, minutes, commitUrl } = req.body;
+  const { projectId, taskId, task, description, status, blocker, minutes, commitUrl, moduleName } = req.body;
   const words = String(description || '').trim().split(/\s+/).filter(Boolean).length;
 
   if (!projectId) return res.status(400).json({ error: 'Select the project this log is for' });
@@ -106,12 +106,13 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
   const project = await Project.findById(projectId);
   if (!project) return res.status(404).json({ error: 'Project not found' });
 
-  const date = dayStr();
-  const hourSlot = slotForNow(settings);
-  const existing = await WorkLog.findOne({ developer: req.user._id, date, hourSlot });
-  if (existing) {
-    return res.status(409).json({ error: `You already submitted your ${hourLabel(hourSlot)} log` });
+  let linkedTaskObj = null;
+  if (taskId) {
+    linkedTaskObj = await Task.findById(taskId);
   }
+
+  const date = dayStr();
+  const hourSlot = req.body.hourSlot ? Number(req.body.hourSlot) : slotForNow(settings);
 
   const attachment = await saveUpload(req.file);
 
@@ -122,7 +123,7 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
     sha = (commitUrl.split('/').pop() || '').slice(0, 7) || Math.random().toString(16).slice(2, 9);
     await Commit.create({
       developer: req.user._id, project: project._id, team: req.user.team,
-      message: task || 'Commit linked from check-in', branch: 'main', files: 1,
+      message: task || (linkedTaskObj ? linkedTaskObj.title : 'Commit linked from check-in'), branch: 'main', files: 1,
       sha, url: commitUrl, committedAt: new Date(), date
     });
   }
@@ -131,9 +132,10 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
     developer: req.user._id,
     team: req.user.team,
     project: project._id,
+    moduleName: moduleName || (project.modules && project.modules[0] ? project.modules[0].name : ''),
     date,
     hourSlot,
-    task: task || description.slice(0, 60),
+    task: linkedTaskObj ? `[Assigned Task] ${linkedTaskObj.title}` : (task || description.slice(0, 60)),
     status: status || 'progress',
     description: String(description).trim(),
     submittedAt: new Date(),
@@ -144,8 +146,17 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
     commitUrl: commitUrl || '',
     review: 'pending',
     blocker: status === 'blocked' ? blocker || '' : '',
-    wordCount: words
+    wordCount: words,
+    linkedTask: linkedTaskObj ? linkedTaskObj._id : null,
+    isAssignedTask: !!linkedTaskObj,
+    assignedTaskTitle: linkedTaskObj ? linkedTaskObj.title : ''
   });
+
+  if (linkedTaskObj) {
+    linkedTaskObj.status = 'in_progress';
+    linkedTaskObj.linkedLog = log._id;
+    await linkedTaskObj.save();
+  }
 
   // batch submission detection: >= threshold logs within 10 minutes
   const recent = await WorkLog.find({
@@ -195,6 +206,7 @@ router.post('/:id/resubmit', requireRole('developer'), upload.single('attachment
 
   const dto = await dtoWithDev(log);
   emitToUser(String(req.user._id), 'log:review', dto);
+  emitToUser(String(req.user._id), 'task:update', {});
   emitToRoles(['leader'], 'log:review', dto);
   res.json({ log: dto });
 }));
@@ -212,6 +224,15 @@ router.post('/:id/review', requireRole('leader'), ah(async (req, res) => {
   if (action === 'approve') {
     log.review = 'approved';
     log.reviewNote = note || `Approved by ${req.user.name} (Team Lead)`;
+    if (log.linkedTask) {
+      const taskToComplete = await Task.findById(log.linkedTask);
+      if (taskToComplete) {
+        taskToComplete.status = 'completed';
+        await taskToComplete.save();
+        emitToUser(String(log.developer), 'task:update', { taskId: String(taskToComplete._id), status: 'completed' });
+        emitToRoles(['leader', 'manager'], 'task:update', { taskId: String(taskToComplete._id), status: 'completed' });
+      }
+    }
   } else if (action === 'reject') {
     log.review = 'rejected';
     log.reviewNote = note || 'Full resubmission requested by Team Lead.';
@@ -232,6 +253,7 @@ router.post('/:id/review', requireRole('leader'), ah(async (req, res) => {
       body: `${hourLabel(log.hourSlot)} log ${action === 'approve' ? 'approved' : 'rejected'} — ${log.reviewNote}`
     });
     emitToUser(String(log.developer), 'alert:new', {});
+    emitToUser(String(log.developer), 'task:update', {});
   }
 
   const dto = await dtoWithDev(log);
@@ -289,6 +311,7 @@ router.post('/:id/feedback', requireRole('leader'), upload.single('screenshot'),
 
   const dto = await dtoWithDev(log);
   emitToUser(String(log.developer), 'log:review', dto);
+  emitToUser(String(log.developer), 'task:update', {});
   emitToUser(String(log.developer), 'alert:new', {});
   emitToRoles(['leader', 'manager', 'admin'], 'log:review', dto);
   res.json({ log: dto });
@@ -361,49 +384,101 @@ router.get('/calendar', ah(async (req, res) => {
   res.json({ days });
 }));
 
-// ---------- GET /api/logs/pending-works (developer resubmission queue) ----------
+// ---------- GET /api/logs/pending-works (developer resubmission & task queue) ----------
 router.get('/pending-works', requireRole('developer'), ah(async (req, res) => {
+  const devUser = await User.findById(req.user._id).populate('team');
+  const userTeam = devUser && devUser.team && typeof devUser.team === 'object' ? devUser.team : null;
+  const userProjectId = userTeam && userTeam.project ? String(userTeam.project) : '';
+
+  // 1. WorkLogs that are revisions requested OR currently marked in_progress / blocked (not yet done & approved)
   const logs = await WorkLog.find({
     developer: req.user._id,
-    review: { $in: ['changes_requested', 'rejected'] }
+    $or: [
+      { review: { $in: ['changes_requested', 'rejected'] } },
+      { status: { $in: ['progress', 'blocked'] } }
+    ]
   }).sort({ date: -1, hourSlot: 1 }).populate('project', 'name');
 
   const items = [];
+  const handledLogIds = new Set();
+  const handledTaskIds = new Set();
+
   for (const log of logs) {
+    // If a log is marked 'done' and 'approved', it is completely finished -> skip
+    if (log.status === 'done' && log.review === 'approved') continue;
+
+    handledLogIds.add(String(log._id));
+    if (log.linkedTask) handledTaskIds.add(String(log.linkedTask));
+
     const fb = log.targetedFeedback && log.targetedFeedback.length
       ? log.targetedFeedback[log.targetedFeedback.length - 1]
       : null;
+    
+    const isRevision = ['changes_requested', 'rejected'].includes(log.review);
+    const isSubmittedPending = log.review === 'pending' && log.status === 'done';
+
     items.push({
       kind: 'log',
       id: String(log._id),
       logId: String(log._id),
+      projectId: log.project ? String(log.project._id || log.project) : userProjectId,
       dateStr: fmtDateMDY(new Date(`${log.date}T12:00:00`)),
       taskTitle: log.task,
       hourLabel: `${hourLabel(log.hourSlot)} Slot`,
-      assignedBy: 'Team Lead',
+      assignedBy: isRevision ? 'Team Lead' : 'Self (Check-in)',
       assignerRole: 'TL',
       highlightedText: fb ? fb.highlightedText : undefined,
-      feedbackNote: fb ? fb.comment : (log.reviewNote || 'Full resubmission requested by Team Lead.'),
-      screenshotUrl: fb && fb.screenshotUrl ? fb.screenshotUrl : undefined,
-      screenshotName: fb && fb.screenshotName ? fb.screenshotName : undefined,
-      status: 'pending_resubmit'
+      feedbackNote: fb
+        ? fb.comment
+        : log.reviewNote
+        ? log.reviewNote
+        : log.status === 'blocked'
+        ? `Blocker: ${log.blocker || 'Blocked'}`
+        : log.description,
+      screenshotUrl: fb && fb.screenshotUrl ? fb.screenshotUrl : (log.attachmentUrl || undefined),
+      screenshotName: fb && fb.screenshotName ? fb.screenshotName : (log.attachmentName || undefined),
+      status: isRevision
+        ? 'changes_requested'
+        : isSubmittedPending
+        ? 'awaiting_lead_approval'
+        : log.status === 'blocked'
+        ? 'blocked'
+        : 'in_progress'
     });
   }
 
-  const tasks = await Task.find({ assignee: req.user._id, status: { $ne: 'completed' }, type: { $ne: 'targeted_feedback' } })
-    .sort({ createdAt: -1 });
+  // 2. Assigned Tasks (in progress, pending submission, or awaiting lead approval)
+  const tasks = await Task.find({
+    assignee: req.user._id,
+    status: { $ne: 'completed' },
+    type: { $ne: 'targeted_feedback' }
+  }).populate('linkedLog').sort({ createdAt: -1 });
+
   for (const t of tasks) {
+    if (handledTaskIds.has(String(t._id))) continue;
+    if (t.linkedLog) {
+      if (handledLogIds.has(String(t.linkedLog._id || t.linkedLog))) continue;
+      // If developer already submitted log as done and lead approved it, skip
+      if (t.linkedLog.review === 'approved' && t.linkedLog.status === 'done') continue;
+    }
+
+    const isSubmittedPending = t.linkedLog && t.linkedLog.review === 'pending';
+    const isChangesRequested = t.linkedLog && ['changes_requested', 'rejected'].includes(t.linkedLog.review);
+
     items.push({
       kind: 'task',
       id: String(t._id),
       taskId: String(t._id),
+      projectId: userProjectId,
       dateStr: fmtDateMDY(t.createdAt),
       taskTitle: t.title,
-      hourLabel: 'Assigned Task',
+      hourLabel: isSubmittedPending ? 'Awaiting Approval' : 'Assigned Task',
       assignedBy: t.assignedByName,
       assignerRole: t.assignedByRole,
-      feedbackNote: t.note || 'Task assigned manually by lead.',
-      status: 'pending_resubmit'
+      feedbackNote: isSubmittedPending
+        ? 'Work log submitted. Waiting for Team Lead review and approval.'
+        : (t.note || 'Task assigned manually by lead.'),
+      status: isSubmittedPending ? 'awaiting_lead_approval' : isChangesRequested ? 'changes_requested' : 'pending_submission'
     });
   }
 

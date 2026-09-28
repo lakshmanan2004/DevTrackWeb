@@ -46,8 +46,8 @@ async function createManagerAlert(dev, payload) {
 async function reminderCheck() {
   const settings = await Setting.get();
   const now = new Date();
-  if (!isWorkday(now, settings.workDays)) return;
   const slot = slotForNow(settings);
+  if (slot === 12) return; // Lunch break: no reminders or alerts
   const devs = await activeDevelopers();
   const date = dayStr(now);
   for (const dev of devs) {
@@ -71,7 +71,7 @@ async function reminderCheck() {
 async function missedLogCheck() {
   const settings = await Setting.get();
   const now = new Date();
-  if (!isWorkday(now, settings.workDays)) return;
+  if (!isWorkday(now, settings)) return;
 
   const date = dayStr(now);
   const currentSlot = slotForNow(settings);
@@ -129,7 +129,7 @@ async function missedLogCheck() {
 async function eodMissingCheck() {
   const settings = await Setting.get();
   const now = new Date();
-  if (!isWorkday(now, settings.workDays)) return;
+  if (!isWorkday(now, settings)) return;
   const date = dayStr(now);
 
   const devs = await activeDevelopers();
@@ -168,7 +168,7 @@ async function eodMissingCheck() {
 async function idleCheck() {
   const settings = await Setting.get();
   const now = new Date();
-  if (!isWorkday(now, settings.workDays)) return;
+  if (!isWorkday(now, settings)) return;
   const date = dayStr(now);
 
   const devs = await activeDevelopers();

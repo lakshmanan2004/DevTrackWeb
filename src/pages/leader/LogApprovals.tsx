@@ -9,7 +9,8 @@ import {
   HighlighterIcon,
   EyeIcon,
   RotateCcwIcon,
-  PlusIcon
+  PlusIcon,
+  ZapIcon
 } from 'lucide-react';
 
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -31,12 +32,15 @@ export function LogApprovals() {
 
   const queue = data?.logs || [];
   const [filter, setFilter] = useState('pending');
+  const [moduleFilter, setModuleFilter] = useState('');
   const [activeModalItem, setActiveModalItem] = useState<{ developer: string; log: any } | null>(null);
   const [selectedText, setSelectedText] = useState('');
   const [activeScreenshotModal, setActiveScreenshotModal] = useState<{ url: string; title: string } | null>(null);
   const [rejectionNotes, setRejectionNotes] = useState<Record<string, string>>({});
   const [assignTaskModalOpen, setAssignTaskModalOpen] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  const moduleNames = Array.from(new Set(queue.map((i: any) => i.moduleName).filter(Boolean)));
 
   const handleTextSelection = (_logId: string) => {
     const selection = window.getSelection();
@@ -79,9 +83,11 @@ export function LogApprovals() {
     rejected: queue.filter((i: any) => i.review === 'rejected').length
   };
 
-  const filteredQueue = filter === 'all'
-    ? queue
-    : queue.filter((item: any) => item.review === filter);
+  const filteredQueue = queue.filter((item: any) => {
+    if (moduleFilter && item.moduleName !== moduleFilter) return false;
+    if (filter === 'all') return true;
+    return item.review === filter;
+  });
 
   return (
     <>
@@ -112,18 +118,41 @@ export function LogApprovals() {
       />
 
       <div className="flex-1 space-y-5 p-6">
-        <FilterPills
-          ariaLabel="Filter approvals"
-          value={filter}
-          onChange={setFilter}
-          options={[
-            { id: 'all', label: 'All', count: counts.all },
-            { id: 'pending', label: 'Pending', count: counts.pending },
-            { id: 'changes_requested', label: 'Changes Requested', count: counts.changes_requested },
-            { id: 'approved', label: 'Approved', count: counts.approved },
-            { id: 'rejected', label: 'Rejected', count: counts.rejected }
-          ]}
-        />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <FilterPills
+            ariaLabel="Filter approvals"
+            value={filter}
+            onChange={setFilter}
+            options={[
+              { id: 'all', label: 'All', count: counts.all },
+              { id: 'pending', label: 'Pending', count: counts.pending },
+              { id: 'changes_requested', label: 'Changes Requested', count: counts.changes_requested },
+              { id: 'approved', label: 'Approved', count: counts.approved },
+              { id: 'rejected', label: 'Rejected', count: counts.rejected }
+            ]}
+          />
+
+          {moduleNames.length > 0 && (
+            <div className="flex items-center gap-2 rounded-xl border border-hairline bg-white px-3 py-1.5 shadow-card">
+              <label htmlFor="la-module-filter" className="text-xs font-bold text-navy flex items-center gap-1">
+                Filter by Module:
+              </label>
+              <select
+                id="la-module-filter"
+                value={moduleFilter}
+                onChange={(e) => setModuleFilter(e.target.value)}
+                className="bg-transparent text-xs font-bold text-brand focus:outline-none cursor-pointer"
+              >
+                <option value="">All Project Modules</option>
+                {moduleNames.map((modName: string) => (
+                  <option key={modName} value={modName}>
+                    {modName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
 
         {/* Floating Selection Tooltip Banner */}
         {selectedText && (
@@ -149,43 +178,69 @@ export function LogApprovals() {
         )}
 
         <ul className="space-y-4">
-          {filteredQueue.map((log: any) => (
-            <li
-              key={log.id}
-              className={`rounded-card border bg-white shadow-card transition-all ${
-                log.review === 'changes_requested'
-                  ? 'border-amber-300 ring-2 ring-amber-400/20'
-                  : log.review === 'approved'
-                  ? 'border-green-200'
-                  : log.review === 'rejected'
-                  ? 'border-red-200'
-                  : 'border-hairline'
-              }`}
-            >
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-5 py-3.5">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-navy">
-                    {log.developerName}
-                    <span className="ml-2 font-normal text-gray-500">
-                      {log.hourLabel} · submitted {log.submittedAt} · {log.project || user?.teamName}
+          {filteredQueue.map((log: any) => {
+            const isAssigned = log.isAssignedTask || !!log.linkedTask;
+
+            return (
+              <li
+                key={log.id}
+                className={`rounded-card border transition-all ${
+                  isAssigned
+                    ? 'border-amber-400 bg-amber-50/20 ring-2 ring-amber-300/60 shadow-md'
+                    : log.review === 'changes_requested'
+                    ? 'border-amber-300 ring-2 ring-amber-400/20 bg-white shadow-card'
+                    : log.review === 'approved'
+                    ? 'border-green-200 bg-white shadow-card'
+                    : log.review === 'rejected'
+                    ? 'border-red-200 bg-white shadow-card'
+                    : 'border-hairline bg-white shadow-card'
+                }`}
+              >
+                {/* ASSIGNED TASK PROMINENT BANNER */}
+                {isAssigned && (
+                  <div className="flex items-center justify-between bg-amber-500 px-5 py-2 text-xs font-bold text-white">
+                    <span className="flex items-center gap-1.5">
+                      <ZapIcon className="h-4 w-4 animate-pulse" />
+                      ⚡ SUBMISSION FOR ASSIGNED LEAD TASK: {log.assignedTaskTitle || log.task}
                     </span>
-                  </p>
+                    <span className="rounded bg-amber-700/60 px-2 py-0.5 text-[11px] font-semibold text-amber-100">
+                      Approving this log completes the task
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-5 py-3.5">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-navy">
+                      {log.developerName}
+                      <span className="ml-2 font-normal text-gray-500">
+                        {log.hourLabel} · submitted {log.submittedAt} · {log.project || user?.teamName}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isAssigned && (
+                      <Badge tone="amber">
+                        ⚡ Assigned Task
+                      </Badge>
+                    )}
+                    {log.review === 'changes_requested' && (
+                      <Badge tone="amber">Changes Requested ({log.targetedFeedback?.length || 0})</Badge>
+                    )}
+                    {log.review === 'approved' && <Badge tone="green">Approved</Badge>}
+                    {log.review === 'rejected' && <Badge tone="red">Rejected</Badge>}
+                    {log.review === 'pending' && <Badge tone="blue">{log.project || 'Pending review'}</Badge>}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {log.review === 'changes_requested' && (
-                    <Badge tone="amber">Changes Requested ({log.targetedFeedback?.length || 0})</Badge>
-                  )}
-                  {log.review === 'approved' && <Badge tone="green">Approved</Badge>}
-                  {log.review === 'rejected' && <Badge tone="red">Rejected</Badge>}
-                  {log.review === 'pending' && <Badge tone="blue">{log.project || 'Pending review'}</Badge>}
-                </div>
-              </div>
 
               <div className="grid gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_280px]">
                 <div>
                   <div className="flex flex-wrap items-center gap-3">
                     <h2 className="text-sm font-bold text-navy">{log.task}</h2>
                     <TaskStatusBadge status={log.status} />
+                    {log.moduleName && (
+                      <Badge tone="purple">Module: {log.moduleName}</Badge>
+                    )}
                   </div>
 
                   <div
@@ -438,7 +493,8 @@ export function LogApprovals() {
                 </div>
               </div>
             </li>
-          ))}
+          );
+        })}
           {filteredQueue.length === 0 && (
             <li className="rounded-card border border-dashed border-gray-300 bg-white p-12 text-center">
               <p className="text-sm font-semibold text-navy">Nothing here right now</p>

@@ -82,7 +82,28 @@ function requiredSlots(settings) {
   return slots;
 }
 
-function isWorkday(d, workDays) {
+function isThirdSaturday(d) {
+  return d.getDay() === 6 && d.getDate() >= 15 && d.getDate() <= 21;
+}
+
+function isWorkday(d, workDaysOrSettings) {
+  const dateStr = dayStr(d);
+  let workDays = Array.isArray(workDaysOrSettings) ? workDaysOrSettings : (workDaysOrSettings?.workDays || [1, 2, 3, 4, 5]);
+  const holidays = !Array.isArray(workDaysOrSettings) && Array.isArray(workDaysOrSettings?.holidays) ? workDaysOrSettings.holidays : [];
+
+  // 1. Check explicit holiday or forced working override date
+  const entry = holidays.find((h) => h.date === dateStr);
+  if (entry) {
+    if (entry.isWorkingOverride) return true; // Forced working day
+    return false; // Explicit holiday
+  }
+
+  // 2. Check 3rd Saturday rule (Organization Holiday)
+  if (isThirdSaturday(d)) {
+    return false;
+  }
+
+  // 3. Fallback to weekly work days (e.g. Mon-Fri)
   return workDays.includes(d.getDay());
 }
 
@@ -110,6 +131,7 @@ module.exports = {
   initialsOf,
   slotForNow,
   requiredSlots,
+  isThirdSaturday,
   isWorkday,
   weekStart
 };

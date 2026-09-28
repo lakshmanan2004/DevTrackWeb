@@ -68,14 +68,15 @@ export function Sidebar({ role }: SidebarProps) {
           <>
                 <span className={isActive ? 'text-white' : 'text-slate-400'}>{item.icon}</span>
                 <span className="flex-1 truncate">{item.label}</span>
-                {item.badge && item.badge !== '0' &&
-            <span
-              className={`min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[11px] font-bold tabular-nums ${
-              isActive ? 'bg-white text-brand' : 'bg-danger text-white'}`
-              }>
-                  {item.badge}
-                </span>
-            }
+                {item.badge && item.badge !== '0' && (
+                  <span
+                    className={`min-w-[20px] h-5 rounded-full px-1.5 inline-flex items-center justify-center text-[11px] font-bold tabular-nums transition-colors ${
+                      isActive ? 'bg-white text-brand' : 'bg-danger text-white'
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                )}
               </>
           }
           </NavLink>

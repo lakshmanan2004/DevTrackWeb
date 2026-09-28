@@ -32,9 +32,18 @@ async function projectStats(project, team) {
       : Promise.resolve(0)
   ]);
 
-  const progress = project.status === 'completed'
-    ? 100
-    : Math.min(100, Math.round((doneCount / (project.plannedTasks || 40)) * 100));
+  let progress = 0;
+  if (project.status === 'completed') {
+    progress = 100;
+  } else if (project.modules && project.modules.length > 0) {
+    const completedWeight = project.modules
+      .filter((m) => m.status === 'completed')
+      .reduce((acc, m) => acc + (m.weightPercentage || 0), 0);
+    progress = Math.min(100, Math.round(completedWeight));
+  } else {
+    progress = Math.min(100, Math.round((doneCount / (project.plannedTasks || 40)) * 100));
+  }
+
   let health = 'On Track';
   if (project.status === 'completed') {
     health = project.targetDate && project.endedAt && project.endedAt <= project.targetDate
@@ -47,6 +56,20 @@ async function projectStats(project, team) {
 }
 
 async function fullProjectDto(project) {
+  if (!project.modules || project.modules.length === 0) {
+    project.modules = [
+      { name: 'UI & Wireframe Design', description: 'Design mockups, wireframes & user experience flows', weightPercentage: 20, status: project.status === 'completed' ? 'completed' : 'completed' },
+      { name: 'Frontend Implementation', description: 'React screens, components & responsive layout', weightPercentage: 30, status: project.status === 'completed' ? 'completed' : 'in_progress' },
+      { name: 'Backend & API Integration', description: 'Database schema, authentication & REST API endpoints', weightPercentage: 35, status: project.status === 'completed' ? 'completed' : 'todo' },
+      { name: 'QA & Final Deployment', description: 'Testing, bug fixes and cloud deployment', weightPercentage: 15, status: project.status === 'completed' ? 'completed' : 'todo' }
+    ];
+    try {
+      await project.save();
+    } catch (_err) {
+      /* ignore save error if read-only */
+    }
+  }
+
   const team = project.team && project.team.members
     ? project.team
     : await Team.findById(project.team).populate('leader', 'name').populate('members', 'name');
@@ -54,7 +77,37 @@ async function fullProjectDto(project) {
     ? project.manager
     : await User.findById(project.manager, 'name');
   const stats = await projectStats(project, team);
-  return projectDto({ ...project.toObject(), manager }, team, stats);
+
+  const projectLogs = await WorkLog.find({ project: project._id }).populate('developer', 'name initials');
+  const projectObj = project.toObject();
+
+  if (projectObj.modules) {
+    projectObj.modules = projectObj.modules.map((m) => {
+      const matched = projectLogs.filter(
+        (l) => l.moduleName === m.name || String(l.moduleName).toLowerCase() === String(m.name).toLowerCase()
+      );
+      return {
+        ...m,
+        logsCount: matched.length,
+        totalMinutes: matched.reduce((acc, l) => acc + (l.activeMinutes || 0), 0),
+        submittedLogs: matched.map((l) => ({
+          id: String(l._id),
+          developerName: l.developer ? l.developer.name : 'Developer',
+          initials: l.developer ? l.developer.initials : 'DV',
+          description: l.description,
+          task: l.task,
+          status: l.status,
+          submittedAt: l.submittedAt ? new Date(l.submittedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '',
+          activeMinutes: l.activeMinutes || 0,
+          attachmentUrl: l.attachmentUrl || '',
+          commitUrl: l.commitUrl || '',
+          review: l.review || 'pending'
+        }))
+      };
+    });
+  }
+
+  return projectDto({ ...projectObj, manager }, team, stats);
 }
 
 // GET /api/projects?scope=mine|all
@@ -73,14 +126,36 @@ router.get('/projects', ah(async (req, res) => {
   res.json({ projects: dtos });
 }));
 
-// POST /api/projects — manager creates project + team in one step
+// POST /api/projects — manager creates project + team + modules in one step
 router.post('/projects', requireRole('manager', 'admin'), ah(async (req, res) => {
-  const { name, description, startedAt, targetDate, repoUrl, status, teamName, leaderId, developerIds } = req.body || {};
+  const { name, description, startedAt, targetDate, repoUrl, status, teamName, leaderId, developerIds, modules } = req.body || {};
   if (!name || !teamName || !leaderId || !developerIds || !developerIds.length) {
     return res.status(400).json({ error: 'Project name, team name, leader and at least one developer are required' });
   }
   const leader = await User.findById(leaderId);
   if (!leader || leader.role !== 'leader') return res.status(400).json({ error: 'Select a valid team leader' });
+
+  // Enforce single-project rule for developers
+  const alreadyAssigned = await User.find({
+    _id: { $in: developerIds },
+    team: { $ne: null }
+  }).populate('team', 'name');
+
+  if (alreadyAssigned.length > 0) {
+    const names = alreadyAssigned.map((u) => u.name).join(', ');
+    return res.status(400).json({
+      error: `Developer(s) ${names} are already assigned to another project team. A developer can only work on one project.`
+    });
+  }
+
+  const formattedModules = Array.isArray(modules)
+    ? modules.map((m) => ({
+        name: m.name,
+        description: m.description || '',
+        weightPercentage: Number(m.weightPercentage) || 0,
+        status: m.status || 'todo'
+      }))
+    : [];
 
   const team = await Team.create({ name: teamName, leader: leaderId, members: [...new Set(developerIds.map(String))] });
   const project = await Project.create({
@@ -92,7 +167,8 @@ router.post('/projects', requireRole('manager', 'admin'), ah(async (req, res) =>
     repoUrl: repoUrl || '',
     startedAt: startedAt ? new Date(startedAt) : new Date(),
     targetDate: targetDate ? new Date(targetDate) : null,
-    plannedTasks: 40
+    plannedTasks: 40,
+    modules: formattedModules
   });
   team.project = project._id;
   await team.save();
@@ -105,6 +181,57 @@ router.post('/projects', requireRole('manager', 'admin'), ah(async (req, res) =>
     .populate({ path: 'team', populate: { path: 'members', select: 'name' } });
   emitToRoles(['admin', 'manager', 'leader', 'developer'], 'project:new', { projectId: String(project._id) });
   res.status(201).json({ project: await fullProjectDto(populated) });
+}));
+
+// PATCH /api/projects/:id/modules/:moduleId — Leader/Manager updates module status
+router.patch('/projects/:id/modules/:moduleId', ah(async (req, res) => {
+  const { status } = req.body || {};
+  if (!['todo', 'in_progress', 'completed'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid module status' });
+  }
+
+  const project = await Project.findById(req.params.id);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+
+  const module = project.modules.id(req.params.moduleId);
+  if (!module) return res.status(404).json({ error: 'Module not found' });
+
+  module.status = status;
+  if (status === 'completed') {
+    const devLogsCount = await WorkLog.countDocuments({
+      project: project._id,
+      moduleName: { $regex: new RegExp(`^${module.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+    });
+    if (devLogsCount === 0) {
+      return res.status(400).json({
+        error: `Cannot complete "${module.name}": At least 1 developer work log must be submitted for this module first.`
+      });
+    }
+    module.completedAt = new Date();
+    module.completedBy = req.user._id;
+  } else {
+    module.completedAt = null;
+    module.completedBy = null;
+  }
+
+  const allDone = project.modules.length > 0 && project.modules.every((m) => m.status === 'completed');
+  if (allDone) {
+    project.status = 'completed';
+    project.endedAt = new Date();
+  } else if (project.status === 'completed' && !allDone) {
+    project.status = 'ongoing';
+    project.endedAt = null;
+  }
+
+  await project.save();
+
+  const populated = await Project.findById(project._id)
+    .populate('manager', 'name')
+    .populate({ path: 'team', populate: { path: 'leader', select: 'name' } })
+    .populate({ path: 'team', populate: { path: 'members', select: 'name' } });
+
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'project:update', { projectId: String(project._id) });
+  res.json({ project: await fullProjectDto(populated) });
 }));
 
 // GET /api/projects/:id/overview — weekly breakdown + live blockers
@@ -163,15 +290,21 @@ router.get('/projects/:id/overview', ah(async (req, res) => {
 // GET /api/directory — leaders & developers available for team building
 router.get('/directory', requireRole('manager', 'admin'), ah(async (_req, res) => {
   const users = await User.find({ role: { $in: ['leader', 'developer'] }, active: true })
-    .populate('team', 'name');
+    .populate({ path: 'team', select: 'name project', populate: { path: 'project', select: 'name status' } });
   res.json({
-    users: users.map((u) => ({
-      id: String(u._id),
-      name: u.name,
-      role: u.role,
-      initials: u.initials,
-      teamName: u.team && typeof u.team === 'object' ? u.team.name : ''
-    }))
+    users: users.map((u) => {
+      const teamObj = u.team && typeof u.team === 'object' ? u.team : null;
+      const projObj = teamObj && teamObj.project && typeof teamObj.project === 'object' ? teamObj.project : null;
+      return {
+        id: String(u._id),
+        name: u.name,
+        role: u.role,
+        initials: u.initials,
+        teamName: teamObj ? teamObj.name : '',
+        projectName: projObj ? projObj.name : (teamObj ? teamObj.name : ''),
+        hasProject: !!teamObj && (!projObj || projObj.status !== 'completed')
+      };
+    })
   });
 }));
 
@@ -208,6 +341,10 @@ router.patch('/teams/:id', requireRole('manager', 'admin'), ah(async (req, res) 
     await leader.save();
   }
   if (req.body.addMemberId) {
+    const dev = await User.findById(req.body.addMemberId);
+    if (dev && dev.team && String(dev.team) !== String(team._id)) {
+      return res.status(400).json({ error: `${dev.name} is already assigned to another project team. A developer can only work on one project.` });
+    }
     if (!team.members.some((m) => String(m) === String(req.body.addMemberId))) {
       team.members.push(req.body.addMemberId);
       await User.findByIdAndUpdate(req.body.addMemberId, { team: team._id });
@@ -215,6 +352,7 @@ router.patch('/teams/:id', requireRole('manager', 'admin'), ah(async (req, res) 
   }
   if (req.body.removeMemberId) {
     team.members = team.members.filter((m) => String(m) !== String(req.body.removeMemberId));
+    await User.findByIdAndUpdate(req.body.removeMemberId, { team: null });
   }
   await team.save();
 
@@ -286,7 +424,7 @@ router.post('/users', requireRole('admin'), ah(async (req, res) => {
   if (!name || !email || !role) return res.status(400).json({ error: 'Name, email and role are required' });
   const exists = await User.findOne({ email: String(email).toLowerCase() });
   if (exists) return res.status(409).json({ error: 'A user with this email already exists' });
-  const hash = await bcrypt.hash(password || 'devtrack@2026', 10);
+  const hash = await bcrypt.hash(password || 'welcome', 10);
   const user = await User.create({
     name,
     email: String(email).toLowerCase(),
@@ -333,10 +471,35 @@ router.get('/settings', requireRole('admin'), ah(async (_req, res) => {
 
 router.put('/settings', requireRole('admin'), ah(async (req, res) => {
   const settings = await Setting.get();
-  const allowed = ['workStartHour', 'workEndHour', 'workEndMinute', 'workDays', 'intervalMinutes', 'minWords', 'graceMinutes', 'idleMinutes', 'batchThreshold', 'notifications', 'eodDeadline'];
+  const allowed = ['workStartHour', 'workEndHour', 'workEndMinute', 'workDays', 'intervalMinutes', 'minWords', 'graceMinutes', 'idleMinutes', 'batchThreshold', 'notifications', 'eodDeadline', 'holidays'];
   for (const key of allowed) {
     if (req.body[key] !== undefined) settings[key] = req.body[key];
   }
+  await settings.save();
+  res.json({ settings });
+}));
+
+// POST /api/settings/holidays — Admin adds/updates a holiday date or working override
+router.post('/settings/holidays', requireRole('admin'), ah(async (req, res) => {
+  const { date, name, type, isWorkingOverride } = req.body || {};
+  if (!date) return res.status(400).json({ error: 'Date is required (YYYY-MM-DD)' });
+
+  const settings = await Setting.get();
+  settings.holidays = (settings.holidays || []).filter((h) => h.date !== date);
+  settings.holidays.push({
+    date,
+    name: name || 'Holiday',
+    type: type || 'org',
+    isWorkingOverride: !!isWorkingOverride
+  });
+  await settings.save();
+  res.json({ settings });
+}));
+
+// DELETE /api/settings/holidays/:date — Admin removes a holiday entry
+router.delete('/settings/holidays/:date', requireRole('admin'), ah(async (req, res) => {
+  const settings = await Setting.get();
+  settings.holidays = (settings.holidays || []).filter((h) => h.date !== req.params.date);
   await settings.save();
   res.json({ settings });
 }));

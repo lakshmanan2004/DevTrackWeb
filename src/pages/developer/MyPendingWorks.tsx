@@ -6,25 +6,60 @@ import {
   EyeIcon,
   SendIcon,
   CalendarIcon,
-  XIcon
+  XIcon,
+  GithubIcon,
+  ImageIcon,
+  TimerIcon,
+  ZapIcon,
+  AlertTriangleIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { FilterPills } from '../../components/ui/FilterPills';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { usePendingWorks } from '../../hooks/useLive';
+import { usePendingWorks, useProjects } from '../../hooks/useLive';
 import { api, apiUpload, fileUrl } from '../../api/client';
 
 export function MyPendingWorks() {
   const { data, refetch } = usePendingWorks();
+  const { data: projData } = useProjects('mine');
+  const userProjects = projData?.projects || [];
+  const defaultProjectId = userProjects[0]?.id || '';
+
   const items = data?.items || [];
   const [filter, setFilter] = useState('all');
   const [activeScreenshotModal, setActiveScreenshotModal] = useState<{ url: string; title: string } | null>(null);
   const [resubmitModalItem, setResubmitModalItem] = useState<any | null>(null);
+
+  // Full Work Log Fields
   const [resubmitText, setResubmitText] = useState('');
   const [resubmitFile, setResubmitFile] = useState<File | null>(null);
+  const [selectedModuleName, setSelectedModuleName] = useState('');
+  const [commitUrl, setCommitUrl] = useState('');
+  const [activeMinutes, setActiveMinutes] = useState(45);
+  const [taskStatus, setTaskStatus] = useState<'progress' | 'done' | 'blocked'>('done');
+  const [blockerText, setBlockerText] = useState('');
+
   const [toastMessage, setToastMessage] = useState('');
   const [busy, setBusy] = useState(false);
+
+  const wordCount = resubmitText.trim().split(/\s+/).filter(Boolean).length;
+  const wordsOk = wordCount >= 30;
+
+  const openSubmissionModal = (item: any) => {
+    setResubmitModalItem(item);
+    setResubmitText(item.feedbackNote && !item.feedbackNote.includes('Work log submitted') ? item.feedbackNote : '');
+    setResubmitFile(null);
+    setSelectedModuleName('');
+    setCommitUrl('');
+    setActiveMinutes(45);
+    setTaskStatus('done');
+    setBlockerText('');
+  };
+
+  const activeProjectObj = userProjects.find((p: any) => p.id === (resubmitModalItem?.projectId || defaultProjectId)) || userProjects[0];
+  const activeModules = activeProjectObj?.modules || [];
+  const activeModuleName = selectedModuleName || activeModules[0]?.name || '';
 
   const handleResolve = async () => {
     if (!resubmitModalItem) return;
@@ -32,31 +67,57 @@ export function MyPendingWorks() {
     try {
       if (resubmitModalItem.kind === 'log') {
         const fd = new FormData();
-        fd.append('text', resubmitText || 'Updated the highlighted part and attached proof.');
+        fd.append('text', resubmitText || 'Updated log and attached proof.');
+        if (activeModuleName) fd.append('moduleName', activeModuleName);
         if (resubmitFile) fd.append('attachment', resubmitFile);
         if (resubmitFile) {
           await apiUpload(`/api/logs/${resubmitModalItem.logId}/resubmit`, fd);
         } else {
           await api(`/api/logs/${resubmitModalItem.logId}/resubmit`, {
             method: 'POST',
-            body: { text: resubmitText }
+            body: { text: resubmitText, moduleName: activeModuleName }
           });
         }
+        setToastMessage('Resubmission sent to Team Lead!');
       } else {
-        await api(`/api/tasks/${resubmitModalItem.taskId}`, {
-          method: 'PATCH',
-          body: { status: 'completed' }
-        });
+        // Full Work Log submission for Assigned Task
+        if (!resubmitFile) {
+          setToastMessage('⚠️ Screenshot proof is required to submit work log.');
+          setTimeout(() => setToastMessage(''), 3000);
+          setBusy(false);
+          return;
+        }
+        if (!wordsOk) {
+          setToastMessage(`⚠️ Description must be at least 30 words (currently ${wordCount}).`);
+          setTimeout(() => setToastMessage(''), 3000);
+          setBusy(false);
+          return;
+        }
+
+        const fd = new FormData();
+        fd.append('projectId', resubmitModalItem.projectId || defaultProjectId);
+        fd.append('taskId', resubmitModalItem.taskId);
+        if (activeModuleName) fd.append('moduleName', activeModuleName);
+        fd.append('description', resubmitText);
+        fd.append('status', taskStatus);
+        if (taskStatus === 'blocked') fd.append('blocker', blockerText);
+        fd.append('minutes', String(activeMinutes));
+        if (commitUrl) fd.append('commitUrl', commitUrl);
+        fd.append('attachment', resubmitFile);
+
+        await apiUpload('/api/logs', fd);
+        setToastMessage('Full Work Log submitted & sent to Team Lead for approval!');
       }
-      setToastMessage('Work updated and resubmitted to your Team Lead!');
-      setTimeout(() => setToastMessage(''), 2500);
+
+      setTimeout(() => setToastMessage(''), 3000);
       setResubmitModalItem(null);
       setResubmitText('');
       setResubmitFile(null);
+      setCommitUrl('');
       refetch();
     } catch (err: any) {
-      setToastMessage(err.message || 'Failed to resubmit');
-      setTimeout(() => setToastMessage(''), 2500);
+      setToastMessage(err.message || 'Failed to submit work log');
+      setTimeout(() => setToastMessage(''), 3000);
     } finally {
       setBusy(false);
     }
@@ -65,8 +126,8 @@ export function MyPendingWorks() {
   const visible = filter === 'all'
     ? items
     : filter === 'resubmit'
-    ? items.filter((i: any) => i.highlightedText)
-    : items.filter((i: any) => !i.highlightedText);
+    ? items.filter((i: any) => i.highlightedText || i.status === 'changes_requested')
+    : items.filter((i: any) => !i.highlightedText && i.status !== 'changes_requested');
 
   const groupedByDate: Record<string, any[]> = {};
   visible.forEach((item: any) => {
@@ -78,7 +139,7 @@ export function MyPendingWorks() {
     <>
       <PageHeader
         title="My Pending Works"
-        subtitle="All pending tasks & resubmissions assigned by Team Lead / PM, grouped by date"
+        subtitle="All pending tasks, in-progress logs & resubmissions assigned by Team Lead / PM, grouped by date"
         actions={
           <span className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm">
             <ClockIcon className="h-4 w-4" />
@@ -89,8 +150,8 @@ export function MyPendingWorks() {
 
       <div className="flex-1 space-y-6 p-6">
         {toastMessage && (
-          <div className="flex items-center gap-2 rounded-xl bg-emerald-600 p-3 text-xs font-bold text-white shadow-md animate-in fade-in">
-            <CheckCircle2Icon className="h-4 w-4" />
+          <div className={`flex items-center gap-2 rounded-xl p-3 text-xs font-bold text-white shadow-md animate-in fade-in ${toastMessage.includes('⚠️') ? 'bg-amber-600' : 'bg-emerald-600'}`}>
+            <CheckCircle2Icon className="h-4 w-4 shrink-0" />
             {toastMessage}
           </div>
         )}
@@ -101,8 +162,8 @@ export function MyPendingWorks() {
           onChange={setFilter}
           options={[
             { id: 'all', label: 'All Pending', count: items.length },
-            { id: 'resubmit', label: 'Targeted Feedback', count: items.filter((i: any) => i.highlightedText).length },
-            { id: 'blocker', label: 'Blockers / Assigned', count: items.filter((i: any) => !i.highlightedText).length }
+            { id: 'resubmit', label: 'Targeted Feedback', count: items.filter((i: any) => i.highlightedText || i.status === 'changes_requested').length },
+            { id: 'blocker', label: 'Assigned Lead & In Progress Tasks', count: items.filter((i: any) => !i.highlightedText && i.status !== 'changes_requested').length }
           ]}
         />
 
@@ -125,12 +186,25 @@ export function MyPendingWorks() {
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-hairline pb-3">
                       <div className="flex items-center gap-2.5">
-                        <span className="rounded bg-navy/10 px-2.5 py-1 text-xs font-bold text-navy">
+                        <span className="rounded bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900 border border-amber-200 flex items-center gap-1">
+                          <ZapIcon className="h-3.5 w-3.5 text-amber-600" />
                           {item.hourLabel}
                         </span>
                         <h3 className="text-sm font-bold text-navy">{item.taskTitle}</h3>
                       </div>
-                      <Badge tone="purple">Assigned by {item.assignedBy}</Badge>
+                      <div className="flex items-center gap-2">
+                        {item.status === 'awaiting_lead_approval' ? (
+                          <Badge tone="blue">Awaiting Lead Approval</Badge>
+                        ) : item.status === 'changes_requested' ? (
+                          <Badge tone="yellow">Changes Requested</Badge>
+                        ) : item.status === 'in_progress' ? (
+                          <Badge tone="blue">In Progress Log</Badge>
+                        ) : item.status === 'blocked' ? (
+                          <Badge tone="red">Blocked Log</Badge>
+                        ) : (
+                          <Badge tone="purple">Assigned by {item.assignedBy}</Badge>
+                        )}
+                      </div>
                     </div>
 
                     {item.highlightedText && (
@@ -177,11 +251,21 @@ export function MyPendingWorks() {
 
                     <div className="mt-4 flex items-center justify-end gap-3 border-t border-hairline pt-3">
                       <Button
-                        onClick={() => setResubmitModalItem(item)}
-                        className="bg-amber-500 text-white hover:bg-amber-600 font-bold border-none"
-                        icon={<SendIcon className="h-3.5 w-3.5" />}
+                        onClick={() => openSubmissionModal(item)}
+                        className={`font-bold border-none text-white ${
+                          item.status === 'awaiting_lead_approval'
+                            ? 'bg-blue-600 hover:bg-blue-700'
+                            : item.status === 'changes_requested'
+                            ? 'bg-amber-500 hover:bg-amber-600'
+                            : 'bg-emerald-600 hover:bg-emerald-700'
+                        }`}
+                        icon={item.status === 'awaiting_lead_approval' ? <ClockIcon className="h-3.5 w-3.5" /> : <SendIcon className="h-3.5 w-3.5" />}
                       >
-                        {item.kind === 'log' ? 'Update Log & Resubmit Work' : 'Mark Task Done'}
+                        {item.status === 'awaiting_lead_approval'
+                          ? 'Update Work Log (Awaiting Approval)'
+                          : item.status === 'changes_requested'
+                          ? 'Update Log & Resubmit'
+                          : 'Mark as Completed & Request Approval'}
                       </Button>
                     </div>
                   </article>
@@ -198,50 +282,152 @@ export function MyPendingWorks() {
         )}
       </div>
 
-      {/* Resubmit Modal */}
+      {/* FULL WORK LOG SUBMISSION MODAL */}
       {resubmitModalItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-lg rounded-2xl border border-hairline bg-white p-6 shadow-2xl">
+          <div className="relative w-full max-w-lg rounded-2xl border border-hairline bg-white p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div className="flex items-center justify-between border-b border-hairline pb-4">
               <div>
-                <h3 className="text-base font-bold text-navy">
-                  {resubmitModalItem.kind === 'log' ? 'Resubmit Work Log' : 'Complete Assigned Task'}
+                <h3 className="text-base font-bold text-navy flex items-center gap-2">
+                  <ZapIcon className="h-5 w-5 text-amber-500" />
+                  {resubmitModalItem.kind === 'log' ? 'Resubmit Work Log' : 'Submit Full Work Log for Assigned Task'}
                 </h3>
-                <p className="text-xs text-gray-500">{resubmitModalItem.taskTitle} · {resubmitModalItem.dateStr}</p>
+                <p className="text-xs text-gray-500">{resubmitModalItem.taskTitle} · Assigned by {resubmitModalItem.assignedBy}</p>
               </div>
               <button onClick={() => setResubmitModalItem(null)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100">
                 <XIcon className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="mt-4 space-y-3">
-              <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-900 border border-amber-200">
-                <strong>TL Note:</strong> "{resubmitModalItem.feedbackNote}"
+            <div className="mt-4 space-y-4">
+              <div className="rounded-xl bg-amber-50 p-3 text-xs text-amber-900 border border-amber-200">
+                <strong>Lead Task Note:</strong> "{resubmitModalItem.feedbackNote}"
               </div>
 
+              {/* 0. Module Select */}
+              {activeModules.length > 0 && (
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
+                    Select Project Module <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    value={activeModuleName}
+                    onChange={(e) => setSelectedModuleName(e.target.value)}
+                    className="h-9 w-full rounded-xl border border-hairline bg-canvas px-3 text-xs font-bold text-navy focus:border-brand focus:bg-white focus:outline-none"
+                  >
+                    {activeModules.map((m: any) => (
+                      <option key={m.id || m.name} value={m.name}>
+                        {m.name} ({m.weightPercentage}% Weight)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* 1. Description */}
               <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-600">
-                  Updated Explanation
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
+                  Work Log Description <span className="text-danger">*</span>
                 </label>
                 <textarea
-                  rows={3}
+                  rows={4}
                   value={resubmitText}
                   onChange={(e) => setResubmitText(e.target.value)}
-                  placeholder="Describe your fix or what you completed..."
+                  placeholder="Describe in detail what you implemented, files changed, and tested logic (min 30 words)..."
                   className="w-full rounded-xl border border-hairline bg-canvas p-3 text-xs text-navy focus:border-brand focus:bg-white focus:outline-none"
                 />
+                <div className="mt-1 flex items-center justify-between text-xs">
+                  <span className={wordsOk ? 'font-semibold text-green-600' : 'text-gray-500'}>
+                    {wordCount} / min 30 words
+                  </span>
+                  {!wordsOk && (
+                    <span className="inline-flex items-center gap-1 font-semibold text-danger">
+                      <AlertTriangleIcon className="h-3.5 w-3.5" /> Minimum 30 words required
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {resubmitModalItem.kind === 'log' && (
-                <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-600">
-                    Attach Updated Screenshot (optional)
-                  </label>
+              {/* 2. Screenshot Proof */}
+              <div>
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
+                  Screenshot Proof <span className="text-danger">*</span>
+                </label>
+                <div className="flex items-center gap-3 rounded-xl border border-dashed border-hairline bg-canvas p-3">
+                  <ImageIcon className="h-5 w-5 text-gray-400 shrink-0" />
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/pdf"
                     onChange={(e) => setResubmitFile(e.target.files?.[0] || null)}
-                    className="w-full rounded-xl border border-hairline bg-canvas p-2.5 text-xs text-navy"
+                    className="w-full text-xs text-navy file:mr-3 file:rounded-lg file:border-0 file:bg-brand-soft file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand hover:file:bg-violet-100"
+                  />
+                </div>
+              </div>
+
+              {/* 3. GitHub Commit URL */}
+              <div>
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
+                  GitHub Commit URL <span className="text-gray-400 font-normal">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <GithubIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="url"
+                    value={commitUrl}
+                    onChange={(e) => setCommitUrl(e.target.value)}
+                    placeholder="https://github.com/org/repo/commit/sha"
+                    className="h-9 w-full rounded-xl border border-hairline bg-canvas pl-9 pr-3 text-xs text-navy focus:border-brand focus:bg-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* 4. Active Minutes & Task Status */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
+                    Active Minutes Spent
+                  </label>
+                  <div className="relative">
+                    <TimerIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="number"
+                      min="5"
+                      max="480"
+                      value={activeMinutes}
+                      onChange={(e) => setActiveMinutes(Number(e.target.value) || 45)}
+                      className="h-9 w-full rounded-xl border border-hairline bg-canvas pl-9 pr-3 text-xs font-bold text-navy focus:border-brand focus:bg-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
+                    Task Status
+                  </label>
+                  <select
+                    value={taskStatus}
+                    onChange={(e) => setTaskStatus(e.target.value as any)}
+                    className="h-9 w-full rounded-xl border border-hairline bg-canvas px-3 text-xs font-bold text-navy focus:border-brand focus:bg-white focus:outline-none"
+                  >
+                    <option value="done">Completed / Ready for Review</option>
+                    <option value="progress">In Progress</option>
+                    <option value="blocked">Blocked with Issues</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Blocker input if blocked */}
+              {taskStatus === 'blocked' && (
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-danger">
+                    Describe Blocker / Issue
+                  </label>
+                  <input
+                    type="text"
+                    value={blockerText}
+                    onChange={(e) => setBlockerText(e.target.value)}
+                    placeholder="What is blocking you from completing this task?"
+                    className="h-9 w-full rounded-xl border border-red-200 bg-danger-soft px-3 text-xs text-navy focus:border-danger focus:outline-none"
                   />
                 </div>
               )}
@@ -257,7 +443,7 @@ export function MyPendingWorks() {
                 className="bg-emerald-600 text-white hover:bg-emerald-700 font-bold border-none"
                 icon={<CheckCircle2Icon className="h-4 w-4" />}
               >
-                {busy ? 'Submitting…' : 'Submit Fix to Lead'}
+                {busy ? 'Submitting…' : 'Submit Work Log to Lead'}
               </Button>
             </div>
           </div>

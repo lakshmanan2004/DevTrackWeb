@@ -43,7 +43,17 @@ const ProjectSchema = new Schema({
   startedAt: { type: Date, required: true },
   targetDate: { type: Date, default: null },
   endedAt: { type: Date, default: null },
-  plannedTasks: { type: Number, default: 50 }
+  plannedTasks: { type: Number, default: 50 },
+  modules: [
+    {
+      name: { type: String, required: true },
+      description: { type: String, default: '' },
+      weightPercentage: { type: Number, required: true },
+      status: { type: String, enum: ['todo', 'in_progress', 'completed'], default: 'todo' },
+      completedAt: { type: Date, default: null },
+      completedBy: { type: Types.ObjectId, ref: 'User', default: null }
+    }
+  ]
 });
 
 const WorkLogSchema = new Schema({
@@ -68,11 +78,15 @@ const WorkLogSchema = new Schema({
   },
   reviewNote: { type: String, default: '' },
   targetedFeedback: [TargetedFeedbackSchema],
+  moduleName: { type: String, default: '' },
   blocker: { type: String, default: '' },
   wordCount: { type: Number, default: 0 },
+  linkedTask: { type: Types.ObjectId, ref: 'Task', default: null },
+  isAssignedTask: { type: Boolean, default: false },
+  assignedTaskTitle: { type: String, default: '' },
   resubmissions: [{ text: String, at: Date }]
 });
-WorkLogSchema.index({ developer: 1, date: 1, hourSlot: 1 }, { unique: true });
+WorkLogSchema.index({ developer: 1, date: 1, hourSlot: 1 });
 
 const CommitSchema = new Schema({
   developer: { type: Types.ObjectId, ref: 'User', required: true },
@@ -163,7 +177,15 @@ const SettingSchema = new Schema({
     email: { type: Boolean, default: true },
     autoReject: { type: Boolean, default: false }
   },
-  eodDeadline: { type: String, default: '4:30 PM' }
+  eodDeadline: { type: String, default: '4:30 PM' },
+  holidays: [
+    {
+      date: { type: String, required: true },
+      name: { type: String, default: 'Holiday' },
+      type: { type: String, enum: ['govt', 'org', 'weekend'], default: 'org' },
+      isWorkingOverride: { type: Boolean, default: false }
+    }
+  ]
 });
 SettingSchema.statics.get = async function () {
   let s = await this.findOne();

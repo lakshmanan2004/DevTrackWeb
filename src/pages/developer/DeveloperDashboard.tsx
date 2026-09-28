@@ -25,7 +25,7 @@ import { CheckInModal } from '../../components/developer/CheckInModal';
 import { CheckInAlertModal } from '../../components/developer/CheckInAlertModal';
 import { DeveloperCalendarWidget } from '../../components/developer/DeveloperCalendarWidget';
 import { useAuth } from '../../context/AuthContext';
-import { useMyLogs, useTasks, useProjects } from '../../hooks/useLive';
+import { useMyLogs, useTasks, useProjects, usePendingWorks } from '../../hooks/useLive';
 import { playAlertSound, showWindowsNotification } from '../../utils/audioAlerts';
 
 function fmtDuration(min: number) {
@@ -39,6 +39,7 @@ export function DeveloperDashboard() {
   const { data } = useMyLogs();
   const { data: taskData } = useTasks();
   const { data: projectData } = useProjects('mine');
+  const { data: pendingData } = usePendingWorks();
   const [modalOpen, setModalOpen] = useState(false);
   const [alertModalState, setAlertModalState] = useState<{
     open: boolean;
@@ -56,14 +57,11 @@ export function DeveloperDashboard() {
 
   const logs = data?.logs || [];
   const stats = data?.stats;
-  const tasks = (taskData?.tasks || []).filter((t: any) => t.status !== 'completed');
   const myProjects = projectData?.projects || [];
   const activeProject = myProjects[0] || null;
 
-  const pendingRevisions = logs.filter(
-    (log: any) => log.review === 'changes_requested' || log.review === 'rejected'
-  );
-  const pendingRevisionsCount = pendingRevisions.length + tasks.filter((t: any) => t.type === 'targeted_feedback').length;
+  const pendingItems = pendingData?.items || [];
+  const pendingRevisionsCount = pendingItems.length;
 
   const now = new Date();
   const deadline = new Date(now);
@@ -115,6 +113,10 @@ export function DeveloperDashboard() {
     const checkTimer = setInterval(() => {
       const d = new Date();
       const slot = stats?.currentSlot ?? d.getHours();
+      
+      // Lunch break (12:00 PM – 1:00 PM) is exempt from all log check-in alerts and popups
+      if (slot === 12) return;
+
       const min = d.getMinutes();
       const remainingMins = 60 - min;
       const unlogged = !logs.some((log: any) => log.hourSlot === slot);
@@ -368,9 +370,9 @@ export function DeveloperDashboard() {
           <Link to="/developer/pending" className="block transition-transform hover:-translate-y-0.5">
             <StatCard
               label="Pending Tasks / Resubmit"
-              value={String(pendingRevisionsCount + tasks.length)}
-              hint={pendingRevisionsCount + tasks.length > 0 ? 'Action required by TL' : 'All clear'}
-              tone={pendingRevisionsCount + tasks.length > 0 ? 'yellow' : 'green'}
+              value={String(pendingRevisionsCount)}
+              hint={pendingRevisionsCount > 0 ? 'Action required by TL' : 'All clear'}
+              tone={pendingRevisionsCount > 0 ? 'yellow' : 'green'}
               icon={<HighlighterIcon className="h-4 w-4" />}
             />
           </Link>

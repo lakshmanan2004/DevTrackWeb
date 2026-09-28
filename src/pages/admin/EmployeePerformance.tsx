@@ -115,6 +115,15 @@ export function EmployeePerformance() {
   const { data: perfData } = usePerformance();
   const developersData: DeveloperDetailedPerformance[] = perfData?.developers || [];
 
+  // Extract unique projects dynamically from live developer data
+  const projectOptions = useMemo(() => {
+    const set = new Set<string>();
+    developersData.forEach((d) => {
+      if (d.project) set.add(d.project);
+    });
+    return Array.from(set);
+  }, [developersData]);
+
   // Filter developers list based on project filter and search input
   const filteredDevs = useMemo(() => {
     return developersData.filter((dev) => {
@@ -124,7 +133,7 @@ export function EmployeePerformance() {
                             dev.role.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesProject && matchesSearch;
     });
-  }, [selectedProject, searchQuery]);
+  }, [selectedProject, searchQuery, developersData]);
 
   // Currently selected developer detailed data object
   const activeDev = useMemo(() => {
@@ -182,10 +191,12 @@ export function EmployeePerformance() {
                   onChange={(e) => setSelectedProject(e.target.value)}
                   className="appearance-none rounded-lg border border-hairline bg-white px-3.5 py-2 pr-8 text-xs font-semibold text-navy shadow-xs focus:border-brand focus:outline-none cursor-pointer"
                 >
-                  <option value="All Projects">All Projects ▼</option>
-                  <option value="College ERP System">College ERP System</option>
-                  <option value="Attendance App">Attendance App</option>
-                  <option value="Library Management System">Library Management System</option>
+                  <option value="All Projects">All Projects</option>
+                  {projectOptions.map((proj) => (
+                    <option key={proj} value={proj}>
+                      {proj}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDownIcon className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
               </div>

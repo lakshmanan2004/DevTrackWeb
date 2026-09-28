@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRightIcon, GithubIcon, XIcon } from 'lucide-react';
+import { ArrowRightIcon, GithubIcon, PlusIcon, Trash2Icon, XIcon, SparklesIcon, LayersIcon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
 import { useLive } from '../../hooks/useLive';
 import { api } from '../../api/client';
 
@@ -25,8 +26,43 @@ export function CreateProject() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
+  const [modules, setModules] = useState<Array<{ id: string; name: string; description: string; weightPercentage: number }>>([
+    { id: '1', name: 'UI & Wireframe Design', description: 'Design mockups, wireframes & user experience flows', weightPercentage: 20 },
+    { id: '2', name: 'Frontend Implementation', description: 'React screens, components & responsive layout', weightPercentage: 30 },
+    { id: '3', name: 'Backend & API Integration', description: 'Database schema, authentication & REST API endpoints', weightPercentage: 35 },
+    { id: '4', name: 'QA & Final Deployment', description: 'Testing, bug fixes and cloud deployment', weightPercentage: 15 }
+  ]);
+
   const toggle = (id: string) =>
-  setSelected((prev) => prev.includes(id) ? prev.filter((entry) => entry !== id) : [...prev, id]);
+    setSelected((prev) => prev.includes(id) ? prev.filter((entry) => entry !== id) : [...prev, id]);
+
+  const totalModuleWeight = modules.reduce((sum, m) => sum + (Number(m.weightPercentage) || 0), 0);
+
+  const addModuleRow = () => {
+    setModules((prev) => [
+      ...prev,
+      { id: String(Date.now()), name: '', description: '', weightPercentage: 10 }
+    ]);
+  };
+
+  const removeModuleRow = (id: string) => {
+    setModules((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const updateModuleField = (id: string, field: 'name' | 'description' | 'weightPercentage', value: any) => {
+    setModules((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, [field]: field === 'weightPercentage' ? Number(value) : value } : m))
+    );
+  };
+
+  const loadDefaultTemplate = () => {
+    setModules([
+      { id: 't1', name: 'UI & Wireframe Design', description: 'Figma mockups, layout structure & design tokens', weightPercentage: 20 },
+      { id: 't2', name: 'Frontend Implementation', description: 'Component development, views & routing', weightPercentage: 30 },
+      { id: 't3', name: 'Backend & DB Architecture', description: 'Schema models, REST API endpoints & Auth', weightPercentage: 35 },
+      { id: 't4', name: 'Testing & Cloud Launch', description: 'End-to-end integration tests & deployment', weightPercentage: 15 }
+    ]);
+  };
 
   const submit = async () => {
     setError('');
@@ -34,6 +70,15 @@ export function CreateProject() {
       setError('Project name, team name, a leader and at least one developer are required.');
       return;
     }
+    if (modules.length === 0) {
+      setError('Please add at least one project module/task.');
+      return;
+    }
+    if (modules.some((m) => !m.name.trim())) {
+      setError('All modules must have a valid Module Name.');
+      return;
+    }
+
     setBusy(true);
     try {
       await api('/api/projects', {
@@ -41,7 +86,8 @@ export function CreateProject() {
         body: {
           name, description, startedAt: start,
           targetDate: end || null, repoUrl: repo, status,
-          teamName, leaderId: leader, developerIds: selected
+          teamName, leaderId: leader, developerIds: selected,
+          modules
         }
       });
       navigate('/manager');
@@ -58,7 +104,7 @@ export function CreateProject() {
 
   return (
     <>
-      <PageHeader title="Create New Project" subtitle="Project, team and assignments in one step" />
+      <PageHeader title="Create New Project" subtitle="Project details, team assignment & weighted modules" />
 
       <div className="flex-1 p-6">
         <div className="max-w-4xl space-y-5">
@@ -130,7 +176,7 @@ export function CreateProject() {
                 <legend className="mb-2 text-sm font-medium text-navy">Status</legend>
                 <div className="flex gap-5">
                   {(['ongoing', 'hold'] as const).map((option) =>
-                  <label key={option} className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <label key={option} className="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                       <input
                       type="radio"
                       name="cp-status"
@@ -180,21 +226,45 @@ export function CreateProject() {
 
             <fieldset className="mt-4">
               <legend className="mb-2 text-sm font-medium text-navy">
-                Add Developers <span className="text-danger">*</span>
+                Add Developers <span className="text-danger">*</span> (Developers can only belong to one project)
               </legend>
               <ul className="grid gap-2 sm:grid-cols-2">
-                {availableDevelopers.map((dev) =>
-                <li key={dev.id}>
-                    <label className="flex items-center gap-2.5 rounded-lg border border-hairline px-3 py-2.5 text-sm text-navy">
-                      <input
-                      type="checkbox"
-                      checked={selected.includes(dev.id)}
-                      onChange={() => toggle(dev.id)}
-                      className="h-4 w-4 rounded border-gray-300 text-brand" />
-                    {dev.name}{dev.teamName ? ` (${dev.teamName})` : ''}
-                    </label>
-                  </li>
-                )}
+                {availableDevelopers.map((dev) => {
+                  const isAssigned = dev.hasProject || !!dev.teamName;
+                  return (
+                    <li key={dev.id}>
+                      <label
+                        className={`flex items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition-colors ${
+                          isAssigned
+                            ? 'border-gray-200 bg-gray-100/70 text-gray-400 cursor-not-allowed'
+                            : 'border-hairline text-navy cursor-pointer hover:bg-canvas'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <input
+                            type="checkbox"
+                            disabled={isAssigned}
+                            checked={selected.includes(dev.id)}
+                            onChange={() => !isAssigned && toggle(dev.id)}
+                            className="h-4 w-4 rounded border-gray-300 text-brand disabled:opacity-40"
+                          />
+                          <span className={isAssigned ? 'line-through text-gray-500 font-normal' : 'font-medium'}>
+                            {dev.name}
+                          </span>
+                        </div>
+                        {isAssigned ? (
+                          <span className="rounded bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-900 border border-amber-200">
+                            🔒 {dev.projectName || dev.teamName || 'Assigned'}
+                          </span>
+                        ) : (
+                          <span className="rounded bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
+                            ✓ Available
+                          </span>
+                        )}
+                      </label>
+                    </li>
+                  );
+                })}
               </ul>
 
               {selectedNames.length > 0 &&
@@ -221,21 +291,103 @@ export function CreateProject() {
             </fieldset>
           </section>
 
+          {/* SECTION 3: PROJECT MODULES & WEIGHTAGE */}
+          <section className="rounded-card border border-hairline bg-white p-5 shadow-card">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-3">
+              <div>
+                <h2 className="flex items-center gap-2 text-sm font-bold text-navy">
+                  <LayersIcon className="h-4 w-4 text-brand" />
+                  3 · Project Modules & Weightage % <span className="text-danger">*</span>
+                </h2>
+                <p className="mt-0.5 text-xs text-gray-500">
+                  Define project modules (e.g. UI Design, Backend, Implementation). Team Lead marks these complete to update overall project progress.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="secondary" size="sm" onClick={loadDefaultTemplate} icon={<SparklesIcon className="h-3.5 w-3.5 text-brand" />}>
+                  Default Template
+                </Button>
+                <Badge tone={totalModuleWeight === 100 ? 'green' : totalModuleWeight > 100 ? 'red' : 'yellow'}>
+                  Total Weight: {totalModuleWeight}% {totalModuleWeight === 100 ? '✓' : '(Target 100%)'}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {modules.map((m, idx) => (
+                <div key={m.id} className="grid items-start gap-3 rounded-xl border border-hairline bg-canvas p-3 sm:grid-cols-[1fr_1.5fr_100px_40px]">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Module Name #{idx + 1}</label>
+                    <input
+                      type="text"
+                      value={m.name}
+                      onChange={(e) => updateModuleField(m.id, 'name', e.target.value)}
+                      placeholder="e.g. UI Wireframing"
+                      className="h-9 w-full rounded-lg border border-hairline bg-white px-3 text-xs font-medium text-navy focus:border-brand focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Description</label>
+                    <input
+                      type="text"
+                      value={m.description}
+                      onChange={(e) => updateModuleField(m.id, 'description', e.target.value)}
+                      placeholder="Short detail of what this module covers..."
+                      className="h-9 w-full rounded-lg border border-hairline bg-white px-3 text-xs text-navy focus:border-brand focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Weight %</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={m.weightPercentage}
+                        onChange={(e) => updateModuleField(m.id, 'weightPercentage', e.target.value)}
+                        className="h-9 w-full rounded-lg border border-hairline bg-white pl-3 pr-6 text-xs font-bold text-navy focus:border-brand focus:outline-none"
+                      />
+                      <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">%</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center pt-6">
+                    <button
+                      type="button"
+                      onClick={() => removeModuleRow(m.id)}
+                      disabled={modules.length === 1}
+                      title="Remove Module"
+                      className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-danger disabled:opacity-30"
+                    >
+                      <Trash2Icon className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              <div className="pt-2">
+                <Button variant="secondary" size="sm" onClick={addModuleRow} icon={<PlusIcon className="h-4 w-4" />}>
+                  Add Another Module
+                </Button>
+              </div>
+            </div>
+          </section>
+
           <section className="rounded-card border border-hairline bg-canvas p-5">
-            <h2 className="text-sm font-bold text-navy">3 · Preview</h2>
+            <h2 className="text-sm font-bold text-navy">4 · Preview</h2>
             <dl className="mt-3 space-y-1.5 text-sm text-gray-700">
               {[
-              { label: 'Project', value: name || '—' },
-              { label: 'Team', value: teamName || '—' },
-              { label: 'Leader', value: leaders.find((l) => l.id === leader)?.name || '—' },
-              { label: 'Developers', value: selectedNames.join(', ') || '—' },
-              { label: 'Start', value: start }].
-              map((row) =>
-              <div key={row.label} className="flex gap-2">
+                { label: 'Project', value: name || '—' },
+                { label: 'Team', value: teamName || '—' },
+                { label: 'Leader', value: leaders.find((l) => l.id === leader)?.name || '—' },
+                { label: 'Developers', value: selectedNames.join(', ') || '—' },
+                { label: 'Modules', value: `${modules.length} modules (${totalModuleWeight}% total weight)` },
+                { label: 'Start', value: start }
+              ].map((row) => (
+                <div key={row.label} className="flex gap-2">
                   <dt className="w-28 shrink-0 font-semibold text-navy">{row.label}:</dt>
                   <dd>{row.value}</dd>
                 </div>
-              )}
+              ))}
             </dl>
           </section>
 
@@ -250,7 +402,7 @@ export function CreateProject() {
               Cancel
             </Button>
             <Button size="lg" onClick={submit} disabled={busy} icon={<ArrowRightIcon className="h-4 w-4" />}>
-              {busy ? 'Creating…' : 'Create Project & Team'}
+              {busy ? 'Creating…' : 'Create Project & Modules'}
             </Button>
           </div>
         </div>
@@ -258,3 +410,4 @@ export function CreateProject() {
     </>
   );
 }
+

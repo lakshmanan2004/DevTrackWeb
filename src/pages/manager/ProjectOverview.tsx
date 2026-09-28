@@ -9,6 +9,7 @@ import { Banner } from '../../components/ui/Banner';
 import { StatCard } from '../../components/ui/StatCard';
 import { Badge } from '../../components/ui/Badge';
 import { ProgressBar } from '../../components/ui/ProgressBar';
+import { ProjectModulesSection } from '../../components/project/ProjectModulesSection';
 import { useProjects, useProjectOverview } from '../../hooks/useLive';
 
 const healthToneMap: Record<string, 'green' | 'yellow' | 'red' | 'blue'> = {
@@ -21,20 +22,39 @@ const healthToneMap: Record<string, 'green' | 'yellow' | 'red' | 'blue'> = {
 const weekHealthToneMap = { Good: 'green', Slow: 'yellow', Behind: 'red' } as const;
 
 export function ProjectOverview() {
-  const { data } = useProjects('mine');
+  const { data, refetch } = useProjects('mine');
   const projects = data?.projects || [];
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const activeId = selectedProjectId || projects[0]?.id || '';
-  const { data: overview } = useProjectOverview(activeId || null);
+  const { data: overview, refetch: refetchOverview } = useProjectOverview(activeId || null);
 
   const selectedProject = projects.find((p: any) => p.id === activeId);
 
+  const modules = selectedProject?.modules || [];
   const donePercent = selectedProject?.progress ?? 0;
-  const inProgressPercent = selectedProject ? Math.min(100 - donePercent, Math.round((selectedProject.inProgress / Math.max(1, selectedProject.tasksDone + selectedProject.inProgress)) * 100)) : 0;
+  const inProgressModuleWeight = modules
+    .filter((m: any) => m.status === 'in_progress')
+    .reduce((sum: number, m: any) => sum + (m.weightPercentage || 0), 0);
+
+  const inProgressPercent = selectedProject
+    ? selectedProject.status === 'completed'
+      ? 0
+      : inProgressModuleWeight > 0
+        ? Math.min(100 - donePercent, inProgressModuleWeight)
+        : selectedProject.inProgress > 0
+          ? Math.min(100 - donePercent, Math.min(15, selectedProject.inProgress * 5))
+          : 0
+    : 0;
+
   const todoPercent = Math.max(0, 100 - donePercent - inProgressPercent);
 
   const currentBlockers = overview?.blockers || [];
   const projectWeeks = overview?.weeks || [];
+
+  const handleModuleUpdated = () => {
+    refetch();
+    refetchOverview();
+  };
 
   return (
     <>
@@ -66,7 +86,7 @@ export function ProjectOverview() {
 
       <div className="flex-1 space-y-6 p-6">
         <Banner tone="blue" icon={<InfoIcon className="h-4 w-4" />}>
-          All metrics below are computed live from your teams' real work logs, tasks and blockers.
+          All project metrics and progress percentages are computed live from team leader completed modules.
         </Banner>
 
         {selectedProject && (
@@ -75,7 +95,7 @@ export function ProjectOverview() {
               <StatCard
                 label="Overall Progress"
                 value={`${selectedProject.progress}%`}
-                hint={selectedProject.status === 'completed' ? 'Project Completed' : 'Computed from logged tasks'}
+                hint={selectedProject.status === 'completed' ? 'Project Completed' : 'Computed from completed modules'}
                 tone={selectedProject.progress >= 70 ? 'green' : selectedProject.progress >= 40 ? 'purple' : 'yellow'}
               />
               <StatCard
@@ -98,47 +118,14 @@ export function ProjectOverview() {
               />
             </div>
 
-            <section className="rounded-card border border-hairline bg-white p-5 shadow-card">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-base font-bold text-navy">
-                    {selectedProject.name} — Progress Breakdown
-                  </h2>
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    {selectedProject.team} · {selectedProject.developers} Developers · Led by {selectedProject.leader}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge tone={healthToneMap[selectedProject.health] || 'blue'} dot>
-                    {selectedProject.health}
-                  </Badge>
-                  <Badge tone={selectedProject.status === 'completed' ? 'green' : 'blue'}>
-                    {selectedProject.status.toUpperCase()}
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="mt-4 flex h-3.5 w-full overflow-hidden rounded-full bg-gray-100">
-                <span className="bg-ok transition-all duration-300" style={{ width: `${donePercent}%` }} aria-hidden="true" />
-                <span className="bg-brand transition-all duration-300" style={{ width: `${inProgressPercent}%` }} aria-hidden="true" />
-                <span className="bg-gray-300 transition-all duration-300" style={{ width: `${todoPercent}%` }} aria-hidden="true" />
-              </div>
-
-              <ul className="mt-3 flex flex-wrap gap-6 text-xs text-gray-600">
-                <li className="inline-flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-ok" aria-hidden="true" />
-                  <span className="font-bold text-navy">{donePercent}%</span> Completed ({selectedProject.tasksDone} tasks)
-                </li>
-                <li className="inline-flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-brand" aria-hidden="true" />
-                  <span className="font-bold text-navy">{inProgressPercent}%</span> In Progress ({selectedProject.inProgress} active)
-                </li>
-                <li className="inline-flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-gray-300" aria-hidden="true" />
-                  <span className="font-bold text-navy">{todoPercent}%</span> Remaining
-                </li>
-              </ul>
-            </section>
+            {/* PROJECT MODULES & WEIGHTED DELIVERY TRACKER */}
+            <ProjectModulesSection
+              project={selectedProject}
+              allProjects={projects}
+              onSelectProject={(id) => setSelectedProjectId(id)}
+              canUpdate={true}
+              onModuleUpdated={handleModuleUpdated}
+            />
           </>
         )}
 

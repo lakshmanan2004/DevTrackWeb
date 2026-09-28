@@ -217,14 +217,14 @@ export function TodayTimeline({ logs, currentSlot, onLog }: TodayTimelineProps) 
                       slotLogs.map((log, lIdx) => (
                         <LogCard key={log.id || log._id || lIdx} log={log} />
                       ))
-                    ) : (
+                    ) : !hour.isLunch ? (
                       <div className="rounded-card border border-red-200 bg-red-50/40 p-3 text-xs text-red-700 flex items-center justify-between">
                         <span>Missed check-in for {hour.label} (0 logs submitted)</span>
                         <button onClick={onLog} className="text-xs font-semibold text-red-700 underline hover:text-red-900">
                           Submit Late Log
                         </button>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 )}
 

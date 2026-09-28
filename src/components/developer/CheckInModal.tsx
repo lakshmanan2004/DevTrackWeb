@@ -26,8 +26,12 @@ interface CheckInModalProps {
 export function CheckInModal({ open, onClose, onSubmitted }: CheckInModalProps) {
   const { data: projectData } = useLive<{ projects: any[] }>(open ? '/api/projects?scope=mine' : null, [], 0);
   const projects = projectData?.projects || [];
+  const { data: taskData } = useLive<{ tasks: any[] }>(open ? '/api/tasks' : null, [], 0);
+  const pendingTasks = (taskData?.tasks || []).filter((t: any) => t.status !== 'completed');
 
   const [projectId, setProjectId] = useState('');
+  const [selectedTaskId, setSelectedTaskId] = useState('');
+  const [selectedModuleName, setSelectedModuleName] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<TaskStatus>('progress');
   const [blocker, setBlocker] = useState('');
@@ -38,17 +42,24 @@ export function CheckInModal({ open, onClose, onSubmitted }: CheckInModalProps) 
   const [busy, setBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const effectiveProjectId = projectId || projects[0]?.id || '';
+  const activeProjectObj = projects.find((p: any) => p.id === effectiveProjectId) || projects[0];
+  const activeModules = activeProjectObj?.modules || [];
+  const activeModuleName = selectedModuleName || activeModules[0]?.name || '';
+
   const wordCount = useMemo(
     () => description.trim().split(/\s+/).filter(Boolean).length,
     [description]
   );
   const wordsOk = wordCount >= MIN_WORDS;
-  const canSubmit = wordsOk && !!file && projectId !== '' && !busy;
+  const canSubmit = wordsOk && !!file && effectiveProjectId !== '' && !busy;
 
   if (!open) return null;
 
   const reset = () => {
     setProjectId('');
+    setSelectedTaskId('');
+    setSelectedModuleName('');
     setDescription('');
     setStatus('progress');
     setBlocker('');
@@ -58,13 +69,25 @@ export function CheckInModal({ open, onClose, onSubmitted }: CheckInModalProps) 
     setError('');
   };
 
+  const handleTaskSelect = (taskId: string) => {
+    setSelectedTaskId(taskId);
+    const t = pendingTasks.find((item: any) => item.id === taskId);
+    if (t) {
+      if (!description) {
+        setDescription(`Working on assigned task: ${t.title}. ${t.note || ''}`);
+      }
+    }
+  };
+
   const handleSubmit = async () => {
     if (!canSubmit) return;
     setBusy(true);
     setError('');
     try {
       const fd = new FormData();
-      fd.append('projectId', projectId);
+      fd.append('projectId', effectiveProjectId);
+      if (selectedTaskId) fd.append('taskId', selectedTaskId);
+      if (activeModuleName) fd.append('moduleName', activeModuleName);
       fd.append('description', description);
       fd.append('status', status);
       if (status === 'blocked') fd.append('blocker', blocker);
@@ -114,6 +137,27 @@ export function CheckInModal({ open, onClose, onSubmitted }: CheckInModalProps) 
         </div>
 
         <form className="max-h-[70vh] space-y-5 overflow-y-auto px-5 py-5" onSubmit={(e) => e.preventDefault()}>
+          {pendingTasks.length > 0 && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+              <label htmlFor="ci-assigned-task" className="mb-1 block text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                ⚡ Submit for an Assigned Lead Task? (Optional)
+              </label>
+              <select
+                id="ci-assigned-task"
+                value={selectedTaskId}
+                onChange={(e) => handleTaskSelect(e.target.value)}
+                className="h-9 w-full rounded-lg border border-amber-300 bg-white px-3 text-xs font-medium text-navy focus:outline-none"
+              >
+                <option value="">— None (Standard Hourly Log) —</option>
+                {pendingTasks.map((t: any) => (
+                  <option key={t.id} value={t.id}>
+                    {t.title} (Due: {t.dueDate})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div>
             <label htmlFor="ci-project" className="mb-1.5 block text-sm font-semibold text-navy">
               Which project is this log for? <span className="text-danger">*</span>
@@ -138,6 +182,30 @@ export function CheckInModal({ open, onClose, onSubmitted }: CheckInModalProps) 
               </p>
             )}
           </div>
+
+          {activeModules.length > 0 && (
+            <div>
+              <label htmlFor="ci-module" className="mb-1.5 block text-sm font-semibold text-navy flex items-center justify-between">
+                <span>Select Project Module <span className="text-danger">*</span></span>
+                <span className="text-xs font-normal text-brand font-mono">Decoupled Delivery Tracker</span>
+              </label>
+              <select
+                id="ci-module"
+                value={activeModuleName}
+                onChange={(event) => setSelectedModuleName(event.target.value)}
+                className="h-10 w-full rounded-lg border border-brand bg-white px-3 text-xs font-bold text-navy shadow-xs focus:outline-none"
+              >
+                {activeModules.map((m: any) => (
+                  <option key={m.id || m.name} value={m.name}>
+                    {m.name} ({m.weightPercentage}% Weight)
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-[11px] text-gray-500">
+                Grouping your work log under this module allows Team Leads to inspect proof before completing milestones.
+              </p>
+            </div>
+          )}
 
           <div>
             <label htmlFor="ci-desc" className="mb-1.5 block text-sm font-semibold text-navy">

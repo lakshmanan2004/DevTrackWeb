@@ -49,6 +49,9 @@ export interface WorkLog {
   blocker?: string;
   project: string;
   wordCount: number;
+  linkedTask?: string;
+  isAssignedTask?: boolean;
+  assignedTaskTitle?: string;
 }
 
 export interface Commit {
@@ -87,6 +90,33 @@ export interface LeaderAlert {
   developerId?: string;
 }
 
+export interface ModuleSubmittedLog {
+  id: string;
+  developerName: string;
+  initials?: string;
+  description: string;
+  task?: string;
+  status: string;
+  submittedAt: string;
+  activeMinutes: number;
+  attachmentUrl?: string;
+  commitUrl?: string;
+  review: string;
+}
+
+export interface ProjectModule {
+  id: string;
+  name: string;
+  description?: string;
+  weightPercentage: number;
+  status: 'todo' | 'in_progress' | 'completed';
+  completedAt?: string;
+  completedBy?: string;
+  logsCount?: number;
+  totalMinutes?: number;
+  submittedLogs?: ModuleSubmittedLog[];
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -110,6 +140,7 @@ export interface Project {
   blockers: number;
   activeDevs: number;
   inProgress: number;
+  modules?: ProjectModule[];
 }
 
 export interface ManagedUser {

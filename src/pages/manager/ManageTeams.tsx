@@ -59,7 +59,7 @@ export function ManageTeams() {
 
   const availableToAdd = (team: any) =>
     directory.filter(
-      (u: any) => u.role === 'developer' && !team.members.some((m: any) => m.id === u.id)
+      (u: any) => u.role === 'developer' && !u.hasProject && !u.teamName && !team.members.some((m: any) => m.id === u.id)
     );
 
   return (

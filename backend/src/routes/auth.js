@@ -57,12 +57,50 @@ async function badgeCounts(user) {
   const today = dayStr();
   const badges = { alerts: 0, approvals: 0, pendingWorks: 0 };
   if (user.role === 'developer') {
+    // Cleanup any orphaned targeted feedback tasks whose linked log has been approved
+    const orphanedTasks = await Task.find({
+      assignee: user._id,
+      status: { $ne: 'completed' },
+      linkedLog: { $ne: null }
+    }).populate('linkedLog', 'review');
+    for (const ot of orphanedTasks) {
+      if (ot.linkedLog && ot.linkedLog.review === 'approved') {
+        ot.status = 'completed';
+        await ot.save();
+      }
+    }
+
     badges.alerts = await Alert.countDocuments({ audience: 'developer', user: user._id, read: false });
-    badges.pendingWorks = await Task.countDocuments({ assignee: user._id, status: { $ne: 'completed' } });
+
+    // Work logs requiring developer action or currently in progress / blocked
+    const inProgressLogs = await WorkLog.find({
+      developer: user._id,
+      $or: [
+        { review: { $in: ['changes_requested', 'rejected'] } },
+        { status: { $in: ['progress', 'blocked'] } }
+      ]
+    });
+    const pendingLogsCount = inProgressLogs.filter(l => !(l.status === 'done' && l.review === 'approved')).length;
+
     badges.approvals = await WorkLog.countDocuments({
       developer: user._id,
       review: { $in: ['changes_requested', 'rejected'] }
     });
+
+    const tasks = await Task.find({
+      assignee: user._id,
+      status: { $ne: 'completed' },
+      type: { $ne: 'targeted_feedback' }
+    }).populate('linkedLog', 'review status');
+
+    let pendingTasksCount = 0;
+    for (const t of tasks) {
+      if (!t.linkedLog || !(t.linkedLog.review === 'approved' && t.linkedLog.status === 'done')) {
+        pendingTasksCount++;
+      }
+    }
+
+    badges.pendingWorks = pendingLogsCount + pendingTasksCount;
   } else if (user.role === 'leader') {
     const { scopeFor } = require('../util/scope');
     const scope = await scopeFor(user);

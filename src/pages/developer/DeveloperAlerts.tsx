@@ -3,6 +3,7 @@ import {
   AlarmClockIcon,
   CheckCircle2Icon,
   FileTextIcon,
+  Trash2Icon,
   XCircleIcon } from
 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -60,15 +61,33 @@ export function DeveloperAlerts() {
     refetch();
   };
 
+  const handleClearAll = async () => {
+    if (!alerts.length) return;
+    await api('/api/alerts/clear-all', { method: 'DELETE' });
+    refetch();
+  };
+
+  const handleDelete = async (id: string) => {
+    await api(`/api/alerts/${id}`, { method: 'DELETE' });
+    refetch();
+  };
+
   return (
     <>
       <PageHeader
         title="My Alerts"
         subtitle="Your notifications only — no other developer can see these"
         actions={
-          alerts.some((a: DevAlert) => a.unread) ? (
-            <Button variant="secondary" size="sm" onClick={markAllRead}>Mark all read</Button>
-          ) : undefined
+          <div className="flex items-center gap-2">
+            {alerts.some((a: DevAlert) => a.unread) && (
+              <Button variant="secondary" size="sm" onClick={markAllRead}>Mark all read</Button>
+            )}
+            {alerts.length > 0 && (
+              <Button variant="danger" size="sm" onClick={handleClearAll} icon={<Trash2Icon className="h-3.5 w-3.5" />}>
+                Clear All
+              </Button>
+            )}
+          </div>
         } />
 
 
@@ -109,19 +128,29 @@ export function DeveloperAlerts() {
                   <p className="mt-0.5 text-sm text-gray-600">{alert.body}</p>
                   <p className="mt-1 text-xs text-gray-400">{alert.time}</p>
                 </div>
-                {alert.unread ?
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={async () => {
-                    await api(`/api/alerts/${alert.id}/action`, { method: 'POST', body: { action: 'Mark Seen' } });
-                    refetch();
-                  }}>
-                    Mark Seen
-                  </Button> :
-
-                <span className="text-xs font-semibold text-gray-400">Seen</span>
-                }
+                <div className="flex items-center gap-2">
+                  {alert.unread ? (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={async () => {
+                        await api(`/api/alerts/${alert.id}/action`, { method: 'POST', body: { action: 'Mark Seen' } });
+                        refetch();
+                      }}>
+                        Mark Seen
+                      </Button>
+                  ) : (
+                    <span className="text-xs font-semibold text-gray-400">Seen</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(alert.id)}
+                    title="Delete Alert"
+                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-danger transition-colors"
+                  >
+                    <Trash2Icon className="h-4 w-4" />
+                  </button>
+                </div>
               </li>);
           })}
           {alerts.length === 0 && (

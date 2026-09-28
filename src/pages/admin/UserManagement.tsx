@@ -255,7 +255,7 @@ export function UserManagement() {
               </div>
               <div>
                 <label htmlFor="au-pass" className="mb-1.5 block text-sm font-medium text-navy">
-                  Temporary Password
+                  Temporary Password (Default: welcome)
                 </label>
                 <input
                 id="au-pass"
@@ -264,7 +264,7 @@ export function UserManagement() {
                 autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="e.g. devtrack@2026"
+                placeholder="Defaults to welcome"
                 className="h-10 w-full rounded-lg border border-hairline px-3 text-sm text-navy placeholder:text-gray-400" />
               </div>
               <div>

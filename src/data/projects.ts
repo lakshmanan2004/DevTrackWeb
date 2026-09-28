@@ -18,7 +18,14 @@ export const projects: Project[] = [
     tasksDone: 28,
     blockers: 6,
     activeDevs: 3,
-    inProgress: 2
+    inProgress: 2,
+    modules: [
+      { id: 'm1', name: 'Database & Architecture Design', description: 'ER diagrams, PostgreSQL schemas & indexing strategy', weightPercentage: 20, status: 'completed' },
+      { id: 'm2', name: 'UI / UX Wireframing', description: 'Figma prototypes for student and admin dashboard', weightPercentage: 15, status: 'completed' },
+      { id: 'm3', name: 'Backend API Development', description: 'REST APIs for registration, timetable & grading', weightPercentage: 30, status: 'completed' },
+      { id: 'm4', name: 'Frontend UI Implementation', description: 'React screens for registration & timetable modules', weightPercentage: 25, status: 'in_progress' },
+      { id: 'm5', name: 'UAT & Deployment', description: 'User acceptance testing, security audit & production launch', weightPercentage: 10, status: 'todo' }
+    ]
   },
   {
     id: 'attendance',
@@ -37,7 +44,14 @@ export const projects: Project[] = [
     tasksDone: 11,
     blockers: 2,
     activeDevs: 2,
-    inProgress: 3
+    inProgress: 3,
+    modules: [
+      { id: 'm201', name: 'Requirements & System Specs', description: 'QR scanning logic & hardware integration specs', weightPercentage: 15, status: 'completed' },
+      { id: 'm202', name: 'UI Mockups & Mobile Layout', description: 'React Native screens for QR scanner & student list', weightPercentage: 15, status: 'completed' },
+      { id: 'm203', name: 'Backend Sync & DB Architecture', description: 'Real-time WebSocket & attendance logging endpoints', weightPercentage: 35, status: 'in_progress' },
+      { id: 'm204', name: 'Biometric & Scanner Integration', description: 'Camera hardware access & biometric verification', weightPercentage: 25, status: 'todo' },
+      { id: 'm205', name: 'Production Deployment', description: 'App store release & server deployment', weightPercentage: 10, status: 'todo' }
+    ]
   },
   {
     id: 'library',
@@ -56,7 +70,13 @@ export const projects: Project[] = [
     tasksDone: 42,
     blockers: 1,
     activeDevs: 3,
-    inProgress: 2
+    inProgress: 2,
+    modules: [
+      { id: 'm301', name: 'Catalog & ISBN Database Schema', description: 'Database design for 50k+ books & electronic media', weightPercentage: 20, status: 'completed' },
+      { id: 'm302', name: 'UI Implementation', description: 'Search portal & checkout interface', weightPercentage: 20, status: 'completed' },
+      { id: 'm303', name: 'Automated Fine Calculation Engine', description: 'Cron job and payment integration for late returns', weightPercentage: 40, status: 'completed' },
+      { id: 'm304', name: 'Digital E-Resource Repository', description: 'PDF upload and reader integration', weightPercentage: 20, status: 'todo' }
+    ]
   },
   {
     id: 'fee',
@@ -75,7 +95,13 @@ export const projects: Project[] = [
     tasksDone: 4,
     blockers: 3,
     activeDevs: 4,
-    inProgress: 5
+    inProgress: 5,
+    modules: [
+      { id: 'm401', name: 'Payment Gateway Integration Specs', description: 'Razorpay / RazorPay API architecture & webhooks', weightPercentage: 15, status: 'completed' },
+      { id: 'm402', name: 'Fee Ledger & ERP Sync Engine', description: 'Database schema for transaction ledgers', weightPercentage: 35, status: 'todo' },
+      { id: 'm403', name: 'Student UI Payment Portal', description: 'Payment screens & invoice generation', weightPercentage: 35, status: 'in_progress' },
+      { id: 'm404', name: 'Security Audit & Compliance', description: 'PCI-DSS validation & encryption testing', weightPercentage: 15, status: 'todo' }
+    ]
   },
   {
     id: 'portal',
@@ -95,7 +121,12 @@ export const projects: Project[] = [
     tasksDone: 56,
     blockers: 0,
     activeDevs: 0,
-    inProgress: 0
+    inProgress: 0,
+    modules: [
+      { id: 'm501', name: 'UI Wireframing & Design System', description: 'Component library & responsive templates', weightPercentage: 25, status: 'completed' },
+      { id: 'm502', name: 'Grade & Transcript APIs', description: 'Fast search & PDF transcript generation', weightPercentage: 45, status: 'completed' },
+      { id: 'm503', name: 'Deployment & SSL Config', description: 'Production hosting and security setup', weightPercentage: 30, status: 'completed' }
+    ]
   },
   {
     id: 'hostel',
@@ -115,7 +146,11 @@ export const projects: Project[] = [
     tasksDone: 38,
     blockers: 0,
     activeDevs: 0,
-    inProgress: 0
+    inProgress: 0,
+    modules: [
+      { id: 'm601', name: 'Room Inventory & Allocation Engine', description: 'Algorithmic room allocation system', weightPercentage: 50, status: 'completed' },
+      { id: 'm602', name: 'Gate Pass & Mess Workflow', description: 'Digital QR gate pass and billing', weightPercentage: 50, status: 'completed' }
+    ]
   },
   {
     id: 'transport',
@@ -134,7 +169,11 @@ export const projects: Project[] = [
     tasksDone: 6,
     blockers: 2,
     activeDevs: 0,
-    inProgress: 1
+    inProgress: 1,
+    modules: [
+      { id: 'm701', name: 'GPS Sensor & Tracking API', description: 'Telemetry integration for shuttle buses', weightPercentage: 22, status: 'completed' },
+      { id: 'm702', name: 'Driver & Route Management UI', description: 'Interactive Mapbox dashboard for routes', weightPercentage: 78, status: 'todo' }
+    ]
   }
 ];
 
