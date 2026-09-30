@@ -543,9 +543,11 @@ export function TeamCalendar() {
                                 <span className="rounded bg-navy/10 px-1.5 py-0.2 text-[9px] font-extrabold text-navy">
                                   {item.hourLabel}
                                 </span>
-                                <span className="text-[11px] font-bold text-gray-600">
-                                  {item.projectName}
-                                </span>
+                                {item.projectName && item.projectName !== item.hourLabel && (
+                                  <span className="text-[11px] font-bold text-gray-600">
+                                    {item.projectName}
+                                  </span>
+                                )}
                               </div>
                               <h5 className="mt-0.5 text-xs font-bold text-navy">{item.taskTitle}</h5>
                             </div>
@@ -571,14 +573,21 @@ export function TeamCalendar() {
                             </span>
                           </div>
 
-                          {/* DEVELOPER INFO & NOTE */}
-                          <div className="mt-2 rounded bg-white/90 p-2 border border-hairline text-[11px]">
-                            <p className="font-semibold text-gray-700">
-                              Developer: <strong className="text-navy">{item.developerName}</strong>
-                            </p>
+                          {/* DEVELOPER INFO, WHO KEPT PENDING & NOTE */}
+                          <div className="mt-2 rounded bg-white/90 p-2.5 border border-hairline text-[11px] space-y-1">
+                            <div className="flex flex-wrap items-center justify-between gap-1.5">
+                              <p className="font-semibold text-gray-700">
+                                Developer: <strong className="text-navy">{item.developerName}</strong>
+                              </p>
+                              {item.keptPendingBy && (
+                                <span className="inline-flex items-center gap-1 rounded bg-amber-100/90 text-amber-900 border border-amber-300 px-2 py-0.5 text-[10px] font-bold">
+                                  👤 Kept Pending By: <strong className="font-extrabold text-amber-950">{item.keptPendingBy}</strong>
+                                </span>
+                              )}
+                            </div>
                             {item.feedbackNote && (
-                              <p className="mt-0.5 text-gray-700 font-medium">
-                                Note / Blocker: <span className="italic text-gray-900">&ldquo;{item.feedbackNote}&rdquo;</span>
+                              <p className="text-gray-700 font-medium pt-0.5">
+                                Note / Instructions: <span className="italic text-gray-900">&ldquo;{item.feedbackNote}&rdquo;</span>
                               </p>
                             )}
                           </div>

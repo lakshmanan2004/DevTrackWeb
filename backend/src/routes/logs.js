@@ -613,7 +613,7 @@ router.get('/team-calendar', ah(async (req, res) => {
   // Fetch all tasks created in or relevant to this month
   const allTasks = await Task.find({
     status: { $ne: 'completed' }
-  }).populate('assignee', 'name initials').populate('linkedLog').sort({ createdAt: -1 });
+  }).populate('assignee', 'name initials').populate('assignedBy', 'name initials role').populate('linkedLog').sort({ createdAt: -1 });
 
   const currentSlot = slotForNow(settings, now);
   const days = [];
@@ -701,6 +701,14 @@ router.get('/team-calendar', ah(async (req, res) => {
       if (isReviewPending || isChangesReq || isBlocked || isProgress) {
         const logDevId = log.developer && typeof log.developer === 'object' ? String(log.developer._id || log.developer) : String(log.developer);
         const dev = devMap[logDevId] || (log.developer && log.developer.name ? log.developer : { name: 'Developer', initials: 'DV' });
+        const keptPendingBy = isChangesReq
+          ? 'Team Leader (Changes Requested)'
+          : isBlocked
+          ? `${dev.name} (Reported Blocker)`
+          : isReviewPending
+          ? `${dev.name} (Submitted, Awaiting Approval)`
+          : `${dev.name} (In Progress)`;
+
         pendingWorks.push({
           id: String(log._id),
           kind: 'log',
@@ -719,6 +727,9 @@ router.get('/team-calendar', ah(async (req, res) => {
             : 'in_progress',
           review: log.review,
           feedbackNote: log.reviewNote || log.blocker || log.description || '',
+          keptPendingBy,
+          assignedByName: dev.name,
+          assignedByRole: isChangesReq ? 'TL' : 'Developer',
           attachmentUrl: log.attachmentUrl || '',
           attachmentName: log.attachmentName || '',
           isPendingWorkSubmission: !!log.isPendingWorkSubmission,
@@ -737,6 +748,10 @@ router.get('/team-calendar', ah(async (req, res) => {
       const tDueStr = t.dueDate || '';
 
       if (tCreatedStr === dStr || tDueStr === dStr || isToday) {
+        const assignerName = t.assignedByName || (t.assignedBy && t.assignedBy.name ? t.assignedBy.name : 'Team Leader');
+        const assignerRole = t.assignedByRole === 'PM' ? 'Project Manager' : 'Team Leader';
+        const keptPendingBy = `${assignerName} (${assignerRole})`;
+
         pendingWorks.push({
           id: String(t._id),
           kind: 'task',
@@ -749,6 +764,9 @@ router.get('/team-calendar', ah(async (req, res) => {
           status: t.status === 'in_progress' ? 'in_progress' : 'pending_submission',
           review: 'pending',
           feedbackNote: t.note || 'Assigned task by lead',
+          keptPendingBy,
+          assignedByName: assignerName,
+          assignedByRole: assignerRole,
           attachmentUrl: '',
           attachmentName: '',
           isPendingWorkSubmission: false,
