@@ -254,10 +254,21 @@ export function WorkLogs() {
                 <span className="inline-flex items-center gap-1.5">
                   <PaperclipIcon className="h-3.5 w-3.5" aria-hidden="true" />
                   {log.attachmentUrl ? (
-                    <a href={fileUrl(log.attachmentUrl)} target="_blank" rel="noreferrer" className="font-semibold text-brand hover:underline">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActiveScreenshotModal({
+                          url: fileUrl(log.attachmentUrl),
+                          title: log.attachment || 'Screenshot Proof'
+                        })
+                      }
+                      className="font-semibold text-brand hover:underline cursor-pointer"
+                    >
                       {log.attachment}
-                    </a>
-                  ) : log.attachment}
+                    </button>
+                  ) : (
+                    log.attachment
+                  )}
                 </span>
                 {log.commits > 0 && (
                   <a

@@ -379,12 +379,29 @@ export function LogApprovals() {
 
                   {/* Attachments */}
                   <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <span className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2 text-xs font-semibold text-navy">
-                      <ImageIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
-                      <a href={fileUrl(log.attachmentUrl)} target="_blank" rel="noreferrer" className="hover:underline">
-                        {log.attachment}
-                      </a>
-                    </span>
+                    {log.attachmentUrl ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setActiveScreenshotModal({
+                            url: fileUrl(log.attachmentUrl),
+                            title: log.attachment ? `${log.developerName || 'Developer'} — ${log.attachment}` : `${log.developerName || 'Developer'} — Screenshot Proof`
+                          })
+                        }
+                        className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-100 hover:text-brand transition-colors cursor-pointer group"
+                      >
+                        <ImageIcon className="h-3.5 w-3.5 text-brand group-hover:scale-110 transition-transform" aria-hidden="true" />
+                        <span className="underline decoration-slate-300 group-hover:decoration-brand">{log.attachment || 'screenshot.png'}</span>
+                        <span className="rounded bg-brand/10 text-brand px-1.5 py-0.5 text-[10px] font-bold">
+                          View Proof
+                        </span>
+                      </button>
+                    ) : (
+                      <span className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2 text-xs font-semibold text-gray-500">
+                        <ImageIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+                        <span>{log.attachment || 'No screenshot attached'}</span>
+                      </span>
+                    )}
                     {log.commits > 0 && (
                       <span className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-2 text-xs font-semibold text-navy">
                         <GitCommitVerticalIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
