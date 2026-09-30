@@ -11,7 +11,8 @@ import {
   EyeIcon,
   RotateCcwIcon,
   PlusIcon,
-  ZapIcon
+  ZapIcon,
+  UsersIcon
 } from 'lucide-react';
 
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -36,6 +37,7 @@ export function LogApprovals() {
 
   const queue = data?.logs || [];
   const [filter, setFilter] = useState('pending');
+  const [developerFilter, setDeveloperFilter] = useState('');
   const [moduleFilter, setModuleFilter] = useState('');
   const [activeModalItem, setActiveModalItem] = useState<{ developer: string; log: any } | null>(null);
   const [selectedText, setSelectedText] = useState('');
@@ -79,16 +81,21 @@ export function LogApprovals() {
     }
   };
 
+  const scopedQueue = queue.filter((item: any) => {
+    if (developerFilter && String(item.developerId || item.developer?._id || item.developer) !== String(developerFilter)) return false;
+    if (moduleFilter && item.moduleName !== moduleFilter) return false;
+    return true;
+  });
+
   const counts = {
-    all: queue.length,
-    pending: queue.filter((i: any) => i.review === 'pending').length,
-    changes_requested: queue.filter((i: any) => i.review === 'changes_requested').length,
-    approved: queue.filter((i: any) => i.review === 'approved').length,
-    rejected: queue.filter((i: any) => i.review === 'rejected').length
+    all: scopedQueue.length,
+    pending: scopedQueue.filter((i: any) => i.review === 'pending').length,
+    changes_requested: scopedQueue.filter((i: any) => i.review === 'changes_requested').length,
+    approved: scopedQueue.filter((i: any) => i.review === 'approved').length,
+    rejected: scopedQueue.filter((i: any) => i.review === 'rejected').length
   };
 
-  const filteredQueue = queue.filter((item: any) => {
-    if (moduleFilter && item.moduleName !== moduleFilter) return false;
+  const filteredQueue = scopedQueue.filter((item: any) => {
     if (filter === 'all') return true;
     return item.review === filter;
   });
@@ -137,6 +144,28 @@ export function LogApprovals() {
           />
 
           <div className="flex flex-wrap items-center gap-3">
+            {developers.length > 0 && (
+              <div className="flex items-center gap-2 rounded-xl border border-hairline bg-white px-3 py-1.5 shadow-card">
+                <label htmlFor="la-dev-filter" className="text-xs font-bold text-navy flex items-center gap-1">
+                  <UsersIcon className="h-3.5 w-3.5 text-gray-400" />
+                  Developer:
+                </label>
+                <select
+                  id="la-dev-filter"
+                  value={developerFilter}
+                  onChange={(e) => setDeveloperFilter(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-brand focus:outline-none cursor-pointer"
+                >
+                  <option value="">All Developers ({developers.length})</option>
+                  {developers.map((dev: any) => (
+                    <option key={dev.id || dev._id} value={dev.id || dev._id}>
+                      {dev.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="flex items-center gap-2">
               <button
                 type="button"
