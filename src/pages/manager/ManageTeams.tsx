@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { PlusIcon, PlusCircleIcon } from 'lucide-react';
+import { PlusIcon, PlusCircleIcon, FolderIcon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { FilterPills } from '../../components/ui/FilterPills';
 import { useTeams, useLive } from '../../hooks/useLive';
 import { AssignTaskModal } from '../../components/common/AssignTaskModal';
 import { api } from '../../api/client';
@@ -86,15 +85,48 @@ export function ManageTeams() {
           </div>
         )}
 
-        <FilterPills
-          ariaLabel="Filter teams by project"
-          value={tab}
-          onChange={setTab}
-          options={[
-            { id: 'all', label: 'All' },
-            ...teams.map((t: any) => ({ id: t.id, label: t.project || t.name }))
-          ]}
-        />
+        {/* PROJECT FILTER DROPDOWN */}
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-hairline bg-white p-4 shadow-card">
+          <div className="flex flex-wrap items-center gap-3.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
+              <FolderIcon className="h-5 w-5" />
+            </div>
+            <div>
+              <label htmlFor="project-filter-select" className="text-xs font-bold uppercase tracking-wider text-gray-500 block">
+                Filter by Project / Team
+              </label>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <select
+                  id="project-filter-select"
+                  value={tab}
+                  onChange={(e) => setTab(e.target.value)}
+                  className="h-10 min-w-[280px] max-w-lg rounded-lg border border-hairline bg-canvas px-3 text-sm font-semibold text-navy shadow-2xs focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand cursor-pointer"
+                >
+                  <option value="all">📁 All Projects &amp; Teams ({teams.length})</option>
+                  {teams.map((t: any) => (
+                    <option key={t.id} value={t.id}>
+                      {t.project ? `${t.project} (${t.name})` : t.name}
+                    </option>
+                  ))}
+                </select>
+
+                {tab !== 'all' && (
+                  <button
+                    type="button"
+                    onClick={() => setTab('all')}
+                    className="rounded-lg border border-hairline bg-canvas hover:bg-slate-100 px-3 py-2 text-xs font-bold text-gray-600 transition-colors"
+                  >
+                    Clear Filter
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+            <span>Showing <strong className="text-navy">{visible.length}</strong> of <strong className="text-navy">{teams.length}</strong> teams</span>
+          </div>
+        </div>
 
         <div className="space-y-5">
           {visible.map((team: any) => (

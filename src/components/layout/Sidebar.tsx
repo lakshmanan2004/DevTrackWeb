@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { ActivityIcon, LogOutIcon } from 'lucide-react';
+import { LogOutIcon } from 'lucide-react';
 import { Avatar } from '../ui/Avatar';
 import { Badge } from '../ui/Badge';
 import { Role } from '../../types';
@@ -41,13 +41,15 @@ export function Sidebar({ role }: SidebarProps) {
 
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col bg-navy text-white overflow-hidden">
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
-          <ActivityIcon className="h-4 w-4" aria-hidden="true" />
-        </span>
-        <div>
-          <p className="text-sm font-bold leading-none">DevTrack</p>
-          <p className="mt-1 text-[11px] text-slate-400">{roleLabels[role]} workspace</p>
+      <div className="flex items-center gap-3 px-5 py-5">
+        <img
+          src="/SIMATS-logo.jpg"
+          alt="DevTrack Logo"
+          className="h-9 w-9 rounded-lg object-contain bg-white p-0.5 shrink-0 shadow-sm"
+        />
+        <div className="min-w-0">
+          <p className="text-sm font-bold leading-none truncate">DevTrack</p>
+          <p className="mt-1 text-[11px] text-slate-400 truncate">{roleLabels[role]} workspace</p>
         </div>
       </div>
 

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ActivityIcon,
   ArrowRightIcon,
   EyeIcon,
   EyeOffIcon,
@@ -105,9 +104,11 @@ useEffect(() => {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-canvas">
         <div className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 animate-spin items-center justify-center rounded-xl bg-brand text-white">
-            <ActivityIcon className="h-6 w-6" />
-          </span>
+          <img
+            src="/SIMATS-logo.jpg"
+            alt="DevTrack Logo"
+            className="h-10 w-10 rounded-xl object-contain bg-white p-1 shadow-sm"
+          />
           <span className="text-xl font-bold text-navy">DevTrack</span>
         </div>
         <p className="mt-4 text-xs font-semibold text-gray-500">Validating your authentication session...</p>
@@ -119,9 +120,11 @@ useEffect(() => {
     <div className="flex min-h-screen w-full flex-col lg:flex-row">
       <section className="flex flex-col justify-between bg-navy px-8 py-10 text-white lg:w-1/2 lg:px-14 lg:py-14">
         <div className="flex items-center gap-2.5">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
-            <ActivityIcon className="h-5 w-5" aria-hidden="true" />
-          </span>
+          <img
+            src="/SIMATS-logo.jpg"
+            alt="DevTrack Logo"
+            className="h-9 w-9 rounded-lg object-contain bg-white p-0.5 shadow-sm"
+          />
           <span className="text-lg font-bold tracking-tight">DevTrack</span>
         </div>
 
