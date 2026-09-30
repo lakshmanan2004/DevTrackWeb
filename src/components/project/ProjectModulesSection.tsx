@@ -281,10 +281,7 @@ export function ProjectModulesSection({
                         {devObj?.online && (
                           <span className="h-2 w-2 rounded-full bg-ok" title="Online now" />
                         )}
-                        {devObj?.logs !== undefined && (
-                          <span className="text-[10px] font-semibold text-gray-400">({devObj.logs} logs)</span>
-                        )}
-                        <CalendarIcon className="h-3 w-3 text-purple-400 group-hover:text-brand transition-colors ml-0.5" />
+                        <CalendarIcon className="h-3.5 w-3.5 text-purple-400 group-hover:text-brand transition-colors ml-0.5" />
                       </button>
                     );
                   })

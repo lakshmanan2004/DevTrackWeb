@@ -262,18 +262,11 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                             }
                           }}
                           title={`${day.fullLabel} — ${day.status.toUpperCase()} (${day.tasksCount} logs, ${day.missedCount || 0} non-submitted)`}
-                          className={`flex h-10 w-full flex-col items-center justify-center rounded-xl text-xs font-extrabold transition-all duration-150 transform hover:scale-105 cursor-pointer relative ${
+                          className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-extrabold transition-all duration-150 transform hover:scale-105 cursor-pointer relative ${
                             dayCellStyles[day.status]
                           } ${isSelected ? 'ring-4 ring-brand shadow-lg scale-105 z-10' : ''}`}
                         >
                           <span>{day.dateNum}</span>
-                          {hasMissed ? (
-                            <span className="text-[8px] opacity-95 font-black bg-rose-900/40 rounded px-1">
-                              {day.missedCount} missed
-                            </span>
-                          ) : day.tasksCount > 0 ? (
-                            <span className="text-[8px] opacity-90 font-medium">{day.tasksCount} logs</span>
-                          ) : null}
                         </button>
                       );
                     })}

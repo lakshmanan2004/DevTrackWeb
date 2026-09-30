@@ -53,7 +53,6 @@ export function LiveDashboard() {
     <>
       <PageHeader
         title="Live Dashboard"
-        subtitle={activeProject ? `${activeProject.name} · ${user?.teamName || 'Team'}` : (user?.teamName || 'Team')}
         actions={
           <>
             <span className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-danger-soft px-3 py-1.5 text-xs font-bold text-danger">
