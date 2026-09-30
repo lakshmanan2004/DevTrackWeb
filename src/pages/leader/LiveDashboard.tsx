@@ -17,8 +17,7 @@ export function LiveDashboard() {
   const leaderProjects = projData?.projects || [];
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
-  const activeProjectId = selectedProjectId || leaderProjects[0]?.id;
-  const activeProject = leaderProjects.find((p: any) => p.id === activeProjectId) || leaderProjects[0];
+  const activeProject = selectedProjectId ? leaderProjects.find((p: any) => p.id === selectedProjectId) : null;
 
   const developers = data?.developers || [];
   const unreadAlerts = (alertData?.alerts || []).filter((a: any) => a.unread).length;
@@ -55,7 +54,7 @@ export function LiveDashboard() {
     <>
       <PageHeader
         title="Live Dashboard"
-        subtitle={`${activeProject?.name || user?.projectName || 'Project'} · ${user?.teamName || 'Team'}`}
+        subtitle={activeProject ? `${activeProject.name} · ${user?.teamName || 'Team'}` : `Select Project · ${user?.teamName || 'Team'}`}
         actions={
           <>
             <span className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-danger-soft px-3 py-1.5 text-xs font-bold text-danger">
@@ -80,10 +79,96 @@ export function LiveDashboard() {
 
       <div className="flex-1 space-y-5 p-6">
         <Banner tone="blue" icon={<InfoIcon className="h-4 w-4" />}>
-          You are viewing {user?.teamName} assigned to <strong className="underline">{activeProject?.name || user?.projectName || 'Project'}</strong>. Updates stream in real time.
+          {activeProject
+            ? `You are viewing ${user?.teamName} assigned to ${activeProject.name}. Updates stream in real time.`
+            : `You are viewing ${user?.teamName}. Select a project below to inspect delivery progress and developer submissions by module.`}
         </Banner>
 
-        {activeProject && (
+        {/* HIGHLIGHTED PROJECT SELECTION PROMPT IF NO PROJECT SELECTED */}
+        {!activeProject ? (
+          <div className="rounded-2xl border-2 border-brand/40 bg-gradient-to-br from-white via-brand-soft/20 to-brand-soft/40 p-6 shadow-card space-y-5 animate-in fade-in">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand/20 pb-4">
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white shadow-md ring-4 ring-brand/20">
+                  <LayersIcon className="h-6 w-6 animate-pulse" />
+                </div>
+                <div>
+                  <h2 className="text-base font-extrabold text-navy">
+                    ⚡ Select a Project to Inspect Modules & Delivery Progress
+                  </h2>
+                  <p className="text-xs text-gray-600 mt-0.5">
+                    No project selected by default. Pick a project assigned to {user?.teamName || 'your team'} below to inspect developer submissions by module.
+                  </p>
+                </div>
+              </div>
+
+              {leaderProjects.length > 0 && (
+                <div className="flex items-center gap-2 rounded-xl border-2 border-brand bg-white px-3.5 py-2 shadow-sm ring-4 ring-brand/10">
+                  <label htmlFor="lead-select-proj-main" className="text-xs font-extrabold text-navy whitespace-nowrap flex items-center gap-1.5">
+                    <LayersIcon className="h-4 w-4 text-brand" />
+                    Select Project:
+                  </label>
+                  <select
+                    id="lead-select-proj-main"
+                    value=""
+                    onChange={(e) => setSelectedProjectId(e.target.value)}
+                    className="bg-transparent text-xs font-extrabold text-brand focus:outline-none cursor-pointer"
+                  >
+                    <option value="" disabled>— Click to Select a Project ({leaderProjects.length}) —</option>
+                    {leaderProjects.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.team || user?.teamName}) — {p.modules?.length || 0} Modules
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {leaderProjects.length > 0 ? (
+              <div>
+                <p className="text-xs font-bold text-navy uppercase tracking-wider mb-3">
+                  Available Projects ({leaderProjects.length}):
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {leaderProjects.map((p: any) => {
+                    const completedWeight = (p.modules || [])
+                      .filter((m: any) => m.status === 'completed')
+                      .reduce((sum: number, m: any) => sum + (m.weightPercentage || 0), 0);
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSelectedProjectId(p.id)}
+                        className="flex flex-col text-left justify-between rounded-xl border border-brand/30 bg-white p-4 shadow-sm hover:border-brand hover:shadow-md hover:ring-2 hover:ring-brand/30 transition-all group cursor-pointer"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="text-sm font-bold text-navy group-hover:text-brand transition-colors">
+                              {p.name}
+                            </h3>
+                            <span className="text-[11px] font-extrabold text-brand bg-brand-soft px-2 py-0.5 rounded-full">
+                              {completedWeight}% Done
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500 line-clamp-2">
+                            {p.description || 'Assigned team project'}
+                          </p>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-2 text-[11px] font-semibold text-gray-600">
+                          <span>{p.modules?.length || 0} Modules</span>
+                          <span className="text-brand font-bold group-hover:underline">Open & Inspect →</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500 italic">No projects found for your team.</p>
+            )}
+          </div>
+        ) : (
           <ProjectModulesSection
             project={activeProject}
             allProjects={leaderProjects}

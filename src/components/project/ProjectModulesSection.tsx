@@ -91,17 +91,20 @@ export function ProjectModulesSection({
 
           <div className="flex flex-wrap items-center gap-3">
             {allProjects && allProjects.length > 1 && onSelectProject && (
-              <div className="flex items-center gap-2 rounded-xl border border-hairline bg-canvas px-3 py-1.5 shadow-xs">
-                <label htmlFor="pms-project-select" className="text-xs font-bold text-navy whitespace-nowrap">Select Project:</label>
+              <div className="flex items-center gap-2 rounded-xl border-2 border-brand bg-brand-soft/30 px-3.5 py-1.5 shadow-sm ring-2 ring-brand/20">
+                <label htmlFor="pms-project-select" className="text-xs font-extrabold text-navy whitespace-nowrap flex items-center gap-1.5">
+                  <LayersIcon className="h-4 w-4 text-brand" />
+                  Select Project:
+                </label>
                 <select
                   id="pms-project-select"
                   value={project.id}
                   onChange={(e) => onSelectProject(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-brand focus:outline-none cursor-pointer"
+                  className="bg-white rounded-lg px-2.5 py-1 text-xs font-bold text-brand border border-brand/30 shadow-xs focus:outline-none cursor-pointer"
                 >
                   {allProjects.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name} ({p.team})
+                      {p.name} ({p.team || 'Team'})
                     </option>
                   ))}
                 </select>
@@ -116,7 +119,7 @@ export function ProjectModulesSection({
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
             <span>Completion Progress</span>
-            <span className="text-navy">{completedWeight}% of 100%</span>
+            <span className="text-navy font-bold">{completedWeight}% of 100%</span>
           </div>
           <ProgressBar
             value={completedWeight}
@@ -125,14 +128,21 @@ export function ProjectModulesSection({
           />
         </div>
 
-        {/* MODULE PROOF INSPECTION DROPDOWN BAR */}
+        {/* HIGHLIGHTED MODULE PROOF INSPECTION DROPDOWN BAR */}
         {modules.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand/20 bg-brand-soft/20 p-3 shadow-xs">
-            <div className="flex flex-wrap items-center gap-2">
-              <label htmlFor="pms-module-inspect-dropdown" className="text-xs font-bold text-navy flex items-center gap-1.5">
-                <EyeIcon className="h-4 w-4 text-brand shrink-0" />
-                Inspect Dev Submissions by Module:
-              </label>
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border-2 border-brand/40 bg-gradient-to-r from-brand-soft/40 via-purple-50 to-brand-soft/20 p-4 shadow-sm ring-2 ring-brand/10">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white shadow-xs ring-2 ring-brand/20">
+                <EyeIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <label htmlFor="pms-module-inspect-dropdown" className="text-xs font-extrabold text-navy flex items-center gap-1.5">
+                  Inspect Developer Submissions by Module:
+                </label>
+                <p className="text-[11px] text-gray-500">
+                  Select a module below to inspect work logs, developer proof screenshots & commit references.
+                </p>
+              </div>
               <select
                 id="pms-module-inspect-dropdown"
                 value={selectedModuleFilter}
@@ -145,14 +155,14 @@ export function ProjectModulesSection({
                     setExpandedModuleIds({});
                   }
                 }}
-                className="rounded-lg border border-brand/40 bg-white px-3 py-1.5 text-xs font-bold text-navy shadow-xs focus:border-brand focus:outline-none cursor-pointer"
+                className="rounded-xl border-2 border-brand bg-white px-3.5 py-2 text-xs font-bold text-navy shadow-sm focus:ring-2 focus:ring-brand/30 focus:outline-none cursor-pointer"
               >
                 <option value="">— Show All Modules ({modules.length}) —</option>
                 {modules.map((m) => {
                   const count = m.submittedLogs?.length || m.logsCount || 0;
                   return (
                     <option key={m.id || m.name} value={m.id}>
-                      {m.name} ({count} dev log{count !== 1 ? 's' : ''} submitted)
+                      {m.name} ({count} dev submission{count !== 1 ? 's' : ''})
                     </option>
                   );
                 })}
@@ -165,9 +175,9 @@ export function ProjectModulesSection({
                   setSelectedModuleFilter('');
                   setExpandedModuleIds({});
                 }}
-                className="text-[11px] font-bold text-brand hover:underline"
+                className="rounded-lg bg-white border border-brand/30 px-3 py-1.5 text-xs font-bold text-brand shadow-xs hover:bg-brand-soft transition-colors"
               >
-                Clear Filter
+                Reset Module Filter
               </button>
             )}
           </div>
