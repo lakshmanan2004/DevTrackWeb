@@ -86,13 +86,17 @@ export function Sidebar({ role }: SidebarProps) {
       </nav>
 
       <div className="border-t border-navy-700 p-4">
-        <div className="flex items-center gap-3">
+        <NavLink
+          to={`/${role}/profile`}
+          className="flex items-center gap-3 rounded-lg p-1.5 -m-1.5 transition-colors duration-150 hover:bg-navy-700 group cursor-pointer"
+          title="View My Profile"
+        >
           <Avatar initials={user?.initials || '··'} tone={avatarTone[role]} />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold">{user?.name || 'Loading…'}</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-bold group-hover:text-brand-light transition-colors">{user?.name || 'Loading…'}</p>
             <p className="truncate text-[11px] text-slate-400">{context}</p>
           </div>
-        </div>
+        </NavLink>
         <div className="mt-3 flex items-center justify-between gap-2">
           <Badge tone={avatarTone[role]}>{roleLabels[role]}</Badge>
           <button

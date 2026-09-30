@@ -58,7 +58,8 @@ export function navFor(role: Role, badges: Badges = { alerts: 0, approvals: 0, p
       { to: '/leader/alerts', label: 'Alerts', icon: <BellIcon className={size} />, badge: badges.alerts > 0 ? String(badges.alerts) : undefined },
       { to: '/leader/reports', label: 'Weekly Reports', icon: <TrendingUpIcon className={size} /> },
       { to: '/leader/commits', label: 'Commits Overview', icon: <GitCommitVerticalIcon className={size} /> },
-      { to: '/leader/approvals', label: 'Log Approvals', icon: <CheckSquareIcon className={size} />, badge: badges.approvals > 0 ? String(badges.approvals) : undefined }
+      { to: '/leader/approvals', label: 'Log Approvals', icon: <CheckSquareIcon className={size} />, badge: badges.approvals > 0 ? String(badges.approvals) : undefined },
+      { to: '/leader/profile', label: 'My Profile', icon: <UserIcon className={size} /> }
     ];
   }
   if (role === 'manager') {
@@ -67,13 +68,15 @@ export function navFor(role: Role, badges: Badges = { alerts: 0, approvals: 0, p
       { to: '/manager/create', label: 'Create Project', icon: <FilePlus2Icon className={size} /> },
       { to: '/manager/teams', label: 'Manage Teams', icon: <UsersRoundIcon className={size} /> },
       { to: '/manager/overview', label: 'Project Overview', icon: <TrendingUpIcon className={size} /> },
-      { to: '/manager/alerts', label: 'Alerts', icon: <BellIcon className={size} />, badge: badges.alerts > 0 ? String(badges.alerts) : undefined }
+      { to: '/manager/alerts', label: 'Alerts', icon: <BellIcon className={size} />, badge: badges.alerts > 0 ? String(badges.alerts) : undefined },
+      { to: '/manager/profile', label: 'My Profile', icon: <UserIcon className={size} /> }
     ];
   }
   return [
     { to: '/admin', label: 'User Management', icon: <UsersIcon className={size} /> },
     { to: '/admin/projects', label: 'Projects Overview', icon: <BriefcaseIcon className={size} /> },
     { to: '/admin/performance', label: 'Employee Performance', icon: <BarChart3Icon className={size} /> },
-    { to: '/admin/settings', label: 'Settings', icon: <SettingsIcon className={size} /> }
+    { to: '/admin/settings', label: 'Settings', icon: <SettingsIcon className={size} /> },
+    { to: '/admin/profile', label: 'My Profile', icon: <UserIcon className={size} /> }
   ];
 }

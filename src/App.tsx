@@ -27,6 +27,7 @@ import { UserManagement } from './pages/admin/UserManagement';
 import { ProjectsOverview } from './pages/admin/ProjectsOverview';
 import { EmployeePerformance } from './pages/admin/EmployeePerformance';
 import { AdminSettings } from './pages/admin/AdminSettings';
+import { UserProfile } from './pages/common/UserProfile';
 import { Role } from './types';
 
 const roleHome: Record<Role, string> = {
@@ -75,6 +76,7 @@ export function App() {
           <Route path="/leader/reports" element={<WeeklyReports />} />
           <Route path="/leader/commits" element={<CommitsOverview />} />
           <Route path="/leader/approvals" element={<LogApprovals />} />
+          <Route path="/leader/profile" element={<UserProfile />} />
         </Route>
 
         <Route element={<Protected role="manager"><AppShell role="manager" /></Protected>}>
@@ -83,6 +85,7 @@ export function App() {
           <Route path="/manager/teams" element={<ManageTeams />} />
           <Route path="/manager/overview" element={<ProjectOverview />} />
           <Route path="/manager/alerts" element={<ManagerAlerts />} />
+          <Route path="/manager/profile" element={<UserProfile />} />
         </Route>
 
         <Route element={<Protected role="admin"><AppShell role="admin" /></Protected>}>
@@ -90,6 +93,7 @@ export function App() {
           <Route path="/admin/projects" element={<ProjectsOverview />} />
           <Route path="/admin/performance" element={<EmployeePerformance />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/profile" element={<UserProfile />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
