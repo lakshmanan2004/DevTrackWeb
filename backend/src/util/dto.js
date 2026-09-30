@@ -30,6 +30,7 @@ function workLogDto(log, extra = {}) {
     status: log.status,
     description: log.description,
     submittedAt: fmtTime(log.submittedAt),
+    submittedDate: log.submittedAt ? dayStr(log.submittedAt) : log.date,
     submittedAtISO: log.submittedAt,
     activeMinutes: log.activeMinutes,
     attachment: log.attachmentName || 'screenshot.png',

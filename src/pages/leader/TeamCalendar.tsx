@@ -588,8 +588,8 @@ export function TeamCalendar() {
                         )}
 
                         <div className="mt-2 flex items-center justify-between text-[11px] pt-1 border-t border-hairline">
-                          <span className="text-gray-400">
-                            Time: {new Date(item.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          <span className="text-gray-500 font-medium">
+                            Submitted: <strong className="text-slate-700">{new Date(item.submittedAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</strong> at {new Date(item.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                           <Link
                             to="/leader/approvals"

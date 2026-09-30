@@ -313,7 +313,7 @@ export function LogApprovals() {
                     <p className="text-sm font-semibold text-navy">
                       {log.developerName}
                       <span className="ml-2 font-normal text-gray-500">
-                        📅 {log.date} · {log.hourLabel} · {isLate ? `submitted late at ${log.submittedAt}` : `submitted ${log.submittedAt}`} · {log.project || user?.teamName}
+                        📅 Slot: {log.date} · {log.hourLabel} · Submitted on: <strong className="font-semibold text-slate-700">{log.submittedDate || log.pendingSubmissionDate || log.date}</strong> at {log.submittedAt} · {log.project || user?.teamName}
                       </span>
                     </p>
                     {isLate && (
@@ -550,13 +550,13 @@ export function LogApprovals() {
                         <>
                           <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 font-bold" aria-hidden="true" />
                           <span className="font-bold text-amber-900 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300">
-                            Submitted Late at {log.submittedAt}
+                            Submitted Late on {log.submittedDate || log.pendingSubmissionDate || log.date} at {log.submittedAt}
                           </span>
                         </>
                       ) : (
                         <>
                           <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
-                          Submitted {log.submittedAt}
+                          <span>Submitted on <strong className="font-semibold text-navy">{log.submittedDate || log.pendingSubmissionDate || log.date}</strong> at {log.submittedAt}</span>
                         </>
                       )}
                     </li>
