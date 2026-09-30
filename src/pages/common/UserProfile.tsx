@@ -155,122 +155,177 @@ export function UserProfile() {
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                   <Badge tone={roleTones[role]}>{roleLabels[role]}</Badge>
 
-                  {role === 'leader' ? (
+                  {role === 'leader' || role === 'manager' ? (
                     <>
                       {displayProjects.map((p: any) => (
                         <Badge key={p.id || p.name} tone="purple">
                           Project: {p.name}
                         </Badge>
                       ))}
-                    {teams.length > 0 ? (
-                      teams.map((t: any) => (
-                        <Badge key={t.id || t.name} tone="grey">
-                          Team: {t.name}
+                      {teams.length > 0 && role === 'leader' && (
+                        teams.map((t: any) => (
+                          <Badge key={t.id || t.name} tone="grey">
+                            Team: {t.name}
+                          </Badge>
+                        ))
+                      )}
+                      {teams.length > 0 && role === 'manager' && (
+                        <Badge tone="grey">
+                          {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
                         </Badge>
-                      ))
-                    ) : user?.teamName ? (
-                      <Badge tone="grey">Team: {user.teamName}</Badge>
-                    ) : null}
-                  </>
-                ) : (
-                  <>
-                    {user?.teamName && <Badge tone="grey">Team: {user.teamName}</Badge>}
-                    {user?.projectName && <Badge tone="purple">Project: {user.projectName}</Badge>}
-                  </>
-                )}
-              </div>
-
-              {/* METADATA LIST */}
-              <div className="mt-6 border-t border-hairline pt-4 text-left space-y-3 text-xs">
-                <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                  <span className="flex items-center gap-2 text-gray-500">
-                    <MailIcon className="h-4 w-4 text-gray-400" /> Email Address
-                  </span>
-                  <span className="font-semibold text-navy truncate max-w-[200px]">{user?.email}</span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {user?.teamName && <Badge tone="grey">Team: {user.teamName}</Badge>}
+                      {user?.projectName && <Badge tone="purple">Project: {user.projectName}</Badge>}
+                    </>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                  <span className="flex items-center gap-2 text-gray-500">
-                    <ShieldCheckIcon className="h-4 w-4 text-gray-400" /> Role Permissions
-                  </span>
-                  <span className="font-semibold text-navy uppercase tracking-wider">{role}</span>
-                </div>
+                {/* METADATA LIST */}
+                <div className="mt-6 border-t border-hairline pt-4 text-left space-y-2.5 text-xs">
+                  {/* Email Address */}
+                  <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100">
+                    <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
+                      <MailIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                      <span>Email Address</span>
+                    </span>
+                    <span className="font-semibold text-navy truncate text-right pl-2 max-w-[210px]" title={user?.email}>
+                      {user?.email}
+                    </span>
+                  </div>
 
-                {role === 'leader' ? (
-                  <>
-                    <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                      <span className="flex items-center gap-2 text-gray-500">
-                        <UsersIcon className="h-4 w-4 text-gray-400" /> Assigned Teams
-                      </span>
-                      <span className="font-semibold text-navy text-right">
-                        {teams.length > 0
-                          ? teams.map((t: any) => t.name).join(', ')
-                          : user?.teamName || '—'}
-                      </span>
-                    </div>
+                  {/* Role Permissions */}
+                  <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100">
+                    <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
+                      <ShieldCheckIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                      <span>Role Permissions</span>
+                    </span>
+                    <span className="font-bold text-navy text-right">
+                      {roleLabels[role] || role.toUpperCase()}
+                    </span>
+                  </div>
 
-                    <div className="flex items-start justify-between py-1 border-b border-slate-100 gap-2">
-                      <span className="flex items-center gap-2 text-gray-500 shrink-0">
-                        <FolderIcon className="h-4 w-4 text-gray-400" /> Assigned Projects
-                      </span>
-                      <div className="flex flex-wrap justify-end gap-1 text-right">
-                        {displayProjects.length > 0 ? (
-                          displayProjects.map((p: any) => (
-                            <span
-                              key={p.id || p.name}
-                              className="inline-flex items-center rounded bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-200"
-                            >
-                              {p.name}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="font-semibold text-navy">None</span>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {user?.teamName && (
-                      <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                        <span className="flex items-center gap-2 text-gray-500">
-                          <UsersIcon className="h-4 w-4 text-gray-400" /> Assigned Team
+                  {/* Role Specific Details */}
+                  {role === 'leader' && (
+                    <>
+                      <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100">
+                        <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
+                          <UsersIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                          <span>Assigned Teams</span>
                         </span>
-                        <span className="font-semibold text-navy">{user.teamName}</span>
-                      </div>
-                    )}
-
-                    {user?.projectName && (
-                      <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                        <span className="flex items-center gap-2 text-gray-500">
-                          <FolderIcon className="h-4 w-4 text-gray-400" /> Active Project
+                        <span className="font-semibold text-navy text-right pl-2 truncate max-w-[210px]">
+                          {teams.length > 0
+                            ? teams.map((t: any) => t.name).join(', ')
+                            : user?.teamName || '—'}
                         </span>
-                        <span className="font-semibold text-navy">{user.projectName}</span>
                       </div>
-                    )}
-                  </>
-                )}
 
-                <div className="flex items-center justify-between py-1">
-                  <span className="flex items-center gap-2 text-gray-500">
-                    <GithubIcon className="h-4 w-4 text-gray-400" /> GitHub Profile
-                  </span>
-                  <span className="font-semibold text-navy">
-                    {user?.github ? (
-                      <a
-                        href={`https://github.com/${user.github}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-brand hover:underline font-bold"
-                      >
-                        @{user.github}
-                      </a>
-                    ) : (
-                      <span className="text-gray-400 font-normal">Not linked</span>
-                    )}
-                  </span>
+                      <div className="flex items-start justify-between gap-4 py-2 border-b border-slate-100">
+                        <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium pt-0.5">
+                          <FolderIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                          <span>Assigned Projects</span>
+                        </span>
+                        <div className="flex flex-wrap justify-end gap-1.5 text-right pl-2">
+                          {displayProjects.length > 0 ? (
+                            displayProjects.map((p: any) => (
+                              <span
+                                key={p.id || p.name}
+                                className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-200"
+                              >
+                                {p.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="font-semibold text-navy">None</span>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {role === 'manager' && (
+                    <>
+                      <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100">
+                        <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
+                          <UsersIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                          <span>Managed Teams</span>
+                        </span>
+                        <span className="font-semibold text-navy text-right pl-2">
+                          {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
+                        </span>
+                      </div>
+
+                      <div className="flex items-start justify-between gap-4 py-2 border-b border-slate-100">
+                        <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium pt-0.5">
+                          <FolderIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                          <span>Managed Projects</span>
+                        </span>
+                        <div className="flex flex-wrap justify-end gap-1.5 text-right pl-2">
+                          {displayProjects.length > 0 ? (
+                            displayProjects.map((p: any) => (
+                              <span
+                                key={p.id || p.name}
+                                className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-200"
+                              >
+                                {p.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="font-semibold text-navy">None</span>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {role === 'developer' && (
+                    <>
+                      {user?.teamName && (
+                        <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100">
+                          <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
+                            <UsersIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                            <span>Assigned Team</span>
+                          </span>
+                          <span className="font-semibold text-navy text-right pl-2">{user.teamName}</span>
+                        </div>
+                      )}
+
+                      {user?.projectName && (
+                        <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100">
+                          <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
+                            <FolderIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                            <span>Active Project</span>
+                          </span>
+                          <span className="font-semibold text-navy text-right pl-2">{user.projectName}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* GitHub Profile */}
+                  <div className="flex items-center justify-between gap-4 py-2">
+                    <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
+                      <GithubIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                      <span>GitHub Profile</span>
+                    </span>
+                    <span className="font-semibold text-navy text-right pl-2">
+                      {user?.github ? (
+                        <a
+                          href={`https://github.com/${user.github}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-brand hover:underline font-bold"
+                        >
+                          @{user.github}
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 font-normal">Not linked</span>
+                      )}
+                    </span>
+                  </div>
                 </div>
-              </div>
             </div>
           </div>
 
@@ -535,26 +590,98 @@ export function UserProfile() {
               <div className="flex items-center justify-between border-b border-hairline pb-3">
                 <div className="flex items-center gap-2">
                   <BriefcaseIcon className="h-4 w-4 text-purple-600" />
-                  <h3 className="text-sm font-bold text-navy">Project Manager Responsibilities</h3>
+                  <h3 className="text-sm font-bold text-navy">Project Manager Projects &amp; Teams</h3>
                 </div>
                 <Badge tone="purple">Manager Workspace</Badge>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-xl border border-hairline bg-slate-50 p-3.5">
                   <p className="text-xs font-bold text-gray-500">Managed Projects</p>
-                  <p className="mt-1 text-base font-extrabold text-purple-700">{projects.length} Projects</p>
+                  <p className="mt-1 text-base font-extrabold text-purple-700">
+                    {displayProjects.length} {displayProjects.length === 1 ? 'Project' : 'Projects'}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-hairline bg-slate-50 p-3.5">
                   <p className="text-xs font-bold text-gray-500">Total Teams</p>
-                  <p className="mt-1 text-base font-extrabold text-navy">{teams.length} Teams</p>
+                  <p className="mt-1 text-base font-extrabold text-navy">
+                    {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-hairline bg-slate-50 p-3.5">
                   <p className="text-xs font-bold text-gray-500">Active Developers</p>
-                  <p className="mt-1 text-base font-extrabold text-navy">
-                    {directory.filter((u: any) => u.role === 'developer').length} Devs
+                  <p className="mt-1 text-base font-extrabold text-brand">
+                    {directory.filter((u: any) => u.role === 'developer').length || supervisedDevCount} Devs
                   </p>
                 </div>
+              </div>
+
+              {/* MANAGED PROJECTS LIST */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-navy uppercase tracking-wider flex items-center gap-1.5">
+                  <FolderIcon className="h-3.5 w-3.5 text-purple-600" /> Managed Project Portfolio
+                </h4>
+
+                {displayProjects.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-center text-xs text-gray-400">
+                    No projects created yet.
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100 rounded-xl border border-hairline overflow-hidden bg-slate-50/50">
+                    {displayProjects.map((p: any) => {
+                      const linkedTeam = teams.find((t: any) => t.project?._id === p.id || t.project === p.id || t.name === p.teamName) || null;
+                      const membersCount = linkedTeam?.members?.length || 0;
+
+                      return (
+                        <div key={p.id || p.name} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white hover:bg-slate-50/70 transition-colors">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-bold text-navy truncate">{p.name}</p>
+                              <Badge tone={p.status === 'completed' ? 'green' : p.status === 'hold' ? 'yellow' : 'purple'}>
+                                {p.status === 'completed' ? 'Delivered' : p.status === 'hold' ? 'On Hold' : 'Active'}
+                              </Badge>
+                            </div>
+                            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                              {linkedTeam?.name && (
+                                <span className="flex items-center gap-1">
+                                  <UsersIcon className="h-3.5 w-3.5 text-gray-400" /> Team: <span className="font-semibold text-slate-700">{linkedTeam.name}</span>
+                                </span>
+                              )}
+                              {linkedTeam?.leader?.name && (
+                                <span>• TL: <span className="font-semibold text-slate-700">{linkedTeam.leader.name}</span></span>
+                              )}
+                              {membersCount > 0 && (
+                                <span>• {membersCount} Devs</span>
+                              )}
+                              {p.targetDate && (
+                                <span className="flex items-center gap-1">
+                                  <CalendarIcon className="h-3.5 w-3.5 text-gray-400" /> Target: {p.targetDate}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0">
+                            {typeof p.progress === 'number' && (
+                              <div className="w-28 text-right">
+                                <div className="flex items-center justify-between text-[11px] font-bold mb-1">
+                                  <span className="text-gray-400">Progress</span>
+                                  <span className="text-navy">{p.progress}%</span>
+                                </div>
+                                <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full bg-purple-600"
+                                    style={{ width: `${Math.min(100, Math.max(0, p.progress))}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div className="rounded-xl border border-purple-100 bg-purple-50/50 p-4 text-xs text-purple-900 space-y-1">
