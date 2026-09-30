@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  CalendarIcon,
   CheckCircle2Icon,
   CheckIcon,
   ClockIcon,
@@ -27,7 +28,9 @@ import { isLogLate } from '../../utils/logTimeliness';
 
 export function LogApprovals() {
   const { user } = useAuth();
-  const { data, refetch } = useLive<{ logs: any[] }>('/api/logs', ['log:new', 'log:review'], 20000);
+  const [dateFilter, setDateFilter] = useState<string>('all');
+  const fetchPath = dateFilter && dateFilter !== 'all' ? `/api/logs?date=${dateFilter}` : '/api/logs?date=all';
+  const { data, refetch } = useLive<{ logs: any[] }>(fetchPath, ['log:new', 'log:review'], 20000);
   const { data: devData } = useDevelopers();
   const developers = devData?.developers || [];
 
@@ -133,26 +136,53 @@ export function LogApprovals() {
             ]}
           />
 
-          {moduleNames.length > 0 && (
-            <div className="flex items-center gap-2 rounded-xl border border-hairline bg-white px-3 py-1.5 shadow-card">
-              <label htmlFor="la-module-filter" className="text-xs font-bold text-navy flex items-center gap-1">
-                Filter by Module:
-              </label>
-              <select
-                id="la-module-filter"
-                value={moduleFilter}
-                onChange={(e) => setModuleFilter(e.target.value)}
-                className="bg-transparent text-xs font-bold text-brand focus:outline-none cursor-pointer"
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setDateFilter(dateFilter === 'all' ? new Date().toISOString().slice(0, 10) : 'all')}
+                className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors shadow-card ${
+                  dateFilter === 'all'
+                    ? 'border-brand bg-brand text-white'
+                    : 'border-hairline bg-white text-navy hover:bg-gray-50'
+                }`}
               >
-                <option value="">All Project Modules</option>
-                {moduleNames.map((modName: string) => (
-                  <option key={modName} value={modName}>
-                    {modName}
-                  </option>
-                ))}
-              </select>
+                {dateFilter === 'all' ? 'Showing All Dates' : 'View All Dates'}
+              </button>
+
+              <label className="inline-flex items-center gap-2 rounded-xl border border-hairline bg-white px-3 py-1.5 text-xs font-semibold text-navy shadow-card cursor-pointer">
+                <CalendarIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+                <span className="sr-only">Pick a date</span>
+                <input
+                  type="date"
+                  value={dateFilter === 'all' ? '' : dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value || 'all')}
+                  className="bg-transparent text-xs font-bold text-navy outline-none cursor-pointer"
+                />
+              </label>
             </div>
-          )}
+
+            {moduleNames.length > 0 && (
+              <div className="flex items-center gap-2 rounded-xl border border-hairline bg-white px-3 py-1.5 shadow-card">
+                <label htmlFor="la-module-filter" className="text-xs font-bold text-navy flex items-center gap-1">
+                  Filter by Module:
+                </label>
+                <select
+                  id="la-module-filter"
+                  value={moduleFilter}
+                  onChange={(e) => setModuleFilter(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-brand focus:outline-none cursor-pointer"
+                >
+                  <option value="">All Project Modules</option>
+                  {moduleNames.map((modName: string) => (
+                    <option key={modName} value={modName}>
+                      {modName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Floating Selection Tooltip Banner */}
