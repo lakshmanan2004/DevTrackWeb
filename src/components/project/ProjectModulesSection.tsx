@@ -10,6 +10,7 @@ import {
   EyeIcon,
   GithubIcon,
   ImageIcon,
+  FileTextIcon,
   XIcon,
   TimerIcon,
   AlertCircleIcon,
@@ -509,25 +510,38 @@ export function ProjectModulesSection({
 
                                 <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                                   {log.attachmentUrl ? (
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        setActiveScreenshot({
-                                          url: fileUrl(log.attachmentUrl!),
-                                          title: `${log.developerName} — ${m.name} Proof`
-                                        })
-                                      }
-                                      className="group relative inline-flex items-center gap-2 rounded-lg border border-hairline bg-gray-900 p-1 pr-3 text-xs font-bold text-white hover:border-brand"
-                                    >
-                                      <img
-                                        src={fileUrl(log.attachmentUrl)}
-                                        alt="Proof preview"
-                                        className="h-10 w-16 object-cover rounded"
-                                      />
-                                      <span className="flex items-center gap-1 text-[11px]">
-                                        <ImageIcon className="h-3.5 w-3.5 text-brand" /> View Screenshot Proof
-                                      </span>
-                                    </button>
+                                    log.attachmentUrl.split('?')[0].toLowerCase().endsWith('.pdf') ? (
+                                      <a
+                                        href={fileUrl(log.attachmentUrl)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-bold text-red-900 hover:bg-red-100 transition-colors"
+                                      >
+                                        <FileTextIcon className="h-4 w-4 text-red-600" />
+                                        <span className="underline">Document Proof (PDF)</span>
+                                        <span className="rounded bg-red-200 text-red-800 px-1.5 py-0.5 text-[10px] font-bold">Open PDF ↗</span>
+                                      </a>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setActiveScreenshot({
+                                            url: fileUrl(log.attachmentUrl!),
+                                            title: `${log.developerName} — ${m.name} Proof`
+                                          })
+                                        }
+                                        className="group relative inline-flex items-center gap-2 rounded-lg border border-hairline bg-gray-900 p-1 pr-3 text-xs font-bold text-white hover:border-brand"
+                                      >
+                                        <img
+                                          src={fileUrl(log.attachmentUrl)}
+                                          alt="Proof preview"
+                                          className="h-10 w-16 object-cover rounded"
+                                        />
+                                        <span className="flex items-center gap-1 text-[11px]">
+                                          <ImageIcon className="h-3.5 w-3.5 text-brand" /> View Screenshot Proof
+                                        </span>
+                                      </button>
+                                    )
                                   ) : (
                                     <span className="text-[11px] italic text-gray-400">No screenshot attached</span>
                                   )}
