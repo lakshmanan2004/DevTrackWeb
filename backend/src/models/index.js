@@ -22,6 +22,7 @@ const UserSchema = new Schema({
   active: { type: Boolean, default: true },
   team: { type: Types.ObjectId, ref: 'Team', default: null },
   jobTitle: { type: String, default: 'Developer' },
+  lunchSlot: { type: Number, enum: [11, 12], default: 12 },
   joinedAt: { type: Date, default: Date.now },
   lastSeenAt: { type: Date, default: null }
 });

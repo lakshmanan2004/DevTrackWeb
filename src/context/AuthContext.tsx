@@ -14,6 +14,7 @@ export interface AuthUser {
   teamName: string;
   projectName: string;
   leaderName: string;
+  lunchSlot?: number;
 }
 
 export interface Badges {

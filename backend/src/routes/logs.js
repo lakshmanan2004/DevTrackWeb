@@ -385,9 +385,10 @@ router.post('/:id/feedback', requireRole('leader'), upload.single('screenshot'),
 // ---------- GET /api/logs/calendar?month=YYYY-MM (developer monthly widget) ----------
 router.get('/calendar', ah(async (req, res) => {
   const me = req.user.role === 'developer' ? req.user._id : req.query.developerId || req.user._id;
-  const devUser = await User.findById(me, 'joinedAt');
+  const devUser = await User.findById(me, 'joinedAt lunchSlot');
   const joinedDate = devUser?.joinedAt || (devUser?._id ? devUser._id.getTimestamp() : new Date());
   const joinedStr = new Date(joinedDate).toISOString().slice(0, 10);
+  const devLunchSlot = devUser?.lunchSlot || 12;
 
   const [y, m] = (req.query.month || dayStr().slice(0, 7)).split('-').map(Number);
   const daysInMonth = new Date(y, m, 0).getDate();
@@ -403,7 +404,7 @@ router.get('/calendar', ah(async (req, res) => {
     date: { $gte: `${y}-${String(m).padStart(2, '0')}-01`, $lte: `${y}-${String(m).padStart(2, '0')}-${daysInMonth}` }
   });
 
-  const required = requiredSlots(settings);
+  const required = requiredSlots(settings, devLunchSlot);
   const days = [];
   for (let dnum = 1; dnum <= daysInMonth; dnum++) {
     const ds = `${y}-${String(m).padStart(2, '0')}-${String(dnum).padStart(2, '0')}`;
@@ -575,9 +576,9 @@ router.get('/team-calendar', ah(async (req, res) => {
     if (validIds.length) devQuery._id = { $in: validIds };
   }
 
-  let developers = await User.find(devQuery, '_id name initials email jobTitle lastSeenAt joinedAt').sort({ name: 1 });
+  let developers = await User.find(devQuery, '_id name initials email jobTitle lastSeenAt joinedAt lunchSlot').sort({ name: 1 });
   if (!developers.length) {
-    developers = await User.find({ role: 'developer', active: { $ne: false } }, '_id name initials email jobTitle lastSeenAt joinedAt').sort({ name: 1 });
+    developers = await User.find({ role: 'developer', active: { $ne: false } }, '_id name initials email jobTitle lastSeenAt joinedAt lunchSlot').sort({ name: 1 });
   }
 
   const devMap = {};
@@ -586,8 +587,6 @@ router.get('/team-calendar', ah(async (req, res) => {
   });
 
   const settings = await Setting.get();
-  const reqSlots = requiredSlots(settings);
-  const totalRequiredSlots = reqSlots.length;
 
   const now = new Date();
   const todayStr = dayStr(now);
@@ -630,12 +629,13 @@ router.get('/team-calendar', ah(async (req, res) => {
     const unsubmittedDevelopers = [];
     const submittedDevelopers = [];
 
-    // Applicable slots: on today, slots up to currentSlot; on past workdays, all required slots
-    const dayApplicableSlots = isToday ? reqSlots.filter((s) => s <= currentSlot) : reqSlots;
-    const dayRequiredCount = dayApplicableSlots.length || totalRequiredSlots;
-
     // Group logs by developer
     for (const dev of developers) {
+      const devLunchSlot = dev.lunchSlot || 12;
+      const devReqSlots = requiredSlots(settings, devLunchSlot);
+      const dayApplicableSlots = isToday ? devReqSlots.filter((s) => s <= currentSlot) : devReqSlots;
+      const dayRequiredCount = dayApplicableSlots.length || devReqSlots.length;
+
       // Only evaluate check-ins from the date the developer was created
       const devCreatedDate = dev.joinedAt || (dev._id && dev._id.getTimestamp ? dev._id.getTimestamp() : null);
       const devCreatedDateStr = devCreatedDate ? dayStr(new Date(devCreatedDate)) : null;

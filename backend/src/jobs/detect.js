@@ -48,10 +48,11 @@ async function reminderCheck() {
   const settings = await Setting.get();
   const now = new Date();
   const slot = slotForNow(settings);
-  if (slot === 12) return; // Lunch break: no reminders or alerts
   const devs = await activeDevelopers();
   const date = dayStr(now);
   for (const dev of devs) {
+    const devLunchSlot = dev.lunchSlot || 12;
+    if (slot === devLunchSlot) continue; // Lunch break: no reminders or alerts
     const has = await WorkLog.findOne({ developer: dev._id, date, hourSlot: slot });
     if (!has) {
       const dedupeKey = `reminder:${dev._id}:${date}:${slot}`;
@@ -71,18 +72,20 @@ async function reminderCheck() {
 // Missed log detection: at :00 of the next hour, flag the previous slot
 async function missedLogCheck() {
   const now = new Date();
-  if (now.getHours() >= 17 || now.getHours() === 12) return; // Skip after 5 PM and during lunch break (12 PM - 1 PM)
+  if (now.getHours() >= 17) return; // Skip after 5 PM
   const settings = await Setting.get();
   if (!isWorkday(now, settings)) return;
 
   const date = dayStr(now);
   const currentSlot = slotForNow(settings);
-  const checkSlots = requiredSlots(settings).filter((s) => s < currentSlot);
-  if (!checkSlots.length) return;
-  const justEnded = checkSlots[checkSlots.length - 1];
 
   const devs = await activeDevelopers();
   for (const dev of devs) {
+    const devLunchSlot = dev.lunchSlot || 12;
+    const checkSlots = requiredSlots(settings, devLunchSlot).filter((s) => s < currentSlot);
+    if (!checkSlots.length) continue;
+    const justEnded = checkSlots[checkSlots.length - 1];
+
     const team = dev.team;
     if (!team) continue;
     const logs = await WorkLog.find({ developer: dev._id, date });
@@ -170,13 +173,16 @@ async function eodMissingCheck() {
 // Idle detection for managers: developer with stale heartbeat during work hours
 async function idleCheck() {
   const now = new Date();
-  if (now.getHours() >= 17 || now.getHours() === 12) return; // Skip after 5 PM and during lunch break (12 PM - 1 PM)
+  if (now.getHours() >= 17) return; // Skip after 5 PM
   const settings = await Setting.get();
   if (!isWorkday(now, settings)) return;
   const date = dayStr(now);
+  const currentHour = now.getHours();
 
   const devs = await activeDevelopers();
   for (const dev of devs) {
+    const devLunchSlot = dev.lunchSlot || 12;
+    if (currentHour === devLunchSlot) continue; // Skip during developer's lunch break
     const team = dev.team;
     if (!team) continue;
     const seenAt = dev.lastSeenAt;

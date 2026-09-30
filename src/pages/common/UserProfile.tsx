@@ -14,7 +14,8 @@ import {
   ActivityIcon,
   CalendarIcon,
   RadioIcon,
-  CheckIcon
+  CheckIcon,
+  UtensilsIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
@@ -76,6 +77,7 @@ export function UserProfile() {
 
   const [name, setName] = useState(user?.name || '');
   const [github, setGithub] = useState(user?.github || '');
+  const [lunchSlot, setLunchSlot] = useState<number>(user?.lunchSlot || 12);
   const [saved, setSaved] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -88,7 +90,7 @@ export function UserProfile() {
     e.preventDefault();
     setIsUpdating(true);
     try {
-      await api('/api/users/profile', { method: 'PATCH', body: { name, github } });
+      await api('/api/users/profile', { method: 'PATCH', body: { name, github, lunchSlot: role === 'developer' ? lunchSlot : undefined } });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       refresh();
@@ -214,6 +216,17 @@ export function UserProfile() {
                           <span className="font-semibold text-navy text-right pl-2">{user.projectName}</span>
                         </div>
                       )}
+
+                      {/* Lunch Break for Developer */}
+                      <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100">
+                        <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
+                          <UtensilsIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                          <span>Lunch Break</span>
+                        </span>
+                        <span className="font-semibold text-navy text-right pl-2">
+                          {(user?.lunchSlot || lunchSlot) === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM'}
+                        </span>
+                      </div>
                     </>
                   )}
 
@@ -379,6 +392,41 @@ export function UserProfile() {
                   Email address is managed by the administrator.
                 </p>
               </div>
+
+              {role === 'developer' && (
+                <div className="pt-1">
+                  <label className="block text-xs font-bold text-navy mb-1">Lunch Break Time Slot</label>
+                  <p className="text-[11px] text-gray-500 mb-2">
+                    Choose your daily lunch break hour. Check-ins and submission alerts are paused during this hour.
+                  </p>
+                  <div className="flex flex-wrap gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setLunchSlot(11)}
+                      className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-bold transition-all ${
+                        lunchSlot === 11
+                          ? 'border-amber-400 bg-amber-50 text-amber-950 ring-2 ring-amber-400/40'
+                          : 'border-hairline bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>🍱</span>
+                      <span>11:00 AM – 12:00 PM</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLunchSlot(12)}
+                      className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-bold transition-all ${
+                        lunchSlot === 12
+                          ? 'border-amber-400 bg-amber-50 text-amber-950 ring-2 ring-amber-400/40'
+                          : 'border-hairline bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>🍱</span>
+                      <span>12:00 PM – 1:00 PM</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="pt-2 flex justify-end">
                 <Button type="submit" disabled={isUpdating} size="md">

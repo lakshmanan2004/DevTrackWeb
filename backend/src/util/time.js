@@ -73,11 +73,12 @@ function slotForNow(settings, now = new Date()) {
   return h;
 }
 
-// Slots that require a check-in. Lunch hour 12 (12 PM to 1 PM) is excluded.
-function requiredSlots(settings) {
+// Slots that require a check-in. Lunch hour (11 AM to 12 PM or 12 PM to 1 PM) is excluded.
+function requiredSlots(settings, lunchSlot = 12) {
   const slots = [];
+  const ls = Number(lunchSlot) || 12;
   for (let h = settings.workStartHour; h <= settings.workEndHour; h++) {
-    if (h !== 12) slots.push(h);
+    if (h !== ls) slots.push(h);
   }
   return slots;
 }

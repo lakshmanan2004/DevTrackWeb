@@ -120,11 +120,14 @@ function taskDto(t) {
 // ---- developer day stats ------------------------------------------------
 
 async function dayStats(developerIds, date = dayStr()) {
-  const { WorkLog, Commit, EodReport, Project } = require('../models');
+  const { WorkLog, Commit, EodReport, Project, User } = require('../models');
   const settings = await Setting.get();
   const currentSlot = slotForNow(settings);
-  const required = requiredSlots(settings);
   const ids = developerIds.map((id) => id.toString());
+
+  const users = await User.find({ _id: { $in: ids } }, 'lunchSlot');
+  const userMap = {};
+  users.forEach((u) => { userMap[String(u._id)] = u; });
 
   const logs = await WorkLog.find({ developer: { $in: ids }, date })
     .populate('developer', 'name initials')
@@ -149,8 +152,10 @@ async function dayStats(developerIds, date = dayStr()) {
   const result = {};
   for (const id of ids) {
     const info = perDev[id];
+    const devLunchSlot = (userMap[id] && userMap[id].lunchSlot) ? userMap[id].lunchSlot : 12;
+    const devRequired = requiredSlots(settings, devLunchSlot);
     const loggedSlots = new Set(info.logs.map((l) => l.hourSlot));
-    const elapsed = required.filter((s) => s < currentSlot);
+    const elapsed = devRequired.filter((s) => s < currentSlot);
     const missed = elapsed.filter((s) => !loggedSlots.has(s)).length;
     const hoursCovered = info.logs.length;
     const slotsSoFar = elapsed.length || 0;

@@ -17,8 +17,9 @@ router.get('/reports/weekly', ah(async (req, res) => {
   } else if (req.query.developerId && String(req.query.developerId) !== String(req.user._id)) {
     return res.status(403).json({ error: 'You can only view your own reports' });
   }
-  const dev = await User.findById(devId, 'name');
+  const dev = await User.findById(devId, 'name lunchSlot');
   if (!dev) return res.status(404).json({ error: 'Developer not found' });
+  const devLunchSlot = dev.lunchSlot || 12;
 
   const weekOffset = Number(req.query.week || 0);
   const monday = addDays(weekStart(), weekOffset * 7);
@@ -37,7 +38,7 @@ router.get('/reports/weekly', ah(async (req, res) => {
     const eod = await EodReport.findOne({ developer: devId, date: ds });
     const logged = new Set(logs.map((l) => l.hourSlot));
     const missed = isWorkday(day, settings.workDays)
-      ? requiredSlots(settings).filter((s) => (ds === todayStr ? s < day.getHours() : true) && !logged.has(s)).length
+      ? requiredSlots(settings, devLunchSlot).filter((s) => (ds === todayStr ? s < day.getHours() : true) && !logged.has(s)).length
       : 0;
     const done = logs.filter((l) => l.status === 'done').length;
     const blocked = logs.filter((l) => l.status === 'blocked').length;
@@ -85,13 +86,14 @@ router.get('/reports/performance', ah(async (req, res) => {
   const scope = await scopeFor(req.user);
   const devs = await User.find({ _id: { $in: scope.developerIds }, active: true }).populate('team');
   const settings = await Setting.get();
-  const required = requiredSlots(settings);
 
   const out = [];
   const teamScores = [];
   const drafts = [];
 
   for (const dev of devs) {
+    const devLunchSlot = dev.lunchSlot || 12;
+    const required = requiredSlots(settings, devLunchSlot);
     const logs = await WorkLog.find({ developer: dev._id }).sort({ date: -1 }).limit(300);
     const commits = await Commit.find({ developer: dev._id }, 'date');
     const eods = await EodReport.find({ developer: dev._id }, 'date rating');

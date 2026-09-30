@@ -1,23 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   CheckCircle2Icon,
   GitCommitVerticalIcon,
   PaperclipIcon,
   TimerIcon,
   HighlighterIcon,
-  XIcon
+  XIcon,
+  UtensilsIcon,
+  Loader2Icon
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { TaskStatusBadge, taskStatusMeta } from '../ui/TaskStatusBadge';
 import { TaskStatus } from '../../types';
 import { isLogLate } from '../../utils/logTimeliness';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../api/client';
 
-const hours = [
+const baseHours = [
   { slot: 8, label: '8 AM' },
   { slot: 9, label: '9 AM' },
   { slot: 10, label: '10 AM' },
   { slot: 11, label: '11 AM' },
-  { slot: 12, label: '12 PM', isLunch: true },
+  { slot: 12, label: '12 PM' },
   { slot: 13, label: '1 PM' },
   { slot: 14, label: '2 PM' },
   { slot: 15, label: '3 PM' },
@@ -28,6 +32,7 @@ interface TodayTimelineProps {
   logs: any[];
   currentSlot?: number;
   teamName?: string;
+  lunchSlot?: number;
   onLog: (targetSlot?: number) => void;
 }
 
@@ -111,14 +116,78 @@ function LogCard({ log }: { log: any }) {
   );
 }
 
-export function TodayTimeline({ logs, currentSlot, onLog }: TodayTimelineProps) {
+export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, onLog }: TodayTimelineProps) {
+  const { user, refresh } = useAuth();
+  const [isUpdatingLunch, setIsUpdatingLunch] = useState(false);
+  const activeLunchSlot = propLunchSlot ?? user?.lunchSlot ?? 12;
+
   const slot = currentSlot ?? new Date().getHours();
+
+  const handleSelectLunchSlot = async (newSlot: number) => {
+    if (newSlot === activeLunchSlot || isUpdatingLunch) return;
+    setIsUpdatingLunch(true);
+    try {
+      await api('/api/users/lunch', {
+        method: 'PATCH',
+        body: { lunchSlot: newSlot }
+      });
+      await refresh();
+    } catch (err: any) {
+      console.error('Failed to update lunch slot:', err);
+    } finally {
+      setIsUpdatingLunch(false);
+    }
+  };
+
+  const hours = baseHours.map((h) => ({
+    ...h,
+    isLunch: h.slot === activeLunchSlot
+  }));
 
   return (
     <section aria-label="Today's timeline" className="rounded-card border border-hairline bg-white shadow-card">
-      <div className="flex items-center justify-between border-b border-hairline px-5 py-4">
-        <h2 className="text-sm font-bold text-navy">Today&apos;s Timeline</h2>
-        <p className="text-xs text-gray-500">8:00 AM – 4:30 PM workday</p>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-5 py-4">
+        <div>
+          <h2 className="text-sm font-bold text-navy">Today&apos;s Timeline</h2>
+          <p className="text-xs text-gray-500">8:00 AM – 5:00 PM workday</p>
+        </div>
+
+        {/* Lunch Break Slot Selector */}
+        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/70 p-1.5 shadow-xs">
+          <div className="flex items-center gap-1.5 pl-2 pr-1 text-xs font-bold text-amber-950">
+            <UtensilsIcon className="h-3.5 w-3.5 text-amber-600" />
+            <span>Lunch Time:</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={isUpdatingLunch}
+              onClick={() => handleSelectLunchSlot(11)}
+              className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                activeLunchSlot === 11
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : 'bg-white text-amber-900 hover:bg-amber-100/80 border border-amber-200'
+              }`}
+            >
+              11:00 AM – 12:00 PM
+            </button>
+            <button
+              type="button"
+              disabled={isUpdatingLunch}
+              onClick={() => handleSelectLunchSlot(12)}
+              className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                activeLunchSlot === 12
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : 'bg-white text-amber-900 hover:bg-amber-100/80 border border-amber-200'
+              }`}
+            >
+              12:00 PM – 1:00 PM
+            </button>
+          </div>
+          {isUpdatingLunch && (
+            <Loader2Icon className="h-3.5 w-3.5 animate-spin text-amber-600 mr-1" />
+          )}
+        </div>
       </div>
 
       <ol className="px-5 py-4">
@@ -157,7 +226,7 @@ export function TodayTimeline({ logs, currentSlot, onLog }: TodayTimelineProps) 
               </div>
 
               <div className={`min-w-0 flex-1 ${index < hours.length - 1 ? 'pb-4' : ''}`}>
-                {/* Lunch Break Display (12 PM - 1 PM) */}
+                {/* Lunch Break Display (11 AM - 12 PM or 12 PM - 1 PM) */}
                 {hour.isLunch ? (
                   <article className="rounded-card border border-amber-200 bg-amber-50/70 p-4 shadow-xs flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -166,13 +235,15 @@ export function TodayTimeline({ logs, currentSlot, onLog }: TodayTimelineProps) 
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-bold text-amber-950">Lunch Break (12:00 PM – 1:00 PM)</h3>
+                          <h3 className="text-sm font-bold text-amber-950">
+                            Lunch Break ({activeLunchSlot === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM'})
+                          </h3>
                           <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-300">
                             Break Time
                           </span>
                         </div>
                         <p className="mt-0.5 text-xs text-amber-800">
-                          No check-in or work log required during lunch break. Enjoy your lunch!
+                          No check-in or work log required during your lunch break. Enjoy your lunch!
                         </p>
                       </div>
                     </div>

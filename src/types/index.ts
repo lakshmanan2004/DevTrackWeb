@@ -29,7 +29,7 @@ export interface Developer {
   team: string;
   project: string;
   topPerformer?: boolean;
-
+  lunchSlot?: number;
 }
 
 export interface WorkLog {

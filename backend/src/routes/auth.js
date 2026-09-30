@@ -45,6 +45,7 @@ async function mePayload(user) {
     initials: user.initials,
     github: user.github,
     jobTitle: user.jobTitle,
+    lunchSlot: user.lunchSlot || 12,
     teamName: '',
     projectName: '',
     leaderName: '',

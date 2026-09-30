@@ -488,7 +488,7 @@ router.patch('/teams/:id', requireRole('manager', 'admin'), ah(async (req, res) 
 
 // ======================= USERS (admin) =======================
 
-// PATCH /api/users/profile — any logged-in user updates own name/github
+// PATCH /api/users/profile — any logged-in user updates own name/github/lunchSlot
 router.patch('/users/profile', ah(async (req, res) => {
   const user = await User.findById(req.user._id);
   if (!user) return res.status(404).json({ error: 'User not found' });
@@ -497,8 +497,25 @@ router.patch('/users/profile', ah(async (req, res) => {
     user.initials = initialsOf(req.body.name);
   }
   if (typeof req.body.github === 'string') user.github = req.body.github;
+  if ([11, 12, '11', '12'].includes(req.body.lunchSlot)) {
+    user.lunchSlot = Number(req.body.lunchSlot);
+  }
   await user.save();
-  res.json({ ok: true });
+  res.json({ ok: true, lunchSlot: user.lunchSlot || 12 });
+}));
+
+// PATCH /api/users/lunch — quick switch lunch time (11 or 12)
+router.patch('/users/lunch', ah(async (req, res) => {
+  const { lunchSlot } = req.body || {};
+  if (![11, 12, '11', '12'].includes(lunchSlot)) {
+    return res.status(400).json({ error: 'Lunch slot must be 11 (11 AM - 12 PM) or 12 (12 PM - 1 PM)' });
+  }
+  const user = await User.findById(req.user._id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  user.lunchSlot = Number(lunchSlot);
+  await user.save();
+  emitToUser(String(user._id), 'user:update', { lunchSlot: user.lunchSlot });
+  res.json({ ok: true, lunchSlot: user.lunchSlot });
 }));
 
 // PATCH /api/users/password — any logged-in user changes own password

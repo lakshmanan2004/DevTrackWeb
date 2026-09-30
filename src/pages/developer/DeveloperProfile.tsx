@@ -19,12 +19,14 @@ import { TaskStatusBadge } from '../../components/ui/TaskStatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { useLive } from '../../hooks/useLive';
 import { api } from '../../api/client';
+import { UtensilsIcon } from 'lucide-react';
 
 export function DeveloperProfile() {
   const { user, refresh } = useAuth();
   const { data: logData } = useLive<any>('/api/logs', ['log:new'], 30000);
   const [name, setName] = useState(user?.name || '');
   const [github, setGithub] = useState(user?.github || '');
+  const [lunchSlot, setLunchSlot] = useState<number>(user?.lunchSlot || 12);
   const [saved, setSaved] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -48,7 +50,7 @@ export function DeveloperProfile() {
   ];
 
   const saveProfile = async () => {
-    await api('/api/users/profile', { method: 'PATCH', body: { name, github } }).catch(() => null);
+    await api('/api/users/profile', { method: 'PATCH', body: { name, github, lunchSlot } }).catch(() => null);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
     refresh();
@@ -94,7 +96,8 @@ export function DeveloperProfile() {
                 { icon: <UsersIcon className="h-4 w-4" />, label: 'Team', value: user?.teamName || '' },
                 { icon: <GithubIcon className="h-4 w-4" />, label: 'GitHub', value: user?.github || 'not linked' },
                 { icon: <FolderIcon className="h-4 w-4" />, label: 'Project', value: user?.projectName || '' },
-                { icon: <ShieldCheckIcon className="h-4 w-4" />, label: 'Team Leader', value: user?.leaderName || '' }].
+                { icon: <ShieldCheckIcon className="h-4 w-4" />, label: 'Team Leader', value: user?.leaderName || '' },
+                { icon: <UtensilsIcon className="h-4 w-4" />, label: 'Lunch Break', value: (user?.lunchSlot || lunchSlot) === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM' }].
                 map((row) =>
                 <div key={row.label} className="flex items-center gap-2.5">
                     <span className="text-gray-400" aria-hidden="true">
@@ -199,6 +202,42 @@ export function DeveloperProfile() {
                     onChange={(e) => setGithub(e.target.value)}
                     className="h-10 w-full rounded-lg border border-hairline px-3 text-sm text-navy" />
                 </div>
+
+                <div className="sm:col-span-2">
+                  <label className="mb-1.5 block text-sm font-medium text-navy">
+                    Lunch Break Time Slot
+                  </label>
+                  <p className="mb-2 text-xs text-gray-500">
+                    Select your preferred lunch break hour. Check-ins and submission reminders will not be requested during this slot.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setLunchSlot(11)}
+                      className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all ${
+                        lunchSlot === 11
+                          ? 'border-amber-400 bg-amber-50 text-amber-950 ring-2 ring-amber-400/40'
+                          : 'border-hairline bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>🍱</span>
+                      <span>11:00 AM – 12:00 PM</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLunchSlot(12)}
+                      className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all ${
+                        lunchSlot === 12
+                          ? 'border-amber-400 bg-amber-50 text-amber-950 ring-2 ring-amber-400/40'
+                          : 'border-hairline bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>🍱</span>
+                      <span>12:00 PM – 1:00 PM</span>
+                    </button>
+                  </div>
+                </div>
+
                 <div className="sm:col-span-2 flex items-center gap-3">
                   <Button type="submit">Save Changes</Button>
                   {saved && <span className="text-xs font-semibold text-green-600">Saved ✓</span>}

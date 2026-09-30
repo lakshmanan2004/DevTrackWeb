@@ -107,6 +107,11 @@ export function DeveloperDashboard() {
     });
   };
 
+  const devLunchSlot = user?.lunchSlot ?? 12;
+  const isLunchSlot = currentSlot === devLunchSlot;
+  const lunchSlotLabel = devLunchSlot === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM';
+  const lunchEndLabel = devLunchSlot === 11 ? '12:00 PM' : '1:00 PM';
+
   const lastAlertRef = useRef<{ slot: number; level: string } | null>(null);
 
   // Background monitor for 20m, 10m, 5m audio pop/chime sounds & Windows desktop notifications + Screen Pop-up Modal
@@ -119,8 +124,8 @@ export function DeveloperDashboard() {
       const d = new Date();
       const slot = stats?.currentSlot ?? d.getHours();
       
-      // Lunch break (12:00 PM – 1:00 PM) is exempt from all log check-in alerts and popups
-      if (slot === 12) return;
+      // Lunch break (chosen slot 11 or 12) is exempt from all log check-in alerts and popups
+      if (slot === devLunchSlot) return;
 
       const min = d.getMinutes();
       const remainingMins = 60 - min;
@@ -161,7 +166,7 @@ export function DeveloperDashboard() {
     }, 5000);
 
     return () => clearInterval(checkTimer);
-  }, [stats?.currentSlot, logs]);
+  }, [stats?.currentSlot, logs, devLunchSlot]);
 
   const firstName = user?.name?.split(' ')[0] || 'there';
 
@@ -258,7 +263,7 @@ export function DeveloperDashboard() {
         {/* Persistent Check-In Status & Windows Alert Banner */}
         <Banner
           tone={
-            currentSlot === 12
+            isLunchSlot
               ? 'yellow'
               : hasLoggedCurrentSlot
               ? 'green'
@@ -267,7 +272,7 @@ export function DeveloperDashboard() {
               : 'yellow'
           }
           icon={
-            currentSlot === 12 ? (
+            isLunchSlot ? (
               <span className="text-sm">🍱</span>
             ) : (
               <AlarmClockIcon
@@ -282,8 +287,8 @@ export function DeveloperDashboard() {
             )
           }
           title={
-            currentSlot === 12
-              ? `🍱 Lunch Break (12:00 PM – 1:00 PM) — ${minutesLeft}m remaining`
+            isLunchSlot
+              ? `🍱 Lunch Break (${lunchSlotLabel}) — ${minutesLeft}m remaining`
               : hasLoggedCurrentSlot
               ? `✓ Work Log Submitted for ${currentSlotLabel} Slot (${minutesLeft}m remaining in this slot)`
               : minutesLeft <= 5
@@ -302,14 +307,14 @@ export function DeveloperDashboard() {
               >
                 Test Audio & Windows Alert
               </Button>
-              <Button onClick={() => handleOpenLog(currentSlot === 12 ? undefined : currentSlot)}>
-                {hasLoggedCurrentSlot || currentSlot === 12 ? '+ Add Log' : 'Log Now'}
+              <Button onClick={() => handleOpenLog(isLunchSlot ? undefined : currentSlot)}>
+                {hasLoggedCurrentSlot || isLunchSlot ? '+ Add Log' : 'Log Now'}
               </Button>
             </div>
           }
         >
-          {currentSlot === 12
-            ? 'Lunch Break is in progress! No mandatory check-in is required between 12:00 PM and 1:00 PM. Automated check-in alerts resume at 1:00 PM.'
+          {isLunchSlot
+            ? `Lunch Break is in progress! No mandatory check-in is required during ${lunchSlotLabel}. Automated check-in alerts resume at ${lunchEndLabel}.`
             : hasLoggedCurrentSlot
             ? 'Your check-in for this hour is recorded. Automated audio pop sounds and Windows notifications will alert you before the next slot ends.'
             : 'Automated audio pop sounds and Windows screen pop-up notifications will alert you at 20m, 10m, 5m, and deadline.'}
@@ -400,7 +405,7 @@ export function DeveloperDashboard() {
         onClose={() => setAlertModalState((prev) => ({ ...prev, open: false }))}
         onLogNow={() => {
           setAlertModalState((prev) => ({ ...prev, open: false }));
-          handleOpenLog(currentSlot === 12 ? undefined : currentSlot);
+          handleOpenLog(isLunchSlot ? undefined : currentSlot);
         }}
         minutesLeft={alertModalState.minsLeft}
         slotLabel={alertModalState.slotLabel}
