@@ -30,15 +30,21 @@ import { isLogLate } from '../../utils/logTimeliness';
 export function LogApprovals() {
   const { user } = useAuth();
   const [dateFilter, setDateFilter] = useState<string>('all');
-  const fetchPath = dateFilter && dateFilter !== 'all' ? `/api/logs?date=${dateFilter}` : '/api/logs?date=all';
+  const [developerFilter, setDeveloperFilter] = useState('');
+  const [moduleFilter, setModuleFilter] = useState('');
+
+  const params = new URLSearchParams();
+  if (dateFilter && dateFilter !== 'all') params.set('date', dateFilter);
+  else params.set('date', 'all');
+  if (developerFilter) params.set('developerId', developerFilter);
+
+  const fetchPath = `/api/logs?${params.toString()}`;
   const { data, refetch } = useLive<{ logs: any[] }>(fetchPath, ['log:new', 'log:review'], 20000);
   const { data: devData } = useDevelopers();
   const developers = devData?.developers || [];
 
   const queue = data?.logs || [];
   const [filter, setFilter] = useState('pending');
-  const [developerFilter, setDeveloperFilter] = useState('');
-  const [moduleFilter, setModuleFilter] = useState('');
   const [activeModalItem, setActiveModalItem] = useState<{ developer: string; log: any } | null>(null);
   const [selectedText, setSelectedText] = useState('');
   const [activeScreenshotModal, setActiveScreenshotModal] = useState<{ url: string; title: string } | null>(null);
