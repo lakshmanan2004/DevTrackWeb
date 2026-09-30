@@ -563,12 +563,19 @@ router.get('/team-calendar', ah(async (req, res) => {
     if (devObjectIds.length) {
       devQuery._id = { $in: devObjectIds };
     } else {
-      // Leader with no team developers yet
-      devQuery._id = { $in: [] };
+      const leaderTeams = await Team.find({ leader: req.user._id });
+      if (leaderTeams.length) {
+        devQuery = { role: 'developer', active: true, team: { $in: leaderTeams.map((t) => t._id) } };
+      }
     }
   }
 
-  const developers = await User.find(devQuery, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
+  let developers = await User.find(devQuery, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
+  // Fallback for leader/manager if no explicit team mapping exists in demo data
+  if (!developers.length && (req.user.role === 'leader' || req.user.role === 'manager')) {
+    developers = await User.find({ role: 'developer', active: true }, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
+  }
+
   const devMap = {};
   developers.forEach((d) => {
     devMap[String(d._id)] = d;
@@ -592,6 +599,8 @@ router.get('/team-calendar', ah(async (req, res) => {
 
   const daysInMonth = new Date(year, month, 0).getDate();
   const targetDevIds = developers.map((d) => d._id);
+  const targetDevIdStrings = developers.map((d) => String(d._id));
+  const allDevIdentifiers = [...targetDevIds, ...targetDevIdStrings];
 
   // Fetch all logs for this month for target developers
   const monthStartStr = `${year}-${String(month).padStart(2, '0')}-01`;
@@ -600,21 +609,19 @@ router.get('/team-calendar', ah(async (req, res) => {
   const allMonthLogs = targetDevIds.length
     ? await WorkLog.find({
         date: { $gte: monthStartStr, $lte: monthEndStr },
-        developer: { $in: targetDevIds }
+        developer: { $in: allDevIdentifiers }
       }).populate('project', 'name').sort({ date: 1, hourSlot: 1 })
     : [];
 
   // Fetch all tasks created in or relevant to this month
-  const monthStartDate = new Date(`${monthStartStr}T00:00:00`);
-  const monthEndDate = new Date(`${monthEndStr}T23:59:59`);
   const allTasks = targetDevIds.length
     ? await Task.find({
-        assignee: { $in: targetDevIds },
-        createdAt: { $lte: monthEndDate },
+        assignee: { $in: allDevIdentifiers },
         status: { $ne: 'completed' }
       }).populate('linkedLog').sort({ createdAt: -1 })
     : [];
 
+  const currentSlot = slotForNow(settings, now);
   const days = [];
 
   for (let d = 1; d <= daysInMonth; d++) {
@@ -629,27 +636,34 @@ router.get('/team-calendar', ah(async (req, res) => {
     const unsubmittedDevelopers = [];
     const submittedDevelopers = [];
 
+    // Applicable slots: on today, slots up to currentSlot; on past workdays, all required slots
+    const dayApplicableSlots = isToday ? reqSlots.filter((s) => s <= currentSlot) : reqSlots;
+    const dayRequiredCount = dayApplicableSlots.length || totalRequiredSlots;
+
     // Group logs by developer
     for (const dev of developers) {
-      const devLogs = dayLogs.filter((l) => String(l.developer) === String(dev._id));
+      const devLogs = dayLogs.filter((l) => {
+        const devId = l.developer && typeof l.developer === 'object' ? String(l.developer._id || l.developer) : String(l.developer);
+        return devId === String(dev._id);
+      });
       const submittedCount = devLogs.length;
       const submittedSlots = devLogs.map((l) => l.hourSlot);
-      const missedSlotsNums = reqSlots.filter((s) => !submittedSlots.includes(s));
+      const missedSlotsNums = dayApplicableSlots.filter((s) => !submittedSlots.includes(s));
       const missedSlotsLabels = missedSlotsNums.map((s) => hourLabel(s));
       const activeMin = devLogs.reduce((acc, l) => acc + (l.activeMinutes || 0), 0);
 
       if ((isPast || isToday) && isWork) {
-        if (submittedCount < totalRequiredSlots) {
+        if (submittedCount < dayRequiredCount || missedSlotsNums.length > 0) {
           unsubmittedDevelopers.push({
             developerId: String(dev._id),
             developerName: dev.name,
             initials: dev.initials || initialsOf(dev.name),
             email: dev.email,
             jobTitle: dev.jobTitle || 'Developer',
-            missedCount: totalRequiredSlots - submittedCount,
+            missedCount: missedSlotsNums.length,
             missedSlots: missedSlotsLabels,
             submittedCount,
-            totalRequired: totalRequiredSlots,
+            totalRequired: dayRequiredCount,
             activeMinutes: activeMin,
             lastSeenAt: dev.lastSeenAt,
             status: submittedCount === 0 ? 'Not Submitted' : 'Partially Submitted'
@@ -665,10 +679,10 @@ router.get('/team-calendar', ah(async (req, res) => {
           email: dev.email,
           jobTitle: dev.jobTitle || 'Developer',
           submittedCount,
-          totalRequired: totalRequiredSlots,
+          totalRequired: dayRequiredCount,
           activeMinutes: activeMin,
           lastSeenAt: dev.lastSeenAt,
-          status: submittedCount >= totalRequiredSlots ? 'Fully Submitted' : 'Partially Submitted'
+          status: submittedCount >= dayRequiredCount ? 'Fully Submitted' : 'Partially Submitted'
         });
       }
     }
@@ -681,16 +695,17 @@ router.get('/team-calendar', ah(async (req, res) => {
       const isReviewPending = log.review === 'pending';
       const isChangesReq = ['changes_requested', 'rejected'].includes(log.review);
       const isBlocked = log.status === 'blocked';
-      const isProgress = log.status === 'progress' && (isPast || isToday);
+      const isProgress = log.status === 'progress';
 
       if (isReviewPending || isChangesReq || isBlocked || isProgress) {
-        const dev = devMap[String(log.developer)];
+        const logDevId = log.developer && typeof log.developer === 'object' ? String(log.developer._id || log.developer) : String(log.developer);
+        const dev = devMap[logDevId] || { name: 'Developer', initials: 'DV' };
         pendingWorks.push({
           id: String(log._id),
           kind: 'log',
-          developerId: String(log.developer),
-          developerName: dev ? dev.name : 'Developer',
-          initials: dev ? (dev.initials || initialsOf(dev.name)) : 'DV',
+          developerId: logDevId,
+          developerName: dev.name,
+          initials: dev.initials || initialsOf(dev.name),
           taskTitle: log.task,
           projectName: log.project ? log.project.name : 'Project',
           hourLabel: `${hourLabel(log.hourSlot)} Slot`,
@@ -713,20 +728,22 @@ router.get('/team-calendar', ah(async (req, res) => {
       }
     }
 
-    // 2. Tasks created on or around this date that are not completed
+    // 2. Tasks active on this date
     const dayTasks = allTasks.filter((t) => {
-      const tDateStr = dayStr(t.createdAt);
-      return tDateStr === dStr;
+      const tCreatedStr = t.createdAt ? dayStr(t.createdAt) : '';
+      const tDueStr = t.dueDate || '';
+      return tCreatedStr === dStr || tDueStr === dStr || (isToday && t.status !== 'completed');
     });
 
     for (const t of dayTasks) {
-      const dev = devMap[String(t.assignee)];
+      const assigneeId = t.assignee && typeof t.assignee === 'object' ? String(t.assignee._id || t.assignee) : String(t.assignee);
+      const dev = devMap[assigneeId] || { name: 'Developer', initials: 'DV' };
       pendingWorks.push({
         id: String(t._id),
         kind: 'task',
-        developerId: String(t.assignee),
-        developerName: dev ? dev.name : 'Developer',
-        initials: dev ? (dev.initials || initialsOf(dev.name)) : 'DV',
+        developerId: assigneeId,
+        developerName: dev.name,
+        initials: dev.initials || initialsOf(dev.name),
         taskTitle: t.title,
         projectName: 'Assigned Task',
         hourLabel: 'Assigned Task',
@@ -769,22 +786,26 @@ router.get('/team-calendar', ah(async (req, res) => {
       unsubmittedDevelopers,
       submittedDevelopers,
       pendingWorks,
-      logs: dayLogs.map((l) => ({
-        id: String(l._id),
-        developerId: String(l.developer),
-        developerName: devMap[String(l.developer)]?.name || 'Developer',
-        initials: devMap[String(l.developer)]?.initials || 'DV',
-        taskTitle: l.task,
-        projectName: l.project ? l.project.name : 'Project',
-        hourLabel: `${hourLabel(l.hourSlot)} Slot`,
-        status: l.status,
-        review: l.review,
-        description: l.description,
-        attachmentUrl: l.attachmentUrl || '',
-        attachmentName: l.attachmentName || '',
-        activeMinutes: l.activeMinutes || 0,
-        submittedAt: l.submittedAt
-      }))
+      logs: dayLogs.map((l) => {
+        const logDevId = l.developer && typeof l.developer === 'object' ? String(l.developer._id || l.developer) : String(l.developer);
+        const dev = devMap[logDevId] || { name: 'Developer', initials: 'DV' };
+        return {
+          id: String(l._id),
+          developerId: logDevId,
+          developerName: dev.name,
+          initials: dev.initials || initialsOf(dev.name),
+          taskTitle: l.task,
+          projectName: l.project ? l.project.name : 'Project',
+          hourLabel: `${hourLabel(l.hourSlot)} Slot`,
+          status: l.status,
+          review: l.review,
+          description: l.description,
+          attachmentUrl: l.attachmentUrl || '',
+          attachmentName: l.attachmentName || '',
+          activeMinutes: l.activeMinutes || 0,
+          submittedAt: l.submittedAt
+        };
+      })
     });
   }
 
@@ -806,4 +827,5 @@ router.get('/team-calendar', ah(async (req, res) => {
 }));
 
 module.exports = router;
+
 
