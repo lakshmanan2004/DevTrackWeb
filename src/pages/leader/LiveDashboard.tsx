@@ -110,10 +110,6 @@ export function LiveDashboard() {
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
           <div className="space-y-3">
-            <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-500">
-              <span className="h-2 w-2 rounded-full bg-ok" aria-hidden="true" />
-              {user?.teamName || 'Team'} — {visible.length} developer{visible.length !== 1 ? 's' : ''}
-            </h2>
             <ul className="space-y-3">
               {visible.map((dev: any) => (
                 <DeveloperCard

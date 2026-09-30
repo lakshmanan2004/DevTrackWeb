@@ -587,6 +587,7 @@ router.get('/team-calendar', ah(async (req, res) => {
   });
 
   const settings = await Setting.get();
+  const totalRequiredSlots = requiredSlots(settings).length;
 
   const now = new Date();
   const todayStr = dayStr(now);
