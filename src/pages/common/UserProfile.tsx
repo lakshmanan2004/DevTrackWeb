@@ -130,39 +130,38 @@ export function UserProfile() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col min-h-full">
       <PageHeader
         title="My Profile"
         subtitle={`Account details, security settings, and workspace preferences for ${roleLabels[role] || 'User'}`}
       />
 
-      <div className="grid gap-6 xl:grid-cols-12 items-start">
-        {/* ========================================================================= */}
-        {/* LEFT COLUMN: USER OVERVIEW CARD & SECURITY (5 COLUMNS)                    */}
-        {/* ========================================================================= */}
-        <div className="xl:col-span-5 space-y-6">
-          {/* USER IDENTITY CARD */}
-          <div className="rounded-2xl border border-hairline bg-white p-6 shadow-card text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-navy via-slate-800 to-navy" />
+      <div className="p-6 space-y-6">
+        <div className="grid gap-6 xl:grid-cols-12 items-start">
+          {/* ========================================================================= */}
+          {/* LEFT COLUMN: USER OVERVIEW CARD & SECURITY (5 COLUMNS)                    */}
+          {/* ========================================================================= */}
+          <div className="xl:col-span-5 space-y-6">
+            {/* USER IDENTITY CARD */}
+            <div className="rounded-2xl border border-hairline bg-white p-6 shadow-card text-center">
+              <div className="flex flex-col items-center">
+                <div className="inline-block rounded-full ring-4 ring-slate-100 shadow-sm">
+                  <Avatar initials={user?.initials || '··'} size="lg" tone={roleTones[role]} />
+                </div>
+                <h2 className="mt-3.5 text-xl font-bold text-navy">{user?.name}</h2>
+                <p className="text-xs text-gray-500 mt-0.5">{user?.email}</p>
 
-            <div className="relative pt-6">
-              <div className="inline-block rounded-full ring-4 ring-white shadow-md">
-                <Avatar initials={user?.initials || '··'} size="lg" tone={roleTones[role]} />
-              </div>
-              <h2 className="mt-3 text-xl font-bold text-navy">{user?.name}</h2>
-              <p className="text-xs text-gray-500">{user?.email}</p>
+                {/* ROLE & PROJECT/TEAM PILLS */}
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                  <Badge tone={roleTones[role]}>{roleLabels[role]}</Badge>
 
-              {/* ROLE & PROJECT/TEAM PILLS */}
-              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                <Badge tone={roleTones[role]}>{roleLabels[role]}</Badge>
-
-                {role === 'leader' ? (
-                  <>
-                    {displayProjects.map((p: any) => (
-                      <Badge key={p.id || p.name} tone="purple">
-                        Project: {p.name}
-                      </Badge>
-                    ))}
+                  {role === 'leader' ? (
+                    <>
+                      {displayProjects.map((p: any) => (
+                        <Badge key={p.id || p.name} tone="purple">
+                          Project: {p.name}
+                        </Badge>
+                      ))}
                     {teams.length > 0 ? (
                       teams.map((t: any) => (
                         <Badge key={t.id || t.name} tone="grey">
@@ -590,5 +589,6 @@ export function UserProfile() {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
