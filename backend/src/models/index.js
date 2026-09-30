@@ -66,6 +66,7 @@ const WorkLogSchema = new Schema({
   status: { type: String, enum: ['todo', 'progress', 'done', 'blocked'], default: 'progress' },
   description: { type: String, required: true },
   submittedAt: { type: Date, default: Date.now },
+  isLate: { type: Boolean, default: false },
   activeMinutes: { type: Number, default: 0 },
   attachmentName: { type: String, default: '' },
   attachmentUrl: { type: String, default: '' },

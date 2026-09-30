@@ -33,6 +33,8 @@ export interface Developer {
 }
 
 export interface WorkLog {
+  isLate?: boolean;
+  submissionStatus?: string;
   id: string;
   hourLabel: string;
   hourSlot: number;

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { CloseProjectModal } from '../../components/project/CloseProjectModal';
 import { Link } from 'react-router-dom';
 import {
   BarChart3Icon,
@@ -24,8 +25,10 @@ const healthTone = {
 
 export function MyProjects() {
   const { user } = useAuth();
-  const { data } = useProjects('mine');
+  const { data, refetch } = useProjects('mine');
   const myProjects = data?.projects || [];
+  const [closeModalOpen, setCloseModalOpen] = useState(false);
+  const [selectedProjectForClose, setSelectedProjectForClose] = useState<any>(null);
 
   const summary = [
   { label: 'Total', value: myProjects.length, tone: 'text-navy' },
@@ -107,26 +110,21 @@ export function MyProjects() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {completed ?
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedProjectForClose(project);
+                        setCloseModalOpen(true);
+                      }}
+                    >
+                      {completed ? 'Status / Reopen' : 'Close Project'}
+                    </Button>
                     <Link to="/manager/overview">
-                        <Button variant="secondary" size="sm" icon={<BarChart3Icon className="h-3.5 w-3.5" />}>
-                          View Report
-                        </Button>
-                      </Link> :
-
-                    <>
-                        <Link to="/manager/teams">
-                          <Button variant="secondary" size="sm" icon={<UsersIcon className="h-3.5 w-3.5" />}>
-                            View Team
-                          </Button>
-                        </Link>
-                        <Link to="/manager/overview">
-                          <Button size="sm" icon={<BarChart3Icon className="h-3.5 w-3.5" />}>
-                            View Progress
-                          </Button>
-                        </Link>
-                      </>
-                    }
+                      <Button size="sm" icon={<BarChart3Icon className="h-3.5 w-3.5" />}>
+                        {completed ? 'View Report' : 'View Progress'}
+                      </Button>
+                    </Link>
                   </div>
                 </div>
 
@@ -171,6 +169,12 @@ export function MyProjects() {
               </li>);
           })}
         </ul>
+        <CloseProjectModal
+          open={closeModalOpen}
+          project={selectedProjectForClose}
+          onClose={() => setCloseModalOpen(false)}
+          onSuccess={refetch}
+        />
       </div>
     </>);
 

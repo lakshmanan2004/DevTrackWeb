@@ -23,6 +23,7 @@ import { AssignTaskModal } from '../../components/common/AssignTaskModal';
 import { useLive, useDevelopers } from '../../hooks/useLive';
 import { api, apiUpload, fileUrl } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import { isLogLate } from '../../utils/logTimeliness';
 
 export function LogApprovals() {
   const { user } = useAuth();
@@ -180,6 +181,7 @@ export function LogApprovals() {
         <ul className="space-y-4">
           {filteredQueue.map((log: any) => {
             const isAssigned = log.isAssignedTask || !!log.linkedTask;
+            const isLate = isLogLate(log);
 
             return (
               <li
@@ -187,6 +189,8 @@ export function LogApprovals() {
                 className={`rounded-card border transition-all ${
                   isAssigned
                     ? 'border-amber-400 bg-amber-50/20 ring-2 ring-amber-300/60 shadow-md'
+                    : isLate
+                    ? 'border-amber-400 ring-2 ring-amber-400/30 bg-amber-50/20 shadow-md'
                     : log.review === 'changes_requested'
                     ? 'border-amber-300 ring-2 ring-amber-400/20 bg-white shadow-card'
                     : log.review === 'approved'
@@ -210,13 +214,18 @@ export function LogApprovals() {
                 )}
 
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-5 py-3.5">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-semibold text-navy">
                       {log.developerName}
                       <span className="ml-2 font-normal text-gray-500">
-                        {log.hourLabel} · submitted {log.submittedAt} · {log.project || user?.teamName}
+                        📅 {log.date} · {log.hourLabel} · {isLate ? `submitted late at ${log.submittedAt}` : `submitted ${log.submittedAt}`} · {log.project || user?.teamName}
                       </span>
                     </p>
+                    {isLate && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-2.5 py-0.5 text-[10px] font-extrabold shadow-xs uppercase tracking-wide">
+                        ⚠️ Late Submission
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     {isAssigned && (
@@ -428,8 +437,19 @@ export function LogApprovals() {
                   </h3>
                   <ul className="mt-3 space-y-2.5 text-xs">
                     <li className="flex items-start gap-2 text-gray-700">
-                      <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
-                      Submitted {log.submittedAt}
+                      {isLate ? (
+                        <>
+                          <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 font-bold" aria-hidden="true" />
+                          <span className="font-bold text-amber-900 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300">
+                            Submitted Late at {log.submittedAt}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
+                          Submitted {log.submittedAt}
+                        </>
+                      )}
                     </li>
                     <li className="flex items-start gap-2 text-gray-700">
                       <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />

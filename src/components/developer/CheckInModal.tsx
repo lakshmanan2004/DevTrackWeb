@@ -21,9 +21,10 @@ interface CheckInModalProps {
   open: boolean;
   onClose: () => void;
   onSubmitted?: () => void;
+  targetSlot?: number;
 }
 
-export function CheckInModal({ open, onClose, onSubmitted }: CheckInModalProps) {
+export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckInModalProps) {
   const { data: projectData } = useLive<{ projects: any[] }>(open ? '/api/projects?scope=mine' : null, [], 0);
   const projects = projectData?.projects || [];
   const { data: taskData } = useLive<{ tasks: any[] }>(open ? '/api/tasks' : null, [], 0);
@@ -86,6 +87,7 @@ export function CheckInModal({ open, onClose, onSubmitted }: CheckInModalProps) 
     try {
       const fd = new FormData();
       fd.append('projectId', effectiveProjectId);
+      if (targetSlot !== undefined) fd.append('hourSlot', String(targetSlot));
       if (selectedTaskId) fd.append('taskId', selectedTaskId);
       if (activeModuleName) fd.append('moduleName', activeModuleName);
       fd.append('description', description);
@@ -123,7 +125,7 @@ export function CheckInModal({ open, onClose, onSubmitted }: CheckInModalProps) 
               </h2>
               <p className="mt-0.5 text-xs text-gray-500">
                 {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} ·
-                {' '}current hour slot
+                {' '}{targetSlot !== undefined ? `${targetSlot > 12 ? targetSlot - 12 : targetSlot} ${targetSlot >= 12 ? 'PM' : 'AM'} slot` : 'current hour slot'}
               </p>
             </div>
           </div>

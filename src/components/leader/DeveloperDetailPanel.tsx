@@ -9,6 +9,7 @@ import { Avatar } from '../ui/Avatar';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { TaskStatusBadge } from '../ui/TaskStatusBadge';
+import { isLogLate } from '../../utils/logTimeliness';
 import { DailyGoalAndStandupBoard } from './DailyGoalAndStandupBoard';
 import { Developer } from '../../types';
 import { api } from '../../api/client';
@@ -113,18 +114,27 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
         <div>
             <h4 className="text-sm font-bold text-navy">Work Logs</h4>
             <ul className="mt-3 space-y-2.5">
-              {panelLogs.map((log: any) =>
-            <li key={log.id} className="rounded-lg border border-hairline p-3.5">
+              {panelLogs.map((log: any) => {
+                const isLate = isLogLate(log);
+                return (
+            <li key={log.id} className={`rounded-lg border p-3.5 transition-all ${isLate ? 'border-amber-300 border-l-4 border-l-amber-500 bg-amber-50/20 shadow-xs' : 'border-hairline bg-white'}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-navy">
-                      <span className="mr-2 rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-gray-600">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-gray-600">
                         {log.hourLabel}
                       </span>
-                      {log.task}
-                    </p>
+                      <p className="text-sm font-semibold text-navy">{log.task}</p>
+                      {isLate && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-2 py-0.5 text-[10px] font-extrabold shadow-xs uppercase tracking-wide">
+                          ⚠️ Late Submission
+                        </span>
+                      )}
+                    </div>
                     <TaskStatusBadge status={log.status} />
                   </div>
-                  <p className="mt-2 text-xs text-gray-500">Submitted {log.submittedAt}</p>
+                  <p className={`mt-2 text-xs ${isLate ? 'font-bold text-amber-900' : 'text-gray-500'}`}>
+                    {isLate ? `Submitted Late at ${log.submittedAt}` : `Submitted ${log.submittedAt}`}
+                  </p>
                   {log.review === 'approved' ?
               <Badge tone="green" className="mt-2.5">
                       <CheckIcon className="h-3.5 w-3.5" />
@@ -149,7 +159,7 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
                     </div>
               }
                 </li>
-            )}
+              );})}
               {panelLogs.length === 0 && (
                 <li className="rounded-lg border border-dashed border-gray-300 p-6 text-center text-xs text-gray-500">
                   No logs submitted today.
@@ -163,7 +173,7 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
         <div>
             <h4 className="text-sm font-bold text-navy">Commits</h4>
             <ul className="mt-3 divide-y divide-gray-100 rounded-lg border border-hairline">
-              {(detail?.commits || []).map((commit: any) =>
+              {(detail?.commits || []).map((commit: any) => (
             <li key={commit.id} className="flex items-center gap-2.5 px-3.5 py-3">
                   <GitBranchIcon className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden="true" />
                   <p className="min-w-0 flex-1 truncate text-sm text-navy">{commit.message}</p>
@@ -171,7 +181,7 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
                     {commit.time} · {commit.branch}
                   </span>
                 </li>
-            )}
+              ))}
               {(detail?.commits || []).length === 0 && (
                 <li className="px-3.5 py-4 text-center text-xs text-gray-500">No commits today.</li>
               )}

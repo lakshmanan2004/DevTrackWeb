@@ -16,6 +16,7 @@ import { TaskStatusBadge } from '../../components/ui/TaskStatusBadge';
 import { useMyLogs } from '../../hooks/useLive';
 import { fileUrl } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import { isLogLate } from '../../utils/logTimeliness';
 
 export function WorkLogs() {
   const { user } = useAuth();
@@ -41,9 +42,11 @@ export function WorkLogs() {
     ? todayLogs.filter((log: any) => log.review === 'changes_requested')
     : todayLogs.filter((log: any) => log.status === filter);
 
-  const dateLabel = new Date(`${date}T12:00:00`).toLocaleDateString(undefined, {
-    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
-  });
+  const dateLabel = date === 'all'
+    ? 'All Recorded Work Logs'
+    : new Date(`${date}T12:00:00`).toLocaleDateString(undefined, {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+      });
 
   return (
     <>
@@ -51,16 +54,29 @@ export function WorkLogs() {
         title="My Work Logs"
         subtitle={user?.leaderName ? `Only you and ${user.leaderName} can see these logs` : 'Only you and your Team Leader can see these logs'}
         actions={
-          <label className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-2 text-sm font-semibold text-navy">
-            <CalendarIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
-            <span className="sr-only">Pick a date</span>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="bg-transparent text-sm outline-none"
-            />
-          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setDate(date === 'all' ? new Date().toISOString().slice(0, 10) : 'all')}
+              className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${
+                date === 'all'
+                  ? 'border-brand bg-brand text-white'
+                  : 'border-hairline bg-white text-navy hover:bg-gray-50'
+              }`}
+            >
+              {date === 'all' ? 'Showing All Logs' : 'View All Dates'}
+            </button>
+            <label className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-2 text-sm font-semibold text-navy">
+              <CalendarIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
+              <span className="sr-only">Pick a date</span>
+              <input
+                type="date"
+                value={date === 'all' ? '' : date}
+                onChange={(e) => setDate(e.target.value || 'all')}
+                className="bg-transparent text-sm outline-none cursor-pointer"
+              />
+            </label>
+          </div>
         }
       />
 
@@ -111,17 +127,21 @@ export function WorkLogs() {
         />
 
         <div className="space-y-4">
-          {visible.map((log: any) => (
+          {visible.map((log: any) => {
+            const isLate = isLogLate(log);
+            return (
             <article
               key={log.id}
-              className={`rounded-card border border-l-4 bg-white p-5 shadow-card ${
-                log.review === 'changes_requested'
+              className={`rounded-card border border-l-4 p-5 shadow-card transition-all ${
+                isLate
+                  ? 'border-amber-300 border-l-amber-500 bg-amber-50/30'
+                  : log.review === 'changes_requested'
                   ? 'border-amber-300 border-l-amber-500 bg-amber-50/20'
-                  : `${log.status === 'blocked' ? 'border-l-red-500' : 'border-l-green-500'} border-hairline`
+                  : `${log.status === 'blocked' ? 'border-l-red-500' : 'border-l-green-500'} border-hairline bg-white`
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={`rounded-md px-2 py-1 text-xs font-bold tabular-nums ${
                       log.status === 'blocked'
@@ -129,9 +149,14 @@ export function WorkLogs() {
                         : 'bg-ok-soft text-green-700'
                     }`}
                   >
-                    {log.hourLabel}
+                    {log.date ? `📅 ${log.date} · ${log.hourLabel}` : log.hourLabel}
                   </span>
                   <h2 className="text-sm font-bold text-navy">{log.task}</h2>
+                  {isLate && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-2.5 py-0.5 text-[10px] font-extrabold shadow-xs uppercase tracking-wide">
+                      ⚠️ Late Submission
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <TaskStatusBadge status={log.status} />
@@ -269,7 +294,7 @@ export function WorkLogs() {
                 </span>
               </div>
             </article>
-          ))}
+          );})} 
           {!loading && visible.length === 0 && (
             <div className="rounded-card border border-dashed border-gray-300 bg-white p-12 text-center">
               <p className="text-sm font-semibold text-navy">No logs for this date</p>

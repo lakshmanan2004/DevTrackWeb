@@ -9,14 +9,31 @@ const router = express.Router();
 
 // POST /api/auth/login
 router.post('/login', ah(async (req, res) => {
-  const { email, password } = req.body || {};
+  const { email, password, remember } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   const user = await User.findOne({ email: String(email).toLowerCase().trim() }).populate('team');
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
   if (!user.active) return res.status(403).json({ error: 'This account has been deactivated' });
-  res.json({ token: sign(user), user: await mePayload(user) });
+  const token = sign(user);
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  };
+  if (remember) {
+    cookieOptions.maxAge = 7 * 24 * 60 * 60 * 1000;
+  }
+  res.cookie('devtrack_token', token, cookieOptions);
+  res.json({ token, user: await mePayload(user) });
+}));
+
+
+// POST /api/auth/logout
+router.post('/logout', ah(async (_req, res) => {
+  res.clearCookie('devtrack_token');
+  res.json({ ok: true, message: 'Logged out successfully' });
 }));
 
 async function mePayload(user) {

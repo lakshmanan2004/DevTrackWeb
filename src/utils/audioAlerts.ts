@@ -1,5 +1,6 @@
 // Web Audio API synthesizer for system alert sounds without external assets
 export function playAlertSound(type: 'pop' | 'notification' | 'urgent' | 'late') {
+  if (new Date().getHours() >= 17) return;
   try {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
@@ -69,6 +70,7 @@ export function playAlertSound(type: 'pop' | 'notification' | 'urgent' | 'late')
 
 // Request and trigger Windows Desktop Pop-up Notification natively via ServiceWorker & Notification API
 export async function showWindowsNotification(title: string, body: string): Promise<boolean> {
+  if (new Date().getHours() >= 17) return false;
   if (typeof Notification === 'undefined') return false;
 
   let perm = Notification.permission;

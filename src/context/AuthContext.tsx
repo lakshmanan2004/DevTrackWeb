@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { api, getToken, setToken } from '../api/client';
+import { api, getToken, onUnauthorized, setToken } from '../api/client';
 import { connectSocket, disconnectSocket, onSocketEvent } from '../api/socket';
 import { playAlertSound, showWindowsNotification } from '../utils/audioAlerts';
 
@@ -35,7 +35,7 @@ interface AuthContextValue {
   badges: Badges;
   settings: MeResponse['settings'] | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<AuthUser>;
+  login: (email: string, password: string, remember?: boolean) => Promise<AuthUser>;
   logout: () => void;
   refresh: () => Promise<void>;
 }
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setBadges(me.badges);
       setSettings(me.settings);
     } catch (err: any) {
-      if (err.status === 401) {
+      if (err.status === 401 || err.message?.includes('401')) {
         setToken(null);
         setUser(null);
         disconnectSocket();
@@ -78,6 +78,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    const unsub = onUnauthorized(() => {
+      setToken(null);
+      setUser(null);
+      disconnectSocket();
+    });
+    return unsub;
   }, []);
 
   useEffect(() => {
@@ -146,12 +155,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, refresh]);
 
   const login = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string, remember: boolean = true) => {
       const res = await api<{ token: string; user: AuthUser }>('/api/auth/login', {
         method: 'POST',
-        body: { email, password }
+        body: { email, password, remember }
       });
-      setToken(res.token);
+      setToken(res.token, remember);
       setUser(res.user);
       connectSocket();
       await refresh();
@@ -160,10 +169,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [refresh]
   );
 
-  const logout = useCallback(() => {
-    setToken(null);
-    disconnectSocket();
-    setUser(null);
+  const logout = useCallback(async () => {
+    try {
+      await api('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // ignore network errors
+    } finally {
+      setToken(null);
+      disconnectSocket();
+      setUser(null);
+    }
   }, []);
 
   const value = useMemo(

@@ -3,13 +3,37 @@
 // In production, set VITE_API_URL to the backend base URL (e.g. https://devtrack-api.onrender.com).
 export const API_BASE = import.meta.env.VITE_API_URL || '';
 
-export function getToken(): string | null {
-  return localStorage.getItem('devtrack_token');
+type UnauthorizedListener = () => void;
+const unauthorizedListeners = new Set<UnauthorizedListener>();
+
+export function onUnauthorized(listener: UnauthorizedListener) {
+  unauthorizedListeners.add(listener);
+  return () => {
+    unauthorizedListeners.delete(listener);
+  };
 }
 
-export function setToken(token: string | null) {
-  if (token) localStorage.setItem('devtrack_token', token);
-  else localStorage.removeItem('devtrack_token');
+function triggerUnauthorized() {
+  unauthorizedListeners.forEach((fn) => fn());
+}
+
+export function getToken(): string | null {
+  return localStorage.getItem('devtrack_token') || sessionStorage.getItem('devtrack_token');
+}
+
+export function setToken(token: string | null, remember = true) {
+  if (token) {
+    if (remember) {
+      localStorage.setItem('devtrack_token', token);
+      sessionStorage.removeItem('devtrack_token');
+    } else {
+      sessionStorage.setItem('devtrack_token', token);
+      localStorage.removeItem('devtrack_token');
+    }
+  } else {
+    localStorage.removeItem('devtrack_token');
+    sessionStorage.removeItem('devtrack_token');
+  }
 }
 
 export async function api<T = any>(
@@ -19,6 +43,7 @@ export async function api<T = any>(
   const token = getToken();
   const res = await fetch(`${API_BASE}${path}`, {
     method: options.method || 'GET',
+    credentials: 'include',
     headers: {
       ...(options.body ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -27,6 +52,9 @@ export async function api<T = any>(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 401) {
+      triggerUnauthorized();
+    }
     const err: any = new Error(data.error || `Request failed (${res.status})`);
     err.status = res.status;
     throw err;
@@ -39,11 +67,15 @@ export async function apiUpload<T = any>(path: string, formData: FormData): Prom
   const token = getToken();
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
+    credentials: 'include',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 401) {
+      triggerUnauthorized();
+    }
     const err: any = new Error(data.error || `Upload failed (${res.status})`);
     err.status = res.status;
     throw err;

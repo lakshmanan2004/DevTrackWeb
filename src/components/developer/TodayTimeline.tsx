@@ -10,6 +10,7 @@ import {
 import { Button } from '../ui/Button';
 import { TaskStatusBadge, taskStatusMeta } from '../ui/TaskStatusBadge';
 import { TaskStatus } from '../../types';
+import { isLogLate } from '../../utils/logTimeliness';
 
 const hours = [
   { slot: 8, label: '8 AM' },
@@ -27,28 +28,38 @@ interface TodayTimelineProps {
   logs: any[];
   currentSlot?: number;
   teamName?: string;
-  onLog: () => void;
+  onLog: (targetSlot?: number) => void;
 }
 
 function LogCard({ log }: { log: any }) {
+  const isLate = isLogLate(log);
   const statusMeta = (taskStatusMeta[log.status as TaskStatus] || taskStatusMeta['progress']);
   return (
     <article
-      className={`rounded-card border border-hairline border-l-4 bg-white p-4 shadow-card ${
-        log.review === 'changes_requested'
-          ? 'border-l-amber-500 bg-amber-50/20'
-          : `${statusMeta.border}`
+      className={`rounded-card border border-l-4 p-4 shadow-card transition-all ${
+        isLate
+          ? 'border-amber-300 border-l-amber-500 bg-amber-50/30 ring-1 ring-amber-400/40'
+          : log.review === 'changes_requested'
+          ? 'border-hairline border-l-amber-500 bg-amber-50/20'
+          : `border-hairline ${statusMeta.border} bg-white`
       }`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-bold text-navy">{log.task}</h3>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-sm font-bold text-navy">{log.task}</h3>
+          {isLate && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-2.5 py-0.5 text-[10px] font-extrabold shadow-xs uppercase tracking-wide">
+              ⚠️ Late Submission
+            </span>
+          )}
+        </div>
         <TaskStatusBadge status={log.status} />
       </div>
       <p className="mt-2 text-sm leading-relaxed text-gray-600">{log.description}</p>
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
-        <span className="inline-flex items-center gap-1.5">
+        <span className={`inline-flex items-center gap-1.5 ${isLate ? 'font-bold text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-md border border-amber-300' : ''}`}>
           <TimerIcon className="h-3.5 w-3.5" aria-hidden="true" />
-          {log.activeMinutes} active min · {log.submittedAt}
+          {log.activeMinutes} active min · {isLate ? `Submitted Late at ${log.submittedAt}` : log.submittedAt}
         </span>
         {log.attachment && (
           <span className="inline-flex items-center gap-1.5">
@@ -125,6 +136,8 @@ export function TodayTimeline({ logs, currentSlot, onLog }: TodayTimelineProps) 
               ? 'bg-amber-500'
               : slotLogs.some((l) => l.review === 'rejected')
               ? 'bg-red-500'
+              : slotLogs.some((l) => isLogLate(l))
+              ? 'bg-amber-500'
               : 'bg-ok'
             : isCurrent
             ? 'bg-warn dt-pulse'
@@ -183,7 +196,7 @@ export function TodayTimeline({ logs, currentSlot, onLog }: TodayTimelineProps) 
                             </div>
                             <p className="mt-0.5 text-[11px] text-emerald-700">You can submit additional logs before this hour ends.</p>
                           </div>
-                          <Button size="sm" onClick={onLog} className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs py-1 px-3">
+                          <Button size="sm" onClick={() => onLog(hour.slot)} className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs py-1 px-3">
                             + Add Another Log
                           </Button>
                         </div>
@@ -204,7 +217,7 @@ export function TodayTimeline({ logs, currentSlot, onLog }: TodayTimelineProps) 
                             Log your work for this hour before it ends
                           </p>
                         </div>
-                        <Button onClick={onLog}>Submit Now</Button>
+                        <Button onClick={() => onLog(hour.slot)}>Submit Now</Button>
                       </article>
                     )}
                   </div>
@@ -220,7 +233,7 @@ export function TodayTimeline({ logs, currentSlot, onLog }: TodayTimelineProps) 
                     ) : !hour.isLunch ? (
                       <div className="rounded-card border border-red-200 bg-red-50/40 p-3 text-xs text-red-700 flex items-center justify-between">
                         <span>Missed check-in for {hour.label} (0 logs submitted)</span>
-                        <button onClick={onLog} className="text-xs font-semibold text-red-700 underline hover:text-red-900">
+                        <button onClick={() => onLog(hour.slot)} className="text-xs font-semibold text-red-700 underline hover:text-red-900">
                           Submit Late Log
                         </button>
                       </div>

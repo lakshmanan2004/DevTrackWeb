@@ -41,6 +41,11 @@ export function DeveloperDashboard() {
   const { data: projectData } = useProjects('mine');
   const { data: pendingData } = usePendingWorks();
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalTargetSlot, setModalTargetSlot] = useState<number | undefined>(undefined);
+  const handleOpenLog = (slot?: number) => {
+    setModalTargetSlot(slot);
+    setModalOpen(true);
+  };
   const [alertModalState, setAlertModalState] = useState<{
     open: boolean;
     level: 'pop' | 'warning' | 'urgent' | 'late' | 'test';
@@ -297,7 +302,7 @@ export function DeveloperDashboard() {
               >
                 Test Audio & Windows Alert
               </Button>
-              <Button onClick={() => setModalOpen(true)}>
+              <Button onClick={() => handleOpenLog(currentSlot === 12 ? undefined : currentSlot)}>
                 {hasLoggedCurrentSlot || currentSlot === 12 ? '+ Add Log' : 'Log Now'}
               </Button>
             </div>
@@ -379,23 +384,23 @@ export function DeveloperDashboard() {
         </div>
 
         <ActiveTimerCard
-          onLog={() => setModalOpen(true)}
+          onLog={handleOpenLog}
           activeMinutes={stats?.activeMinutes ?? 0}
           firstSeen={stats?.firstSeen ?? null}
           missed={stats?.missed ?? 0}
         />
 
         {/* Today's Timeline */}
-        <TodayTimeline logs={logs} onLog={() => setModalOpen(true)} />
+        <TodayTimeline logs={logs} onLog={handleOpenLog} />
       </div>
 
-      <CheckInModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <CheckInModal open={modalOpen} targetSlot={modalTargetSlot} onClose={() => { setModalOpen(false); setModalTargetSlot(undefined); }} />
       <CheckInAlertModal
         open={alertModalState.open}
         onClose={() => setAlertModalState((prev) => ({ ...prev, open: false }))}
         onLogNow={() => {
           setAlertModalState((prev) => ({ ...prev, open: false }));
-          setModalOpen(true);
+          handleOpenLog(currentSlot === 12 ? undefined : currentSlot);
         }}
         minutesLeft={alertModalState.minsLeft}
         slotLabel={alertModalState.slotLabel}

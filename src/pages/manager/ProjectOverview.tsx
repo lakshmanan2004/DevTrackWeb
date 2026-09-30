@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { CheckCircle2Icon, TrophyIcon } from 'lucide-react';
+import { Button } from '../../components/ui/Button';
+import { CloseProjectModal } from '../../components/project/CloseProjectModal';
 import {
   InfoIcon,
   FolderKanbanIcon,
@@ -27,6 +30,7 @@ export function ProjectOverview() {
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const activeId = selectedProjectId || projects[0]?.id || '';
   const { data: overview, refetch: refetchOverview } = useProjectOverview(activeId || null);
+  const [closeModalOpen, setCloseModalOpen] = useState(false);
 
   const selectedProject = projects.find((p: any) => p.id === activeId);
 
@@ -80,6 +84,18 @@ export function ProjectOverview() {
                 ))}
               </select>
             </label>
+
+            {selectedProject && (
+              <Button
+                size="sm"
+                variant={selectedProject.status === 'completed' ? 'secondary' : 'primary'}
+                className={selectedProject.status === 'completed' ? '' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}
+                onClick={() => setCloseModalOpen(true)}
+                icon={selectedProject.status === 'completed' ? <TrophyIcon className="h-4 w-4 text-emerald-600" /> : <CheckCircle2Icon className="h-4 w-4" />}
+              >
+                {selectedProject.status === 'completed' ? 'Project Completed (Manage)' : 'Close Project'}
+              </Button>
+            )}
           </div>
         }
       />
@@ -261,6 +277,15 @@ export function ProjectOverview() {
             ))}
           </div>
         </section>
+        <CloseProjectModal
+          open={closeModalOpen}
+          project={selectedProject}
+          onClose={() => setCloseModalOpen(false)}
+          onSuccess={() => {
+            refetch();
+            refetchOverview();
+          }}
+        />
       </div>
     </>
   );

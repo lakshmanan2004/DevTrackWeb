@@ -44,7 +44,7 @@ async function dtoWithDev(log) {
 
 // ---------- GET /api/logs?date=&developerId= ----------
 router.get('/', ah(async (req, res) => {
-  const date = req.query.date || dayStr();
+  const dateQuery = req.query.date;
   const scope = await scopeFor(req.user);
 
   let developerFilter;
@@ -60,8 +60,15 @@ router.get('/', ah(async (req, res) => {
     developerFilter = { $in: scope.developerIds };
   }
 
-  const logs = await WorkLog.find({ date, developer: developerFilter })
-    .sort({ hourSlot: 1 })
+  const query = { developer: developerFilter };
+  if (dateQuery && dateQuery !== 'all') {
+    query.date = dateQuery;
+  } else if (req.user.role === 'developer' && !dateQuery) {
+    query.date = dayStr();
+  }
+
+  const logs = await WorkLog.find(query)
+    .sort({ date: -1, hourSlot: -1, submittedAt: -1 })
     .populate('developer', 'name initials')
     .populate('project', 'name');
 
@@ -128,8 +135,14 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
     });
   }
 
+  const now = new Date();
+  const slotEnd = new Date(now);
+  slotEnd.setHours(hourSlot + 1, 0, 0, 0);
+  const isLate = now.getHours() >= 17 || now > slotEnd;
+
   const log = await WorkLog.create({
     developer: req.user._id,
+    isLate,
     team: req.user.team,
     project: project._id,
     moduleName: moduleName || (project.modules && project.modules[0] ? project.modules[0].name : ''),

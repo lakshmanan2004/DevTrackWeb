@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ActivityIcon,
@@ -55,7 +55,7 @@ const roleTabs: {
 
 export function Login() {
   const navigate = useNavigate();
-  const { login, logout, user } = useAuth();
+  const { login, logout, user, loading } = useAuth();
   const { data: stats } = usePublicStats();
   const [role, setRole] = useState<Role>('developer');
   const [email, setEmail] = useState('');
@@ -77,7 +77,7 @@ export function Login() {
     setError('');
     setBusy(true);
     try {
-      const loggedIn = await login(email.trim(), password);
+      const loggedIn = await login(email.trim(), password, remember);
       if (loggedIn.role !== role) {
         logout();
         const actualTab = roleTabs.find((t) => t.id === loggedIn.role);
@@ -94,10 +94,25 @@ export function Login() {
     }
   };
 
-  if (user) {
-    // already signed in — bounce to the right workspace
-    const home = roleTabs.find((t) => t.id === user.role)?.path || '/developer';
-    navigate(home, { replace: true });
+useEffect(() => {
+    if (!loading && user) {
+      const home = roleTabs.find((t) => t.id === user.role)?.path || '/developer';
+      navigate(home, { replace: true });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-canvas">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex h-10 w-10 animate-spin items-center justify-center rounded-xl bg-brand text-white">
+            <ActivityIcon className="h-6 w-6" />
+          </span>
+          <span className="text-xl font-bold text-navy">DevTrack</span>
+        </div>
+        <p className="mt-4 text-xs font-semibold text-gray-500">Validating your authentication session...</p>
+      </div>
+    );
   }
 
   return (
@@ -254,6 +269,6 @@ export function Login() {
           </div>
         </div>
       </section>
-    </div>);
-
+    </div>
+  );
 }

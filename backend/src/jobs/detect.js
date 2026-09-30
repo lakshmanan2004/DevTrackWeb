@@ -44,6 +44,7 @@ async function createManagerAlert(dev, payload) {
 
 // Check-in reminder: 15 minutes before each slot closes (H:45)
 async function reminderCheck() {
+  if (new Date().getHours() >= 17) return;
   const settings = await Setting.get();
   const now = new Date();
   const slot = slotForNow(settings);
@@ -69,8 +70,9 @@ async function reminderCheck() {
 
 // Missed log detection: at :00 of the next hour, flag the previous slot
 async function missedLogCheck() {
-  const settings = await Setting.get();
   const now = new Date();
+  if (now.getHours() >= 17 || now.getHours() === 12) return; // Skip after 5 PM and during lunch break (12 PM - 1 PM)
+  const settings = await Setting.get();
   if (!isWorkday(now, settings)) return;
 
   const date = dayStr(now);
@@ -127,6 +129,7 @@ async function missedLogCheck() {
 
 // EOD missing check: after the EOD deadline
 async function eodMissingCheck() {
+  if (new Date().getHours() >= 17) return;
   const settings = await Setting.get();
   const now = new Date();
   if (!isWorkday(now, settings)) return;
@@ -166,8 +169,9 @@ async function eodMissingCheck() {
 
 // Idle detection for managers: developer with stale heartbeat during work hours
 async function idleCheck() {
-  const settings = await Setting.get();
   const now = new Date();
+  if (now.getHours() >= 17 || now.getHours() === 12) return; // Skip after 5 PM and during lunch break (12 PM - 1 PM)
+  const settings = await Setting.get();
   if (!isWorkday(now, settings)) return;
   const date = dayStr(now);
 

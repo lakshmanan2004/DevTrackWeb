@@ -4,8 +4,11 @@ const { Setting } = require('../models');
 // ---- shared builders ----------------------------------------------------
 
 function workLogDto(log, extra = {}) {
+  const isLate = !!(log.isLate || (log.submittedAt && (new Date(log.submittedAt).getHours() >= 17 || new Date(log.submittedAt) > new Date(new Date(log.submittedAt).setHours(log.hourSlot + 1, 0, 0, 0)))));
   return {
     id: String(log._id),
+    isLate,
+    submissionStatus: isLate ? 'Late Submit' : 'On Time',
     developerId: log.developer ? String(log.developer) : extra.developerId || '',
     developerName: extra.developerName || '',
     initials: extra.initials || '',
