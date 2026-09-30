@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { BellIcon, InfoIcon, LayersIcon } from 'lucide-react';
+import { BellIcon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
-import { Banner } from '../../components/ui/Banner';
 import { DeveloperCard } from '../../components/leader/DeveloperCard';
 import { DeveloperDetailPanel } from '../../components/leader/DeveloperDetailPanel';
 import { ProjectModulesSection } from '../../components/project/ProjectModulesSection';
@@ -54,7 +53,7 @@ export function LiveDashboard() {
     <>
       <PageHeader
         title="Live Dashboard"
-        subtitle={activeProject ? `${activeProject.name} · ${user?.teamName || 'Team'}` : `Select Project · ${user?.teamName || 'Team'}`}
+        subtitle={activeProject ? `${activeProject.name} · ${user?.teamName || 'Team'}` : (user?.teamName || 'Team')}
         actions={
           <>
             <span className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-danger-soft px-3 py-1.5 text-xs font-bold text-danger">
@@ -78,11 +77,6 @@ export function LiveDashboard() {
 
 
       <div className="flex-1 space-y-5 p-6">
-        <Banner tone="blue" icon={<InfoIcon className="h-4 w-4" />}>
-          {activeProject
-            ? `You are viewing ${user?.teamName} assigned to ${activeProject.name}. Updates stream in real time.`
-            : `You are viewing ${user?.teamName}. Select a project below to inspect delivery progress and developer submissions by module.`}
-        </Banner>
 
         <ProjectModulesSection
           project={activeProject}
