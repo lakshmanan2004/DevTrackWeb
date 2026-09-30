@@ -151,36 +151,9 @@ export function UserProfile() {
                 <h2 className="mt-3.5 text-xl font-bold text-navy">{user?.name}</h2>
                 <p className="text-xs text-gray-500 mt-0.5">{user?.email}</p>
 
-                {/* ROLE & PROJECT/TEAM PILLS */}
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                {/* ROLE BADGE ALONE */}
+                <div className="mt-3 flex items-center justify-center">
                   <Badge tone={roleTones[role]}>{roleLabels[role]}</Badge>
-
-                  {role === 'leader' || role === 'manager' ? (
-                    <>
-                      {displayProjects.map((p: any) => (
-                        <Badge key={p.id || p.name} tone="purple">
-                          Project: {p.name}
-                        </Badge>
-                      ))}
-                      {teams.length > 0 && role === 'leader' && (
-                        teams.map((t: any) => (
-                          <Badge key={t.id || t.name} tone="grey">
-                            Team: {t.name}
-                          </Badge>
-                        ))
-                      )}
-                      {teams.length > 0 && role === 'manager' && (
-                        <Badge tone="grey">
-                          {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
-                        </Badge>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {user?.teamName && <Badge tone="grey">Team: {user.teamName}</Badge>}
-                      {user?.projectName && <Badge tone="purple">Project: {user.projectName}</Badge>}
-                    </>
-                  )}
                 </div>
 
                 {/* METADATA LIST */}
@@ -207,77 +180,17 @@ export function UserProfile() {
                     </span>
                   </div>
 
-                  {/* Role Specific Details */}
-                  {role === 'leader' && (
-                    <>
-                      <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100">
-                        <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
-                          <UsersIcon className="h-4 w-4 text-slate-400 shrink-0" />
-                          <span>Assigned Teams</span>
-                        </span>
-                        <span className="font-semibold text-navy text-right pl-2 truncate max-w-[210px]">
-                          {teams.length > 0
-                            ? teams.map((t: any) => t.name).join(', ')
-                            : user?.teamName || '—'}
-                        </span>
-                      </div>
-
-                      <div className="flex items-start justify-between gap-4 py-2 border-b border-slate-100">
-                        <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium pt-0.5">
-                          <FolderIcon className="h-4 w-4 text-slate-400 shrink-0" />
-                          <span>Assigned Projects</span>
-                        </span>
-                        <div className="flex flex-wrap justify-end gap-1.5 text-right pl-2">
-                          {displayProjects.length > 0 ? (
-                            displayProjects.map((p: any) => (
-                              <span
-                                key={p.id || p.name}
-                                className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-200"
-                              >
-                                {p.name}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="font-semibold text-navy">None</span>
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {role === 'manager' && (
-                    <>
-                      <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100">
-                        <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
-                          <UsersIcon className="h-4 w-4 text-slate-400 shrink-0" />
-                          <span>Managed Teams</span>
-                        </span>
-                        <span className="font-semibold text-navy text-right pl-2">
-                          {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
-                        </span>
-                      </div>
-
-                      <div className="flex items-start justify-between gap-4 py-2 border-b border-slate-100">
-                        <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium pt-0.5">
-                          <FolderIcon className="h-4 w-4 text-slate-400 shrink-0" />
-                          <span>Managed Projects</span>
-                        </span>
-                        <div className="flex flex-wrap justify-end gap-1.5 text-right pl-2">
-                          {displayProjects.length > 0 ? (
-                            displayProjects.map((p: any) => (
-                              <span
-                                key={p.id || p.name}
-                                className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-200"
-                              >
-                                {p.name}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="font-semibold text-navy">None</span>
-                          )}
-                        </div>
-                      </div>
-                    </>
+                  {/* Assigned Projects count for Leader & Manager */}
+                  {(role === 'leader' || role === 'manager') && (
+                    <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100">
+                      <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
+                        <FolderIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                        <span>Assigned Projects</span>
+                      </span>
+                      <span className="font-bold text-navy text-right pl-2">
+                        {displayProjects.length} {displayProjects.length === 1 ? 'Project' : 'Projects'}
+                      </span>
+                    </div>
                   )}
 
                   {role === 'developer' && (
