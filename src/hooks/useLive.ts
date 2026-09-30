@@ -90,8 +90,8 @@ export const useTasks = () => useLive<{ tasks: any[] }>('/api/tasks', ['task:new
 export const useMyLogs = (date?: string) =>
   useLive<{ logs: any[]; stats?: any }>(`/api/logs${date ? `?date=${date}` : ''}`, ['log:new', 'log:review'], 20000);
 
-export const useCalendar = (month: string) =>
-  useLive<{ days: any[] }>(`/api/logs/calendar?month=${month}`, ['log:new', 'log:review', 'eod:new'], 60000);
+export const useCalendar = (month: string, developerId?: string) =>
+  useLive<{ days: any[] }>(`/api/logs/calendar?month=${month}${developerId ? `&developerId=${developerId}` : ''}`, ['log:new', 'log:review', 'eod:new'], 60000);
 
 export const usePendingWorks = () =>
   useLive<{ items: any[] }>('/api/logs/pending-works', ['log:review', 'task:new', 'task:update'], 30000);

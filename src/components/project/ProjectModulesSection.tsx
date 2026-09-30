@@ -16,12 +16,14 @@ import {
   AlertCircleIcon,
   InfoIcon,
   UsersIcon,
-  SparklesIcon
+  SparklesIcon,
+  CalendarIcon
 } from 'lucide-react';
 import { Project, ProjectModule, ModuleSubmittedLog } from '../../types';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { ProgressBar } from '../ui/ProgressBar';
+import { DeveloperCalendarModal } from '../leader/DeveloperCalendarModal';
 import { api, fileUrl } from '../../api/client';
 
 interface ProjectModulesSectionProps {
@@ -45,6 +47,7 @@ export function ProjectModulesSection({
   const [selectedModuleFilter, setSelectedModuleFilter] = useState('');
   const [expandedModuleIds, setExpandedModuleIds] = useState<Record<string, boolean>>({});
   const [activeScreenshot, setActiveScreenshot] = useState<{ url: string; title: string } | null>(null);
+  const [selectedCalendarDev, setSelectedCalendarDev] = useState<{ id: string; name: string; initials?: string; email?: string; team?: string } | null>(null);
   const [error, setError] = useState('');
 
   if (!project) {
@@ -239,29 +242,50 @@ export function ProjectModulesSection({
             </div>
 
             <div className="space-y-1.5 pt-1 border-t border-purple-100">
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                Assigned Developers:
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                  Assigned Developers:
+                </p>
+                <span className="text-[10px] font-medium text-purple-700">
+                  💡 Click any developer to view their calendar
+                </span>
+              </div>
               <div className="flex flex-wrap items-center gap-1.5">
                 {assignedDevsList.length > 0 ? (
                   assignedDevsList.map((devName: string, idx: number) => {
-                    const devObj = (developers || []).find((d: any) => d.name === devName || d.stat?.name === devName);
+                    const devObj = (developers || []).find((d: any) => d.name === devName || d.stat?.name === devName || d.id === devName || d._id === devName);
+                    const devId = devObj?.id || devObj?._id || devObj?.stat?.id || '';
+                    const devInitial = devObj?.initials || devObj?.stat?.initials || devName.slice(0, 2).toUpperCase();
+                    const devEmail = devObj?.email || devObj?.stat?.email || '';
+
                     return (
-                      <span
+                      <button
                         key={idx}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-purple-200 bg-white px-2.5 py-1 text-xs font-bold text-navy shadow-xs"
+                        type="button"
+                        onClick={() =>
+                          setSelectedCalendarDev({
+                            id: devId,
+                            name: devName,
+                            initials: devInitial,
+                            email: devEmail,
+                            team: project.team
+                          })
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 bg-white px-2.5 py-1 text-xs font-bold text-navy shadow-xs hover:border-brand hover:bg-brand-soft/40 hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+                        title={`Click to view ${devName}'s monthly task & activity calendar`}
                       >
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-[10px] font-extrabold text-white">
-                          {devObj?.initials || devName.slice(0, 2).toUpperCase()}
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-[10px] font-extrabold text-white group-hover:ring-2 group-hover:ring-brand/40 transition-all">
+                          {devInitial}
                         </span>
-                        {devName}
+                        <span className="group-hover:text-brand group-hover:underline">{devName}</span>
                         {devObj?.online && (
                           <span className="h-2 w-2 rounded-full bg-ok" title="Online now" />
                         )}
                         {devObj?.logs !== undefined && (
                           <span className="text-[10px] font-semibold text-gray-400">({devObj.logs} logs)</span>
                         )}
-                      </span>
+                        <CalendarIcon className="h-3 w-3 text-purple-400 group-hover:text-brand transition-colors ml-0.5" />
+                      </button>
                     );
                   })
                 ) : (
@@ -606,6 +630,15 @@ export function ProjectModulesSection({
             />
           </div>
         </div>
+      )}
+
+      {/* DEVELOPER CALENDAR MODAL */}
+      {selectedCalendarDev && (
+        <DeveloperCalendarModal
+          isOpen={!!selectedCalendarDev}
+          onClose={() => setSelectedCalendarDev(null)}
+          developer={selectedCalendarDev}
+        />
       )}
     </>
   );

@@ -384,7 +384,7 @@ router.post('/:id/feedback', requireRole('leader'), upload.single('screenshot'),
 
 // ---------- GET /api/logs/calendar?month=YYYY-MM (developer monthly widget) ----------
 router.get('/calendar', ah(async (req, res) => {
-  const me = req.user.role === 'developer' ? req.user._id : req.query.developerId || req.user._id;
+  const me = req.query.developerId || req.user._id;
   const devUser = await User.findById(me, 'joinedAt lunchSlot');
   const joinedDate = devUser?.joinedAt || (devUser?._id ? devUser._id.getTimestamp() : new Date());
   const joinedStr = new Date(joinedDate).toISOString().slice(0, 10);
