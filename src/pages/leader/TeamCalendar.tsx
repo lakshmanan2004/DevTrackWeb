@@ -31,12 +31,50 @@ export function TeamCalendar() {
 
   const { data: calData, loading, error, refetch } = useTeamCalendar(monthStr);
 
-  const days = calData?.days || [];
+  const daysInMonth = useMemo(() => new Date(currentYear, currentMonth, 0).getDate(), [currentYear, currentMonth]);
+  const serverDays: any[] = calData?.days || [];
   const developers = calData?.developers || [];
 
   const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
   const [selectedDateStr, setSelectedDateStr] = useState<string>(todayStr);
   const [devSearch, setDevSearch] = useState('');
+
+  // Always generate all days in the month (1..daysInMonth) merged with backend data
+  const days = useMemo(() => {
+    const list: any[] = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dStr = `${currentYear}-${pad(currentMonth)}-${pad(d)}`;
+      const serverDay = serverDays.find((sd: any) => sd.dateNum === d || sd.dateStr === dStr);
+      if (serverDay) {
+        list.push(serverDay);
+      } else {
+        const dateObj = new Date(currentYear, currentMonth - 1, d);
+        const dow = dateObj.getDay();
+        const isWeekend = dow === 0 || dow === 6;
+        const isToday = dStr === todayStr;
+        const isFuture = dStr > todayStr;
+        list.push({
+          dateNum: d,
+          dateStr: dStr,
+          fullLabel: dateObj.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }),
+          dayOfWeek: dow,
+          isWorkday: !isWeekend,
+          isToday,
+          isPast: dStr < todayStr,
+          isFuture,
+          status: isFuture ? 'future' : isWeekend ? 'weekend' : 'empty',
+          unsubmittedCount: 0,
+          pendingWorksCount: 0,
+          totalLogsCount: 0,
+          unsubmittedDevelopers: [],
+          submittedDevelopers: [],
+          pendingWorks: [],
+          logs: []
+        });
+      }
+    }
+    return list;
+  }, [daysInMonth, currentYear, currentMonth, serverDays, todayStr]);
 
   // When month changes, if selected date is not in month, select 1st day of that month
   useEffect(() => {
