@@ -14,15 +14,27 @@ async function scopeFor(user) {
   if (user.role === 'leader') {
     const teams = await Team.find({ leader: user._id });
     const ids = teams.map((t) => t._id);
-    const devs = teams.flatMap((t) => t.members);
-    return { teams, teamIds: ids, developerIds: devs, projectIds: teams.map((t) => t.project).filter(Boolean) };
+    const devsFromTeam = teams.flatMap((t) => t.members || []);
+    const devsWithTeamDoc = await User.find({ role: 'developer', team: { $in: ids } });
+    const devIdsSet = new Set([
+      ...devsFromTeam.map((d) => String(d._id || d)),
+      ...devsWithTeamDoc.map((d) => String(d._id))
+    ]);
+    const developerIds = Array.from(devIdsSet);
+    return { teams, teamIds: ids, developerIds, projectIds: teams.map((t) => t.project).filter(Boolean) };
   }
   if (user.role === 'manager') {
     const projects = await Project.find({ manager: user._id }).populate('team');
     const teams = projects.map((p) => p.team).filter(Boolean);
     const ids = teams.map((t) => t._id);
-    const devs = teams.flatMap((t) => t.members);
-    return { teams, teamIds: ids, developerIds: devs, projectIds: projects.map((p) => p._id) };
+    const devsFromTeam = teams.flatMap((t) => t.members || []);
+    const devsWithTeamDoc = await User.find({ role: 'developer', team: { $in: ids } });
+    const devIdsSet = new Set([
+      ...devsFromTeam.map((d) => String(d._id || d)),
+      ...devsWithTeamDoc.map((d) => String(d._id))
+    ]);
+    const developerIds = Array.from(devIdsSet);
+    return { teams, teamIds: ids, developerIds, projectIds: projects.map((p) => p._id) };
   }
   // developer: own team only
   const team = user.team ? await Team.findById(user.team) : null;

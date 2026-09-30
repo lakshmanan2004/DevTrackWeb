@@ -47,20 +47,27 @@ router.get('/', ah(async (req, res) => {
   const dateQuery = req.query.date;
   const scope = await scopeFor(req.user);
 
-  let developerFilter;
+  let query;
   if (req.user.role === 'developer') {
-    developerFilter = req.user._id;
+    query = { developer: req.user._id };
   } else if (req.query.developerId) {
     const id = String(req.query.developerId);
     if (!scope.developerIds.some((d) => String(d) === id)) {
       return res.status(403).json({ error: 'This developer is not in your scope' });
     }
-    developerFilter = id;
+    query = { developer: id };
+  } else if (req.user.role === 'admin') {
+    query = {};
   } else {
-    developerFilter = { $in: scope.developerIds };
+    query = {
+      $or: [
+        { developer: { $in: scope.developerIds } },
+        { team: { $in: scope.teamIds } },
+        { project: { $in: scope.projectIds } }
+      ]
+    };
   }
 
-  const query = { developer: developerFilter };
   if (dateQuery && dateQuery !== 'all') {
     query.date = dateQuery;
   } else if (req.user.role === 'developer' && !dateQuery) {
