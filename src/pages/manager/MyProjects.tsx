@@ -7,14 +7,16 @@ import {
   PlusIcon,
   TrophyIcon,
   UserCogIcon,
-  UsersIcon } from
-'lucide-react';
+  UsersIcon,
+  Trash2Icon
+} from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { useProjects } from '../../hooks/useLive';
 import { useAuth } from '../../context/AuthContext';
+import { api } from '../../api/client';
 
 const healthTone = {
   'On Track': 'green',
@@ -29,6 +31,18 @@ export function MyProjects() {
   const myProjects = data?.projects || [];
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [selectedProjectForClose, setSelectedProjectForClose] = useState<any>(null);
+
+  const handleDeleteProject = async (project: any) => {
+    if (!window.confirm(`Are you sure you want to permanently delete project "${project.name}"?\n\nThis will dissolve the team and free up developers.`)) {
+      return;
+    }
+    try {
+      await api(`/api/projects/${project.id}`, { method: 'DELETE' });
+      refetch();
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete project');
+    }
+  };
 
   const summary = [
   { label: 'Total', value: myProjects.length, tone: 'text-navy' },
@@ -125,6 +139,15 @@ export function MyProjects() {
                         {completed ? 'View Report' : 'View Progress'}
                       </Button>
                     </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteProject(project)}
+                      className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300"
+                      title="Delete Project"
+                    >
+                      <Trash2Icon className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
 

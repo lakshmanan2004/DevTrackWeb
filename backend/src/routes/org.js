@@ -234,6 +234,120 @@ router.patch('/projects/:id/modules/:moduleId', ah(async (req, res) => {
   res.json({ project: await fullProjectDto(populated) });
 }));
 
+// PATCH /api/projects/:id/status — Leader/Manager/Admin updates project overall status
+router.patch('/projects/:id/status', ah(async (req, res) => {
+  const { status } = req.body || {};
+  if (!['ongoing', 'completed', 'hold'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid project status. Must be ongoing, completed, or hold' });
+  }
+
+  const project = await Project.findById(req.params.id);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+
+  project.status = status;
+  if (status === 'completed') {
+    project.endedAt = new Date();
+    if (project.modules && project.modules.length > 0) {
+      for (const mod of project.modules) {
+        mod.status = 'completed';
+        if (!mod.completedAt) mod.completedAt = new Date();
+        if (!mod.completedBy) mod.completedBy = req.user._id;
+      }
+    }
+  } else if (status === 'ongoing' || status === 'hold') {
+    project.endedAt = null;
+  }
+
+  await project.save();
+
+  const populated = await Project.findById(project._id)
+    .populate('manager', 'name')
+    .populate({ path: 'team', populate: { path: 'leader', select: 'name' } })
+    .populate({ path: 'team', populate: { path: 'members', select: 'name' } });
+
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'project:update', { projectId: String(project._id) });
+  res.json({ project: await fullProjectDto(populated) });
+}));
+
+// PATCH /api/projects/:id — Manager/Admin updates project details
+router.patch('/projects/:id', requireRole('manager', 'admin'), ah(async (req, res) => {
+  const { status, name, description, targetDate } = req.body || {};
+  const project = await Project.findById(req.params.id);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+
+  if (name) project.name = name;
+  if (description !== undefined) project.description = description;
+  if (targetDate !== undefined) project.targetDate = targetDate ? new Date(targetDate) : null;
+  if (status) {
+    if (!['ongoing', 'completed', 'hold'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid project status' });
+    }
+    project.status = status;
+    if (status === 'completed') {
+      project.endedAt = new Date();
+      if (project.modules && project.modules.length > 0) {
+        for (const mod of project.modules) {
+          mod.status = 'completed';
+          if (!mod.completedAt) mod.completedAt = new Date();
+          if (!mod.completedBy) mod.completedBy = req.user._id;
+        }
+      }
+    } else if (status === 'ongoing' || status === 'hold') {
+      project.endedAt = null;
+    }
+  }
+
+  await project.save();
+
+  const populated = await Project.findById(project._id)
+    .populate('manager', 'name')
+    .populate({ path: 'team', populate: { path: 'leader', select: 'name' } })
+    .populate({ path: 'team', populate: { path: 'members', select: 'name' } });
+
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'project:update', { projectId: String(project._id) });
+  res.json({ project: await fullProjectDto(populated) });
+}));
+
+// DELETE /api/projects/:id — Admin & Project Manager delete project
+router.delete('/projects/:id', requireRole('admin', 'manager'), ah(async (req, res) => {
+  const project = await Project.findById(req.params.id);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+
+  // If manager, ensure they manage this project (admin can delete any project)
+  if (req.user.role === 'manager' && project.manager && String(project.manager) !== String(req.user._id)) {
+    return res.status(403).json({ error: 'You can only delete projects you manage' });
+  }
+
+  const teamId = project.team;
+  if (teamId) {
+    const team = await Team.findById(teamId);
+    if (team) {
+      // Free up all developer members
+      if (team.members && team.members.length > 0) {
+        await User.updateMany({ _id: { $in: team.members } }, { team: null });
+      }
+      // Free up team leader if this team was attached
+      if (team.leader) {
+        await User.findByIdAndUpdate(team.leader, { team: null });
+      }
+      // Delete associated team
+      await Team.findByIdAndDelete(teamId);
+    }
+  }
+
+  // Delete work logs for this project
+  await WorkLog.deleteMany({ project: project._id });
+
+  // Delete project
+  await Project.findByIdAndDelete(project._id);
+
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'project:delete', { projectId: String(project._id) });
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'team:update', {});
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'user:update', {});
+
+  res.json({ ok: true, message: 'Project and associated team deleted successfully' });
+}));
+
 // GET /api/projects/:id/overview — weekly breakdown + live blockers
 router.get('/projects/:id/overview', ah(async (req, res) => {
   const scope = await scopeFor(req.user);

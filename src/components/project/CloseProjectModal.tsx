@@ -5,12 +5,14 @@ import {
   PauseCircleIcon,
   TrophyIcon,
   XIcon,
-  AlertTriangleIcon
+  AlertTriangleIcon,
+  Trash2Icon
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { ProgressBar } from '../ui/ProgressBar';
 import { api } from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
 
 interface CloseProjectModalProps {
   open: boolean;
@@ -20,14 +22,16 @@ interface CloseProjectModalProps {
 }
 
 export function CloseProjectModal({ open, project, onClose, onSuccess }: CloseProjectModalProps) {
+  const { user } = useAuth();
   const [selectedStatus, setSelectedStatus] = useState<'completed' | 'ongoing' | 'hold'>(
-    project?.status === 'completed' ? 'completed' : 'completed'
+    project?.status === 'completed' ? 'completed' : project?.status === 'hold' ? 'hold' : 'ongoing'
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
   if (!open || !project) return null;
 
+  const canDelete = user?.role === 'admin' || user?.role === 'manager';
   const modules = project.modules || [];
   const completedModules = modules.filter((m: any) => m.status === 'completed').length;
   const totalModules = modules.length;
@@ -44,6 +48,23 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
       onClose();
     } catch (err: any) {
       setError(err.message || 'Failed to update project status');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!window.confirm(`Are you sure you want to permanently delete project "${project.name}"?\n\nThis will remove the project, unassign team developers so they can join other projects, and clear project work logs.`)) {
+      return;
+    }
+    setBusy(true);
+    setError('');
+    try {
+      await api(`/api/projects/${project.id}`, { method: 'DELETE' });
+      onSuccess?.();
+      onClose();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete project');
     } finally {
       setBusy(false);
     }
@@ -219,9 +240,23 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
 
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-hairline bg-canvas px-6 py-4">
-          <Button variant="secondary" onClick={onClose} disabled={busy}>
-            Cancel
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" onClick={onClose} disabled={busy}>
+              Cancel
+            </Button>
+            {canDelete && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleDeleteProject}
+                disabled={busy}
+                icon={<Trash2Icon className="h-4 w-4 text-rose-500" />}
+                className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 text-xs"
+              >
+                Delete Project
+              </Button>
+            )}
+          </div>
           <Button
             onClick={handleUpdateStatus}
             disabled={busy}
