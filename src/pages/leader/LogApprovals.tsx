@@ -44,7 +44,7 @@ export function LogApprovals() {
   const developers = devData?.developers || [];
 
   const queue = data?.logs || [];
-  const [filter, setFilter] = useState('pending');
+  const [filter, setFilter] = useState('all');
   const [activeModalItem, setActiveModalItem] = useState<{ developer: string; log: any } | null>(null);
   const [selectedText, setSelectedText] = useState('');
   const [activeScreenshotModal, setActiveScreenshotModal] = useState<{ url: string; title: string } | null>(null);
@@ -99,13 +99,21 @@ export function LogApprovals() {
 
   const scopedQueue = queue.filter((item: any) => {
     if (developerFilter) {
-      const targetDevId = String(developerFilter).trim();
+      const target = String(developerFilter).trim().toLowerCase();
       const itemDevId = String(
         item.developerId ||
         (item.developer && (item.developer._id || item.developer.id || item.developer)) ||
         ''
-      ).trim();
-      if (itemDevId !== targetDevId) return false;
+      ).trim().toLowerCase();
+      const itemDevName = String(item.developerName || '').trim().toLowerCase();
+
+      const selectedDevObj = developers.find((d: any) => getDevId(d) === developerFilter);
+      const selectedDevName = selectedDevObj ? (selectedDevObj.name || selectedDevObj.stat?.name || '').trim().toLowerCase() : '';
+
+      const matchId = itemDevId && (itemDevId === target || (selectedDevObj && itemDevId === getDevId(selectedDevObj).toLowerCase()));
+      const matchName = (itemDevName && (itemDevName === target || (selectedDevName && itemDevName === selectedDevName))) || false;
+
+      if (!matchId && !matchName) return false;
     }
     if (moduleFilter && item.moduleName !== moduleFilter) return false;
     return true;

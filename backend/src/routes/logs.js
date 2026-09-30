@@ -79,8 +79,20 @@ router.get('/', ah(async (req, res) => {
     query = { developer: toObjId(req.user._id) };
   } else if (req.query.developerId) {
     const id = String(req.query.developerId);
-    const objId = toObjId(id);
-    query = { $or: [{ developer: objId }, { developer: id }] };
+    const conditions = [];
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      conditions.push({ developer: new mongoose.Types.ObjectId(id) });
+      conditions.push({ developer: id });
+    } else {
+      const matchingUsers = await User.find({ name: new RegExp(`^${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }, '_id');
+      const uIds = matchingUsers.map((u) => u._id);
+      if (uIds.length) {
+        conditions.push({ developer: { $in: uIds } });
+      } else {
+        conditions.push({ developer: id });
+      }
+    }
+    query = conditions.length > 1 ? { $or: conditions } : (conditions[0] || {});
   } else if (req.user.role === 'admin') {
     query = {};
   } else {
