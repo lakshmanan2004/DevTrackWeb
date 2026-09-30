@@ -87,8 +87,26 @@ export function LogApprovals() {
     }
   };
 
+  const getDevId = (dev: any) => {
+    if (!dev) return '';
+    if (typeof dev === 'string') return dev;
+    if (dev.id && typeof dev.id === 'string') return dev.id;
+    if (dev._id && typeof dev._id === 'string') return dev._id;
+    if (dev.stat && dev.stat.id) return String(dev.stat.id);
+    if (dev.raw && dev.raw._id) return String(dev.raw._id);
+    return String(dev._id || dev.id || dev);
+  };
+
   const scopedQueue = queue.filter((item: any) => {
-    if (developerFilter && String(item.developerId || item.developer?._id || item.developer) !== String(developerFilter)) return false;
+    if (developerFilter) {
+      const targetDevId = String(developerFilter).trim();
+      const itemDevId = String(
+        item.developerId ||
+        (item.developer && (item.developer._id || item.developer.id || item.developer)) ||
+        ''
+      ).trim();
+      if (itemDevId !== targetDevId) return false;
+    }
     if (moduleFilter && item.moduleName !== moduleFilter) return false;
     return true;
   });
@@ -163,11 +181,14 @@ export function LogApprovals() {
                   className="bg-transparent text-xs font-bold text-brand focus:outline-none cursor-pointer"
                 >
                   <option value="">All Developers ({developers.length})</option>
-                  {developers.map((dev: any) => (
-                    <option key={dev.id || dev._id} value={dev.id || dev._id}>
-                      {dev.name}
-                    </option>
-                  ))}
+                  {developers.map((dev: any) => {
+                    const dId = getDevId(dev);
+                    return (
+                      <option key={dId} value={dId}>
+                        {dev.name || dev.stat?.name || 'Developer'}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             )}

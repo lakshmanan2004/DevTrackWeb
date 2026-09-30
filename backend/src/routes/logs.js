@@ -37,9 +37,30 @@ async function saveUpload(file) {
 }
 
 async function dtoWithDev(log) {
-  const dev = await User.findById(log.developer, 'name initials');
-  const project = log.project ? await Project.findById(log.project, 'name') : null;
-  return workLogDto(log, { developerName: dev ? dev.name : '', initials: dev ? dev.initials : '', projectName: project ? project.name : '' });
+  let devName = '';
+  let initials = '';
+  const devObj = log.developer;
+  if (devObj && typeof devObj === 'object' && devObj.name) {
+    devName = devObj.name;
+    initials = devObj.initials || '';
+  } else if (devObj) {
+    const dev = await User.findById(devObj, 'name initials');
+    if (dev) {
+      devName = dev.name;
+      initials = dev.initials || '';
+    }
+  }
+
+  let projName = '';
+  const projObj = log.project;
+  if (projObj && typeof projObj === 'object' && projObj.name) {
+    projName = projObj.name;
+  } else if (projObj) {
+    const project = await Project.findById(projObj, 'name');
+    if (project) projName = project.name;
+  }
+
+  return workLogDto(log, { developerName: devName, initials, projectName: projName });
 }
 
 // ---------- GET /api/logs?date=&developerId= ----------
@@ -58,7 +79,8 @@ router.get('/', ah(async (req, res) => {
     query = { developer: toObjId(req.user._id) };
   } else if (req.query.developerId) {
     const id = String(req.query.developerId);
-    query = { developer: toObjId(id) };
+    const objId = toObjId(id);
+    query = { $or: [{ developer: objId }, { developer: id }] };
   } else if (req.user.role === 'admin') {
     query = {};
   } else {

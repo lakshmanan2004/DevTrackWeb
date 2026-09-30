@@ -5,11 +5,22 @@ const { Setting } = require('../models');
 
 function workLogDto(log, extra = {}) {
   const isLate = !!(log.isLate || (log.submittedAt && (new Date(log.submittedAt).getHours() >= 17 || new Date(log.submittedAt) > new Date(new Date(log.submittedAt).setHours(log.hourSlot + 1, 0, 0, 0)))));
+  let devId = extra.developerId || '';
+  if (log.developer) {
+    if (typeof log.developer === 'object' && log.developer._id) {
+      devId = String(log.developer._id);
+    } else if (typeof log.developer === 'string') {
+      devId = log.developer;
+    } else {
+      devId = String(log.developer);
+    }
+  }
+
   return {
     id: String(log._id),
     isLate,
     submissionStatus: isLate ? 'Late Submit' : 'On Time',
-    developerId: log.developer ? String(log.developer) : extra.developerId || '',
+    developerId: devId,
     developerName: extra.developerName || '',
     initials: extra.initials || '',
     date: log.date,
