@@ -554,25 +554,26 @@ router.get('/pending-works', requireRole('developer'), ah(async (req, res) => {
 router.get('/team-calendar', ah(async (req, res) => {
   const scope = await scopeFor(req.user);
   const mongoose = require('mongoose');
-  const toObjId = (id) => (id && mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id);
 
-  const devObjectIds = (scope.developerIds || []).map(toObjId);
+  const candidateDevIds = new Set((scope.developerIds || []).map(String));
+  if (scope.teamIds && scope.teamIds.length) {
+    const teamDevs = await User.find({ role: 'developer', team: { $in: scope.teamIds } }, '_id');
+    teamDevs.forEach((d) => candidateDevIds.add(String(d._id)));
+  }
+  if (scope.projectIds && scope.projectIds.length) {
+    const projectDevs = await WorkLog.distinct('developer', { project: { $in: scope.projectIds } });
+    projectDevs.forEach((d) => candidateDevIds.add(String(d)));
+  }
 
   let devQuery = { role: 'developer', active: true };
-  if (req.user.role === 'leader' || req.user.role === 'manager') {
-    if (devObjectIds.length) {
-      devQuery._id = { $in: devObjectIds };
-    } else {
-      const leaderTeams = await Team.find({ leader: req.user._id });
-      if (leaderTeams.length) {
-        devQuery = { role: 'developer', active: true, team: { $in: leaderTeams.map((t) => t._id) } };
-      }
-    }
+  if (candidateDevIds.size > 0 && req.user.role === 'leader') {
+    const validIds = Array.from(candidateDevIds).filter((id) => mongoose.Types.ObjectId.isValid(id)).map((id) => new mongoose.Types.ObjectId(id));
+    if (validIds.length) devQuery._id = { $in: validIds };
   }
 
   let developers = await User.find(devQuery, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
   // Fallback for leader/manager if no explicit team mapping exists in demo data
-  if (!developers.length && (req.user.role === 'leader' || req.user.role === 'manager')) {
+  if (!developers.length) {
     developers = await User.find({ role: 'developer', active: true }, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
   }
 
@@ -598,28 +599,18 @@ router.get('/team-calendar', ah(async (req, res) => {
   }
 
   const daysInMonth = new Date(year, month, 0).getDate();
-  const targetDevIds = developers.map((d) => d._id);
-  const targetDevIdStrings = developers.map((d) => String(d._id));
-  const allDevIdentifiers = [...targetDevIds, ...targetDevIdStrings];
-
-  // Fetch all logs for this month for target developers
   const monthStartStr = `${year}-${String(month).padStart(2, '0')}-01`;
   const monthEndStr = `${year}-${String(month).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
 
-  const allMonthLogs = targetDevIds.length
-    ? await WorkLog.find({
-        date: { $gte: monthStartStr, $lte: monthEndStr },
-        developer: { $in: allDevIdentifiers }
-      }).populate('project', 'name').sort({ date: 1, hourSlot: 1 })
-    : [];
+  // Fetch all logs for this month
+  const allMonthLogs = await WorkLog.find({
+    date: { $gte: monthStartStr, $lte: monthEndStr }
+  }).populate('developer', 'name initials email jobTitle').populate('project', 'name').sort({ date: 1, hourSlot: 1 });
 
   // Fetch all tasks created in or relevant to this month
-  const allTasks = targetDevIds.length
-    ? await Task.find({
-        assignee: { $in: allDevIdentifiers },
-        status: { $ne: 'completed' }
-      }).populate('linkedLog').sort({ createdAt: -1 })
-    : [];
+  const allTasks = await Task.find({
+    status: { $ne: 'completed' }
+  }).populate('assignee', 'name initials').populate('linkedLog').sort({ createdAt: -1 });
 
   const currentSlot = slotForNow(settings, now);
   const days = [];
@@ -644,7 +635,7 @@ router.get('/team-calendar', ah(async (req, res) => {
     for (const dev of developers) {
       const devLogs = dayLogs.filter((l) => {
         const devId = l.developer && typeof l.developer === 'object' ? String(l.developer._id || l.developer) : String(l.developer);
-        return devId === String(dev._id);
+        return devId === String(dev._id) || (l.developer && l.developer.name && l.developer.name.toLowerCase() === dev.name.toLowerCase());
       });
       const submittedCount = devLogs.length;
       const submittedSlots = devLogs.map((l) => l.hourSlot);
@@ -699,7 +690,7 @@ router.get('/team-calendar', ah(async (req, res) => {
 
       if (isReviewPending || isChangesReq || isBlocked || isProgress) {
         const logDevId = log.developer && typeof log.developer === 'object' ? String(log.developer._id || log.developer) : String(log.developer);
-        const dev = devMap[logDevId] || { name: 'Developer', initials: 'DV' };
+        const dev = devMap[logDevId] || (log.developer && log.developer.name ? log.developer : { name: 'Developer', initials: 'DV' });
         pendingWorks.push({
           id: String(log._id),
           kind: 'log',
@@ -729,34 +720,33 @@ router.get('/team-calendar', ah(async (req, res) => {
     }
 
     // 2. Tasks active on this date
-    const dayTasks = allTasks.filter((t) => {
+    for (const t of allTasks) {
+      const assigneeId = t.assignee && typeof t.assignee === 'object' ? String(t.assignee._id || t.assignee) : String(t.assignee);
+      const dev = devMap[assigneeId] || (t.assignee && t.assignee.name ? t.assignee : { name: t.assignedByName || 'Developer', initials: 'DV' });
       const tCreatedStr = t.createdAt ? dayStr(t.createdAt) : '';
       const tDueStr = t.dueDate || '';
-      return tCreatedStr === dStr || tDueStr === dStr || (isToday && t.status !== 'completed');
-    });
 
-    for (const t of dayTasks) {
-      const assigneeId = t.assignee && typeof t.assignee === 'object' ? String(t.assignee._id || t.assignee) : String(t.assignee);
-      const dev = devMap[assigneeId] || { name: 'Developer', initials: 'DV' };
-      pendingWorks.push({
-        id: String(t._id),
-        kind: 'task',
-        developerId: assigneeId,
-        developerName: dev.name,
-        initials: dev.initials || initialsOf(dev.name),
-        taskTitle: t.title,
-        projectName: 'Assigned Task',
-        hourLabel: 'Assigned Task',
-        status: t.status === 'in_progress' ? 'in_progress' : 'pending_submission',
-        review: 'pending',
-        feedbackNote: t.note || 'Assigned task by lead',
-        attachmentUrl: '',
-        attachmentName: '',
-        isPendingWorkSubmission: false,
-        originalPendingDate: '',
-        pendingSubmissionAt: null,
-        submittedAt: t.createdAt
-      });
+      if (tCreatedStr === dStr || tDueStr === dStr || isToday) {
+        pendingWorks.push({
+          id: String(t._id),
+          kind: 'task',
+          developerId: assigneeId,
+          developerName: dev.name,
+          initials: dev.initials || initialsOf(dev.name),
+          taskTitle: t.title,
+          projectName: 'Assigned Task',
+          hourLabel: 'Assigned Task',
+          status: t.status === 'in_progress' ? 'in_progress' : 'pending_submission',
+          review: 'pending',
+          feedbackNote: t.note || 'Assigned task by lead',
+          attachmentUrl: '',
+          attachmentName: '',
+          isPendingWorkSubmission: false,
+          originalPendingDate: '',
+          pendingSubmissionAt: null,
+          submittedAt: t.createdAt
+        });
+      }
     }
 
     let dayStatus = 'completed';
@@ -788,7 +778,7 @@ router.get('/team-calendar', ah(async (req, res) => {
       pendingWorks,
       logs: dayLogs.map((l) => {
         const logDevId = l.developer && typeof l.developer === 'object' ? String(l.developer._id || l.developer) : String(l.developer);
-        const dev = devMap[logDevId] || { name: 'Developer', initials: 'DV' };
+        const dev = devMap[logDevId] || (l.developer && l.developer.name ? l.developer : { name: 'Developer', initials: 'DV' });
         return {
           id: String(l._id),
           developerId: logDevId,
@@ -827,5 +817,6 @@ router.get('/team-calendar', ah(async (req, res) => {
 }));
 
 module.exports = router;
+
 
 
