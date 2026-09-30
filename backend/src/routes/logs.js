@@ -412,6 +412,84 @@ router.get('/calendar', ah(async (req, res) => {
     const dow = date.getDay();
     const dayLogs = logs.filter((l) => l.date === ds);
     const eod = eods.find((e) => e.date === ds);
+
+    const loggedSlots = new Set(dayLogs.map((l) => l.hourSlot));
+    const isWork = isWorkday(date, settings);
+    const missedSlots = [];
+
+    if (isWork && ds >= joinedStr && ds <= todayStr) {
+      const now = new Date();
+      const isToday = ds === todayStr;
+      const currentHour = now.getHours();
+
+      for (const slot of required) {
+        if (isToday && slot > currentHour) continue;
+        if (!loggedSlots.has(slot)) {
+          const startH = slot % 12 === 0 ? 12 : slot % 12;
+          const startAp = slot >= 12 ? 'PM' : 'AM';
+          const endSlot = slot + 1;
+          const endH = endSlot % 12 === 0 ? 12 : endSlot % 12;
+          const endAp = endSlot >= 12 ? 'PM' : 'AM';
+          missedSlots.push({
+            slot,
+            hourLabel: hourLabel(slot),
+            timeRange: `${startH}:00 ${startAp} – ${endH}:00 ${endAp}`,
+            status: 'Not Submitted',
+            reason: 'Check-in was required but no work log was submitted for this slot.'
+          });
+        }
+      }
+    }
+
+    const pendingTasksList = dayLogs.filter((l) =>
+      l.isPendingWorkSubmission ||
+      l.status !== 'done' ||
+      l.review === 'changes_requested' ||
+      l.review === 'pending'
+    ).map((l) => ({
+      id: String(l._id),
+      task: l.task,
+      title: l.task,
+      description: l.description,
+      status: l.status,
+      review: l.review,
+      hourLabel: hourLabel(l.hourSlot),
+      activeMinutes: l.activeMinutes || 0,
+      isPendingWorkSubmission: !!l.isPendingWorkSubmission,
+      originalPendingDate: l.originalPendingDate || '',
+      blocker: l.blocker || '',
+      tlNote: l.targetedFeedback && l.targetedFeedback.length
+        ? l.targetedFeedback[l.targetedFeedback.length - 1].comment
+        : undefined,
+      targetedFeedback: (l.targetedFeedback || []).map((fb) => ({
+        id: fb.id,
+        highlightedText: fb.highlightedText,
+        comment: fb.comment,
+        screenshotUrl: fb.screenshotUrl,
+        screenshotName: fb.screenshotName
+      }))
+    }));
+
+    const allTasksList = dayLogs.map((l) => ({
+      id: String(l._id),
+      task: l.task,
+      title: l.task,
+      description: l.description,
+      status: l.status,
+      review: l.review,
+      hourLabel: hourLabel(l.hourSlot),
+      activeMinutes: l.activeMinutes || 0,
+      wordCount: l.wordCount || 0,
+      attachmentUrl: l.attachmentUrl || '',
+      attachmentName: l.attachmentName || '',
+      isPendingWorkSubmission: !!l.isPendingWorkSubmission,
+      originalPendingDate: l.originalPendingDate || '',
+      blocker: l.blocker || '',
+      tlNote: l.targetedFeedback && l.targetedFeedback.length
+        ? l.targetedFeedback[l.targetedFeedback.length - 1].comment
+        : undefined
+    }));
+
     let status;
     if (dow === 0 || dow === 6) status = 'weekend';
     else if (ds < joinedStr) status = 'off';
@@ -423,6 +501,7 @@ router.get('/calendar', ah(async (req, res) => {
       const hasUnresolved = dayLogs.some((l) => l.review !== 'approved');
       status = !hasUnresolved && eod ? 'approved' : 'pending';
     }
+
     days.push({
       dateNum: dnum,
       dateStr: ds,
@@ -431,20 +510,16 @@ router.get('/calendar', ah(async (req, res) => {
       tasksCount: dayLogs.length,
       approvedCount: dayLogs.filter((l) => l.review === 'approved').length,
       pendingCount: dayLogs.filter((l) => l.review !== 'approved').length,
+      missedCount: missedSlots.length,
+      missedSlots,
+      pendingTasks: pendingTasksList,
+      pendingTasksCount: pendingTasksList.length,
+      allTasks: allTasksList,
       activeTime: fmtDuration(dayLogs.reduce((s, l) => s + (l.activeMinutes || 0), 0)),
       notes: dayLogs.some((l) => l.review !== 'approved')
         ? `${dayLogs.filter((l) => l.review !== 'approved').length} task(s) require action / resubmission.`
         : undefined,
-      tasks: dayLogs.slice(0, 4).map((l) => ({
-        id: String(l._id),
-        title: l.task,
-        status: l.status,
-        review: l.review,
-        hourLabel: hourLabel(l.hourSlot),
-        tlNote: l.targetedFeedback && l.targetedFeedback.length
-          ? l.targetedFeedback[l.targetedFeedback.length - 1].comment
-          : undefined
-      }))
+      tasks: allTasksList
     });
   }
   res.json({ days });
