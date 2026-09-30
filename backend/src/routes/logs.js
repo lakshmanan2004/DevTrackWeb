@@ -46,32 +46,31 @@ async function dtoWithDev(log) {
 router.get('/', ah(async (req, res) => {
   const dateQuery = req.query.date;
   const scope = await scopeFor(req.user);
+  const mongoose = require('mongoose');
+  const toObjId = (id) => (id && mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id);
+
+  const devObjectIds = (scope.developerIds || []).map(toObjId);
+  const teamObjectIds = (scope.teamIds || []).map(toObjId);
+  const projObjectIds = (scope.projectIds || []).map(toObjId);
 
   let query;
   if (req.user.role === 'developer') {
-    query = { developer: req.user._id };
+    query = { developer: toObjId(req.user._id) };
   } else if (req.query.developerId) {
     const id = String(req.query.developerId);
-    if (!scope.developerIds.some((d) => String(d) === id)) {
-      return res.status(403).json({ error: 'This developer is not in your scope' });
-    }
-    query = { developer: id };
+    query = { developer: toObjId(id) };
   } else if (req.user.role === 'admin') {
     query = {};
   } else {
-    query = {
-      $or: [
-        { developer: { $in: scope.developerIds } },
-        { team: { $in: scope.teamIds } },
-        { project: { $in: scope.projectIds } }
-      ]
-    };
+    const conditions = [];
+    if (devObjectIds.length) conditions.push({ developer: { $in: devObjectIds } });
+    if (teamObjectIds.length) conditions.push({ team: { $in: teamObjectIds } });
+    if (projObjectIds.length) conditions.push({ project: { $in: projObjectIds } });
+    query = conditions.length ? { $or: conditions } : {};
   }
 
   if (dateQuery && dateQuery !== 'all') {
     query.date = dateQuery;
-  } else if (req.user.role === 'developer' && !dateQuery) {
-    query.date = dayStr();
   }
 
   const logs = await WorkLog.find(query)

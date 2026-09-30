@@ -20,7 +20,7 @@ import { isLogLate } from '../../utils/logTimeliness';
 
 export function WorkLogs() {
   const { user } = useAuth();
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState<string>('all');
   const { data, loading } = useMyLogs(date);
   const todayLogs = data?.logs || [];
   const stats = data?.stats;
