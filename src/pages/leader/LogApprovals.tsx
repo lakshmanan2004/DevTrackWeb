@@ -313,7 +313,15 @@ export function LogApprovals() {
                     <p className="text-sm font-semibold text-navy">
                       {log.developerName}
                       <span className="ml-2 font-normal text-gray-500">
-                        📅 Slot: {log.date} · {log.hourLabel} · Submitted on: <strong className="font-semibold text-slate-700">{log.submittedDate || log.pendingSubmissionDate || log.date}</strong> at {log.submittedAt} · {log.project || user?.teamName}
+                        {log.isPendingWorkSubmission ? (
+                          <>
+                            📅 Kept Pending on: <strong className="font-semibold text-amber-900">{log.originalPendingDate || log.date}</strong> ({log.hourLabel}) · Submitted on: <strong className="font-semibold text-navy">{log.pendingSubmissionDate || log.submittedDate || log.date} at {log.pendingSubmissionAt || log.submittedAt}</strong> · {log.project || user?.teamName}
+                          </>
+                        ) : (
+                          <>
+                            📅 {log.date} · {log.hourLabel} · {isLate ? `submitted late at ${log.submittedAt}` : `submitted ${log.submittedAt}`} · {log.project || user?.teamName}
+                          </>
+                        )}
                       </span>
                     </p>
                     {isLate && (
@@ -537,29 +545,38 @@ export function LogApprovals() {
                     Validation checklist
                   </h3>
                   <ul className="mt-3 space-y-2.5 text-xs">
-                    {log.isPendingWorkSubmission && (
-                      <li className="flex items-center gap-2 text-gray-700">
-                        <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" aria-hidden="true" />
-                        <span>
-                          Pending work from <strong className="font-semibold text-navy">{log.originalPendingDate || log.date}</strong>
-                        </span>
+                    {log.isPendingWorkSubmission ? (
+                      <>
+                        <li className="flex items-start gap-2 text-gray-700">
+                          <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" aria-hidden="true" />
+                          <span>
+                            Kept Pending: <strong className="font-semibold text-navy">{log.originalPendingDate || log.date}</strong>
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2 text-gray-700">
+                          <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
+                          <span>
+                            Submitted: <strong className="font-semibold text-navy">{log.pendingSubmissionDate || log.submittedDate || log.date}</strong> at {log.pendingSubmissionAt || log.submittedAt}
+                          </span>
+                        </li>
+                      </>
+                    ) : (
+                      <li className="flex items-start gap-2 text-gray-700">
+                        {isLate ? (
+                          <>
+                            <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 font-bold" aria-hidden="true" />
+                            <span className="font-bold text-amber-900 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300">
+                              Submitted Late at {log.submittedAt}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
+                            <span>Submitted at {log.submittedAt}</span>
+                          </>
+                        )}
                       </li>
                     )}
-                    <li className="flex items-start gap-2 text-gray-700">
-                      {isLate ? (
-                        <>
-                          <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 font-bold" aria-hidden="true" />
-                          <span className="font-bold text-amber-900 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300">
-                            Submitted Late on {log.submittedDate || log.pendingSubmissionDate || log.date} at {log.submittedAt}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
-                          <span>Submitted on <strong className="font-semibold text-navy">{log.submittedDate || log.pendingSubmissionDate || log.date}</strong> at {log.submittedAt}</span>
-                        </>
-                      )}
-                    </li>
                     <li className="flex items-start gap-2 text-gray-700">
                       <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
                       {log.wordCount} words — meets minimum
