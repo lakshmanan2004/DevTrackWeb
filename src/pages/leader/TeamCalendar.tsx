@@ -228,23 +228,23 @@ export function TeamCalendar() {
         {/* ========================================================================= */}
         {/* LEFT COLUMN: MONTHLY CALENDAR (EXACT DEVELOPER PORTAL REFERENCE DESIGN)    */}
         {/* ========================================================================= */}
-        <div className="xl:col-span-5 flex flex-col rounded-2xl border border-amber-300/80 bg-white p-5 shadow-card">
+        <div className="xl:col-span-5 flex flex-col rounded-2xl border border-hairline bg-white p-5 shadow-card">
           {/* CALENDAR HEADER */}
           <div className="flex items-center justify-between border-b border-hairline pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/10 text-brand">
                 <CalendarIcon className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-sm font-extrabold text-amber-950 uppercase tracking-wider">
+                <h2 className="text-sm font-extrabold text-navy uppercase tracking-wider">
                   {monthLabel}
                 </h2>
-                <p className="text-xs text-amber-800">Monthly Task Status &amp; Pending Calendar</p>
+                <p className="text-xs text-slate-500">Team Attendance &amp; Work Calendar</p>
               </div>
             </div>
 
-            <span className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white shadow-sm">
-              <ClockIcon className="h-3.5 w-3.5" />
+            <span className="flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm">
+              <ClockIcon className="h-3.5 w-3.5 text-brand" />
               {totalPendingInMonth} Pending
             </span>
           </div>
@@ -296,27 +296,19 @@ export function TeamCalendar() {
 
               {days.map((day: any) => {
                 const isSelected = day.dateStr === selectedDateStr;
-                const hasUnsubmitted = day.unsubmittedCount > 0;
-                const hasPending = day.pendingWorksCount > 0;
-                const isWeekend = !day.isWorkday;
+                const isToday = day.isToday;
                 const isFuture = day.isFuture;
 
-                // Color tones matching Developer Portal reference image:
-                // Red (Rose-500): Missed / Unsubmitted logs (e.g. 24, 25 in image)
-                // Amber (Amber-400): Pending works (e.g. 28, 29, 30 in image)
-                // Light Slate: Completed / normal workday
-                // Muted Slate: Weekend / off
-                let dayStyle = 'bg-slate-100 text-slate-700 hover:bg-slate-200';
-                if (hasUnsubmitted) {
-                  dayStyle = 'bg-rose-500 text-white shadow-sm hover:bg-rose-600';
-                } else if (hasPending) {
-                  dayStyle = 'bg-[#f59e0b] text-white shadow-sm hover:bg-[#d97706]';
-                } else if (day.totalLogsCount > 0) {
-                  dayStyle = 'bg-emerald-500 text-white shadow-sm hover:bg-emerald-600';
-                } else if (isWeekend) {
-                  dayStyle = 'bg-slate-100/70 text-slate-400 border border-slate-200/60';
+                let dayStyle = 'bg-slate-50 border border-slate-200/80 text-slate-700 hover:bg-slate-100 hover:text-navy';
+
+                if (isToday && isSelected) {
+                  dayStyle = 'bg-brand text-white border-2 border-brand shadow-md ring-4 ring-brand/20 scale-105 z-10 font-black';
+                } else if (isToday) {
+                  dayStyle = 'bg-brand text-white border-2 border-brand shadow-sm font-black';
+                } else if (isSelected) {
+                  dayStyle = 'bg-brand/10 border-2 border-brand text-brand shadow-sm ring-2 ring-brand/30 scale-105 z-10 font-extrabold';
                 } else if (isFuture) {
-                  dayStyle = 'bg-slate-50 text-slate-300';
+                  dayStyle = 'bg-transparent text-slate-300 border border-transparent hover:bg-slate-50 hover:text-slate-400';
                 }
 
                 return (
@@ -324,12 +316,8 @@ export function TeamCalendar() {
                     key={day.dateStr}
                     type="button"
                     onClick={() => setSelectedDateStr(day.dateStr)}
-                    title={`${day.fullLabel} — ${day.unsubmittedCount} Not Submitted, ${day.pendingWorksCount} Pending`}
-                    className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-extrabold transition-all duration-150 transform hover:scale-105 cursor-pointer ${dayStyle} ${
-                      isSelected
-                        ? 'ring-3 ring-brand ring-offset-2 scale-105 shadow-md z-10'
-                        : ''
-                    }`}
+                    title={`${day.fullLabel}${isToday ? ' (Today)' : ''} — ${day.unsubmittedCount} Not Submitted, ${day.pendingWorksCount} Pending`}
+                    className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer ${dayStyle}`}
                   >
                     {day.dateNum}
                   </button>
@@ -340,23 +328,18 @@ export function TeamCalendar() {
 
           {/* CALENDAR LEGEND */}
           <div className="mt-5 border-t border-hairline pt-3">
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <div className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-md bg-rose-500 shrink-0" />
-                <span className="font-semibold text-rose-950">Not Submitted / Missed</span>
+            <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-3 w-3 rounded-md bg-brand shrink-0" />
+                  <span className="font-semibold text-slate-700">Today</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="h-3 w-3 rounded-md border-2 border-brand bg-brand/10 shrink-0" />
+                  <span className="font-semibold text-slate-700">Selected Date</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-md bg-[#f59e0b] shrink-0" />
-                <span className="font-bold text-amber-900">Pending Works Active</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-md bg-emerald-500 shrink-0" />
-                <span className="font-semibold text-emerald-950">All Logs Done</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-md bg-slate-100 border border-slate-300 shrink-0" />
-                <span className="font-semibold text-gray-500">Off / Weekend</span>
-              </div>
+              <span className="text-[11px] text-slate-400">Click date to inspect</span>
             </div>
           </div>
         </div>

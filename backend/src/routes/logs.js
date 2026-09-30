@@ -575,9 +575,9 @@ router.get('/team-calendar', ah(async (req, res) => {
     if (validIds.length) devQuery._id = { $in: validIds };
   }
 
-  let developers = await User.find(devQuery, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
+  let developers = await User.find(devQuery, '_id name initials email jobTitle lastSeenAt joinedAt').sort({ name: 1 });
   if (!developers.length) {
-    developers = await User.find({ role: 'developer', active: { $ne: false } }, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
+    developers = await User.find({ role: 'developer', active: { $ne: false } }, '_id name initials email jobTitle lastSeenAt joinedAt').sort({ name: 1 });
   }
 
   const devMap = {};
@@ -636,6 +636,13 @@ router.get('/team-calendar', ah(async (req, res) => {
 
     // Group logs by developer
     for (const dev of developers) {
+      // Only evaluate check-ins from the date the developer was created
+      const devCreatedDate = dev.joinedAt || (dev._id && dev._id.getTimestamp ? dev._id.getTimestamp() : null);
+      const devCreatedDateStr = devCreatedDate ? dayStr(new Date(devCreatedDate)) : null;
+      if (devCreatedDateStr && dStr < devCreatedDateStr) {
+        // Date is before developer account creation date
+        continue;
+      }
       const devLogs = dayLogs.filter((l) => {
         const devId = l.developer && typeof l.developer === 'object' ? String(l.developer._id || l.developer) : String(l.developer);
         return devId === String(dev._id) || (l.developer && l.developer.name && l.developer.name.toLowerCase() === dev.name.toLowerCase());
