@@ -12,7 +12,10 @@ import {
   ImageIcon,
   XIcon,
   TimerIcon,
-  AlertCircleIcon
+  AlertCircleIcon,
+  InfoIcon,
+  UsersIcon,
+  SparklesIcon
 } from 'lucide-react';
 import { Project, ProjectModule, ModuleSubmittedLog } from '../../types';
 import { Badge } from '../ui/Badge';
@@ -21,9 +24,10 @@ import { ProgressBar } from '../ui/ProgressBar';
 import { api, fileUrl } from '../../api/client';
 
 interface ProjectModulesSectionProps {
-  project: Project;
+  project?: Project | null;
   allProjects?: Project[];
   onSelectProject?: (projectId: string) => void;
+  developers?: any[];
   canUpdate?: boolean;
   onModuleUpdated?: () => void;
 }
@@ -32,6 +36,7 @@ export function ProjectModulesSection({
   project,
   allProjects = [],
   onSelectProject,
+  developers = [],
   canUpdate = true,
   onModuleUpdated
 }: ProjectModulesSectionProps) {
@@ -40,6 +45,54 @@ export function ProjectModulesSection({
   const [expandedModuleIds, setExpandedModuleIds] = useState<Record<string, boolean>>({});
   const [activeScreenshot, setActiveScreenshot] = useState<{ url: string; title: string } | null>(null);
   const [error, setError] = useState('');
+
+  if (!project) {
+    return (
+      <section className="rounded-2xl border-2 border-brand/40 bg-gradient-to-br from-white via-brand-soft/20 to-brand-soft/40 p-6 shadow-card space-y-4 animate-in fade-in">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand/20 pb-4">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white shadow-md ring-4 ring-brand/20">
+              <LayersIcon className="h-6 w-6 animate-pulse" />
+            </div>
+            <div>
+              <h2 className="text-base font-extrabold text-navy">
+                ⚡ Select a Project to Inspect Modules & Delivery Progress
+              </h2>
+              <p className="text-xs text-gray-600 mt-0.5">
+                No project selected by default. Pick a project from the dropdown to inspect developer submissions by module.
+              </p>
+            </div>
+          </div>
+
+          {allProjects && allProjects.length > 0 && onSelectProject && (
+            <div className="flex items-center gap-2 rounded-xl border-2 border-brand bg-white px-3.5 py-2 shadow-sm ring-4 ring-brand/10">
+              <label htmlFor="pms-project-select-empty" className="text-xs font-extrabold text-navy whitespace-nowrap flex items-center gap-1.5">
+                <LayersIcon className="h-4 w-4 text-brand" />
+                Select Project:
+              </label>
+              <select
+                id="pms-project-select-empty"
+                value=""
+                onChange={(e) => onSelectProject(e.target.value)}
+                className="bg-transparent text-xs font-extrabold text-brand focus:outline-none cursor-pointer"
+              >
+                <option value="" disabled>— Click to Select a Project ({allProjects.length}) —</option>
+                {allProjects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.team || 'Team'})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div className="py-8 text-center text-sm text-gray-500 font-medium">
+          Please select a project from the dropdown above to inspect its delivery progress, module milestones, and developer submissions.
+        </div>
+      </section>
+    );
+  }
 
   const modules = project.modules || [];
   const completedWeight = modules
@@ -70,23 +123,32 @@ export function ProjectModulesSection({
     ? modules.filter((m) => m.id === selectedModuleFilter || m.name === selectedModuleFilter)
     : modules;
 
+  const assignedDevsList = project.developerNames && project.developerNames.length > 0
+    ? project.developerNames
+    : developers.map((d: any) => d.name || d.stat?.name || '').filter(Boolean);
+
   return (
     <>
-      <section className="rounded-card border border-hairline bg-white p-5 shadow-card space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="flex items-center gap-2 text-base font-extrabold text-navy">
-                <LayersIcon className="h-5 w-5 text-brand" />
-                {project?.name ? `${project.name} — Modules & Delivery Progress` : 'Project Modules & Delivery Progress'} ({modules.length})
-              </h2>
-              {project?.name && (
-                <Badge tone="purple">Project: {project.name}</Badge>
-              )}
+      <section className="rounded-2xl border-2 border-brand/30 bg-white p-6 shadow-card space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-hairline pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-white shadow-sm">
+              <LayersIcon className="h-5 w-5" />
             </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Project progress is calculated strictly from Team Leader completed modules ({completedWeight}% completed). Work logs do not alter project progress.
-            </p>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base font-extrabold text-navy">
+                  ⚡ {project.name} — Modules & Delivery Progress
+                </h2>
+                <Badge tone="purple">{modules.length} Modules</Badge>
+                <Badge tone={completedWeight >= 70 ? 'green' : completedWeight >= 40 ? 'yellow' : 'blue'}>
+                  {completedWeight}% Completed
+                </Badge>
+              </div>
+              <p className="mt-0.5 text-xs text-gray-500">
+                Project progress is calculated strictly from Team Leader completed modules ({completedWeight}% completed). Work logs do not alter project progress.
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -110,15 +172,109 @@ export function ProjectModulesSection({
                 </select>
               </div>
             )}
-            <Badge tone={completedWeight >= 70 ? 'green' : completedWeight >= 40 ? 'yellow' : 'blue'}>
-              Overall Progress: {completedWeight}%
-            </Badge>
           </div>
         </div>
 
-        <div className="space-y-2">
+        {/* HIGHLIGHTED ABOUT THE PROJECT & WHO IS DOING THIS PROJECT */}
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* ABOUT THE PROJECT CARD */}
+          <div className="rounded-xl border-2 border-brand/20 bg-gradient-to-br from-brand-soft/30 to-blue-50/40 p-4 shadow-xs space-y-2.5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-extrabold text-brand uppercase tracking-wider flex items-center gap-1.5">
+                <InfoIcon className="h-4 w-4 text-brand" />
+                About the Project
+              </h3>
+              <Badge tone={project.status === 'completed' ? 'green' : 'blue'}>
+                {project.status.toUpperCase()}
+              </Badge>
+            </div>
+
+            <p className="text-sm font-bold text-navy">
+              {project.name}
+            </p>
+            <p className="text-xs text-gray-700 leading-relaxed">
+              {project.description || 'Dedicated academic portal and product delivery platform for staff and students.'}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-brand/10 text-[11px] font-semibold text-gray-600">
+              {project.started && <span>Started: <strong className="text-navy">{project.started}</strong></span>}
+              {project.targetDate && <span>· Target: <strong className="text-navy">{project.targetDate}</strong></span>}
+              {project.repoUrl && (
+                <a
+                  href={project.repoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ml-auto inline-flex items-center gap-1 text-brand font-bold hover:underline"
+                >
+                  <GithubIcon className="h-3 w-3" /> Repository ↗
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* WHO IS DOING THIS PROJECT CARD */}
+          <div className="rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50/50 to-brand-soft/20 p-4 shadow-xs space-y-2.5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-extrabold text-purple-900 uppercase tracking-wider flex items-center gap-1.5">
+                <UsersIcon className="h-4 w-4 text-purple-600" />
+                Who is Doing this Project
+              </h3>
+              <span className="text-[11px] font-extrabold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                {assignedDevsList.length} Developer{assignedDevsList.length !== 1 ? 's' : ''} Assigned
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-gray-500">Team:</span>
+                <span className="font-extrabold text-navy">Team {project.team || 'VStudy'}</span>
+              </div>
+              {project.leader && (
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-gray-500">Leader:</span>
+                  <span className="font-extrabold text-brand">{project.leader}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1.5 pt-1 border-t border-purple-100">
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                Assigned Developers:
+              </p>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {assignedDevsList.length > 0 ? (
+                  assignedDevsList.map((devName: string, idx: number) => {
+                    const devObj = (developers || []).find((d: any) => d.name === devName || d.stat?.name === devName);
+                    return (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-purple-200 bg-white px-2.5 py-1 text-xs font-bold text-navy shadow-xs"
+                      >
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-[10px] font-extrabold text-white">
+                          {devObj?.initials || devName.slice(0, 2).toUpperCase()}
+                        </span>
+                        {devName}
+                        {devObj?.online && (
+                          <span className="h-2 w-2 rounded-full bg-ok" title="Online now" />
+                        )}
+                        {devObj?.logs !== undefined && (
+                          <span className="text-[10px] font-semibold text-gray-400">({devObj.logs} logs)</span>
+                        )}
+                      </span>
+                    );
+                  })
+                ) : (
+                  <span className="text-xs text-gray-500 italic">No developers assigned yet</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* COMPLETION PROGRESS */}
+        <div className="space-y-2 rounded-xl border border-hairline bg-canvas/60 p-3.5">
           <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
-            <span>Completion Progress</span>
+            <span className="font-bold text-navy">Completion Progress</span>
             <span className="text-navy font-bold">{completedWeight}% of 100%</span>
           </div>
           <ProgressBar
