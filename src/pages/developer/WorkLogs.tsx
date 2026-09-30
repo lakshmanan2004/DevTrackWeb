@@ -54,26 +54,41 @@ export function WorkLogs() {
         title="My Work Logs"
         subtitle={user?.leaderName ? `Only you and ${user.leaderName} can see these logs` : 'Only you and your Team Leader can see these logs'}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 rounded-xl border border-hairline bg-white p-1 shadow-card">
             <button
               type="button"
-              onClick={() => setDate(date === 'all' ? new Date().toISOString().slice(0, 10) : 'all')}
-              className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${
-                date === 'all'
-                  ? 'border-brand bg-brand text-white'
-                  : 'border-hairline bg-white text-navy hover:bg-gray-50'
+              onClick={() => setDate(new Date().toISOString().slice(0, 10))}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                date === new Date().toISOString().slice(0, 10)
+                  ? 'bg-brand text-white shadow-sm'
+                  : 'text-navy hover:bg-gray-100'
               }`}
             >
-              {date === 'all' ? 'Showing All Logs' : 'View All Dates'}
+              Today's Logs
             </button>
-            <label className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-white px-3 py-2 text-sm font-semibold text-navy">
-              <CalendarIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
+
+            <button
+              type="button"
+              onClick={() => setDate('all')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                date === 'all'
+                  ? 'bg-brand text-white shadow-sm'
+                  : 'text-navy hover:bg-gray-100'
+              }`}
+            >
+              Show All Logs
+            </button>
+
+            <div className="h-4 w-px bg-gray-200 mx-0.5" />
+
+            <label className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-navy cursor-pointer">
+              <CalendarIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
               <span className="sr-only">Pick a date</span>
               <input
                 type="date"
                 value={date === 'all' ? '' : date}
                 onChange={(e) => setDate(e.target.value || 'all')}
-                className="bg-transparent text-sm outline-none cursor-pointer"
+                className="bg-transparent text-xs font-bold text-navy outline-none cursor-pointer"
               />
             </label>
           </div>
