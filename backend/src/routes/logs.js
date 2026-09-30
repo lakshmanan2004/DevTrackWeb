@@ -85,9 +85,10 @@ router.get('/', ah(async (req, res) => {
 
   // day stats (for developer dashboards)
   let stats = null;
+  const targetDate = (dateQuery && dateQuery !== 'all') ? dateQuery : dayStr();
   if (req.user.role === 'developer' || req.query.developerId) {
     const devId = req.user.role === 'developer' ? req.user._id : req.query.developerId;
-    const { perDev } = await dayStats([devId], date);
+    const { perDev } = await dayStats([devId], targetDate);
     const s = perDev[String(devId)];
     if (s) {
       stats = {
