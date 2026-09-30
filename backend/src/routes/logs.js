@@ -449,6 +449,168 @@ router.get('/calendar', ah(async (req, res) => {
   res.json({ days });
 }));
 
+// ---------- GET /api/logs/team-calendar?month=YYYY-MM (Team Leader team monthly calendar) ----------
+router.get('/team-calendar', requireRole('leader', 'manager', 'admin'), ah(async (req, res) => {
+  const scope = await scopeFor(req.user);
+  const [y, m] = (req.query.month || dayStr().slice(0, 7)).split('-').map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const settings = await Setting.get();
+  const todayStr = dayStr();
+  const required = requiredSlots(settings);
+
+  // 1. Fetch team developers
+  const devs = await User.find({ _id: { $in: scope.developerIds }, active: true }).select('name initials email jobTitle lastSeenAt');
+
+  // 2. Fetch all WorkLogs for the month
+  const startDate = `${y}-${String(m).padStart(2, '0')}-01`;
+  const endDate = `${y}-${String(m).padStart(2, '0')}-${daysInMonth}`;
+  const logs = await WorkLog.find({
+    developer: { $in: devs.map((d) => d._id) },
+    date: { $gte: startDate, $lte: endDate }
+  }).populate('developer', 'name initials').populate('project', 'name').sort({ hourSlot: 1 });
+
+  // 3. Fetch all Tasks for the team
+  const tasks = await Task.find({
+    assignee: { $in: devs.map((d) => d._id) }
+  }).populate('assignee', 'name initials').populate('linkedLog');
+
+  const days = [];
+  for (let dnum = 1; dnum <= daysInMonth; dnum++) {
+    const ds = `${y}-${String(m).padStart(2, '0')}-${String(dnum).padStart(2, '0')}`;
+    const dateObj = new Date(y, m - 1, dnum);
+    const dow = dateObj.getDay();
+    const isWeekend = dow === 0 || dow === 6;
+    const isFuture = ds > todayStr;
+    const isToday = ds === todayStr;
+
+    const dayLogs = logs.filter((l) => l.date === ds);
+    const dayTasks = tasks.filter((t) => {
+      const taskDate = t.createdAt ? dayStr(t.createdAt) : '';
+      const dueDate = t.dueDate || '';
+      return taskDate === ds || dueDate === ds;
+    });
+
+    const unsubmittedDevelopers = [];
+    const submittedDevelopers = [];
+
+    for (const dev of devs) {
+      const devLogs = dayLogs.filter((l) => String(l.developer?._id || l.developer) === String(dev._id));
+      const loggedSlots = new Set(devLogs.map((l) => l.hourSlot));
+
+      const currentSlot = slotForNow(settings);
+      const applicableSlots = isToday
+        ? required.filter((s) => s <= currentSlot)
+        : required;
+
+      const missedSlotNumbers = applicableSlots.filter((s) => !loggedSlots.has(s));
+      const missedSlots = missedSlotNumbers.map(hourLabel);
+      const missedCount = missedSlotNumbers.length;
+      const submittedCount = devLogs.length;
+
+      const devInfo = {
+        developerId: String(dev._id),
+        developerName: dev.name,
+        initials: dev.initials || dev.name.slice(0, 2).toUpperCase(),
+        email: dev.email,
+        jobTitle: dev.jobTitle,
+        lastSeenAt: dev.lastSeenAt,
+        missedCount,
+        missedSlots,
+        submittedCount,
+        totalRequired: applicableSlots.length,
+        activeMinutes: devLogs.reduce((acc, l) => acc + (l.activeMinutes || 0), 0),
+        status: submittedCount === 0 ? 'not_submitted' : missedCount > 0 ? 'partial' : 'submitted'
+      };
+
+      if (!isWeekend && !isFuture && missedCount > 0) {
+        unsubmittedDevelopers.push(devInfo);
+      }
+      if (submittedCount > 0) {
+        submittedDevelopers.push(devInfo);
+      }
+    }
+
+    const pendingWorks = [];
+    for (const log of dayLogs) {
+      const isPending = log.review === 'changes_requested' || log.review === 'pending' || log.status === 'blocked';
+      if (isPending) {
+        const fb = log.targetedFeedback && log.targetedFeedback.length
+          ? log.targetedFeedback[log.targetedFeedback.length - 1]
+          : null;
+        pendingWorks.push({
+          id: String(log._id),
+          kind: 'log',
+          developerId: log.developer ? String(log.developer._id || log.developer) : '',
+          developerName: log.developer && log.developer.name ? log.developer.name : '',
+          initials: log.developer && log.developer.initials ? log.developer.initials : '',
+          taskTitle: log.task,
+          hourLabel: hourLabel(log.hourSlot),
+          status: log.status,
+          review: log.review,
+          moduleName: log.moduleName || '',
+          feedbackNote: fb ? fb.comment : log.reviewNote || (log.status === 'blocked' ? `Blocker: ${log.blocker}` : log.description),
+          attachmentUrl: log.attachmentUrl || '',
+          submittedAt: fmtTime(log.submittedAt)
+        });
+      }
+    }
+
+    for (const t of dayTasks) {
+      if (t.status !== 'completed') {
+        const isLinkedLogPending = t.linkedLog && t.linkedLog.review === 'pending';
+        pendingWorks.push({
+          id: String(t._id),
+          kind: 'task',
+          developerId: t.assignee ? String(t.assignee._id || t.assignee) : '',
+          developerName: t.assignee && t.assignee.name ? t.assignee.name : 'Developer',
+          initials: t.assignee && t.assignee.initials ? t.assignee.initials : '',
+          taskTitle: t.title,
+          hourLabel: isLinkedLogPending ? 'Awaiting Approval' : 'Assigned Task',
+          status: t.status,
+          review: isLinkedLogPending ? 'pending' : 'pending_submission',
+          moduleName: '',
+          feedbackNote: t.note || 'Assigned task pending completion',
+          attachmentUrl: '',
+          submittedAt: t.createdAt ? fmtTime(t.createdAt) : ''
+        });
+      }
+    }
+
+    let dayStatus;
+    if (isWeekend) dayStatus = 'weekend';
+    else if (isFuture) dayStatus = 'future';
+    else if (unsubmittedDevelopers.length === 0 && pendingWorks.length === 0 && dayLogs.length > 0) dayStatus = 'all_submitted';
+    else if (unsubmittedDevelopers.length > 0 || pendingWorks.length > 0) dayStatus = 'has_unsubmitted';
+    else dayStatus = 'empty';
+
+    days.push({
+      dateNum: dnum,
+      dateStr: ds,
+      fullLabel: isToday ? `${fmtDateMDY(dateObj)} (Today)` : fmtDateMDY(dateObj),
+      status: dayStatus,
+      isToday,
+      isWeekend,
+      isFuture,
+      unsubmittedDevelopers,
+      submittedDevelopers,
+      pendingWorks,
+      totalLogsCount: dayLogs.length,
+      approvedLogsCount: dayLogs.filter((l) => l.review === 'approved').length,
+      unsubmittedCount: unsubmittedDevelopers.length,
+      pendingWorksCount: pendingWorks.length,
+      activeTime: fmtDuration(dayLogs.reduce((s, l) => s + (l.activeMinutes || 0), 0))
+    });
+  }
+
+  res.json({
+    month: `${y}-${String(m).padStart(2, '0')}`,
+    monthLabel: new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }),
+    teamName: req.user.teamName || 'Team',
+    totalDevelopers: devs.length,
+    days
+  });
+}));
+
 // ---------- GET /api/logs/pending-works (developer resubmission & task queue) ----------
 router.get('/pending-works', requireRole('developer'), ah(async (req, res) => {
   const devUser = await User.findById(req.user._id).populate('team');
@@ -550,4 +712,260 @@ router.get('/pending-works', requireRole('developer'), ah(async (req, res) => {
   res.json({ items });
 }));
 
+// ---------- GET /api/logs/team-calendar?month=YYYY-MM ----------
+router.get('/team-calendar', ah(async (req, res) => {
+  const scope = await scopeFor(req.user);
+  const mongoose = require('mongoose');
+  const toObjId = (id) => (id && mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id);
+
+  const devObjectIds = (scope.developerIds || []).map(toObjId);
+
+  let devQuery = { role: 'developer', active: true };
+  if (req.user.role === 'leader' || req.user.role === 'manager') {
+    if (devObjectIds.length) {
+      devQuery._id = { $in: devObjectIds };
+    } else {
+      // Leader with no team developers yet
+      devQuery._id = { $in: [] };
+    }
+  }
+
+  const developers = await User.find(devQuery, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
+  const devMap = {};
+  developers.forEach((d) => {
+    devMap[String(d._id)] = d;
+  });
+
+  const settings = await Setting.get();
+  const reqSlots = requiredSlots(settings);
+  const totalRequiredSlots = reqSlots.length;
+
+  const now = new Date();
+  const todayStr = dayStr(now);
+
+  // Month param (format YYYY-MM)
+  let year = now.getFullYear();
+  let month = now.getMonth() + 1; // 1-12
+  if (req.query.month && /^\d{4}-\d{2}$/.test(req.query.month)) {
+    const parts = req.query.month.split('-').map(Number);
+    year = parts[0];
+    month = parts[1];
+  }
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const targetDevIds = developers.map((d) => d._id);
+
+  // Fetch all logs for this month for target developers
+  const monthStartStr = `${year}-${String(month).padStart(2, '0')}-01`;
+  const monthEndStr = `${year}-${String(month).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+
+  const allMonthLogs = targetDevIds.length
+    ? await WorkLog.find({
+        date: { $gte: monthStartStr, $lte: monthEndStr },
+        developer: { $in: targetDevIds }
+      }).populate('project', 'name').sort({ date: 1, hourSlot: 1 })
+    : [];
+
+  // Fetch all tasks created in or relevant to this month
+  const monthStartDate = new Date(`${monthStartStr}T00:00:00`);
+  const monthEndDate = new Date(`${monthEndStr}T23:59:59`);
+  const allTasks = targetDevIds.length
+    ? await Task.find({
+        assignee: { $in: targetDevIds },
+        createdAt: { $lte: monthEndDate },
+        status: { $ne: 'completed' }
+      }).populate('linkedLog').sort({ createdAt: -1 })
+    : [];
+
+  const days = [];
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayObj = fromDayStr(dStr);
+    const isWork = isWorkday(dayObj, settings);
+    const isToday = dStr === todayStr;
+    const isPast = dStr < todayStr;
+    const isFuture = dStr > todayStr;
+
+    const dayLogs = allMonthLogs.filter((l) => l.date === dStr);
+    const unsubmittedDevelopers = [];
+    const submittedDevelopers = [];
+
+    // Group logs by developer
+    for (const dev of developers) {
+      const devLogs = dayLogs.filter((l) => String(l.developer) === String(dev._id));
+      const submittedCount = devLogs.length;
+      const submittedSlots = devLogs.map((l) => l.hourSlot);
+      const missedSlotsNums = reqSlots.filter((s) => !submittedSlots.includes(s));
+      const missedSlotsLabels = missedSlotsNums.map((s) => hourLabel(s));
+      const activeMin = devLogs.reduce((acc, l) => acc + (l.activeMinutes || 0), 0);
+
+      if ((isPast || isToday) && isWork) {
+        if (submittedCount < totalRequiredSlots) {
+          unsubmittedDevelopers.push({
+            developerId: String(dev._id),
+            developerName: dev.name,
+            initials: dev.initials || initialsOf(dev.name),
+            email: dev.email,
+            jobTitle: dev.jobTitle || 'Developer',
+            missedCount: totalRequiredSlots - submittedCount,
+            missedSlots: missedSlotsLabels,
+            submittedCount,
+            totalRequired: totalRequiredSlots,
+            activeMinutes: activeMin,
+            lastSeenAt: dev.lastSeenAt,
+            status: submittedCount === 0 ? 'Not Submitted' : 'Partially Submitted'
+          });
+        }
+      }
+
+      if (submittedCount > 0) {
+        submittedDevelopers.push({
+          developerId: String(dev._id),
+          developerName: dev.name,
+          initials: dev.initials || initialsOf(dev.name),
+          email: dev.email,
+          jobTitle: dev.jobTitle || 'Developer',
+          submittedCount,
+          totalRequired: totalRequiredSlots,
+          activeMinutes: activeMin,
+          lastSeenAt: dev.lastSeenAt,
+          status: submittedCount >= totalRequiredSlots ? 'Fully Submitted' : 'Partially Submitted'
+        });
+      }
+    }
+
+    // Pending works for this date
+    const pendingWorks = [];
+
+    // 1. Logs requiring attention / pending approval / blocked / changes requested
+    for (const log of dayLogs) {
+      const isReviewPending = log.review === 'pending';
+      const isChangesReq = ['changes_requested', 'rejected'].includes(log.review);
+      const isBlocked = log.status === 'blocked';
+      const isProgress = log.status === 'progress' && (isPast || isToday);
+
+      if (isReviewPending || isChangesReq || isBlocked || isProgress) {
+        const dev = devMap[String(log.developer)];
+        pendingWorks.push({
+          id: String(log._id),
+          kind: 'log',
+          developerId: String(log.developer),
+          developerName: dev ? dev.name : 'Developer',
+          initials: dev ? (dev.initials || initialsOf(dev.name)) : 'DV',
+          taskTitle: log.task,
+          projectName: log.project ? log.project.name : 'Project',
+          hourLabel: `${hourLabel(log.hourSlot)} Slot`,
+          status: isChangesReq
+            ? 'changes_requested'
+            : isReviewPending
+            ? 'awaiting_lead_approval'
+            : isBlocked
+            ? 'blocked'
+            : 'in_progress',
+          review: log.review,
+          feedbackNote: log.reviewNote || log.blocker || log.description || '',
+          attachmentUrl: log.attachmentUrl || '',
+          attachmentName: log.attachmentName || '',
+          isPendingWorkSubmission: !!log.isPendingWorkSubmission,
+          originalPendingDate: log.originalPendingDate || '',
+          pendingSubmissionAt: log.pendingSubmissionAt || null,
+          submittedAt: log.submittedAt
+        });
+      }
+    }
+
+    // 2. Tasks created on or around this date that are not completed
+    const dayTasks = allTasks.filter((t) => {
+      const tDateStr = dayStr(t.createdAt);
+      return tDateStr === dStr;
+    });
+
+    for (const t of dayTasks) {
+      const dev = devMap[String(t.assignee)];
+      pendingWorks.push({
+        id: String(t._id),
+        kind: 'task',
+        developerId: String(t.assignee),
+        developerName: dev ? dev.name : 'Developer',
+        initials: dev ? (dev.initials || initialsOf(dev.name)) : 'DV',
+        taskTitle: t.title,
+        projectName: 'Assigned Task',
+        hourLabel: 'Assigned Task',
+        status: t.status === 'in_progress' ? 'in_progress' : 'pending_submission',
+        review: 'pending',
+        feedbackNote: t.note || 'Assigned task by lead',
+        attachmentUrl: '',
+        attachmentName: '',
+        isPendingWorkSubmission: false,
+        originalPendingDate: '',
+        pendingSubmissionAt: null,
+        submittedAt: t.createdAt
+      });
+    }
+
+    let dayStatus = 'completed';
+    if (isFuture) {
+      dayStatus = 'future';
+    } else if (!isWork && dayLogs.length === 0) {
+      dayStatus = 'weekend';
+    } else if (unsubmittedDevelopers.length > 0) {
+      dayStatus = 'attention';
+    } else if (pendingWorks.length > 0) {
+      dayStatus = 'pending';
+    }
+
+    days.push({
+      dateNum: d,
+      dateStr: dStr,
+      fullLabel: fmtDateLong(dayObj),
+      dayOfWeek: dayObj.getDay(),
+      isWorkday: isWork,
+      isToday,
+      isPast,
+      isFuture,
+      status: dayStatus,
+      unsubmittedCount: unsubmittedDevelopers.length,
+      pendingWorksCount: pendingWorks.length,
+      totalLogsCount: dayLogs.length,
+      unsubmittedDevelopers,
+      submittedDevelopers,
+      pendingWorks,
+      logs: dayLogs.map((l) => ({
+        id: String(l._id),
+        developerId: String(l.developer),
+        developerName: devMap[String(l.developer)]?.name || 'Developer',
+        initials: devMap[String(l.developer)]?.initials || 'DV',
+        taskTitle: l.task,
+        projectName: l.project ? l.project.name : 'Project',
+        hourLabel: `${hourLabel(l.hourSlot)} Slot`,
+        status: l.status,
+        review: l.review,
+        description: l.description,
+        attachmentUrl: l.attachmentUrl || '',
+        attachmentName: l.attachmentName || '',
+        activeMinutes: l.activeMinutes || 0,
+        submittedAt: l.submittedAt
+      }))
+    });
+  }
+
+  res.json({
+    month: `${year}-${String(month).padStart(2, '0')}`,
+    year,
+    monthNum: month,
+    totalDevelopers: developers.length,
+    developers: developers.map((d) => ({
+      id: String(d._id),
+      name: d.name,
+      initials: d.initials || initialsOf(d.name),
+      email: d.email,
+      jobTitle: d.jobTitle || 'Developer'
+    })),
+    requiredSlotsCount: totalRequiredSlots,
+    days
+  });
+}));
+
 module.exports = router;
+

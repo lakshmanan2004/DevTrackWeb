@@ -115,4 +115,8 @@ export const useWeeklyReport = (developerId: string, week = 0) =>
 
 export const usePerformance = () => useLive<any>('/api/reports/performance', ['log:new', 'log:review', 'task:update', 'eod:new'], 60000);
 
+export const useTeamCalendar = (month: string) =>
+  useLive<any>(`/api/logs/team-calendar?month=${month}`, ['log:new', 'log:review', 'task:new', 'task:update', 'presence:update'], 30000);
+
 export const usePublicStats = () => useLive<any>('/api/auth/stats/public', ['log:new'], 60000);
+

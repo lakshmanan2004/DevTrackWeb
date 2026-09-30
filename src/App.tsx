@@ -12,6 +12,7 @@ import { DeveloperProfile } from './pages/developer/DeveloperProfile';
 import { MyPendingWorks } from './pages/developer/MyPendingWorks';
 import { MyProjects as DeveloperMyProjects } from './pages/developer/MyProjects';
 import { LiveDashboard } from './pages/leader/LiveDashboard';
+import { TeamCalendar } from './pages/leader/TeamCalendar';
 import { AllDevelopers } from './pages/leader/AllDevelopers';
 import { LeaderAlerts } from './pages/leader/LeaderAlerts';
 import { WeeklyReports } from './pages/leader/WeeklyReports';
@@ -68,6 +69,7 @@ export function App() {
 
         <Route element={<Protected role="leader"><AppShell role="leader" /></Protected>}>
           <Route path="/leader" element={<LiveDashboard />} />
+          <Route path="/leader/calendar" element={<TeamCalendar />} />
           <Route path="/leader/developers" element={<AllDevelopers />} />
           <Route path="/leader/alerts" element={<LeaderAlerts />} />
           <Route path="/leader/reports" element={<WeeklyReports />} />
