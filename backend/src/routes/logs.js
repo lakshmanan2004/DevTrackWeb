@@ -557,24 +557,27 @@ router.get('/team-calendar', ah(async (req, res) => {
 
   const candidateDevIds = new Set((scope.developerIds || []).map(String));
   if (scope.teamIds && scope.teamIds.length) {
-    const teamDevs = await User.find({ role: 'developer', team: { $in: scope.teamIds } }, '_id');
+    const teamDevs = await User.find({ role: 'developer', active: { $ne: false }, team: { $in: scope.teamIds } }, '_id');
     teamDevs.forEach((d) => candidateDevIds.add(String(d._id)));
+  }
+  if (req.user.team) {
+    const ownTeamDevs = await User.find({ role: 'developer', active: { $ne: false }, team: req.user.team }, '_id');
+    ownTeamDevs.forEach((d) => candidateDevIds.add(String(d._id)));
   }
   if (scope.projectIds && scope.projectIds.length) {
     const projectDevs = await WorkLog.distinct('developer', { project: { $in: scope.projectIds } });
     projectDevs.forEach((d) => candidateDevIds.add(String(d)));
   }
 
-  let devQuery = { role: 'developer', active: true };
+  let devQuery = { role: 'developer', active: { $ne: false } };
   if (candidateDevIds.size > 0 && req.user.role === 'leader') {
     const validIds = Array.from(candidateDevIds).filter((id) => mongoose.Types.ObjectId.isValid(id)).map((id) => new mongoose.Types.ObjectId(id));
     if (validIds.length) devQuery._id = { $in: validIds };
   }
 
   let developers = await User.find(devQuery, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
-  // Fallback for leader/manager if no explicit team mapping exists in demo data
   if (!developers.length) {
-    developers = await User.find({ role: 'developer', active: true }, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
+    developers = await User.find({ role: 'developer', active: { $ne: false } }, '_id name initials email jobTitle lastSeenAt').sort({ name: 1 });
   }
 
   const devMap = {};

@@ -7,20 +7,30 @@ async function scopeFor(user) {
     return {
       teams,
       teamIds: teams.map((t) => t._id),
-      developerIds: (await User.find({ role: 'developer', active: true })).map((u) => u._id),
+      developerIds: (await User.find({ role: 'developer', active: { $ne: false } })).map((u) => u._id),
       projectIds: (await Project.find()).map((p) => p._id)
     };
   }
   if (user.role === 'leader') {
-    const teams = await Team.find({ leader: user._id });
+    const teams = await Team.find({
+      $or: [
+        { leader: user._id },
+        { leader: String(user._id) },
+        ...(user.team ? [{ _id: user.team }] : [])
+      ]
+    });
     const ids = teams.map((t) => t._id);
     const devsFromTeam = teams.flatMap((t) => t.members || []);
-    const devsWithTeamDoc = await User.find({ role: 'developer', team: { $in: ids } });
+    const devsWithTeamDoc = await User.find({ role: 'developer', active: { $ne: false }, team: { $in: ids } });
     const devIdsSet = new Set([
       ...devsFromTeam.map((d) => String(d._id || d)),
       ...devsWithTeamDoc.map((d) => String(d._id))
     ]);
-    const developerIds = Array.from(devIdsSet);
+    let developerIds = Array.from(devIdsSet);
+    if (!developerIds.length) {
+      const allDevs = await User.find({ role: 'developer', active: { $ne: false } }, '_id');
+      developerIds = allDevs.map((d) => String(d._id));
+    }
     return { teams, teamIds: ids, developerIds, projectIds: teams.map((t) => t.project).filter(Boolean) };
   }
   if (user.role === 'manager') {
@@ -28,7 +38,7 @@ async function scopeFor(user) {
     const teams = projects.map((p) => p.team).filter(Boolean);
     const ids = teams.map((t) => t._id);
     const devsFromTeam = teams.flatMap((t) => t.members || []);
-    const devsWithTeamDoc = await User.find({ role: 'developer', team: { $in: ids } });
+    const devsWithTeamDoc = await User.find({ role: 'developer', active: { $ne: false }, team: { $in: ids } });
     const devIdsSet = new Set([
       ...devsFromTeam.map((d) => String(d._id || d)),
       ...devsWithTeamDoc.map((d) => String(d._id))
