@@ -97,6 +97,8 @@ export function MyPendingWorks() {
         const fd = new FormData();
         fd.append('projectId', resubmitModalItem.projectId || defaultProjectId);
         fd.append('taskId', resubmitModalItem.taskId);
+        fd.append('isPendingWork', 'true');
+        fd.append('originalPendingDate', resubmitModalItem.dateStr || '');
         if (activeModuleName) fd.append('moduleName', activeModuleName);
         fd.append('description', resubmitText);
         fd.append('status', taskStatus);

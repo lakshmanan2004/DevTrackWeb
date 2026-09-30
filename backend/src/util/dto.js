@@ -48,11 +48,18 @@ function workLogDto(log, extra = {}) {
     })),
     blocker: log.blocker || '',
     wordCount: log.wordCount,
-    project: extra.projectName || '',
     linkedTask: log.linkedTask ? String(log.linkedTask) : undefined,
     isAssignedTask: !!(log.linkedTask || log.isAssignedTask),
     assignedTaskTitle: log.assignedTaskTitle || extra.assignedTaskTitle || '',
-    resubmissions: (log.resubmissions || []).map((r) => ({ text: r.text, at: fmtTime(r.at) }))
+    resubmissions: (log.resubmissions || []).map((r) => ({ text: r.text, at: fmtTime(r.at) })),
+    isPendingWorkSubmission: !!(log.isPendingWorkSubmission || (log.resubmissions && log.resubmissions.length > 0) || (log.originalPendingDate && log.originalPendingDate !== log.date)),
+    originalPendingDate: log.originalPendingDate || (log.resubmissions && log.resubmissions.length > 0 ? log.date : ''),
+    pendingSubmissionAt: log.pendingSubmissionAt
+      ? fmtTime(log.pendingSubmissionAt)
+      : (log.resubmissions && log.resubmissions.length > 0 ? fmtTime(log.resubmissions[log.resubmissions.length - 1].at) : (log.submittedAt ? fmtTime(log.submittedAt) : '')),
+    pendingSubmissionDate: log.pendingSubmissionAt
+      ? dayStr(log.pendingSubmissionAt)
+      : (log.resubmissions && log.resubmissions.length > 0 ? dayStr(log.resubmissions[log.resubmissions.length - 1].at) : log.date)
   };
 }
 

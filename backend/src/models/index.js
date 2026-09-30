@@ -85,7 +85,10 @@ const WorkLogSchema = new Schema({
   linkedTask: { type: Types.ObjectId, ref: 'Task', default: null },
   isAssignedTask: { type: Boolean, default: false },
   assignedTaskTitle: { type: String, default: '' },
-  resubmissions: [{ text: String, at: Date }]
+  resubmissions: [{ text: String, at: Date }],
+  isPendingWorkSubmission: { type: Boolean, default: false },
+  originalPendingDate: { type: String, default: '' },
+  pendingSubmissionAt: { type: Date, default: null }
 });
 WorkLogSchema.index({ developer: 1, date: 1, hourSlot: 1 });
 

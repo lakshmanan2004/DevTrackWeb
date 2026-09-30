@@ -181,6 +181,9 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
   slotEnd.setHours(hourSlot + 1, 0, 0, 0);
   const isLate = now.getHours() >= 17 || now > slotEnd;
 
+  const isPendingWork = req.body.isPendingWork === 'true' || !!req.body.originalPendingDate || (linkedTaskObj && dayStr(linkedTaskObj.createdAt) !== date);
+  const origPendingDate = req.body.originalPendingDate || (linkedTaskObj ? dayStr(linkedTaskObj.createdAt) : date);
+
   const log = await WorkLog.create({
     developer: req.user._id,
     isLate,
@@ -203,7 +206,10 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
     wordCount: words,
     linkedTask: linkedTaskObj ? linkedTaskObj._id : null,
     isAssignedTask: !!linkedTaskObj,
-    assignedTaskTitle: linkedTaskObj ? linkedTaskObj.title : ''
+    assignedTaskTitle: linkedTaskObj ? linkedTaskObj.title : '',
+    isPendingWorkSubmission: !!isPendingWork,
+    originalPendingDate: isPendingWork ? origPendingDate : '',
+    pendingSubmissionAt: isPendingWork ? new Date() : null
   });
 
   if (linkedTaskObj) {
@@ -255,6 +261,11 @@ router.post('/:id/resubmit', requireRole('developer'), upload.single('attachment
     log.attachmentName = attachment.name || log.attachmentName;
     log.attachmentUrl = attachment.url || log.attachmentUrl;
   }
+  log.isPendingWorkSubmission = true;
+  if (!log.originalPendingDate) {
+    log.originalPendingDate = log.date;
+  }
+  log.pendingSubmissionAt = new Date();
   log.review = 'pending';
   await log.save();
 

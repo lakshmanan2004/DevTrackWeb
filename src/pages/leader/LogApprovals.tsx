@@ -308,8 +308,28 @@ export function LogApprovals() {
                     : 'border-hairline bg-white shadow-card'
                 }`}
               >
+                {/* PENDING WORK SUBMISSION PROMINENT BANNER */}
+                {log.isPendingWorkSubmission && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-xs font-bold text-white shadow-xs">
+                    <div className="flex items-center gap-2">
+                      <ClockIcon className="h-4 w-4 animate-pulse" />
+                      <span>
+                        🕒 PENDING WORK SUBMISSION
+                        {log.originalPendingDate && (
+                          <span className="ml-2 font-medium text-amber-100 bg-black/15 px-2 py-0.5 rounded">
+                            Kept pending on: <strong className="text-white font-bold underline">{log.originalPendingDate}</strong>
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] font-semibold text-amber-100">
+                      <span>Submitted: <strong className="text-white">{log.pendingSubmissionDate || log.date} at {log.pendingSubmissionAt || log.submittedAt}</strong></span>
+                    </div>
+                  </div>
+                )}
+
                 {/* ASSIGNED TASK PROMINENT BANNER */}
-                {isAssigned && (
+                {isAssigned && !log.isPendingWorkSubmission && (
                   <div className="flex items-center justify-between bg-amber-500 px-5 py-2 text-xs font-bold text-white">
                     <span className="flex items-center gap-1.5">
                       <ZapIcon className="h-4 w-4 animate-pulse" />
@@ -329,6 +349,11 @@ export function LogApprovals() {
                         📅 {log.date} · {log.hourLabel} · {isLate ? `submitted late at ${log.submittedAt}` : `submitted ${log.submittedAt}`} · {log.project || user?.teamName}
                       </span>
                     </p>
+                    {log.isPendingWorkSubmission && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 text-[11px] font-bold shadow-xs">
+                        🕒 Pending Work (Pending Date: {log.originalPendingDate || log.date})
+                      </span>
+                    )}
                     {isLate && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-2.5 py-0.5 text-[10px] font-extrabold shadow-xs uppercase tracking-wide">
                         ⚠️ Late Submission
@@ -336,7 +361,12 @@ export function LogApprovals() {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    {isAssigned && (
+                    {log.isPendingWorkSubmission && (
+                      <Badge tone="amber">
+                        🕒 Pending Work
+                      </Badge>
+                    )}
+                    {isAssigned && !log.isPendingWorkSubmission && (
                       <Badge tone="amber">
                         ⚡ Assigned Task
                       </Badge>
@@ -544,6 +574,20 @@ export function LogApprovals() {
                     Validation checklist
                   </h3>
                   <ul className="mt-3 space-y-2.5 text-xs">
+                    {log.isPendingWorkSubmission && (
+                      <li className="flex items-start gap-2 text-xs font-semibold text-amber-900 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                        <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" aria-hidden="true" />
+                        <div>
+                          <p className="font-bold">Pending Work Submission</p>
+                          <p className="text-[11px] font-medium text-amber-800 mt-0.5">
+                            📅 Kept pending: <strong>{log.originalPendingDate || log.date}</strong>
+                          </p>
+                          <p className="text-[11px] font-medium text-amber-800">
+                            🚀 Submitted: <strong>{log.pendingSubmissionDate || log.date} at {log.pendingSubmissionAt || log.submittedAt}</strong>
+                          </p>
+                        </div>
+                      </li>
+                    )}
                     <li className="flex items-start gap-2 text-gray-700">
                       {isLate ? (
                         <>
