@@ -30,14 +30,7 @@ export function Sidebar({ role }: SidebarProps) {
   const { user, badges, logout } = useAuth();
   const nav = navFor(role, badges);
 
-  const context =
-    user?.role === 'developer'
-      ? `${user.teamName || 'No team'}${user.projectName ? ` · ${user.projectName}` : ''}`
-      : user?.role === 'leader'
-      ? user.projectName || user.teamName || ''
-      : user?.role === 'manager'
-      ? user.projectName
-      : 'System owner';
+  const context = user?.email || (role === 'admin' ? 'System owner' : '');
 
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col bg-navy text-white overflow-hidden">

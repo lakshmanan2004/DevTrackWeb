@@ -58,11 +58,20 @@ async function mePayload(user) {
       if (team.project) out.projectName = team.project.name;
     }
   } else if (user.role === 'leader') {
-    const team = await Team.findOne({ leader: user._id }).populate('project', 'name');
-    if (team) {
-      out.teamName = team.name;
-      if (team.project) out.projectName = team.project.name;
-    }
+    const teams = await Team.find({
+      $or: [
+        { leader: user._id },
+        { leader: String(user._id) },
+        ...(user.team ? [{ _id: user.team }] : [])
+      ]
+    }).populate('project', 'name');
+    const projs = teams.map((t) => (t.project ? t.project.name : null)).filter(Boolean);
+    const uniqueProjs = Array.from(new Set(projs));
+    const teamNames = Array.from(new Set(teams.map((t) => t.name).filter(Boolean)));
+    out.teamName = teamNames.join(', ');
+    out.projectName = uniqueProjs.join(', ');
+    out.projectNames = uniqueProjs;
+    out.teams = teams.map((t) => ({ id: String(t._id), name: t.name, projectName: t.project?.name || '' }));
   } else if (user.role === 'manager') {
     const projects = await Project.find({ manager: user._id });
     out.projectName = `${projects.length} project${projects.length === 1 ? '' : 's'}`;

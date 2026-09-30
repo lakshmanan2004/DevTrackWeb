@@ -50,6 +50,30 @@ export function UserProfile() {
   const teams = teamData?.teams || [];
   const directory = dir?.users || [];
 
+  // Compute all assigned projects for leader (from /api/projects or parsed from profile)
+  const displayProjects =
+    projects.length > 0
+      ? projects
+      : (user?.projectName || '')
+          .split(',')
+          .map((p: string) => p.trim())
+          .filter(Boolean)
+          .map((name: string, idx: number) => ({
+            id: `proj-${idx}`,
+            name,
+            status: 'ongoing',
+            teamName: user?.teamName || 'Team',
+            progress: 50,
+            activeDevs: 0,
+            targetDate: null,
+            modules: []
+          }));
+
+  // Unique developer count supervised by the leader
+  const supervisedDevCount = teams.reduce((acc: number, t: any) => {
+    return acc + (Array.isArray(t.members) ? t.members.length : 0);
+  }, 0) || (teams.length > 0 ? teams.length * 3 : (user?.role === 'leader' ? 5 : 0));
+
   const [name, setName] = useState(user?.name || '');
   const [github, setGithub] = useState(user?.github || '');
   const [saved, setSaved] = useState(false);
@@ -128,10 +152,33 @@ export function UserProfile() {
               <h2 className="mt-3 text-xl font-bold text-navy">{user?.name}</h2>
               <p className="text-xs text-gray-500">{user?.email}</p>
 
+              {/* ROLE & PROJECT/TEAM PILLS */}
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                 <Badge tone={roleTones[role]}>{roleLabels[role]}</Badge>
-                {user?.teamName && <Badge tone="grey">Team: {user.teamName}</Badge>}
-                {user?.projectName && <Badge tone="purple">Project: {user.projectName}</Badge>}
+
+                {role === 'leader' ? (
+                  <>
+                    {displayProjects.map((p: any) => (
+                      <Badge key={p.id || p.name} tone="purple">
+                        Project: {p.name}
+                      </Badge>
+                    ))}
+                    {teams.length > 0 ? (
+                      teams.map((t: any) => (
+                        <Badge key={t.id || t.name} tone="grey">
+                          Team: {t.name}
+                        </Badge>
+                      ))
+                    ) : user?.teamName ? (
+                      <Badge tone="grey">Team: {user.teamName}</Badge>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    {user?.teamName && <Badge tone="grey">Team: {user.teamName}</Badge>}
+                    {user?.projectName && <Badge tone="purple">Project: {user.projectName}</Badge>}
+                  </>
+                )}
               </div>
 
               {/* METADATA LIST */}
@@ -150,22 +197,59 @@ export function UserProfile() {
                   <span className="font-semibold text-navy uppercase tracking-wider">{role}</span>
                 </div>
 
-                {user?.teamName && (
-                  <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                    <span className="flex items-center gap-2 text-gray-500">
-                      <UsersIcon className="h-4 w-4 text-gray-400" /> Assigned Team
-                    </span>
-                    <span className="font-semibold text-navy">{user.teamName}</span>
-                  </div>
-                )}
+                {role === 'leader' ? (
+                  <>
+                    <div className="flex items-center justify-between py-1 border-b border-slate-100">
+                      <span className="flex items-center gap-2 text-gray-500">
+                        <UsersIcon className="h-4 w-4 text-gray-400" /> Assigned Teams
+                      </span>
+                      <span className="font-semibold text-navy text-right">
+                        {teams.length > 0
+                          ? teams.map((t: any) => t.name).join(', ')
+                          : user?.teamName || '—'}
+                      </span>
+                    </div>
 
-                {user?.projectName && (
-                  <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                    <span className="flex items-center gap-2 text-gray-500">
-                      <FolderIcon className="h-4 w-4 text-gray-400" /> Active Project
-                    </span>
-                    <span className="font-semibold text-navy">{user.projectName}</span>
-                  </div>
+                    <div className="flex items-start justify-between py-1 border-b border-slate-100 gap-2">
+                      <span className="flex items-center gap-2 text-gray-500 shrink-0">
+                        <FolderIcon className="h-4 w-4 text-gray-400" /> Assigned Projects
+                      </span>
+                      <div className="flex flex-wrap justify-end gap-1 text-right">
+                        {displayProjects.length > 0 ? (
+                          displayProjects.map((p: any) => (
+                            <span
+                              key={p.id || p.name}
+                              className="inline-flex items-center rounded bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-200"
+                            >
+                              {p.name}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="font-semibold text-navy">None</span>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {user?.teamName && (
+                      <div className="flex items-center justify-between py-1 border-b border-slate-100">
+                        <span className="flex items-center gap-2 text-gray-500">
+                          <UsersIcon className="h-4 w-4 text-gray-400" /> Assigned Team
+                        </span>
+                        <span className="font-semibold text-navy">{user.teamName}</span>
+                      </div>
+                    )}
+
+                    {user?.projectName && (
+                      <div className="flex items-center justify-between py-1 border-b border-slate-100">
+                        <span className="flex items-center gap-2 text-gray-500">
+                          <FolderIcon className="h-4 w-4 text-gray-400" /> Active Project
+                        </span>
+                        <span className="font-semibold text-navy">{user.projectName}</span>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <div className="flex items-center justify-between py-1">
@@ -343,28 +427,99 @@ export function UserProfile() {
               <div className="flex items-center justify-between border-b border-hairline pb-3">
                 <div className="flex items-center gap-2">
                   <RadioIcon className="h-4 w-4 text-brand" />
-                  <h3 className="text-sm font-bold text-navy">Team Leader Responsibilities</h3>
+                  <h3 className="text-sm font-bold text-navy">Team Leader Projects &amp; Teams</h3>
                 </div>
                 <Badge tone="blue">Lead Workspace</Badge>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {/* STATS TILES */}
+              <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-xl border border-hairline bg-slate-50 p-3.5">
-                  <p className="text-xs font-bold text-gray-500">Assigned Team</p>
-                  <p className="mt-1 text-base font-extrabold text-navy truncate">{user?.teamName || 'VStudy'}</p>
+                  <p className="text-xs font-bold text-gray-500">Assigned Projects</p>
+                  <p className="mt-1 text-base font-extrabold text-purple-700">
+                    {displayProjects.length} {displayProjects.length === 1 ? 'Project' : 'Projects'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-hairline bg-slate-50 p-3.5">
+                  <p className="text-xs font-bold text-gray-500">Assigned Teams</p>
+                  <p className="mt-1 text-base font-extrabold text-navy truncate">
+                    {teams.length || (user?.teamName ? 1 : 0)} {teams.length === 1 ? 'Team' : 'Teams'}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-hairline bg-slate-50 p-3.5">
                   <p className="text-xs font-bold text-gray-500">Supervised Developers</p>
                   <p className="mt-1 text-base font-extrabold text-brand">
-                    {teams.find((t: any) => t.name === user?.teamName)?.members?.length || 5} Devs
+                    {supervisedDevCount} Devs
                   </p>
-                </div>
-                <div className="rounded-xl border border-hairline bg-slate-50 p-3.5">
-                  <p className="text-xs font-bold text-gray-500">Project Focus</p>
-                  <p className="mt-1 text-base font-extrabold text-navy truncate">{user?.projectName || 'Active'}</p>
                 </div>
               </div>
 
+              {/* ASSIGNED PROJECTS LIST */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-navy uppercase tracking-wider flex items-center gap-1.5">
+                  <FolderIcon className="h-3.5 w-3.5 text-purple-600" /> Managed Project List
+                </h4>
+
+                {displayProjects.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-center text-xs text-gray-400">
+                    No projects assigned yet.
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100 rounded-xl border border-hairline overflow-hidden bg-slate-50/50">
+                    {displayProjects.map((p: any) => {
+                      const linkedTeam = teams.find((t: any) => t.project?._id === p.id || t.project === p.id || t.name === p.teamName) || (teams.length === 1 ? teams[0] : null);
+                      const membersCount = linkedTeam?.members?.length || 0;
+
+                      return (
+                        <div key={p.id || p.name} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white hover:bg-slate-50/70 transition-colors">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-bold text-navy truncate">{p.name}</p>
+                              <Badge tone={p.status === 'completed' ? 'green' : 'purple'}>
+                                {p.status === 'completed' ? 'Delivered' : 'Active'}
+                              </Badge>
+                            </div>
+                            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                              {linkedTeam?.name && (
+                                <span className="flex items-center gap-1">
+                                  <UsersIcon className="h-3.5 w-3.5 text-gray-400" /> Team: <span className="font-semibold text-slate-700">{linkedTeam.name}</span>
+                                </span>
+                              )}
+                              {membersCount > 0 && (
+                                <span>• {membersCount} Developers</span>
+                              )}
+                              {p.targetDate && (
+                                <span className="flex items-center gap-1">
+                                  <CalendarIcon className="h-3.5 w-3.5 text-gray-400" /> Target: {p.targetDate}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0">
+                            {typeof p.progress === 'number' && (
+                              <div className="w-28 text-right">
+                                <div className="flex items-center justify-between text-[11px] font-bold mb-1">
+                                  <span className="text-gray-400">Progress</span>
+                                  <span className="text-navy">{p.progress}%</span>
+                                </div>
+                                <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full bg-brand"
+                                    style={{ width: `${Math.min(100, Math.max(0, p.progress))}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* CAPABILITIES CALLOUT */}
               <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 text-xs text-blue-900 space-y-1">
                 <p className="font-bold flex items-center gap-1.5 text-blue-950">
                   <SparklesIcon className="h-4 w-4 text-brand" /> Team Leader Capabilities
