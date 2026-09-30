@@ -108,7 +108,7 @@ export function LogApprovals() {
       const itemDevName = String(item.developerName || '').trim().toLowerCase();
 
       const selectedDevObj = developers.find((d: any) => getDevId(d) === developerFilter);
-      const selectedDevName = selectedDevObj ? (selectedDevObj.name || selectedDevObj.stat?.name || '').trim().toLowerCase() : '';
+      const selectedDevName = selectedDevObj ? (selectedDevObj.name || (selectedDevObj as any).stat?.name || '').trim().toLowerCase() : '';
 
       const matchId = itemDevId && (itemDevId === target || (selectedDevObj && itemDevId === getDevId(selectedDevObj).toLowerCase()));
       const matchName = (itemDevName && (itemDevName === target || (selectedDevName && itemDevName === selectedDevName))) || false;
