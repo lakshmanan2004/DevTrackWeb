@@ -31,7 +31,7 @@ export function AllDevelopers() {
     <>
       <PageHeader
         title="All Developers"
-        subtitle={`${user?.teamName || 'Team'} · ${user?.projectName || ''} · ${developers.length} developers`}
+        subtitle="Developer directory, performance indicators, module assignments, and task delegation"
         actions={
           <div className="flex items-center gap-3">
             <Button

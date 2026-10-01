@@ -128,7 +128,7 @@ export function LeaderAlerts() {
     <>
       <PageHeader
         title="Alerts"
-        subtitle={`${user?.teamName || 'Team'} · ${user?.projectName || ''}`}
+        subtitle="Monitor missed check-ins, delayed submissions, and actionable developer alerts"
         actions={
           <div className="flex items-center gap-2.5">
             {unread > 0 && (

@@ -96,7 +96,8 @@ export const useCalendar = (month: string, developerId?: string) =>
 export const usePendingWorks = () =>
   useLive<{ items: any[] }>('/api/logs/pending-works', ['log:review', 'task:new', 'task:update'], 30000);
 
-export const useCommits = () => useLive<any>('/api/commits', ['commit:new', 'log:new'], 30000);
+export const useCommits = (date?: string) =>
+  useLive<any>(`/api/commits${date ? `?date=${date}` : ''}`, ['commit:new', 'log:new'], 30000);
 
 export const useEod = () => useLive<any>('/api/eod', ['eod:new', 'log:new'], 30000);
 

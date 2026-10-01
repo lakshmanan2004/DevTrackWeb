@@ -137,7 +137,7 @@ export function LogApprovals() {
     <>
       <PageHeader
         title="Log Approvals"
-        subtitle={`${user?.teamName || 'Team'} · ${user?.projectName || 'Project'}`}
+        subtitle="Review, approve, and provide feedback on developer daily work logs and proof submissions"
         actions={
           <div className="flex items-center gap-3">
             <Button
@@ -316,11 +316,11 @@ export function LogApprovals() {
                       <span className="ml-2 font-normal text-gray-500">
                         {log.isPendingWorkSubmission ? (
                           <>
-                            📅 Kept Pending on: <strong className="font-semibold text-amber-900">{log.originalPendingDate || log.date}</strong> ({log.hourLabel}) · Submitted on: <strong className="font-semibold text-navy">{log.pendingSubmissionDate || log.submittedDate || log.date} at {log.pendingSubmissionAt || log.submittedAt}</strong> · {log.project || user?.teamName}
+                            📅 Kept Pending on: <strong className="font-semibold text-amber-900">{log.originalPendingDate || log.date}</strong> ({log.hourLabel}) · Submitted on: <strong className="font-semibold text-navy">{log.pendingSubmissionDate || log.submittedDate || log.date} at {log.pendingSubmissionAt || log.submittedAt}</strong>
                           </>
                         ) : (
                           <>
-                            📅 {log.date} · {log.hourLabel} · {isLate ? `submitted late at ${log.submittedAt}` : `submitted ${log.submittedAt}`} · {log.project || user?.teamName}
+                            📅 {log.date} · {log.hourLabel} · {isLate ? `submitted late at ${log.submittedAt}` : `submitted ${log.submittedAt}`}
                           </>
                         )}
                       </span>
@@ -348,7 +348,7 @@ export function LogApprovals() {
                     )}
                     {log.review === 'approved' && <Badge tone="green">Approved</Badge>}
                     {log.review === 'rejected' && <Badge tone="red">Rejected</Badge>}
-                    {log.review === 'pending' && <Badge tone="blue">{log.project || 'Pending review'}</Badge>}
+                    {log.review === 'pending' && <Badge tone="blue">Pending review</Badge>}
                   </div>
                 </div>
 

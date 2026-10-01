@@ -53,6 +53,7 @@ export function LiveDashboard() {
     <>
       <PageHeader
         title="Live Dashboard"
+        subtitle="Real-time developer attendance, hourly check-in timeline, and active work monitoring"
         actions={
           <>
             <span className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-danger-soft px-3 py-1.5 text-xs font-bold text-danger">

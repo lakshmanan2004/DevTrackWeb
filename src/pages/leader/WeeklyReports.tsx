@@ -23,7 +23,7 @@ export function WeeklyReports() {
     <>
       <PageHeader
         title="Weekly Reports"
-        subtitle={`${report?.developer?.name || 'Team'} · ${user_weekLabel(week)}`}
+        subtitle={`Weekly performance metrics, attendance summaries, and EOD reports · ${report?.developer?.name || 'Developer'} (${user_weekLabel(week)})`}
         actions={
         <>
             <label className="sr-only" htmlFor="wr-dev">
