@@ -157,6 +157,15 @@ router.post('/projects', requireRole('manager', 'admin'), ah(async (req, res) =>
       }))
     : [];
 
+  if (formattedModules.length > 0) {
+    const totalWeight = formattedModules.reduce((sum, m) => sum + (Number(m.weightPercentage) || 0), 0);
+    if (totalWeight !== 100) {
+      return res.status(400).json({
+        error: `Total module weight must equal exactly 100% (currently ${totalWeight}%).`
+      });
+    }
+  }
+
   const team = await Team.create({ name: teamName, leader: leaderId, members: [...new Set(developerIds.map(String))] });
   const project = await Project.create({
     name,

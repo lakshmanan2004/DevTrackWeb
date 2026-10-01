@@ -116,6 +116,32 @@ function weekStart(d = new Date()) {
   return addDays(copy, diff);
 }
 
+// Cleanly format/truncate task title up to word or char limit without breaking words
+function makeTaskTitle(text, maxWords = 10, maxChars = 75) {
+  if (!text) return 'Work Log';
+  const clean = String(text).trim().replace(/\s+/g, ' ');
+  const words = clean.split(' ');
+  if (words.length <= maxWords && clean.length <= maxChars) {
+    return clean;
+  }
+  const result = [];
+  let currentLen = 0;
+  for (const w of words) {
+    if (result.length >= maxWords) break;
+    const addedLen = currentLen === 0 ? w.length : w.length + 1;
+    if (currentLen + addedLen > maxChars) {
+      if (result.length === 0) {
+        return w.slice(0, maxChars).trim() + '...';
+      }
+      break;
+    }
+    result.push(w);
+    currentLen += addedLen;
+  }
+  const joined = result.join(' ').replace(/[,;:\-.\s]+$/, '');
+  return `${joined}...`;
+}
+
 module.exports = {
   pad,
   DAYS,
@@ -134,5 +160,6 @@ module.exports = {
   requiredSlots,
   isThirdSaturday,
   isWorkday,
-  weekStart
+  weekStart,
+  makeTaskTitle
 };

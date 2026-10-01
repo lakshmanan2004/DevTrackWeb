@@ -6,7 +6,7 @@ const { WorkLog, Commit, Task, Alert, Team, Project, User, Setting } = require('
 const { authRequired, attachUser, requireRole, ah } = require('../middleware/auth');
 const { workLogDto, dayStats } = require('../util/dto');
 const { scopeFor } = require('../util/scope');
-const { dayStr, fromDayStr, slotForNow, hourLabel, fmtTime, fmtDateMDY, fmtDateLong, requiredSlots, fmtDuration, isWorkday, initialsOf } = require('../util/time');
+const { dayStr, fromDayStr, slotForNow, hourLabel, fmtTime, fmtDateMDY, fmtDateLong, requiredSlots, fmtDuration, isWorkday, initialsOf, makeTaskTitle } = require('../util/time');
 const { emitToRoles, emitToUser } = require('../sockets');
 
 const router = express.Router();
@@ -192,7 +192,7 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
     moduleName: moduleName || (project.modules && project.modules[0] ? project.modules[0].name : ''),
     date,
     hourSlot,
-    task: linkedTaskObj ? `[Assigned Task] ${linkedTaskObj.title}` : (task || description.slice(0, 60)),
+    task: linkedTaskObj ? `[Assigned Task] ${linkedTaskObj.title}` : makeTaskTitle(task || description),
     status: status || 'progress',
     description: String(description).trim(),
     submittedAt: new Date(),

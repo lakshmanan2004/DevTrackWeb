@@ -78,6 +78,10 @@ export function CreateProject() {
       setError('All modules must have a valid Module Name.');
       return;
     }
+    if (totalModuleWeight !== 100) {
+      setError(`Total module weight must equal exactly 100% (currently ${totalModuleWeight}%). Please adjust the weights.`);
+      return;
+    }
 
     setBusy(true);
     try {

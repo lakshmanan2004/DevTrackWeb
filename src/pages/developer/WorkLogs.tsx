@@ -18,6 +18,7 @@ import { useMyLogs } from '../../hooks/useLive';
 import { fileUrl } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { isLogLate } from '../../utils/logTimeliness';
+import { formatLogTitle } from '../../utils/logTitle';
 
 export function WorkLogs() {
   const { user } = useAuth();
@@ -167,7 +168,7 @@ export function WorkLogs() {
                   >
                     {log.date ? `📅 ${log.date} · ${log.hourLabel}` : log.hourLabel}
                   </span>
-                  <h2 className="text-sm font-bold text-navy">{log.task}</h2>
+                  <h2 className="text-sm font-bold text-navy">{formatLogTitle(log.task, log.description)}</h2>
                   {isLate && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-2.5 py-0.5 text-[10px] font-extrabold shadow-xs uppercase tracking-wide">
                       ⚠️ Late Submission

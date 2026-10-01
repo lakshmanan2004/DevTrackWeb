@@ -27,10 +27,17 @@ import { useLive, useDevelopers } from '../../hooks/useLive';
 import { api, apiUpload, fileUrl } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { isLogLate } from '../../utils/logTimeliness';
+import { formatLogTitle } from '../../utils/logTitle';
+
+const getTodayStr = () => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
 
 export function LogApprovals() {
   const { user } = useAuth();
-  const [dateFilter, setDateFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>(getTodayStr);
   const [developerFilter, setDeveloperFilter] = useState('');
   const [moduleFilter, setModuleFilter] = useState('');
 
@@ -205,9 +212,9 @@ export function LogApprovals() {
             <div className="flex items-center gap-1.5 rounded-xl border border-hairline bg-white p-1 shadow-card">
               <button
                 type="button"
-                onClick={() => setDateFilter(new Date().toISOString().slice(0, 10))}
+                onClick={() => setDateFilter(getTodayStr())}
                 className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-                  dateFilter === new Date().toISOString().slice(0, 10)
+                  dateFilter === getTodayStr()
                     ? 'bg-brand text-white shadow-sm'
                     : 'text-navy hover:bg-gray-100'
                 }`}
@@ -355,7 +362,7 @@ export function LogApprovals() {
               <div className="grid gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_280px]">
                 <div>
                   <div className="flex flex-wrap items-center gap-3">
-                    <h2 className="text-sm font-bold text-navy">{log.task}</h2>
+                    <h2 className="text-sm font-bold text-navy">{formatLogTitle(log.task, log.description)}</h2>
                     <TaskStatusBadge status={log.status} />
                     {log.moduleName && (
                       <Badge tone="purple">Module: {log.moduleName}</Badge>
