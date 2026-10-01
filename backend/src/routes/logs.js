@@ -13,7 +13,22 @@ const router = express.Router();
 router.use(authRequired, attachUser);
 
 // ---------- uploads (Vercel Blob when configured, local /uploads otherwise) ----------
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const ALLOWED_EXTENSIONS = /\.(png|jpe?g|pdf)$/i;
+const ALLOWED_MIMES = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const extMatch = ALLOWED_EXTENSIONS.test(path.extname(file.originalname).toLowerCase());
+    const mimeMatch = ALLOWED_MIMES.includes(file.mimetype);
+    if (extMatch && mimeMatch) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file format. Only PNG, JPG, and PDF files are allowed.'));
+    }
+  }
+});
 const LOCAL_UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads');
 if (!fs.existsSync(LOCAL_UPLOAD_DIR)) fs.mkdirSync(LOCAL_UPLOAD_DIR, { recursive: true });
 
@@ -298,9 +313,9 @@ router.post('/:id/review', requireRole('leader'), ah(async (req, res) => {
         emitToRoles(['leader', 'manager'], 'task:update', { taskId: String(taskToComplete._id), status: 'completed' });
       }
     }
-  } else if (action === 'reject') {
-    log.review = 'rejected';
-    log.reviewNote = note || 'Full resubmission requested by Team Lead.';
+  } else if (action === 'reject' || action === 'changes_requested') {
+    log.review = action === 'changes_requested' ? 'changes_requested' : 'rejected';
+    log.reviewNote = note || (action === 'changes_requested' ? 'Specific changes requested by Team Lead.' : 'Full resubmission requested by Team Lead.');
   } else if (action === 'reset') {
     log.review = 'pending';
     log.reviewNote = '';
@@ -309,13 +324,13 @@ router.post('/:id/review', requireRole('leader'), ah(async (req, res) => {
   }
   await log.save();
 
-  if (action === 'approve' || action === 'reject') {
+  if (action === 'approve' || action === 'reject' || action === 'changes_requested') {
     await Alert.create({
       audience: 'developer', user: log.developer,
       kind: action === 'approve' ? 'approval' : 'rejection',
       unread: true,
-      title: action === 'approve' ? 'Log Approved' : 'Log Rejected',
-      body: `${hourLabel(log.hourSlot)} log ${action === 'approve' ? 'approved' : 'rejected'} — ${log.reviewNote}`
+      title: action === 'approve' ? 'Log Approved' : action === 'changes_requested' ? 'Changes Requested on Log' : 'Log Rejected',
+      body: `${hourLabel(log.hourSlot)} log ${action === 'approve' ? 'approved' : action === 'changes_requested' ? 'changes requested' : 'rejected'} — ${log.reviewNote}`
     });
     emitToUser(String(log.developer), 'alert:new', {});
     emitToUser(String(log.developer), 'task:update', {});

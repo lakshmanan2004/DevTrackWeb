@@ -84,7 +84,10 @@ async function fullProjectDto(project) {
   if (projectObj.modules) {
     projectObj.modules = projectObj.modules.map((m) => {
       const matched = projectLogs.filter(
-        (l) => l.moduleName === m.name || String(l.moduleName).toLowerCase() === String(m.name).toLowerCase()
+        (l) =>
+          (l.moduleName === m.name || String(l.moduleName).toLowerCase() === String(m.name).toLowerCase()) &&
+          (l.status === 'done' || l.status === 'completed') &&
+          l.review === 'approved'
       );
       return {
         ...m,
@@ -209,11 +212,13 @@ router.patch('/projects/:id/modules/:moduleId', ah(async (req, res) => {
   if (status === 'completed') {
     const devLogsCount = await WorkLog.countDocuments({
       project: project._id,
-      moduleName: { $regex: new RegExp(`^${module.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+      moduleName: { $regex: new RegExp(`^${module.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+      status: { $in: ['done', 'completed'] },
+      review: 'approved'
     });
     if (devLogsCount === 0) {
       return res.status(400).json({
-        error: `Cannot complete "${module.name}": At least 1 developer work log must be submitted for this module first.`
+        error: `Cannot complete "${module.name}": At least 1 completed & TL-approved developer work log must be submitted for this module first.`
       });
     }
     module.completedAt = new Date();

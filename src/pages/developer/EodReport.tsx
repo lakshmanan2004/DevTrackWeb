@@ -13,7 +13,7 @@ const MIN_WORDS = 50;
 
 export function EodReport() {
   const { user } = useAuth();
-  const { data } = useEod();
+  const { data, refetch } = useEod();
   const [summary, setSummary] = useState('');
   const [carry, setCarry] = useState('');
   const [blockers, setBlockers] = useState('');
@@ -25,19 +25,25 @@ export function EodReport() {
   const alreadySubmitted = !!data?.today;
   const todayStats = data?.todayStats;
 
-  // prefill checklist from today's logs once loaded
-  const checklist = useMemo(() => {
-    void data;
-    return undefined;
-  }, [data]);
-
-  void checklist;
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const EOD_OPEN_MINUTES = 15 * 60 + 45; // 3:45 PM
+  const isAfter345 = currentMinutes >= EOD_OPEN_MINUTES;
 
   const wordCount = useMemo(() => summary.trim().split(/\s+/).filter(Boolean).length, [summary]);
+  const wordsOk = wordCount >= MIN_WORDS;
 
   const dateLabel = new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
 
   const submit = async () => {
+    if (!isAfter345) {
+      setError('EOD submission is only allowed after 3:45 PM. You can prepare your draft now.');
+      return;
+    }
+    if (!wordsOk) {
+      setError(`Day summary must be at least ${MIN_WORDS} words (currently ${wordCount}).`);
+      return;
+    }
     setBusy(true);
     setError('');
     setMessage('');
@@ -46,9 +52,10 @@ export function EodReport() {
         method: 'POST',
         body: { summary, carryForward: carry, blockers, rating }
       });
-      setMessage('EOD report submitted — your team leader can see it now.');
+      setMessage('EOD report submitted successfully — your team leader can see it now.');
+      refetch();
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Failed to submit EOD report');
     } finally {
       setBusy(false);
     }
@@ -60,11 +67,21 @@ export function EodReport() {
 
       <div className="flex-1 space-y-5 p-6">
         <Banner
-          tone="orange"
+          tone={alreadySubmitted ? 'green' : isAfter345 ? 'blue' : 'yellow'}
           icon={<AlarmClockIcon className="h-4 w-4" />}
-          title={alreadySubmitted ? 'EOD submitted for today ✓' : 'Submit before 4:30 PM'}>
-
-          {alreadySubmitted ? `Submitted at ${data.today.time}` : 'Wrap up the day with a summary of your work'}
+          title={
+            alreadySubmitted
+              ? 'EOD submitted for today ✓'
+              : isAfter345
+              ? 'EOD Submission Window Open (Submit before 6:00 PM)'
+              : 'EOD opens at 3:45 PM'
+          }
+        >
+          {alreadySubmitted
+            ? `Submitted at ${data.today.time}`
+            : isAfter345
+            ? 'Wrap up the day with a summary of your work.'
+            : 'You can prepare your draft summary below. The submit button will activate once the window opens at 3:45 PM.'}
         </Banner>
 
         <section className="rounded-card border border-hairline bg-white p-5 shadow-card">
@@ -174,8 +191,17 @@ export function EodReport() {
             )}
 
             {!alreadySubmitted && (
-              <Button size="lg" fullWidth icon={<CheckCircle2Icon className="h-4 w-4" />} disabled={busy || wordCount < MIN_WORDS}>
-                {busy ? 'Submitting…' : `Submit EOD Report for ${dateLabel}`}
+              <Button
+                size="lg"
+                fullWidth
+                icon={<CheckCircle2Icon className="h-4 w-4" />}
+                disabled={busy || !wordsOk || !isAfter345}
+              >
+                {busy
+                  ? 'Submitting…'
+                  : !isAfter345
+                  ? 'EOD Opens at 3:45 PM'
+                  : `Submit EOD Report for ${dateLabel}`}
               </Button>
             )}
           </form>

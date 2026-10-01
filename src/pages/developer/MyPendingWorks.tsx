@@ -34,6 +34,7 @@ export function MyPendingWorks() {
   // Full Work Log Fields
   const [resubmitText, setResubmitText] = useState('');
   const [resubmitFile, setResubmitFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState('');
   const [selectedModuleName, setSelectedModuleName] = useState('');
   const [commitUrl, setCommitUrl] = useState('');
   const [activeMinutes, setActiveMinutes] = useState(45);
@@ -46,10 +47,45 @@ export function MyPendingWorks() {
   const wordCount = resubmitText.trim().split(/\s+/).filter(Boolean).length;
   const wordsOk = wordCount >= 30;
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    if (!selectedFile) {
+      setResubmitFile(null);
+      setFileError('');
+      return;
+    }
+
+    const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+    const ALLOWED_EXTS = ['.png', '.jpg', '.jpeg', '.pdf'];
+    const ext = selectedFile.name.includes('.')
+      ? selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toLowerCase()
+      : '';
+
+    const isAllowedFormat = ALLOWED_TYPES.includes(selectedFile.type) || ALLOWED_EXTS.includes(ext);
+    if (!isAllowedFormat) {
+      setResubmitFile(null);
+      setFileError(`⚠️ Invalid file format "${ext || 'unknown'}". Only PNG, JPG, and PDF files are allowed.`);
+      e.target.value = '';
+      return;
+    }
+
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    if (selectedFile.size > MAX_SIZE) {
+      const sizeMb = (selectedFile.size / (1024 * 1024)).toFixed(1);
+      setResubmitFile(null);
+      setFileError(`⚠️ File size (${sizeMb} MB) exceeds the maximum allowed 10 MB limit. Please select a smaller file.`);
+      e.target.value = '';
+      return;
+    }
+    setFileError('');
+    setResubmitFile(selectedFile);
+  };
+
   const openSubmissionModal = (item: any) => {
     setResubmitModalItem(item);
     setResubmitText(item.feedbackNote && !item.feedbackNote.includes('Work log submitted') ? item.feedbackNote : '');
     setResubmitFile(null);
+    setFileError('');
     setSelectedModuleName('');
     setCommitUrl('');
     setActiveMinutes(45);
@@ -355,15 +391,21 @@ export function MyPendingWorks() {
                 <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
                   Screenshot Proof <span className="text-danger">*</span>
                 </label>
-                <div className="flex items-center gap-3 rounded-xl border border-dashed border-hairline bg-canvas p-3">
-                  <ImageIcon className="h-5 w-5 text-gray-400 shrink-0" />
+                <div className={`flex items-center gap-3 rounded-xl border border-dashed p-3 ${fileError ? 'border-red-300 bg-danger-soft' : 'border-hairline bg-canvas'}`}>
+                  <ImageIcon className={`h-5 w-5 shrink-0 ${fileError ? 'text-danger' : 'text-gray-400'}`} />
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/pdf"
-                    onChange={(e) => setResubmitFile(e.target.files?.[0] || null)}
+                    onChange={handleFileChange}
                     className="w-full text-xs text-navy file:mr-3 file:rounded-lg file:border-0 file:bg-brand-soft file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand hover:file:bg-violet-100"
                   />
                 </div>
+                {fileError && (
+                  <div className="mt-2 flex items-start gap-2 rounded-lg border border-red-200 bg-danger-soft p-2.5 text-xs font-semibold text-danger">
+                    <AlertTriangleIcon className="h-4 w-4 shrink-0 mt-0.5" />
+                    <span>{fileError}</span>
+                  </div>
+                )}
               </div>
 
               {/* 3. GitHub Commit URL */}

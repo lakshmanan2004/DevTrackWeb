@@ -64,6 +64,14 @@ router.post('/', ah(async (req, res) => {
   if (words < minWords) {
     return res.status(400).json({ error: `Day summary must be at least ${minWords} words (currently ${words})` });
   }
+
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const EOD_OPEN_MINUTES = 15 * 60 + 45; // 3:45 PM
+  if (currentMinutes < EOD_OPEN_MINUTES) {
+    return res.status(400).json({ error: 'EOD report submission is only allowed after 3:45 PM.' });
+  }
+
   const date = dayStr();
   const existing = await EodReport.findOne({ developer: req.user._id, date });
   if (existing) {

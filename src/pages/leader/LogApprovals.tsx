@@ -21,10 +21,10 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { FilterPills } from '../../components/ui/FilterPills';
 import { TaskStatusBadge } from '../../components/ui/TaskStatusBadge';
-import { TargetedFeedbackModal } from '../../components/leader/TargetedFeedbackModal';
+import { ReviewLogFeedbackModal } from '../../components/leader/ReviewLogFeedbackModal';
 import { AssignTaskModal } from '../../components/common/AssignTaskModal';
 import { useLive, useDevelopers } from '../../hooks/useLive';
-import { api, apiUpload, fileUrl } from '../../api/client';
+import { api, fileUrl } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { isLogLate } from '../../utils/logTimeliness';
 import { formatLogTitle } from '../../utils/logTitle';
@@ -53,47 +53,23 @@ export function LogApprovals() {
 
   const queue = data?.logs || [];
   const [filter, setFilter] = useState('all');
-  const [activeModalItem, setActiveModalItem] = useState<{ developer: string; log: any } | null>(null);
-  const [selectedText, setSelectedText] = useState('');
+  const [selectedReviewLog, setSelectedReviewLog] = useState<{ log: any; mode: 'approve' | 'reject' } | null>(null);
   const [activeScreenshotModal, setActiveScreenshotModal] = useState<{ url: string; title: string } | null>(null);
-  const [rejectionNotes, setRejectionNotes] = useState<Record<string, string>>({});
   const [assignTaskModalOpen, setAssignTaskModalOpen] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const moduleNames = Array.from(new Set(queue.map((i: any) => i.moduleName).filter(Boolean)));
 
-  const handleTextSelection = (_logId: string) => {
-    const selection = window.getSelection();
-    if (selection && selection.toString().trim().length > 0) {
-      setSelectedText(selection.toString().trim());
-    }
-  };
-
-  const review = async (logId: string, action: 'approve' | 'reject' | 'reset') => {
+  const review = async (logId: string, action: 'approve' | 'changes_requested' | 'reject' | 'reset', customNote?: string) => {
     setBusyId(logId);
     try {
-      const note = rejectionNotes[logId];
-      await api(`/api/logs/${logId}/review`, { method: 'POST', body: { action, note } });
+      await api(`/api/logs/${logId}/review`, { method: 'POST', body: { action, note: customNote || '' } });
       refetch();
     } finally {
       setBusyId(null);
     }
   };
 
-  const handleSaveTargetedFeedback = async (feedbackData: any) => {
-    if (!activeModalItem) return;
-    const fd = new FormData();
-    fd.append('highlightedText', feedbackData.highlightedText || '');
-    fd.append('comment', feedbackData.comment);
-    if (feedbackData.file) fd.append('screenshot', feedbackData.file);
-    setBusyId(activeModalItem.log.id);
-    try {
-      await apiUpload(`/api/logs/${activeModalItem.log.id}/feedback`, fd);
-      refetch();
-    } finally {
-      setBusyId(null);
-    }
-  };
 
   const getDevId = (dev: any) => {
     if (!dev) return '';
@@ -271,28 +247,6 @@ export function LogApprovals() {
           </div>
         </div>
 
-        {/* Floating Selection Tooltip Banner */}
-        {selectedText && (
-          <div className="flex items-center justify-between rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-sm animate-in fade-in">
-            <div className="flex items-center gap-3">
-              <HighlighterIcon className="h-5 w-5 text-amber-600 shrink-0" />
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-amber-900">
-                  Text Highlighted: <span className="font-semibold italic">"{selectedText.substring(0, 60)}{selectedText.length > 60 ? '...' : ''}"</span>
-                </p>
-                <p className="text-xs text-amber-700">
-                  Click "Highlight & Request Specific Changes" on any log to attach feedback for this highlight.
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setSelectedText('')}
-              className="text-xs font-semibold text-amber-800 hover:underline"
-            >
-              Clear Highlight
-            </button>
-          </div>
-        )}
 
         <ul className="space-y-4">
           {filteredQueue.map((log: any) => {
@@ -369,16 +323,10 @@ export function LogApprovals() {
                     )}
                   </div>
 
-                  <div
-                    className="relative mt-2.5 rounded-lg p-2 transition-colors hover:bg-gray-50/80 cursor-text"
-                    onMouseUp={() => handleTextSelection(log.id)}
-                  >
-                    <p className="text-sm leading-relaxed text-gray-700 selection:bg-amber-200 selection:text-amber-950">
+                  <div className="relative mt-2.5 rounded-lg bg-gray-50/70 p-3 border border-gray-100">
+                    <p className="text-sm leading-relaxed text-gray-700">
                       {log.description}
                     </p>
-                    <span className="mt-1 block text-[11px] text-gray-400">
-                      💡 Select text above to auto-fill highlighted snippet into targeted feedback.
-                    </span>
                   </div>
 
                   <p className="mt-2 text-xs font-semibold text-green-600">
@@ -440,78 +388,16 @@ export function LogApprovals() {
                     )}
                   </div>
 
-                  {/* Targeted Feedback section */}
-                  {log.targetedFeedback && log.targetedFeedback.length > 0 && (
-                    <div className="mt-5 space-y-3 rounded-xl border border-amber-200 bg-amber-50/70 p-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-900">
-                          <HighlighterIcon className="h-4 w-4 text-amber-600" />
-                          Targeted Feedback & Screenshots ({log.targetedFeedback.length})
-                        </h4>
-                        <span className="text-[11px] font-semibold text-amber-700">
-                          No full resubmit required
-                        </span>
-                      </div>
-
-                      <div className="space-y-3">
-                        {log.targetedFeedback.map((fb: any) => {
-                          const isFbPdf = fb.screenshotUrl && (fb.screenshotUrl.split('?')[0].toLowerCase().endsWith('.pdf') || (fb.screenshotName && fb.screenshotName.toLowerCase().endsWith('.pdf')));
-                          return (
-                          <div key={fb.id} className="rounded-lg border border-amber-200/80 bg-white p-3.5 shadow-sm">
-                            <div className="flex items-start justify-between gap-2">
-                              <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
-                                <HighlighterIcon className="h-3 w-3 text-amber-600" />
-                                "{fb.highlightedText}"
-                              </span>
-                              <span className="text-[11px] text-gray-400">{fb.createdAt}</span>
-                            </div>
-
-                            <p className="mt-2 text-xs leading-relaxed text-gray-800">
-                              <span className="font-bold text-navy">TL Feedback:</span> {fb.comment}
-                            </p>
-
-                            {fb.screenshotUrl && (
-                              <div className="mt-3">
-                                <p className="mb-1 text-[11px] font-semibold text-gray-500">Attached Proof:</p>
-                                {isFbPdf ? (
-                                  <a
-                                    href={fileUrl(fb.screenshotUrl)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50/80 px-3 py-2 text-xs font-semibold text-red-900 hover:bg-red-100 transition-colors"
-                                  >
-                                    <FileTextIcon className="h-4 w-4 text-red-600" />
-                                    <span className="underline">{fb.screenshotName || 'Attached PDF Document'}</span>
-                                    <span className="rounded bg-red-200 text-red-800 px-1.5 py-0.5 text-[10px] font-bold">Open PDF ↗</span>
-                                  </a>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setActiveScreenshotModal({
-                                        url: fileUrl(fb.screenshotUrl),
-                                        title: fb.screenshotName || 'Screenshot Preview'
-                                      })
-                                    }
-                                    className="group relative inline-block overflow-hidden rounded-lg border border-hairline bg-gray-900"
-                                  >
-                                    <img
-                                      src={fileUrl(fb.screenshotUrl)}
-                                      alt="Targeted feedback screenshot"
-                                      className="h-24 w-40 object-cover transition-transform group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center bg-navy/40 opacity-0 transition-opacity group-hover:opacity-100">
-                                      <span className="flex items-center gap-1 text-xs font-bold text-white">
-                                        <EyeIcon className="h-4 w-4" /> View Full
-                                      </span>
-                                    </div>
-                                  </button>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );})}
-                      </div>
+                  {/* Leader Feedback Note */}
+                  {log.reviewNote && (
+                    <div className={`mt-3.5 rounded-xl border p-3 text-xs leading-relaxed ${
+                      log.review === 'approved'
+                        ? 'border-emerald-200 bg-emerald-50/70 text-emerald-900'
+                        : log.review === 'changes_requested'
+                        ? 'border-amber-200 bg-amber-50/80 text-amber-900'
+                        : 'border-red-200 bg-danger-soft text-danger'
+                    }`}>
+                      <span className="font-bold">Team Leader Note:</span> {log.reviewNote}
                     </div>
                   )}
 
@@ -529,67 +415,50 @@ export function LogApprovals() {
                     </div>
                   )}
 
-                  {/* Rejection input */}
-                  {log.review === 'pending' && (
-                    <div className="mt-4">
-                      <label
-                        htmlFor={`reject-${log.id}`}
-                        className="mb-1.5 block text-xs font-semibold text-navy"
-                      >
-                        Full Rejection Reason (Only if rejecting entire log)
-                      </label>
-                      <textarea
-                        id={`reject-${log.id}`}
-                        rows={2}
-                        value={rejectionNotes[log.id] || ''}
-                        onChange={(e) =>
-                          setRejectionNotes({ ...rejectionNotes, [log.id]: e.target.value })
-                        }
-                        placeholder="Reason for full log rejection..."
-                        className="w-full rounded-lg border border-hairline px-3 py-2.5 text-sm text-navy placeholder:text-gray-400"
-                      />
-                    </div>
-                  )}
-
                   {/* Action Buttons */}
                   <div className="mt-4 flex flex-wrap items-center gap-2.5 border-t border-hairline pt-3">
-                    <Button
-                      disabled={busyId === log.id}
-                      onClick={() => review(log.id, 'approve')}
-                      icon={<CheckIcon className="h-4 w-4" />}
-                      className={log.review === 'approved' ? 'bg-green-700 text-white' : ''}
-                    >
-                      {log.review === 'approved' ? 'Approved' : 'Approve Log'}
-                    </Button>
+                    {log.review === 'pending' ? (
+                      <>
+                        <button
+                          type="button"
+                          disabled={busyId === log.id}
+                          onClick={() => setSelectedReviewLog({ log, mode: 'approve' })}
+                          className="inline-flex items-center justify-center gap-1.5 rounded-lg h-9 px-4 text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50"
+                        >
+                          <CheckIcon className="h-4 w-4" />
+                          Approve Log
+                        </button>
 
-                    <button
-                      type="button"
-                      disabled={busyId === log.id}
-                      onClick={() => setActiveModalItem({ developer: log.developerName, log })}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg h-9 px-3.5 text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-colors shadow-sm"
-                    >
-                      <HighlighterIcon className="h-4 w-4 text-white" />
-                      {log.targetedFeedback && log.targetedFeedback.length > 0
-                        ? 'Add More Targeted Feedback'
-                        : 'Highlight & Request Specific Changes'}
-                    </button>
+                        <button
+                          type="button"
+                          disabled={busyId === log.id}
+                          onClick={() => setSelectedReviewLog({ log, mode: 'reject' })}
+                          className="inline-flex items-center justify-center gap-1.5 rounded-lg h-9 px-4 text-xs font-bold border border-red-200 bg-red-50 text-danger hover:bg-red-100 transition-colors shadow-sm disabled:opacity-50"
+                        >
+                          <XIcon className="h-4 w-4" />
+                          Reject Log
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          disabled={busyId === log.id}
+                          onClick={() => setSelectedReviewLog({ log, mode: log.review === 'rejected' ? 'reject' : 'approve' })}
+                          className="inline-flex items-center justify-center gap-1.5 rounded-lg h-8 px-3 text-xs font-semibold border border-hairline bg-white text-navy hover:bg-slate-50 transition-colors"
+                        >
+                          {log.review === 'approved' ? '✓ Approved (Update)' : log.review === 'changes_requested' ? '⚠️ Changes Requested (Update)' : '✗ Rejected (Update)'}
+                        </button>
 
-                    <Button
-                      variant="danger"
-                      disabled={busyId === log.id}
-                      onClick={() => review(log.id, 'reject')}
-                      icon={<XIcon className="h-4 w-4" />}
-                    >
-                      Reject Entire Log
-                    </Button>
-
-                    {log.review !== 'pending' && (
-                      <button
-                        onClick={() => review(log.id, 'reset')}
-                        className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-navy hover:underline ml-auto"
-                      >
-                        <RotateCcwIcon className="h-3.5 w-3.5" /> Reset Status
-                      </button>
+                        <button
+                          type="button"
+                          disabled={busyId === log.id}
+                          onClick={() => review(log.id, 'reset')}
+                          className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-navy hover:underline ml-auto"
+                        >
+                          <RotateCcwIcon className="h-3.5 w-3.5" /> Reset Status
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -705,15 +574,15 @@ export function LogApprovals() {
         </ul>
       </div>
 
-      {/* Targeted Feedback Modal */}
-      {activeModalItem && (
-        <TargetedFeedbackModal
-          isOpen={!!activeModalItem}
-          onClose={() => setActiveModalItem(null)}
-          log={activeModalItem.log}
-          developerName={activeModalItem.developer}
-          initialHighlightedText={selectedText}
-          onSaveFeedback={handleSaveTargetedFeedback}
+      {/* Review & Feedback Modal */}
+      {selectedReviewLog && (
+        <ReviewLogFeedbackModal
+          isOpen={!!selectedReviewLog}
+          onClose={() => setSelectedReviewLog(null)}
+          log={selectedReviewLog.log}
+          mode={selectedReviewLog.mode}
+          onReview={(action, note) => review(selectedReviewLog.log.id, action, note)}
+          busy={busyId === selectedReviewLog?.log?.id}
         />
       )}
 

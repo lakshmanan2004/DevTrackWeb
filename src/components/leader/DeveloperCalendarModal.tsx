@@ -89,7 +89,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
   const { data: cal, loading } = useCalendar(monthStr, developer?.id);
   const days: CalendarDayStatus[] = cal?.days || [];
   const [selectedDay, setSelectedDay] = useState<CalendarDayStatus | null>(null);
-  const [dayDetailTab, setDayDetailTab] = useState<'missed' | 'pending' | 'all'>('missed');
+  const [dayDetailTab, setDayDetailTab] = useState<'missed' | 'pending' | 'approved'>('missed');
 
   if (!isOpen || !developer) return null;
 
@@ -126,6 +126,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
   const activeMissedSlots = selectedDay?.missedSlots || [];
   const activePendingTasks = selectedDay?.pendingTasks || selectedDay?.tasks?.filter(t => t.review !== 'approved' || t.status !== 'done' || t.isPendingWorkSubmission) || [];
   const activeAllTasks = selectedDay?.allTasks || selectedDay?.tasks || [];
+  const activeApprovedTasks = activeAllTasks.filter((t) => t.review === 'approved');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4 backdrop-blur-sm animate-in fade-in">
@@ -258,7 +259,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                             } else if ((day.pendingTasksCount || 0) > 0) {
                               setDayDetailTab('pending');
                             } else {
-                              setDayDetailTab('all');
+                              setDayDetailTab('approved');
                             }
                           }}
                           title={`${day.fullLabel} — ${day.status.toUpperCase()} (${day.tasksCount} logs, ${day.missedCount || 0} non-submitted)`}
@@ -318,17 +319,19 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
               {selectedDay ? (
                 <div className="space-y-4 flex-1 flex flex-col">
                   {/* Summary Banner */}
-                  <div className="rounded-xl bg-white p-3.5 border border-hairline shadow-2xs space-y-1">
+                  <div className="rounded-xl bg-white p-3.5 border border-hairline shadow-2xs space-y-1.5">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-extrabold text-navy">{selectedDay.fullLabel}</p>
                       <span className="text-xs font-bold text-brand">{selectedDay.activeTime} Active</span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-gray-600 border-t border-gray-100">
-                      <span>Submitted: <strong className="text-navy">{selectedDay.tasksCount}</strong></span>
+                    <div className="flex flex-wrap items-center gap-2.5 pt-1.5 text-[11px] text-gray-600 border-t border-gray-100">
+                      <span>Total Logs Submitted: <strong className="text-navy font-bold">{selectedDay.tasksCount}</strong></span>
                       <span>·</span>
-                      <span>Non-Submitted: <strong className={activeMissedSlots.length > 0 ? 'text-rose-600 font-bold' : 'text-green-600'}>{activeMissedSlots.length}</strong></span>
+                      <span>Total Logs Missed: <strong className={activeMissedSlots.length > 0 ? 'text-rose-600 font-bold' : 'text-gray-700'}>{activeMissedSlots.length}</strong></span>
                       <span>·</span>
-                      <span>Pending/Action: <strong className={activePendingTasks.length > 0 ? 'text-amber-700 font-bold' : 'text-navy'}>{activePendingTasks.length}</strong></span>
+                      <span>Approved: <strong className="text-emerald-700 font-bold">{selectedDay.approvedCount || 0}</strong></span>
+                      <span>·</span>
+                      <span>Pending: <strong className={activePendingTasks.length > 0 ? 'text-amber-700 font-bold' : 'text-gray-700'}>{activePendingTasks.length}</strong></span>
                     </div>
                   </div>
 
@@ -362,18 +365,18 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                       <span>Pending Tasks ({activePendingTasks.length})</span>
                     </button>
 
-                    {/* 3. ALL LOGS TAB */}
+                    {/* 3. APPROVED LOGS TAB */}
                     <button
                       type="button"
-                      onClick={() => setDayDetailTab('all')}
-                      className={`flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
-                        dayDetailTab === 'all'
-                          ? 'bg-navy text-white shadow-xs'
-                          : 'text-gray-600 hover:bg-gray-100 hover:text-navy'
+                      onClick={() => setDayDetailTab('approved')}
+                      className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
+                        dayDetailTab === 'approved'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-800'
                       }`}
                     >
-                      <ListChecksIcon className="h-3.5 w-3.5" />
-                      <span>All Logs ({activeAllTasks.length})</span>
+                      <CheckCircle2Icon className="h-3.5 w-3.5" />
+                      <span>Approved Logs ({activeApprovedTasks.length})</span>
                     </button>
                   </div>
 
@@ -513,66 +516,66 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                       </div>
                     )}
 
-                    {/* --- TAB 3: ALL LOGS --- */}
-                    {dayDetailTab === 'all' && (
-                      <div className="space-y-2.5 animate-in fade-in duration-150">
-                        {activeAllTasks.length > 0 ? (
-                          activeAllTasks.map((t) => (
-                            <div
-                              key={t.id}
-                              className={`rounded-xl border p-3.5 transition-all ${
-                                t.review === 'changes_requested'
-                                  ? 'border-amber-300 bg-amber-50/70 shadow-2xs'
-                                  : t.review === 'approved'
-                                  ? 'border-green-200 bg-white shadow-2xs'
-                                  : 'border-hairline bg-white shadow-2xs'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="rounded bg-navy/10 px-2 py-0.5 text-[10px] font-bold text-navy">
-                                  {t.hourLabel}
-                                </span>
-                                <h4 className="text-xs font-bold text-navy flex-1 truncate">{t.title || t.task}</h4>
-                                <Badge
-                                  tone={
-                                    t.review === 'approved'
-                                      ? 'green'
-                                      : t.review === 'changes_requested'
-                                      ? 'amber'
-                                      : 'blue'
-                                  }
-                                >
-                                  {t.review === 'approved'
-                                    ? 'Approved'
-                                    : t.review === 'changes_requested'
-                                    ? 'Changes Req'
-                                    : 'Pending Review'}
-                                </Badge>
-                              </div>
+                    {/* --- TAB 3: APPROVED LOGS --- */}
+                    {dayDetailTab === 'approved' && (
+                      <div className="space-y-3 animate-in fade-in duration-150">
+                        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/80 p-2.5 text-xs text-emerald-950 font-bold">
+                          <span className="flex items-center gap-1.5">
+                            <CheckCircle2Icon className="h-4 w-4 text-emerald-600" />
+                            {activeApprovedTasks.length > 0
+                              ? `${activeApprovedTasks.length} Approved Work Log(s) on ${selectedDay.dateStr}`
+                              : `0 Approved Work Logs on ${selectedDay.dateStr}`}
+                          </span>
+                          <span className="rounded-full bg-emerald-200 text-emerald-900 px-2 py-0.5 text-[10px]">
+                            Verified
+                          </span>
+                        </div>
 
-                              {t.description && (
-                                <p className="mt-2 text-xs text-gray-700 leading-relaxed bg-canvas p-2 rounded-lg border border-hairline">
-                                  {t.description}
-                                </p>
-                              )}
-
-                              <div className="mt-2 flex items-center justify-between text-[11px] text-gray-500">
-                                <TaskStatusBadge status={t.status as TaskStatus} />
-                                {t.activeMinutes ? (
-                                  <span>{t.activeMinutes} mins active</span>
-                                ) : null}
-                              </div>
-
-                              {t.tlNote && (
-                                <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-950">
-                                  <span className="font-bold text-navy">TL Feedback:</span> &quot;{t.tlNote}&quot;
+                        {activeApprovedTasks.length > 0 ? (
+                          <div className="space-y-2.5">
+                            {activeApprovedTasks.map((t) => (
+                              <div
+                                key={t.id}
+                                className="rounded-xl border border-emerald-200 bg-white p-3.5 shadow-2xs space-y-2"
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="rounded bg-navy/10 px-2 py-0.5 text-[10px] font-bold text-navy">
+                                    {t.hourLabel}
+                                  </span>
+                                  <h4 className="text-xs font-bold text-navy flex-1 truncate">{t.title || t.task}</h4>
+                                  <Badge tone="green">Approved</Badge>
                                 </div>
-                              )}
-                            </div>
-                          ))
+
+                                {t.description && (
+                                  <p className="text-xs text-gray-700 leading-relaxed bg-canvas p-2.5 rounded-lg border border-hairline">
+                                    {t.description}
+                                  </p>
+                                )}
+
+                                <div className="flex items-center justify-between text-[11px] text-gray-500 pt-1 border-t border-gray-100">
+                                  <TaskStatusBadge status={t.status as TaskStatus} />
+                                  {t.activeMinutes ? (
+                                    <span className="font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                                      {t.activeMinutes} mins active
+                                    </span>
+                                  ) : null}
+                                </div>
+
+                                {t.tlNote && (
+                                  <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 p-2 text-xs text-emerald-950">
+                                    <span className="font-bold text-navy">TL Feedback:</span> &quot;{t.tlNote}&quot;
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         ) : (
-                          <div className="rounded-xl border border-dashed border-gray-300 bg-white p-6 text-center text-xs text-gray-500">
-                            No logs submitted on this date.
+                          <div className="rounded-xl border border-gray-200 bg-white p-6 text-center space-y-1.5">
+                            <CheckCircle2Icon className="h-7 w-7 text-gray-400 mx-auto" />
+                            <p className="text-xs font-bold text-navy">No Approved Logs Yet</p>
+                            <p className="text-[11px] text-gray-500">
+                              There are no logs approved by the team leader for this date.
+                            </p>
                           </div>
                         )}
                       </div>

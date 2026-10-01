@@ -38,6 +38,7 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
   const [blocker, setBlocker] = useState('');
   const [minutes, setMinutes] = useState(45);
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState('');
   const [commitUrl, setCommitUrl] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -53,7 +54,7 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
     [description]
   );
   const wordsOk = wordCount >= MIN_WORDS;
-  const canSubmit = wordsOk && !!file && effectiveProjectId !== '' && !busy;
+  const canSubmit = wordsOk && !!file && !fileError && effectiveProjectId !== '' && !busy;
 
   if (!open) return null;
 
@@ -66,8 +67,45 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
     setBlocker('');
     setMinutes(45);
     setFile(null);
+    setFileError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
     setCommitUrl('');
     setError('');
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    if (!selectedFile) {
+      setFile(null);
+      setFileError('');
+      return;
+    }
+
+    const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+    const ALLOWED_EXTS = ['.png', '.jpg', '.jpeg', '.pdf'];
+    const ext = selectedFile.name.includes('.')
+      ? selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toLowerCase()
+      : '';
+
+    const isAllowedFormat = ALLOWED_TYPES.includes(selectedFile.type) || ALLOWED_EXTS.includes(ext);
+    if (!isAllowedFormat) {
+      setFile(null);
+      setFileError(`⚠️ Invalid file format "${ext || 'unknown'}". Only PNG, JPG, and PDF files are allowed.`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    if (selectedFile.size > MAX_SIZE) {
+      const sizeMb = (selectedFile.size / (1024 * 1024)).toFixed(1);
+      setFile(null);
+      setFileError(`⚠️ File size (${sizeMb} MB) exceeds the maximum allowed 10 MB limit. Please select a smaller file.`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    setFileError('');
+    setFile(selectedFile);
   };
 
   const handleTaskSelect = (taskId: string) => {
@@ -298,30 +336,45 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
               type="file"
               accept="image/png,image/jpeg,image/pdf"
               className="hidden"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              onChange={handleFileChange}
             />
-            {file ?
-            <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-ok-soft px-3.5 py-3">
+            {file ? (
+              <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-ok-soft px-3.5 py-3">
                 <CheckCircle2Icon className="h-4 w-4 text-ok" aria-hidden="true" />
                 <p className="truncate text-sm font-semibold text-green-800">{file.name}</p>
                 <button
-                type="button"
-                onClick={() => setFile(null)}
-                className="ml-auto text-xs font-semibold text-green-700 hover:underline">
+                  type="button"
+                  onClick={() => {
+                    setFile(null);
+                    setFileError('');
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  className="ml-auto text-xs font-semibold text-green-700 hover:underline">
                   Replace
                 </button>
-              </div> :
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex w-full flex-col items-center gap-1.5 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-6 transition-colors duration-150 ease-out hover:border-brand hover:bg-brand-soft">
-                <UploadCloudIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className={`flex w-full flex-col items-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 transition-colors duration-150 ease-out ${
+                  fileError
+                    ? 'border-red-300 bg-danger-soft hover:border-danger'
+                    : 'border-gray-300 bg-gray-50 hover:border-brand hover:bg-brand-soft'
+                }`}>
+                <UploadCloudIcon className={`h-5 w-5 ${fileError ? 'text-danger' : 'text-gray-400'}`} aria-hidden="true" />
                 <span className="text-sm font-semibold text-navy">
                   Drop screenshot or click to browse
                 </span>
                 <span className="text-xs text-gray-500">Required · PNG JPG PDF · Max 10MB</span>
               </button>
-            }
+            )}
+            {fileError && (
+              <div className="mt-2 flex items-start gap-2 rounded-lg border border-red-200 bg-danger-soft p-2.5 text-xs font-semibold text-danger">
+                <AlertTriangleIcon className="h-4 w-4 shrink-0 mt-0.5" />
+                <span>{fileError}</span>
+              </div>
+            )}
           </div>
 
           <div>

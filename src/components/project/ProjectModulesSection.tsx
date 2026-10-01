@@ -337,10 +337,13 @@ export function ProjectModulesSection({
               >
                 <option value="">— Show All Modules ({modules.length}) —</option>
                 {modules.map((m) => {
-                  const count = m.submittedLogs?.length || m.logsCount || 0;
+                  const approvedDoneLogs = (m.submittedLogs || []).filter(
+                    (log) => (log.status === 'done' || log.status === 'completed') && log.review === 'approved'
+                  );
+                  const count = approvedDoneLogs.length || m.logsCount || 0;
                   return (
                     <option key={m.id || m.name} value={m.id}>
-                      {m.name} ({count} dev submission{count !== 1 ? 's' : ''})
+                      {m.name} ({count} approved completed log{count !== 1 ? 's' : ''})
                     </option>
                   );
                 })}
@@ -374,7 +377,10 @@ export function ProjectModulesSection({
               const isInProgress = m.status === 'in_progress';
               const isBusy = updatingId === m.id;
               const isExpanded = !!expandedModuleIds[m.id];
-              const logsCount = m.submittedLogs?.length || m.logsCount || 0;
+              const approvedDoneLogs = (m.submittedLogs || []).filter(
+                (log) => (log.status === 'done' || log.status === 'completed') && log.review === 'approved'
+              );
+              const logsCount = approvedDoneLogs.length || m.logsCount || 0;
 
               return (
                 <div key={m.id} className="p-4 transition-colors hover:bg-white space-y-3">
@@ -383,8 +389,8 @@ export function ProjectModulesSection({
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-bold text-navy">{m.name}</span>
                         <Badge tone="purple">{m.weightPercentage}% Weight</Badge>
-                        <Badge tone={logsCount > 0 ? 'blue' : 'grey'}>
-                          {logsCount} Dev Logs Submitted
+                        <Badge tone={logsCount > 0 ? 'green' : 'grey'}>
+                          {logsCount} Completed & Approved Logs
                         </Badge>
                         {isCompleted && (
                           <Badge tone="green" dot>
@@ -429,7 +435,7 @@ export function ProjectModulesSection({
                         }`}
                       >
                         <EyeIcon className="h-3.5 w-3.5 text-brand" />
-                        {isExpanded ? 'Hide Dev Proof' : `Inspect Submitted Proof (${logsCount})`}
+                        {isExpanded ? 'Hide Approved Proof' : `Inspect Submitted Proof (${logsCount})`}
                         {isExpanded ? <ChevronUpIcon className="h-3.5 w-3.5" /> : <ChevronDownIcon className="h-3.5 w-3.5" />}
                       </button>
 
@@ -468,8 +474,8 @@ export function ProjectModulesSection({
                                 {isBusy ? 'Updating...' : 'Mark Completed'}
                               </Button>
                               {logsCount === 0 && (
-                                <span className="pointer-events-none absolute right-0 top-full mt-1.5 z-30 hidden w-52 rounded-xl bg-navy p-2.5 text-[11px] font-semibold text-white shadow-xl group-hover:block border border-gray-700 animate-in fade-in">
-                                  🔒 Cannot complete: Developers must submit at least 1 work log under this module first.
+                                <span className="pointer-events-none absolute right-0 top-full mt-1.5 z-30 hidden w-56 rounded-xl bg-navy p-2.5 text-[11px] font-semibold text-white shadow-xl group-hover:block border border-gray-700 animate-in fade-in">
+                                  🔒 Cannot complete: At least 1 completed &amp; TL-approved work log must be submitted for this module first.
                                 </span>
                               )}
                             </div>
@@ -485,16 +491,16 @@ export function ProjectModulesSection({
                       <div className="flex items-center justify-between border-b border-brand/20 pb-2">
                         <h4 className="text-xs font-extrabold uppercase tracking-wider text-navy flex items-center gap-2">
                           <EyeIcon className="h-4 w-4 text-brand" />
-                          Developer Work Logs & Proof Grouped under "{m.name}"
+                          Completed &amp; Approved Work Logs under "{m.name}"
                         </h4>
                         <span className="text-[11px] font-bold text-brand">
-                          Total {logsCount} Submissions · {m.totalMinutes || 0} mins active
+                          Total {logsCount} Approved Submissions · {m.totalMinutes || 0} mins active
                         </span>
                       </div>
 
-                      {m.submittedLogs && m.submittedLogs.length > 0 ? (
+                      {approvedDoneLogs.length > 0 ? (
                         <div className="space-y-3">
-                          {m.submittedLogs.map((log: ModuleSubmittedLog) => (
+                          {approvedDoneLogs.map((log: ModuleSubmittedLog) => (
                             <div
                               key={log.id}
                               className="rounded-lg border border-hairline bg-white p-3.5 shadow-card transition-all hover:shadow-md"
@@ -513,8 +519,8 @@ export function ProjectModulesSection({
                                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-600">
                                     <TimerIcon className="h-3 w-3 text-amber-600" /> {log.activeMinutes} mins
                                   </span>
-                                  <Badge tone={log.review === 'approved' ? 'green' : log.review === 'rejected' ? 'red' : 'yellow'}>
-                                    {log.review.toUpperCase()}
+                                  <Badge tone="green">
+                                    COMPLETED &amp; APPROVED
                                   </Badge>
                                 </div>
                               </div>
@@ -587,10 +593,10 @@ export function ProjectModulesSection({
                         <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50/50 p-4 text-center">
                           <p className="text-xs font-semibold text-amber-900 flex items-center justify-center gap-1.5">
                             <AlertCircleIcon className="h-4 w-4 text-amber-600" />
-                            No work logs submitted under "{m.name}" yet.
+                            No completed and approved work logs under "{m.name}" yet.
                           </p>
                           <p className="mt-0.5 text-[11px] text-amber-700">
-                            Developers must select this module when checking in. Team Leads can verify all proof here before marking completed.
+                            Only tasks marked Done/Completed by developers and Approved by the Team Leader appear here as verified module proof.
                           </p>
                         </div>
                       )}
