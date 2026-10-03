@@ -10,7 +10,7 @@ const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const dayIndex: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
 
 export function AdminSettings() {
-  const { data, refetch } = useLive<{ settings: any }>('/api/settings', [], 0);
+  const { data, refetch } = useLive<{ settings: any }>('/api/settings', ['setting:update'], 0);
   const [workingDays, setWorkingDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [startHour, setStartHour] = useState(8);
   const [endHour, setEndHour] = useState(16);
@@ -115,12 +115,29 @@ export function AdminSettings() {
     setNewHolDate('');
     setNewHolName('');
     setIsOverride(false);
-    await saveHolidays(next);
+    try {
+      await api('/api/settings/holidays', {
+        method: 'POST',
+        body: newEntry
+      });
+      setHolidays(next);
+      refetch();
+    } catch {
+      await saveHolidays(next);
+    }
   };
 
   const handleRemoveHoliday = async (dateStr: string) => {
     const next = holidays.filter((h) => h.date !== dateStr);
-    await saveHolidays(next);
+    try {
+      await api(`/api/settings/holidays/${dateStr}`, {
+        method: 'DELETE'
+      });
+      setHolidays(next);
+      refetch();
+    } catch {
+      await saveHolidays(next);
+    }
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -397,7 +414,7 @@ export function AdminSettings() {
                                       isWorking ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-100 text-amber-900'
                                     }`}
                                   >
-                                    {isWorking ? '💼 Working Day' : '🏖️ Holiday'}
+                                    {isWorking ? '💼 Working Day' : '🎉 Holiday'}
                                   </span>
                                 </div>
                                 <div className="mt-1 text-sm font-black text-navy">{dateStr}</div>

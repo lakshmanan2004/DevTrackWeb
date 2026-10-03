@@ -33,6 +33,8 @@ interface TodayTimelineProps {
   currentSlot?: number;
   teamName?: string;
   lunchSlot?: number;
+  isHoliday?: boolean;
+  holidayName?: string;
   onLog: (targetSlot?: number) => void;
 }
 
@@ -116,7 +118,7 @@ function LogCard({ log }: { log: any }) {
   );
 }
 
-export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, onLog }: TodayTimelineProps) {
+export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isHoliday, holidayName, onLog }: TodayTimelineProps) {
   const { user, refresh } = useAuth();
   const [isUpdatingLunch, setIsUpdatingLunch] = useState(false);
   const activeLunchSlot = propLunchSlot ?? user?.lunchSlot ?? 12;
@@ -148,71 +150,93 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, onL
     <section aria-label="Today's timeline" className="rounded-card border border-hairline bg-white shadow-card">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-5 py-4">
         <div>
-          <h2 className="text-sm font-bold text-navy">Today&apos;s Timeline</h2>
-          <p className="text-xs text-gray-500">8:00 AM – 5:00 PM workday</p>
+          <h2 className="text-sm font-bold text-navy flex items-center gap-2">
+            Today&apos;s Timeline
+            {isHoliday && (
+              <span className="rounded-full bg-purple-100 text-purple-800 border border-purple-300 text-[10px] font-extrabold px-2.5 py-0.5">
+                🎉 Holiday: {holidayName || 'Holiday'}
+              </span>
+            )}
+          </h2>
+          <p className="text-xs text-gray-500">
+            {isHoliday ? 'Organization Holiday — Work check-ins paused today' : '8:00 AM – 5:00 PM workday'}
+          </p>
         </div>
 
         {/* Lunch Break Slot Selector */}
-        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/70 p-1.5 shadow-xs">
-          <div className="flex items-center gap-1.5 pl-2 pr-1 text-xs font-bold text-amber-950">
-            <UtensilsIcon className="h-3.5 w-3.5 text-amber-600" />
-            <span>Lunch Time:</span>
+        {!isHoliday && (
+          <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/70 p-1.5 shadow-xs">
+            <div className="flex items-center gap-1.5 pl-2 pr-1 text-xs font-bold text-amber-950">
+              <UtensilsIcon className="h-3.5 w-3.5 text-amber-600" />
+              <span>Lunch Time:</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                disabled={isUpdatingLunch}
+                onClick={() => handleSelectLunchSlot(11)}
+                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                  activeLunchSlot === 11
+                    ? 'bg-amber-500 text-white shadow-xs'
+                    : 'bg-white text-amber-900 hover:bg-amber-100/80 border border-amber-200'
+                }`}
+              >
+                11:00 AM – 12:00 PM
+              </button>
+              <button
+                type="button"
+                disabled={isUpdatingLunch}
+                onClick={() => handleSelectLunchSlot(12)}
+                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                  activeLunchSlot === 12
+                    ? 'bg-amber-500 text-white shadow-xs'
+                    : 'bg-white text-amber-900 hover:bg-amber-100/80 border border-amber-200'
+                }`}
+              >
+                12:00 PM – 1:00 PM
+              </button>
+            </div>
+            {isUpdatingLunch && (
+              <Loader2Icon className="h-3.5 w-3.5 animate-spin text-amber-600 mr-1" />
+            )}
           </div>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={isUpdatingLunch}
-              onClick={() => handleSelectLunchSlot(11)}
-              className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
-                activeLunchSlot === 11
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'bg-white text-amber-900 hover:bg-amber-100/80 border border-amber-200'
-              }`}
-            >
-              11:00 AM – 12:00 PM
-            </button>
-            <button
-              type="button"
-              disabled={isUpdatingLunch}
-              onClick={() => handleSelectLunchSlot(12)}
-              className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
-                activeLunchSlot === 12
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'bg-white text-amber-900 hover:bg-amber-100/80 border border-amber-200'
-              }`}
-            >
-              12:00 PM – 1:00 PM
-            </button>
-          </div>
-          {isUpdatingLunch && (
-            <Loader2Icon className="h-3.5 w-3.5 animate-spin text-amber-600 mr-1" />
-          )}
-        </div>
+        )}
       </div>
 
-      <ol className="px-5 py-4">
-        {hours.map((hour, index) => {
-          const slotLogs = logs.filter((entry) => entry.hourSlot === hour.slot);
-          const isCurrent = hour.slot === slot;
-          const isFuture = hour.slot > slot;
-          const isPast = hour.slot < slot;
-          const hasLogs = slotLogs.length > 0;
+      {isHoliday && logs.length === 0 ? (
+        <div className="p-8 text-center bg-purple-50/40 rounded-xl border border-dashed border-purple-200 m-5">
+          <span className="text-4xl">🎉</span>
+          <h3 className="mt-2 text-base font-bold text-purple-950">Organization Holiday: {holidayName || 'Holiday'}</h3>
+          <p className="mt-1 text-xs text-purple-800 max-w-md mx-auto">
+            Today is marked as an organization holiday on the calendar. Check-ins, attendance tracking, and work logs are paused today.
+          </p>
+        </div>
+      ) : (
+        <ol className="px-5 py-4">
+          {hours.map((hour, index) => {
+            const slotLogs = logs.filter((entry) => entry.hourSlot === hour.slot);
+            const isCurrent = hour.slot === slot;
+            const isFuture = hour.slot > slot;
+            const isPast = hour.slot < slot;
+            const hasLogs = slotLogs.length > 0;
 
-          const dotTone = hour.isLunch
-            ? 'bg-amber-400'
-            : hasLogs
-            ? slotLogs.some((l) => l.review === 'changes_requested')
-              ? 'bg-amber-500'
-              : slotLogs.some((l) => l.review === 'rejected')
-              ? 'bg-red-500'
-              : slotLogs.some((l) => isLogLate(l))
-              ? 'bg-amber-500'
-              : 'bg-ok'
-            : isCurrent
-            ? 'bg-warn dt-pulse'
-            : isPast
-            ? 'bg-red-200'
-            : 'bg-gray-300';
+            const dotTone = hour.isLunch
+              ? 'bg-amber-400'
+              : hasLogs
+              ? slotLogs.some((l) => l.review === 'changes_requested')
+                ? 'bg-amber-500'
+                : slotLogs.some((l) => l.review === 'rejected')
+                ? 'bg-red-500'
+                : slotLogs.some((l) => isLogLate(l))
+                ? 'bg-amber-500'
+                : 'bg-ok'
+              : isHoliday
+              ? 'bg-purple-200'
+              : isCurrent
+              ? 'bg-warn dt-pulse'
+              : isPast
+              ? 'bg-red-200'
+              : 'bg-gray-300';
 
           return (
             <li key={hour.slot} className="flex gap-4">
@@ -319,6 +343,7 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, onL
           );
         })}
       </ol>
+      )}
     </section>
   );
 }

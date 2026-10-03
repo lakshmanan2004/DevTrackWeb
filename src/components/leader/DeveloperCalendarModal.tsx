@@ -52,7 +52,9 @@ export interface CalendarDayStatus {
   dateNum: number;
   dateStr: string;
   fullLabel: string;
-  status: 'approved' | 'pending' | 'absent' | 'off' | 'weekend';
+  status: 'approved' | 'pending' | 'absent' | 'off' | 'weekend' | 'holiday';
+  holidayName?: string;
+  isHoliday?: boolean;
   tasksCount: number;
   approvedCount: number;
   pendingCount: number;
@@ -108,10 +110,11 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
     setSelectedDay(null);
   };
 
-  const dayCellStyles = {
+  const dayCellStyles: Record<string, string> = {
     approved: 'bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 ring-2 ring-emerald-400/30',
     pending: 'bg-amber-500 text-white shadow-sm hover:bg-amber-600 ring-2 ring-amber-400/40 animate-pulse',
     absent: 'bg-rose-500 text-white shadow-sm hover:bg-rose-600',
+    holiday: 'bg-purple-600 text-white shadow-sm hover:bg-purple-700 ring-2 ring-purple-400/40',
     off: 'bg-slate-200 text-slate-600 hover:bg-slate-300',
     weekend: 'bg-slate-100 text-slate-400 border border-slate-200'
   };
@@ -289,6 +292,10 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                   <div className="flex items-center gap-1.5">
                     <span className="h-3 w-3 rounded-md bg-rose-500" />
                     <span className="font-semibold text-navy">Absent / Missed Check-ins</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-3 w-3 rounded-md bg-purple-600" />
+                    <span className="font-bold text-purple-900">🎉 Holiday</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="h-3 w-3 rounded-md bg-slate-200 border border-slate-300" />

@@ -108,6 +108,26 @@ function isWorkday(d, workDaysOrSettings) {
   return workDays.includes(d.getDay());
 }
 
+function getHolidayInfo(d = new Date(), workDaysOrSettings) {
+  const dateStr = dayStr(d);
+  const holidays = !Array.isArray(workDaysOrSettings) && Array.isArray(workDaysOrSettings?.holidays) ? workDaysOrSettings.holidays : [];
+  const entry = holidays.find((h) => h.date === dateStr);
+  if (entry) {
+    if (entry.isWorkingOverride) {
+      return { isHoliday: false, isWorkingOverride: true, name: entry.name || 'Working Day Override', type: 'work' };
+    }
+    return { isHoliday: true, isWorkingOverride: false, name: entry.name || 'Holiday', type: entry.type || 'org' };
+  }
+  if (isThirdSaturday(d)) {
+    return { isHoliday: true, isWorkingOverride: false, name: '3rd Saturday Holiday', type: 'org' };
+  }
+  const workDays = Array.isArray(workDaysOrSettings) ? workDaysOrSettings : (workDaysOrSettings?.workDays || [1, 2, 3, 4, 5]);
+  if (!workDays.includes(d.getDay())) {
+    return { isHoliday: true, isWorkingOverride: false, name: d.getDay() === 0 ? 'Sunday' : 'Saturday', type: 'weekend' };
+  }
+  return { isHoliday: false, isWorkingOverride: false, name: '', type: 'work' };
+}
+
 // Most recent Monday (or same day if Monday).
 function weekStart(d = new Date()) {
   const copy = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -160,6 +180,7 @@ module.exports = {
   requiredSlots,
   isThirdSaturday,
   isWorkday,
+  getHolidayInfo,
   weekStart,
   makeTaskTitle
 };

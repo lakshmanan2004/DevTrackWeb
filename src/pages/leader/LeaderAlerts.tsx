@@ -75,7 +75,13 @@ export function LeaderAlerts() {
       await api(`/api/alerts/${alert.id}/action`, { method: 'POST', body: { action } });
       refetch();
       if (action.startsWith('View')) {
-        navigate('/leader/developers');
+        if (alert.developerId) {
+          navigate(`/leader?dev=${alert.developerId}`);
+        } else if (alert.who) {
+          navigate(`/leader?dev=${encodeURIComponent(alert.who)}`);
+        } else {
+          navigate('/leader');
+        }
         return;
       }
       if (action === 'Review Logs') {

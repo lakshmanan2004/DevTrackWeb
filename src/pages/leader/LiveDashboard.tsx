@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { BellIcon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { DeveloperCard } from '../../components/leader/DeveloperCard';
@@ -10,6 +11,9 @@ import { useSocketConnected } from '../../api/socket';
 
 export function LiveDashboard() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const devParam = searchParams.get('dev') || searchParams.get('developer');
+
   const { data, refetch } = useDevelopers();
   const { data: alertData } = useAlerts();
   const { data: projData, refetch: refetchProjects } = useProjects('mine');
@@ -27,6 +31,21 @@ export function LiveDashboard() {
   const { data: detail, refetch: refetchDetail } = useDeveloperDetail(selectedId);
   const selected = developers.find((dev) => dev.id === selectedId) ?? null;
 
+  useEffect(() => {
+    if (devParam && developers.length > 0) {
+      const match = developers.find(
+        (d: any) =>
+          d.id === devParam ||
+          d.name?.toLowerCase() === devParam.toLowerCase() ||
+          d.name?.toLowerCase().includes(devParam.toLowerCase())
+      );
+      if (match) {
+        setSelectedId(match.id);
+        setFilter('all');
+      }
+    }
+  }, [devParam, developers]);
+
   const visible = developers.filter((dev: any) => {
     if (filter === 'all') return true;
     if (filter === 'on-track') return dev.missed === 0;
@@ -35,7 +54,7 @@ export function LiveDashboard() {
     return true;
   });
 
-  // auto-select first developer initially
+  // auto-select first developer initially if none selected
   if (!selectedId && visible.length > 0) setSelectedId(visible[0].id);
 
   const pills = [

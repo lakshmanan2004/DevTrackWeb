@@ -6,7 +6,7 @@ const { WorkLog, Commit, Task, Alert, Team, Project, User, Setting } = require('
 const { authRequired, attachUser, requireRole, ah } = require('../middleware/auth');
 const { workLogDto, dayStats } = require('../util/dto');
 const { scopeFor } = require('../util/scope');
-const { dayStr, fromDayStr, slotForNow, hourLabel, fmtTime, fmtDateMDY, fmtDateLong, requiredSlots, fmtDuration, isWorkday, initialsOf, makeTaskTitle } = require('../util/time');
+const { dayStr, fromDayStr, slotForNow, hourLabel, fmtTime, fmtDateMDY, fmtDateLong, requiredSlots, fmtDuration, isWorkday, getHolidayInfo, initialsOf, makeTaskTitle } = require('../util/time');
 const { emitToRoles, emitToUser } = require('../sockets');
 
 const router = express.Router();
@@ -118,8 +118,16 @@ router.get('/', ah(async (req, res) => {
     query = conditions.length ? { $or: conditions } : {};
   }
 
+  const settings = await Setting.get();
+  const targetDate = (dateQuery && dateQuery !== 'all') ? dateQuery : dayStr();
+  const dateObj = fromDayStr(targetDate);
+  const isWork = isWorkday(dateObj, settings);
+  const holidayInfo = getHolidayInfo(dateObj, settings);
+
   if (dateQuery && dateQuery !== 'all') {
     query.date = dateQuery;
+  } else if (!dateQuery && req.user.role === 'developer') {
+    query.date = dayStr();
   }
 
   const logs = await WorkLog.find(query)
@@ -134,7 +142,6 @@ router.get('/', ah(async (req, res) => {
 
   // day stats (for developer dashboards)
   let stats = null;
-  const targetDate = (dateQuery && dateQuery !== 'all') ? dateQuery : dayStr();
   if (req.user.role === 'developer' || req.query.developerId) {
     const devId = req.user.role === 'developer' ? req.user._id : req.query.developerId;
     const { perDev } = await dayStats([devId], targetDate);
@@ -146,12 +153,15 @@ router.get('/', ah(async (req, res) => {
         hoursCovered: s.hoursCovered,
         slotsSoFar: s.slotsSoFar,
         currentSlot: s.currentSlot,
-        firstSeen: s.firstSeen
+        firstSeen: s.firstSeen,
+        isWorkday: s.isWorkday,
+        isHoliday: s.isHoliday,
+        holidayName: s.holidayName
       };
     }
   }
 
-  res.json({ logs: dtos, stats });
+  res.json({ logs: dtos, stats, isWorkday: isWork, isHoliday: holidayInfo.isHoliday, holiday: holidayInfo });
 }));
 
 // ---------- POST /api/logs (developer hourly check-in) ----------
@@ -430,6 +440,7 @@ router.get('/calendar', ah(async (req, res) => {
 
     const loggedSlots = new Set(dayLogs.map((l) => l.hourSlot));
     const isWork = isWorkday(date, settings);
+    const holidayInfo = getHolidayInfo(date, settings);
     const missedSlots = [];
 
     if (isWork && ds >= joinedStr && ds <= todayStr) {
@@ -506,9 +517,11 @@ router.get('/calendar', ah(async (req, res) => {
     }));
 
     let status;
-    if (dow === 0 || dow === 6) status = 'weekend';
-    else if (ds < joinedStr) status = 'off';
-    else if (dayLogs.length === 0) {
+    if (holidayInfo.isHoliday) {
+      status = holidayInfo.type === 'weekend' ? 'weekend' : 'holiday';
+    } else if (ds < joinedStr) {
+      status = 'off';
+    } else if (dayLogs.length === 0) {
       if (ds > todayStr) status = 'off';
       else if (ds === todayStr) status = 'pending';
       else status = 'absent';
@@ -517,11 +530,21 @@ router.get('/calendar', ah(async (req, res) => {
       status = !hasUnresolved && eod ? 'approved' : 'pending';
     }
 
+    let dayNotes = undefined;
+    if (holidayInfo.isHoliday && holidayInfo.type !== 'weekend') {
+      dayNotes = `🎉 Organization Holiday: ${holidayInfo.name || 'Holiday'} — No work check-ins required.`;
+    } else if (dayLogs.some((l) => l.review !== 'approved')) {
+      dayNotes = `${dayLogs.filter((l) => l.review !== 'approved').length} task(s) require action / resubmission.`;
+    }
+
     days.push({
       dateNum: dnum,
       dateStr: ds,
       fullLabel: `${ds === todayStr ? fmtDateMDY(date) + ' (Today)' : fmtDateMDY(date)}`,
       status,
+      isHoliday: holidayInfo.isHoliday,
+      holidayName: holidayInfo.name,
+      isWorkday: isWork,
       tasksCount: dayLogs.length,
       approvedCount: dayLogs.filter((l) => l.review === 'approved').length,
       pendingCount: dayLogs.filter((l) => l.review !== 'approved').length,
@@ -531,9 +554,7 @@ router.get('/calendar', ah(async (req, res) => {
       pendingTasksCount: pendingTasksList.length,
       allTasks: allTasksList,
       activeTime: fmtDuration(dayLogs.reduce((s, l) => s + (l.activeMinutes || 0), 0)),
-      notes: dayLogs.some((l) => l.review !== 'approved')
-        ? `${dayLogs.filter((l) => l.review !== 'approved').length} task(s) require action / resubmission.`
-        : undefined,
+      notes: dayNotes,
       tasks: allTasksList
     });
   }
@@ -551,7 +572,8 @@ router.get('/pending-works', requireRole('developer'), ah(async (req, res) => {
     developer: req.user._id,
     $or: [
       { review: { $in: ['changes_requested', 'rejected'] } },
-      { status: { $in: ['progress', 'blocked'] } }
+      { status: { $in: ['progress', 'blocked'] } },
+      { isPendingWorkSubmission: true, review: 'pending' }
     ]
   }).sort({ date: -1, hourSlot: 1 }).populate('project', 'name');
 
@@ -571,7 +593,7 @@ router.get('/pending-works', requireRole('developer'), ah(async (req, res) => {
       : null;
     
     const isRevision = ['changes_requested', 'rejected'].includes(log.review);
-    const isSubmittedPending = log.review === 'pending' && log.status === 'done';
+    const isSubmittedPending = log.review === 'pending';
 
     items.push({
       kind: 'log',
@@ -588,6 +610,8 @@ router.get('/pending-works', requireRole('developer'), ah(async (req, res) => {
         ? fb.comment
         : log.reviewNote
         ? log.reviewNote
+        : isSubmittedPending
+        ? 'Work log submitted. Waiting for Team Lead review and approval.'
         : log.status === 'blocked'
         ? `Blocker: ${log.blocker || 'Blocked'}`
         : log.description,
@@ -712,6 +736,7 @@ router.get('/team-calendar', ah(async (req, res) => {
     const dStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const dayObj = fromDayStr(dStr);
     const isWork = isWorkday(dayObj, settings);
+    const holidayInfo = getHolidayInfo(dayObj, settings);
     const isToday = dStr === todayStr;
     const isPast = dStr < todayStr;
     const isFuture = dStr > todayStr;
@@ -871,8 +896,8 @@ router.get('/team-calendar', ah(async (req, res) => {
     let dayStatus = 'completed';
     if (isFuture) {
       dayStatus = 'future';
-    } else if (!isWork && dayLogs.length === 0) {
-      dayStatus = 'weekend';
+    } else if (holidayInfo.isHoliday && dayLogs.length === 0) {
+      dayStatus = holidayInfo.type === 'weekend' ? 'weekend' : 'holiday';
     } else if (unsubmittedDevelopers.length > 0) {
       dayStatus = 'attention';
     } else if (pendingWorks.length > 0) {
@@ -885,6 +910,8 @@ router.get('/team-calendar', ah(async (req, res) => {
       fullLabel: fmtDateLong(dayObj),
       dayOfWeek: dayObj.getDay(),
       isWorkday: isWork,
+      isHoliday: holidayInfo.isHoliday,
+      holidayName: holidayInfo.name,
       isToday,
       isPast,
       isFuture,

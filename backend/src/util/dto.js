@@ -1,4 +1,4 @@
-const { dayStr, fmtTime, fmtDuration, hourLabel, fmtDateMDY, fmtDateLong, slotForNow, requiredSlots, isWorkday, makeTaskTitle } = require('./time');
+const { dayStr, fromDayStr, fmtTime, fmtDuration, hourLabel, fmtDateMDY, fmtDateLong, slotForNow, requiredSlots, isWorkday, getHolidayInfo, makeTaskTitle } = require('./time');
 const { Setting } = require('../models');
 
 // ---- shared builders ----------------------------------------------------
@@ -138,6 +138,10 @@ async function dayStats(developerIds, date = dayStr()) {
   const currentSlot = slotForNow(settings);
   const ids = developerIds.map((id) => id.toString());
 
+  const dateObj = fromDayStr(date);
+  const isWork = isWorkday(dateObj, settings);
+  const holidayInfo = getHolidayInfo(dateObj, settings);
+
   const users = await User.find({ _id: { $in: ids } }, 'lunchSlot');
   const userMap = {};
   users.forEach((u) => { userMap[String(u._id)] = u; });
@@ -169,9 +173,9 @@ async function dayStats(developerIds, date = dayStr()) {
     const devRequired = requiredSlots(settings, devLunchSlot);
     const loggedSlots = new Set(info.logs.map((l) => l.hourSlot));
     const elapsed = devRequired.filter((s) => s < currentSlot);
-    const missed = elapsed.filter((s) => !loggedSlots.has(s)).length;
+    const missed = isWork ? elapsed.filter((s) => !loggedSlots.has(s)).length : 0;
     const hoursCovered = info.logs.length;
-    const slotsSoFar = elapsed.length || 0;
+    const slotsSoFar = isWork ? (elapsed.length || 0) : 0;
     result[id] = {
       logs: info.logs,
       commits: info.commits,
@@ -181,15 +185,19 @@ async function dayStats(developerIds, date = dayStr()) {
       hoursCovered,
       slotsSoFar,
       currentSlot,
+      isWorkday: isWork,
+      isHoliday: holidayInfo.isHoliday,
+      holidayName: holidayInfo.name,
       firstSeen: info.logs.length
         ? fmtTime(new Date(Math.min(...info.logs.map((l) => new Date(l.submittedAt).getTime()))))
         : null
     };
   }
-  return { perDev: result, settings, currentSlot };
+  return { perDev: result, settings, currentSlot, isWorkday: isWork, isHoliday: holidayInfo.isHoliday, holiday: holidayInfo };
 }
 
-function developerNote({ missed, logsCount, eodMissing, topPerformer, changesRequested }) {
+function developerNote({ missed, logsCount, eodMissing, topPerformer, changesRequested, isHoliday, holidayName }) {
+  if (isHoliday) return holidayName ? `Holiday: ${holidayName}` : 'Organization Holiday';
   if (topPerformer) return 'Top performer';
   if (logsCount === 0 && missed > 0) return 'No activity';
   if (changesRequested > 0) return 'Changes requested';

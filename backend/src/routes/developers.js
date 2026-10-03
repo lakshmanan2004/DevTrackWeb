@@ -3,7 +3,7 @@ const { User, WorkLog, Commit, EodReport, Team, Project, Alert, Task } = require
 const { authRequired, attachUser, requireRole, ah } = require('../middleware/auth');
 const { scopeFor } = require('../util/scope');
 const { dayStats, developerNote } = require('../util/dto');
-const { dayStr, fmtTime, hourLabel, fmtDuration, requiredSlots, slotForNow, addDays, isWorkday } = require('../util/time');
+const { dayStr, fmtTime, hourLabel, fmtDuration, requiredSlots, slotForNow, addDays, isWorkday, getHolidayInfo } = require('../util/time');
 const { Setting } = require('../models');
 
 const router = express.Router();
@@ -12,7 +12,10 @@ router.use(authRequired, attachUser);
 // GET /api/developers — role-scoped list with today's live stats
 router.get('/', ah(async (req, res) => {
   const scope = await scopeFor(req.user);
+  const settings = await Setting.get();
   const today = dayStr();
+  const isWork = isWorkday(new Date(), settings);
+  const holidayInfo = getHolidayInfo(new Date(), settings);
   const devs = await User.find({ _id: { $in: scope.developerIds }, active: true }).populate('team');
 
   const { perDev, currentSlot } = await dayStats(devs.map((d) => d._id));
@@ -79,14 +82,20 @@ router.get('/', ah(async (req, res) => {
       logsCount: stat.logs,
       eodMissingYesterday,
       topPerformer: stat.topPerformer,
-      changesRequested: String(dev._id) && changesRequested > 0 && stat.logs > 0 ? 0 : 0
+      changesRequested: String(dev._id) && changesRequested > 0 && stat.logs > 0 ? 0 : 0,
+      isHoliday: holidayInfo.isHoliday,
+      holidayName: holidayInfo.name
     });
-    if (stat.logs === 0 && stat.missed > 0) stat.note = 'No activity';
+    if (!isWork && stat.logs === 0) {
+      stat.note = holidayInfo.name || 'Organization Holiday';
+    } else if (stat.logs === 0 && stat.missed > 0) {
+      stat.note = 'No activity';
+    }
     delete stat.eodMissingYesterday;
     return stat;
   });
 
-  res.json({ developers: result, currentSlot, date: today });
+  res.json({ developers: result, currentSlot, date: today, isWorkday: isWork, isHoliday: holidayInfo.isHoliday, holiday: holidayInfo });
 }));
 
 // GET /api/developers/:id — detail panel data (logs, commits, eod)

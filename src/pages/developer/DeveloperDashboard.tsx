@@ -112,10 +112,12 @@ export function DeveloperDashboard() {
   const lunchSlotLabel = devLunchSlot === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM';
   const lunchEndLabel = devLunchSlot === 11 ? '12:00 PM' : '1:00 PM';
 
-  const lastAlertRef = useRef<{ slot: number; level: string } | null>(null);
+  const isHoliday = !!(data as any)?.isHoliday || !!stats?.isHoliday;
+  const holidayName = (data as any)?.holiday?.name || stats?.holidayName || 'Holiday';
 
   // Background monitor for 20m, 10m, 5m audio pop/chime sounds & Windows desktop notifications + Screen Pop-up Modal
   useEffect(() => {
+    if (isHoliday) return;
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       Notification.requestPermission().catch(() => {});
     }
@@ -166,7 +168,7 @@ export function DeveloperDashboard() {
     }, 5000);
 
     return () => clearInterval(checkTimer);
-  }, [stats?.currentSlot, logs, devLunchSlot]);
+  }, [stats?.currentSlot, logs, devLunchSlot, isHoliday]);
 
   const firstName = user?.name?.split(' ')[0] || 'there';
 
@@ -260,65 +262,100 @@ export function DeveloperDashboard() {
           </div>
         )}
 
-        {/* Persistent Check-In Status & Windows Alert Banner */}
-        <Banner
-          tone={
-            isLunchSlot
-              ? 'yellow'
-              : hasLoggedCurrentSlot
-              ? 'green'
-              : minutesLeft <= 5
-              ? 'red'
-              : 'yellow'
-          }
-          icon={
-            isLunchSlot ? (
-              <span className="text-sm">🍱</span>
-            ) : (
-              <AlarmClockIcon
-                className={`h-4 w-4 ${
-                  hasLoggedCurrentSlot
-                    ? 'text-emerald-600'
-                    : minutesLeft <= 5
-                    ? 'text-red-600 animate-bounce'
-                    : 'text-amber-600'
-                }`}
-              />
-            )
-          }
-          title={
-            isLunchSlot
-              ? `🍱 Lunch Break (${lunchSlotLabel}) — ${minutesLeft}m remaining`
-              : hasLoggedCurrentSlot
-              ? `✓ Work Log Submitted for ${currentSlotLabel} Slot (${minutesLeft}m remaining in this slot)`
-              : minutesLeft <= 5
-              ? `URGENT: Only ${minutesLeft} minutes left to log this hour slot!`
-              : minutesLeft <= 10
-              ? `WARNING: ${minutesLeft} minutes left to log this hour slot!`
-              : `Check-In Due: ${minutesLeft} minutes remaining for ${currentSlotLabel} slot`
-          }
-          action={
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={triggerTestAlert}
-                icon={<Volume2Icon className="h-3.5 w-3.5 text-brand" />}
-              >
-                Test Audio & Windows Alert
-              </Button>
-              <Button onClick={() => handleOpenLog(isLunchSlot ? undefined : currentSlot)}>
-                {hasLoggedCurrentSlot || isLunchSlot ? '+ Add Log' : 'Log Now'}
-              </Button>
+        {/* Persistent Check-In Status & Windows Alert Banner or Holiday Banner */}
+        {isHoliday ? (
+          <div className="rounded-2xl border-2 border-purple-300 bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 p-5 shadow-card">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-2xl shadow-inner">
+                  🎉
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-extrabold text-purple-950">
+                      Organization Holiday: {holidayName}
+                    </h2>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-2xs">
+                      ✨ Holiday Active
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs font-medium text-purple-800">
+                    Today is marked as an organization holiday on the system calendar. No hourly check-ins, active timers, or work logs are required today. Enjoy your day off!
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => handleOpenLog()}
+                  className="bg-white text-purple-900 border-purple-200 hover:bg-purple-100/60"
+                >
+                  Optional Check-in
+                </Button>
+              </div>
             </div>
-          }
-        >
-          {isLunchSlot
-            ? `Lunch Break is in progress! No mandatory check-in is required during ${lunchSlotLabel}. Automated check-in alerts resume at ${lunchEndLabel}.`
-            : hasLoggedCurrentSlot
-            ? 'Your check-in for this hour is recorded. Automated audio pop sounds and Windows notifications will alert you before the next slot ends.'
-            : 'Automated audio pop sounds and Windows screen pop-up notifications will alert you at 20m, 10m, 5m, and deadline.'}
-        </Banner>
+          </div>
+        ) : (
+          <Banner
+            tone={
+              isLunchSlot
+                ? 'yellow'
+                : hasLoggedCurrentSlot
+                ? 'green'
+                : minutesLeft <= 5
+                ? 'red'
+                : 'yellow'
+            }
+            icon={
+              isLunchSlot ? (
+                <span className="text-sm">🍱</span>
+              ) : (
+                <AlarmClockIcon
+                  className={`h-4 w-4 ${
+                    hasLoggedCurrentSlot
+                      ? 'text-emerald-600'
+                      : minutesLeft <= 5
+                      ? 'text-red-600 animate-bounce'
+                      : 'text-amber-600'
+                  }`}
+                />
+              )
+            }
+            title={
+              isLunchSlot
+                ? `🍱 Lunch Break (${lunchSlotLabel}) — ${minutesLeft}m remaining`
+                : hasLoggedCurrentSlot
+                ? `✓ Work Log Submitted for ${currentSlotLabel} Slot (${minutesLeft}m remaining in this slot)`
+                : minutesLeft <= 5
+                ? `URGENT: Only ${minutesLeft} minutes left to log this hour slot!`
+                : minutesLeft <= 10
+                ? `WARNING: ${minutesLeft} minutes left to log this hour slot!`
+                : `Check-In Due: ${minutesLeft} minutes remaining for ${currentSlotLabel} slot`
+            }
+            action={
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={triggerTestAlert}
+                  icon={<Volume2Icon className="h-3.5 w-3.5 text-brand" />}
+                >
+                  Test Audio & Windows Alert
+                </Button>
+                <Button onClick={() => handleOpenLog(isLunchSlot ? undefined : currentSlot)}>
+                  {hasLoggedCurrentSlot || isLunchSlot ? '+ Add Log' : 'Log Now'}
+                </Button>
+              </div>
+            }
+          >
+            {isLunchSlot
+              ? `Lunch Break is in progress! No mandatory check-in is required during ${lunchSlotLabel}. Automated check-in alerts resume at ${lunchEndLabel}.`
+              : hasLoggedCurrentSlot
+              ? 'Your check-in for this hour is recorded. Automated audio pop sounds and Windows notifications will alert you before the next slot ends.'
+              : 'Automated audio pop sounds and Windows screen pop-up notifications will alert you at 20m, 10m, 5m, and deadline.'}
+          </Banner>
+        )}
 
         {/* Banner for Team Lead Targeted Feedback / Rejection */}
         {pendingRevisionsCount > 0 && (
@@ -347,7 +384,7 @@ export function DeveloperDashboard() {
           <StatCard
             label="Active Time"
             value={stats ? fmtDuration(stats.activeMinutes) : '—'}
-            hint={stats?.firstSeen ? `since ${stats.firstSeen}` : 'no activity yet'}
+            hint={stats?.firstSeen ? `since ${stats.firstSeen}` : (isHoliday ? 'Holiday today' : 'no activity yet')}
             tone="green"
             icon={<TimerIcon className="h-4 w-4" />}
           />
@@ -355,7 +392,7 @@ export function DeveloperDashboard() {
           <StatCard
             label="Tasks Logged"
             value={String(logs.length)}
-            hint={logs.length ? `Last: ${logs[logs.length - 1].submittedAt}` : 'No logs yet today'}
+            hint={logs.length ? `Last: ${logs[logs.length - 1].submittedAt}` : (isHoliday ? 'Holiday today' : 'No logs yet today')}
             tone="blue"
             icon={<ListChecksIcon className="h-4 w-4" />}
           />
@@ -363,7 +400,7 @@ export function DeveloperDashboard() {
           <StatCard
             label="Hours Covered"
             value={stats ? `${stats.hoursCovered}/${stats.slotsSoFar}` : '—'}
-            hint="working-hour slots"
+            hint={isHoliday ? 'Holiday' : 'working-hour slots'}
             tone="purple"
             icon={<GaugeIcon className="h-4 w-4" />}
           />
@@ -371,7 +408,7 @@ export function DeveloperDashboard() {
           <StatCard
             label="Missed Check-ins"
             value={String(stats?.missed ?? 0)}
-            hint={stats?.missed ? 'submit pending slots' : 'Perfect record'}
+            hint={isHoliday ? 'Holiday today' : (stats?.missed ? 'submit pending slots' : 'Perfect record')}
             tone={stats?.missed ? 'yellow' : 'green'}
             icon={<CheckCircle2Icon className="h-4 w-4" />}
           />
@@ -396,7 +433,14 @@ export function DeveloperDashboard() {
         />
 
         {/* Today's Timeline */}
-        <TodayTimeline logs={logs} onLog={handleOpenLog} />
+        <TodayTimeline
+          logs={logs}
+          currentSlot={currentSlot}
+          lunchSlot={devLunchSlot}
+          isHoliday={isHoliday}
+          holidayName={holidayName}
+          onLog={handleOpenLog}
+        />
       </div>
 
       <CheckInModal open={modalOpen} targetSlot={modalTargetSlot} onClose={() => { setModalOpen(false); setModalTargetSlot(undefined); }} />

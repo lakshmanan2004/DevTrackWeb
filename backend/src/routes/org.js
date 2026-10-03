@@ -620,7 +620,11 @@ router.put('/settings', requireRole('admin'), ah(async (req, res) => {
   for (const key of allowed) {
     if (req.body[key] !== undefined) settings[key] = req.body[key];
   }
+  if (req.body.holidays !== undefined) {
+    settings.markModified('holidays');
+  }
   await settings.save();
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'setting:update', { holidays: settings.holidays });
   res.json({ settings });
 }));
 
@@ -637,7 +641,9 @@ router.post('/settings/holidays', requireRole('admin'), ah(async (req, res) => {
     type: type || 'org',
     isWorkingOverride: !!isWorkingOverride
   });
+  settings.markModified('holidays');
   await settings.save();
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'setting:update', { holidays: settings.holidays });
   res.json({ settings });
 }));
 
@@ -645,7 +651,9 @@ router.post('/settings/holidays', requireRole('admin'), ah(async (req, res) => {
 router.delete('/settings/holidays/:date', requireRole('admin'), ah(async (req, res) => {
   const settings = await Setting.get();
   settings.holidays = (settings.holidays || []).filter((h) => h.date !== req.params.date);
+  settings.markModified('holidays');
   await settings.save();
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'setting:update', { holidays: settings.holidays });
   res.json({ settings });
 }));
 

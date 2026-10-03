@@ -44,9 +44,10 @@ async function createManagerAlert(dev, payload) {
 
 // Check-in reminder: 15 minutes before each slot closes (H:45)
 async function reminderCheck() {
-  if (new Date().getHours() >= 17) return;
-  const settings = await Setting.get();
   const now = new Date();
+  if (now.getHours() >= 17) return;
+  const settings = await Setting.get();
+  if (!isWorkday(now, settings)) return;
   const slot = slotForNow(settings);
   const devs = await activeDevelopers();
   const date = dayStr(now);

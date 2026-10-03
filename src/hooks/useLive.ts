@@ -76,22 +76,22 @@ export interface DeveloperStat {
 export const useDevelopers = () =>
   useLive<{ developers: DeveloperStat[]; currentSlot: number; date: string }>(
     '/api/developers',
-    ['log:new', 'log:review', 'commit:new', 'eod:new', 'presence:update', 'alert:new'],
+    ['log:new', 'log:review', 'commit:new', 'eod:new', 'presence:update', 'alert:new', 'setting:update'],
     30000
   );
 
 export const useDeveloperDetail = (id: string | null) =>
-  useLive<any>(id ? `/api/developers/${id}` : null, ['log:new', 'log:review', 'commit:new', 'presence:update', 'eod:new'], 20000);
+  useLive<any>(id ? `/api/developers/${id}` : null, ['log:new', 'log:review', 'commit:new', 'presence:update', 'eod:new', 'setting:update'], 20000);
 
 export const useAlerts = () => useLive<{ alerts: any[] }>('/api/alerts', ['alert:new', 'alert:update', 'log:review'], 20000);
 
 export const useTasks = () => useLive<{ tasks: any[] }>('/api/tasks', ['task:new', 'task:update'], 30000);
 
 export const useMyLogs = (date?: string) =>
-  useLive<{ logs: any[]; stats?: any }>(`/api/logs${date ? `?date=${date}` : ''}`, ['log:new', 'log:review'], 20000);
+  useLive<{ logs: any[]; stats?: any }>(`/api/logs${date ? `?date=${date}` : ''}`, ['log:new', 'log:review', 'setting:update'], 20000);
 
 export const useCalendar = (month: string, developerId?: string) =>
-  useLive<{ days: any[] }>(`/api/logs/calendar?month=${month}${developerId ? `&developerId=${developerId}` : ''}`, ['log:new', 'log:review', 'eod:new'], 60000);
+  useLive<{ days: any[] }>(`/api/logs/calendar?month=${month}${developerId ? `&developerId=${developerId}` : ''}`, ['log:new', 'log:review', 'eod:new', 'setting:update'], 60000);
 
 export const usePendingWorks = () =>
   useLive<{ items: any[] }>('/api/logs/pending-works', ['log:review', 'task:new', 'task:update'], 30000);
@@ -117,7 +117,7 @@ export const useWeeklyReport = (developerId: string, week = 0) =>
 export const usePerformance = () => useLive<any>('/api/reports/performance', ['log:new', 'log:review', 'task:update', 'eod:new'], 60000);
 
 export const useTeamCalendar = (month: string) =>
-  useLive<any>(`/api/logs/team-calendar?month=${month}`, ['log:new', 'log:review', 'task:new', 'task:update', 'presence:update'], 30000);
+  useLive<any>(`/api/logs/team-calendar?month=${month}`, ['log:new', 'log:review', 'task:new', 'task:update', 'presence:update', 'setting:update'], 30000);
 
 export const usePublicStats = () => useLive<any>('/api/auth/stats/public', ['log:new'], 60000);
 
