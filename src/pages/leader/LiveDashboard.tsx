@@ -109,19 +109,24 @@ export function LiveDashboard() {
           }}
         />
 
-        <dl className="flex flex-wrap gap-3">
+        <dl className="flex flex-wrap gap-2.5">
           {pills.map((pill) => (
             <div
               key={pill.label}
               onClick={() => 'id' in pill ? setFilter(pill.id as typeof filter) : undefined}
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 shadow-card transition-colors cursor-pointer ${'id' in pill && filter === pill.id ? 'border-brand bg-brand text-white' : 'border-hairline bg-white'}`}>
-              <dt className={`text-xs font-semibold ${'id' in pill && filter === pill.id ? 'text-white' : 'text-gray-500'}`}>{pill.label}</dt>
+              className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 shadow-glass transition-all duration-200 cursor-pointer ${
+                'id' in pill && filter === pill.id
+                  ? 'btn-glass-primary !text-white border-transparent'
+                  : 'border-white/80 bg-white/70 backdrop-blur-md hover:bg-white/90'
+              }`}
+            >
+              <dt className={`text-xs font-semibold ${'id' in pill && filter === pill.id ? 'text-white' : 'text-slate-500'}`}>{pill.label}</dt>
               <dd className={`text-sm font-bold tabular-nums ${'id' in pill && filter === pill.id ? 'text-white' : pill.tone}`}>{pill.value}</dd>
             </div>
           ))}
         </dl>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
           <div className="space-y-3">
             <ul className="space-y-3">
               {visible.map((dev: any) => (
@@ -129,10 +134,11 @@ export function LiveDashboard() {
                   key={dev.id}
                   developer={dev}
                   selected={dev.id === selectedId}
-                  onSelect={setSelectedId} />
+                  onSelect={setSelectedId}
+                />
               ))}
               {visible.length === 0 && (
-                <li className="rounded-card border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
+                <li className="glass-card rounded-3xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 shadow-glass">
                   No developers match this filter.
                 </li>
               )}
@@ -140,25 +146,27 @@ export function LiveDashboard() {
           </div>
 
           <div>
-            {selected ?
-            <DeveloperDetailPanel
-              developer={selected}
-              detail={detail}
-              onClose={() => setSelectedId(null)}
-              onChanged={() => {
-                refetch();
-                refetchDetail();
-              }} /> :
-
-            <div className="rounded-card border border-dashed border-gray-300 bg-white px-6 py-16 text-center">
-                <p className="text-sm font-semibold text-navy">No developer selected</p>
-                <p className="mt-1 text-sm text-gray-500">
-                  Pick anyone from your team to inspect their session, logs and commits.
+            {selected ? (
+              <DeveloperDetailPanel
+                developer={selected}
+                detail={detail}
+                onClose={() => setSelectedId(null)}
+                onChanged={() => {
+                  refetch();
+                  refetchDetail();
+                }}
+              />
+            ) : (
+              <div className="glass-card rounded-3xl border border-dashed border-slate-300 px-6 py-16 text-center shadow-glass">
+                <p className="text-sm font-bold text-navy">No developer selected</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Pick anyone from your team to inspect their session, logs, and live timelines.
                 </p>
               </div>
-            }
+            )}
           </div>
         </div>
       </div>
-    </>);
+    </>
+  );
 }

@@ -208,10 +208,10 @@ export function DeveloperDashboard() {
 
         {/* My Involved Project Card */}
         {activeProject ? (
-          <section className="rounded-card border border-hairline bg-white p-5 shadow-card space-y-3">
+          <section className="glass-card rounded-3xl p-5 sm:p-6 shadow-glass space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand">
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 border border-brand/20 text-brand shadow-glass">
                   <FolderKanbanIcon className="h-5 w-5" />
                 </div>
                 <div>
@@ -221,23 +221,23 @@ export function DeveloperDashboard() {
                       {activeProject.status.toUpperCase()}
                     </Badge>
                   </h3>
-                  <p className="text-xs text-gray-500">
-                    Team: {activeProject.team || user?.teamName} · Lead: {activeProject.leader || 'Unassigned'} · Manager: {activeProject.manager || 'Unassigned'}
+                  <p className="text-xs font-medium text-slate-500 mt-0.5">
+                    Team: <span className="text-slate-700 font-semibold">{activeProject.team || user?.teamName}</span> · Lead: <span className="text-slate-700 font-semibold">{activeProject.leader || 'Unassigned'}</span> · Manager: <span className="text-slate-700 font-semibold">{activeProject.manager || 'Unassigned'}</span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 {activeProject.repoUrl && (
                   <a
                     href={activeProject.repoUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-hairline bg-canvas px-3 text-xs font-semibold text-brand hover:bg-gray-100"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/80 bg-white/70 backdrop-blur-md px-3.5 text-xs font-bold text-brand hover:bg-white shadow-glass transition-all"
                   >
-                    <GitBranchIcon className="h-3.5 w-3.5 text-gray-500" />
+                    <GitBranchIcon className="h-3.5 w-3.5 text-slate-500" />
                     <span>Repo</span>
-                    <ExternalLinkIcon className="h-3 w-3 text-gray-400" />
+                    <ExternalLinkIcon className="h-3 w-3 text-slate-400" />
                   </a>
                 )}
                 <Button
@@ -251,9 +251,9 @@ export function DeveloperDashboard() {
             </div>
           </section>
         ) : (
-          <div className="rounded-card border border-dashed border-gray-300 bg-white p-4 text-center text-xs text-gray-500 flex items-center justify-between">
+          <div className="glass-card rounded-2xl border border-dashed border-slate-300 p-4 text-center text-xs text-slate-500 flex items-center justify-between shadow-2xs">
             <span className="flex items-center gap-2 font-medium">
-              <FolderKanbanIcon className="h-4 w-4 text-gray-400" />
+              <FolderKanbanIcon className="h-4 w-4 text-slate-400" />
               Not currently assigned to a project team.
             </span>
             <Button size="sm" variant="secondary" onClick={() => navigate('/developer/projects')}>

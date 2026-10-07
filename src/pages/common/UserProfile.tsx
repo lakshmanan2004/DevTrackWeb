@@ -24,6 +24,7 @@ import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../context/AuthContext';
 import { useProjects, useTeams, useLive } from '../../hooks/useLive';
 import { api } from '../../api/client';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 const roleLabels: Record<string, string> = {
   developer: 'Developer',
@@ -250,6 +251,15 @@ export function UserProfile() {
                         <span className="text-gray-400 font-normal">Not linked</span>
                       )}
                     </span>
+                  </div>
+
+                  {/* Interface Theme */}
+                  <div className="flex items-center justify-between gap-4 py-2 border-t border-slate-100 dark:border-white/10">
+                    <span className="flex items-center gap-2 text-slate-500 shrink-0 font-medium">
+                      <SparklesIcon className="h-4 w-4 text-amber-500 shrink-0" />
+                      <span>Interface Theme</span>
+                    </span>
+                    <ThemeToggle variant="compact" />
                   </div>
                 </div>
             </div>

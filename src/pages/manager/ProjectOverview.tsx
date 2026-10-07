@@ -69,13 +69,13 @@ export function ProjectOverview() {
           : 'Select a project'}
         actions={
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 rounded-xl border border-hairline bg-white px-3 py-2 shadow-sm text-xs font-semibold text-navy">
-              <FolderKanbanIcon className="h-4 w-4 text-brand" />
-              <span className="text-gray-500">Select Project:</span>
+            <label className="flex items-center gap-2 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-md px-3 py-2 shadow-glass text-xs font-semibold text-navy dark:text-white">
+              <FolderKanbanIcon className="h-4 w-4 text-brand dark:text-sky-400" />
+              <span className="text-gray-500 dark:text-slate-400">Select Project:</span>
               <select
                 value={activeId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="bg-transparent font-bold text-navy focus:outline-none cursor-pointer"
+                className="bg-transparent font-bold text-navy dark:text-white focus:outline-none cursor-pointer"
               >
                 {projects.map((proj: any) => (
                   <option key={proj.id} value={proj.id}>
@@ -146,25 +146,25 @@ export function ProjectOverview() {
         )}
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
-          <section className="overflow-hidden rounded-card border border-hairline bg-white shadow-card">
-            <div className="border-b border-hairline px-5 py-4 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-navy">Weekly Delivery Breakdown</h2>
+          <section className="overflow-hidden rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-glass">
+            <div className="border-b border-hairline dark:border-white/10 px-5 py-4 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-navy dark:text-white">Weekly Delivery Breakdown</h2>
             </div>
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-hairline bg-canvas text-xs uppercase tracking-wide text-gray-500">
+                <tr className="border-b border-hairline dark:border-white/10 bg-slate-50/70 dark:bg-slate-950/60 text-xs uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   <th scope="col" className="px-5 py-3 font-semibold">Week</th>
                   <th scope="col" className="px-3 py-3 font-semibold">Tasks closed</th>
                   <th scope="col" className="px-3 py-3 font-semibold">Blockers</th>
                   <th scope="col" className="px-5 py-3 text-right font-semibold">Health</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-white/10">
                 {projectWeeks.map((week: any) => (
-                  <tr key={week.label} className={week.health === 'Behind' ? 'bg-danger-soft' : ''}>
-                    <td className="px-5 py-3.5 font-semibold text-navy">{week.label}</td>
-                    <td className="px-3 py-3.5 tabular-nums text-gray-600">{week.tasks} tasks</td>
-                    <td className="px-3 py-3.5 tabular-nums text-gray-600">
+                  <tr key={week.label} className={week.health === 'Behind' ? 'bg-danger-soft dark:bg-rose-950/30' : ''}>
+                    <td className="px-5 py-3.5 font-semibold text-navy dark:text-white">{week.label}</td>
+                    <td className="px-3 py-3.5 tabular-nums text-gray-600 dark:text-slate-300">{week.tasks} tasks</td>
+                    <td className="px-3 py-3.5 tabular-nums text-gray-600 dark:text-slate-300">
                       {week.blockers} blocker{week.blockers === 1 ? '' : 's'}
                     </td>
                     <td className="px-5 py-3.5 text-right">
@@ -176,7 +176,7 @@ export function ProjectOverview() {
                 ))}
                 {projectWeeks.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-5 py-6 text-center text-xs text-gray-500">
+                    <td colSpan={4} className="px-5 py-6 text-center text-xs text-gray-500 dark:text-slate-400">
                       No weekly data yet.
                     </td>
                   </tr>
@@ -185,18 +185,18 @@ export function ProjectOverview() {
             </table>
           </section>
 
-          <section className="h-fit rounded-card border border-hairline bg-white shadow-card">
-            <h2 className="border-b border-hairline px-5 py-4 text-sm font-bold text-navy">
+          <section className="h-fit rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-glass">
+            <h2 className="border-b border-hairline dark:border-white/10 px-5 py-4 text-sm font-bold text-navy dark:text-white">
               Active Blockers — {currentBlockers.length}
             </h2>
-            <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-gray-100 dark:divide-white/10">
               {currentBlockers.length > 0 ? (
                 currentBlockers.map((blocker: any) => (
                   <li key={blocker.id} className="px-5 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold text-navy">{blocker.title}</p>
-                        <p className="mt-0.5 text-xs text-gray-500">
+                        <p className="text-sm font-semibold text-navy dark:text-white">{blocker.title}</p>
+                        <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">
                           {blocker.since} · {blocker.team}
                         </p>
                       </div>
@@ -207,25 +207,25 @@ export function ProjectOverview() {
                   </li>
                 ))
               ) : (
-                <li className="px-5 py-6 text-center text-xs text-gray-500">
+                <li className="px-5 py-6 text-center text-xs text-gray-500 dark:text-slate-400">
                   No active blockers for this project.
                 </li>
               )}
             </ul>
-            <p className="border-t border-hairline bg-canvas px-5 py-3 text-xs text-gray-500">
-              Contact Team Leader <span className="font-semibold text-navy">{selectedProject?.leader}</span> for resolution.
+            <p className="border-t border-hairline dark:border-white/10 bg-slate-50/70 dark:bg-slate-950/60 px-5 py-3 text-xs text-gray-500 dark:text-slate-400">
+              Contact Team Leader <span className="font-semibold text-navy dark:text-white">{selectedProject?.leader}</span> for resolution.
             </p>
           </section>
         </div>
 
-        <section className="rounded-card border border-hairline bg-white p-5 shadow-card">
-          <div className="flex items-center justify-between border-b border-hairline pb-4">
+        <section className="rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-5 shadow-glass">
+          <div className="flex items-center justify-between border-b border-hairline dark:border-white/10 pb-4">
             <div>
-              <h2 className="flex items-center gap-2 text-base font-bold text-navy">
-                <BarChart3Icon className="h-5 w-5 text-brand" />
+              <h2 className="flex items-center gap-2 text-base font-bold text-navy dark:text-white">
+                <BarChart3Icon className="h-5 w-5 text-brand dark:text-sky-400" />
                 All Managed Projects Overview ({projects.length})
               </h2>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">
                 Click any project card below to instantly view its detailed progress metrics and breakdown.
               </p>
             </div>
@@ -236,18 +236,18 @@ export function ProjectOverview() {
               <div
                 key={proj.id}
                 onClick={() => setSelectedProjectId(proj.id)}
-                className={`group cursor-pointer rounded-xl border p-4 transition-all ${
+                className={`group cursor-pointer rounded-2xl border p-4 transition-all ${
                   activeId === proj.id
-                    ? 'border-brand bg-brand-soft/30 ring-2 ring-brand/20 shadow-md'
-                    : 'border-hairline bg-canvas hover:border-brand/50 hover:bg-white hover:shadow-sm'
+                    ? 'border-brand dark:border-brand bg-brand-soft/30 dark:bg-brand/20 ring-2 ring-brand/20 shadow-md'
+                    : 'border-hairline dark:border-white/10 bg-canvas/40 dark:bg-slate-900/50 hover:border-brand/50 hover:bg-white/80 dark:hover:bg-slate-800/80 hover:shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="text-sm font-bold text-navy group-hover:text-brand transition-colors">
+                    <h3 className="text-sm font-bold text-navy dark:text-white group-hover:text-brand dark:group-hover:text-sky-300 transition-colors">
                       {proj.name}
                     </h3>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-slate-400">
                       {proj.team} · Lead: {proj.leader}
                     </p>
                   </div>
@@ -258,8 +258,8 @@ export function ProjectOverview() {
 
                 <div className="mt-4 space-y-1.5">
                   <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-gray-500">Overall Progress</span>
-                    <span className="text-navy">{proj.progress}%</span>
+                    <span className="text-gray-500 dark:text-slate-400">Overall Progress</span>
+                    <span className="text-navy dark:text-white">{proj.progress}%</span>
                   </div>
                   <ProgressBar
                     value={proj.progress}
@@ -268,10 +268,10 @@ export function ProjectOverview() {
                   />
                 </div>
 
-                <div className="mt-4 flex items-center justify-between border-t border-hairline/60 pt-3 text-xs text-gray-500">
+                <div className="mt-4 flex items-center justify-between border-t border-hairline/60 dark:border-white/10 pt-3 text-xs text-gray-500 dark:text-slate-400">
                   <span>{proj.tasksDone} tasks done</span>
                   <span>{proj.blockers} blockers</span>
-                  <span className="font-semibold text-brand group-hover:underline">View Details →</span>
+                  <span className="font-semibold text-brand dark:text-sky-400 group-hover:underline">View Details →</span>
                 </div>
               </div>
             ))}

@@ -86,13 +86,13 @@ export function ManageTeams() {
         )}
 
         {/* PROJECT FILTER DROPDOWN */}
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-hairline bg-white p-4 shadow-card">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-4 shadow-glass">
           <div className="flex flex-wrap items-center gap-3.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 dark:bg-brand/20 text-brand dark:text-sky-400">
               <FolderIcon className="h-5 w-5" />
             </div>
             <div>
-              <label htmlFor="project-filter-select" className="text-xs font-bold uppercase tracking-wider text-gray-500 block">
+              <label htmlFor="project-filter-select" className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 block">
                 Filter by Project / Team
               </label>
               <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -100,7 +100,7 @@ export function ManageTeams() {
                   id="project-filter-select"
                   value={tab}
                   onChange={(e) => setTab(e.target.value)}
-                  className="h-10 min-w-[280px] max-w-lg rounded-lg border border-hairline bg-canvas px-3 text-sm font-semibold text-navy shadow-2xs focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand cursor-pointer"
+                  className="h-10 min-w-[280px] max-w-lg rounded-xl border border-hairline dark:border-white/10 bg-canvas/60 dark:bg-slate-800 px-3 text-sm font-semibold text-navy dark:text-white shadow-2xs focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand cursor-pointer"
                 >
                   <option value="all">📁 All Projects &amp; Teams ({teams.length})</option>
                   {teams.map((t: any) => (
@@ -114,7 +114,7 @@ export function ManageTeams() {
                   <button
                     type="button"
                     onClick={() => setTab('all')}
-                    className="rounded-lg border border-hairline bg-canvas hover:bg-slate-100 px-3 py-2 text-xs font-bold text-gray-600 transition-colors"
+                    className="rounded-xl border border-hairline dark:border-white/10 bg-canvas dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-2 text-xs font-bold text-gray-600 dark:text-slate-200 transition-colors"
                   >
                     Clear Filter
                   </button>
@@ -123,27 +123,27 @@ export function ManageTeams() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-            <span>Showing <strong className="text-navy">{visible.length}</strong> of <strong className="text-navy">{teams.length}</strong> teams</span>
+          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
+            <span>Showing <strong className="text-navy dark:text-white">{visible.length}</strong> of <strong className="text-navy dark:text-white">{teams.length}</strong> teams</span>
           </div>
         </div>
 
         <div className="space-y-5">
           {visible.map((team: any) => (
-            <section key={team.id} className="rounded-card border border-hairline bg-white shadow-card">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-5 py-4">
+            <section key={team.id} className="rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-glass">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline dark:border-white/10 px-5 py-4">
                 <div>
-                  <h2 className="text-base font-bold text-navy">{team.name}</h2>
-                  <p className="mt-0.5 text-xs text-gray-500">{team.project}</p>
+                  <h2 className="text-base font-bold text-navy dark:text-white">{team.name}</h2>
+                  <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">{team.project}</p>
                 </div>
               </div>
 
               <div className="px-5 py-4">
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-100 bg-brand-soft px-4 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-100 dark:border-sky-500/20 bg-brand-soft/40 dark:bg-sky-950/30 px-4 py-3">
                   <div className="flex items-center gap-3">
                     <Avatar initials={team.leader?.initials || '··'} />
                     <div>
-                      <p className="text-sm font-bold text-navy">{team.leader?.name}</p>
+                      <p className="text-sm font-bold text-navy dark:text-white">{team.leader?.name}</p>
                       <Badge tone="blue" className="mt-1">
                         Team Leader
                       </Badge>
@@ -152,7 +152,7 @@ export function ManageTeams() {
                   <select
                     value=""
                     onChange={(e) => e.target.value && changeLeader(team.id, e.target.value)}
-                    className="h-9 rounded-lg border border-hairline bg-white px-3 text-xs font-semibold text-navy"
+                    className="h-9 rounded-xl border border-hairline dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-semibold text-navy dark:text-white cursor-pointer"
                   >
                     <option value="">Change leader to…</option>
                     {directory.filter((u: any) => u.role === 'leader').map((l: any) => (
@@ -161,16 +161,16 @@ export function ManageTeams() {
                   </select>
                 </div>
 
-                <h3 className="mt-5 text-xs font-bold uppercase tracking-wide text-gray-500">
+                <h3 className="mt-5 text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   Developers ({team.members.length})
                 </h3>
-                <ul className="mt-2.5 divide-y divide-gray-100 rounded-lg border border-hairline">
+                <ul className="mt-2.5 divide-y divide-gray-100 dark:divide-white/10 rounded-xl border border-hairline dark:border-white/10">
                   {team.members.map((member: any) => (
                     <li key={member.id} className="flex items-center gap-3 px-4 py-3">
                       <Avatar initials={member.initials} size="sm" />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-navy">{member.name}</p>
-                        <p className="truncate text-[11px] text-gray-500">{member.email}</p>
+                        <p className="truncate text-sm font-medium text-navy dark:text-white">{member.name}</p>
+                        <p className="truncate text-[11px] text-gray-500 dark:text-slate-400">{member.email}</p>
                       </div>
 
                       <Button
@@ -188,7 +188,7 @@ export function ManageTeams() {
                       <button
                         type="button"
                         onClick={() => removeMember(team.id, member.id)}
-                        className="rounded-md px-2 py-1 text-xs font-semibold text-danger transition-colors duration-150 ease-out hover:bg-danger-soft"
+                        className="rounded-md px-2 py-1 text-xs font-semibold text-danger transition-colors duration-150 ease-out hover:bg-danger-soft dark:hover:bg-rose-950/40"
                       >
                         Remove
                       </button>
@@ -197,8 +197,8 @@ export function ManageTeams() {
                 </ul>
 
                 {availableToAdd(team).length > 0 && (
-                  <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border-2 border-dashed border-gray-300 px-4 py-3.5">
-                    <p className="text-sm font-semibold text-navy">Add Developer</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border-2 border-dashed border-gray-300 dark:border-white/20 px-4 py-3.5">
+                    <p className="text-sm font-semibold text-navy dark:text-white">Add Developer</p>
                     <label className="sr-only" htmlFor={`add-${team.id}`}>
                       Select a developer to add to {team.name}
                     </label>
@@ -206,7 +206,7 @@ export function ManageTeams() {
                       id={`add-${team.id}`}
                       value={addSelect[team.id] || ''}
                       onChange={(e) => setAddSelect({ ...addSelect, [team.id]: e.target.value })}
-                      className="h-9 flex-1 rounded-lg border border-hairline bg-white px-3 text-sm text-navy"
+                      className="h-9 flex-1 rounded-xl border border-hairline dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm text-navy dark:text-white cursor-pointer"
                     >
                       <option value="">Select developer…</option>
                       {availableToAdd(team).map((d: any) => (
@@ -228,9 +228,9 @@ export function ManageTeams() {
             </section>
           ))}
           {teams.length === 0 && (
-            <div className="rounded-card border border-dashed border-gray-300 bg-white p-12 text-center">
-              <p className="text-sm font-semibold text-navy">No teams yet</p>
-              <p className="mt-1 text-sm text-gray-500">Teams appear here once you create projects.</p>
+            <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-12 text-center">
+              <p className="text-sm font-semibold text-navy dark:text-white">No teams yet</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Teams appear here once you create projects.</p>
             </div>
           )}
         </div>

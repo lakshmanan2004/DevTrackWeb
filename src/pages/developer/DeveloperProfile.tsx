@@ -20,6 +20,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLive } from '../../hooks/useLive';
 import { api } from '../../api/client';
 import { UtensilsIcon } from 'lucide-react';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export function DeveloperProfile() {
   const { user, refresh } = useAuth();
@@ -82,9 +83,9 @@ export function DeveloperProfile() {
       <div className="flex-1 p-6">
         <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
           <aside className="space-y-5">
-            <section className="rounded-card border border-hairline bg-white p-5 text-center shadow-card">
+            <section className="glass-card rounded-3xl p-5 text-center shadow-glass">
               <Avatar initials={user?.initials || '··'} size="lg" className="mx-auto" />
-              <h2 className="mt-3 text-xl font-bold text-navy">{user?.name}</h2>
+              <h2 className="mt-3 text-xl font-bold text-navy dark:text-white">{user?.name}</h2>
               <div className="mt-2 flex justify-center gap-2">
                 <Badge tone="blue">Developer</Badge>
                 <Badge tone="grey">{user?.teamName}</Badge>
@@ -100,23 +101,23 @@ export function DeveloperProfile() {
                 { icon: <UtensilsIcon className="h-4 w-4" />, label: 'Lunch Break', value: (user?.lunchSlot || lunchSlot) === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM' }].
                 map((row) =>
                 <div key={row.label} className="flex items-center gap-2.5">
-                    <span className="text-gray-400" aria-hidden="true">
+                    <span className="text-gray-400 dark:text-slate-500" aria-hidden="true">
                       {row.icon}
                     </span>
                     <dt className="sr-only">{row.label}</dt>
-                    <dd className="truncate text-gray-600">{row.value}</dd>
+                    <dd className="truncate text-gray-600 dark:text-slate-300 font-medium">{row.value}</dd>
                   </div>
                 )}
               </dl>
             </section>
 
-            <section className="rounded-card border border-hairline bg-white p-5 shadow-card">
-              <h3 className="text-sm font-bold text-navy">Today</h3>
+            <section className="glass-card rounded-3xl p-5 shadow-glass">
+              <h3 className="text-sm font-bold text-navy dark:text-white">Today</h3>
               <dl className="mt-3 grid grid-cols-2 gap-3">
                 {weekStats.map((stat) =>
-                <div key={stat.label} className="rounded-lg bg-canvas px-3 py-2.5">
-                    <dt className="text-xs text-gray-500">{stat.label}</dt>
-                    <dd className="mt-0.5 text-base font-bold tabular-nums text-navy">{stat.value}</dd>
+                <div key={stat.label} className="rounded-2xl border border-hairline bg-canvas p-3">
+                    <dt className="text-xs text-gray-500 dark:text-slate-400">{stat.label}</dt>
+                    <dd className="mt-0.5 text-base font-bold tabular-nums text-navy dark:text-white">{stat.value}</dd>
                   </div>
                 )}
               </dl>
@@ -133,16 +134,16 @@ export function DeveloperProfile() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder="Current password"
-                      className="h-10 w-full rounded-lg border border-hairline px-3 text-sm text-navy" />
+                      className="glass-input h-10 w-full px-3 text-sm text-navy dark:text-white" />
                     <input
                       type="password"
                       autoComplete="new-password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="New password (min 6 chars)"
-                      className="h-10 w-full rounded-lg border border-hairline px-3 text-sm text-navy" />
+                      className="glass-input h-10 w-full px-3 text-sm text-navy dark:text-white" />
                     {passwordMessage && (
-                      <p className={`text-xs font-semibold ${passwordMessage.includes('✓') ? 'text-green-600' : 'text-danger'}`}>
+                      <p className={`text-xs font-semibold ${passwordMessage.includes('✓') ? 'text-green-600 dark:text-emerald-400' : 'text-danger dark:text-rose-400'}`}>
                         {passwordMessage}
                       </p>
                     )}
@@ -159,65 +160,65 @@ export function DeveloperProfile() {
           </aside>
 
           <div className="space-y-5">
-            <section className="rounded-card border border-hairline bg-white p-5 shadow-card">
-              <h2 className="text-sm font-bold text-navy">Account Settings</h2>
+            <section className="glass-card rounded-3xl p-6 shadow-glass">
+              <h2 className="text-sm font-bold text-navy dark:text-white">Account Settings</h2>
               <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); saveProfile(); }}>
                 <div>
-                  <label htmlFor="p-name" className="mb-1.5 block text-sm font-medium text-navy">
+                  <label htmlFor="p-name" className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     Full Name
                   </label>
                   <input
                     id="p-name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-hairline px-3 text-sm text-navy" />
+                    className="glass-input h-10 w-full px-3 text-sm text-navy dark:text-white font-semibold" />
                 </div>
                 <div>
-                  <label htmlFor="p-email" className="mb-1.5 block text-sm font-medium text-navy">
+                  <label htmlFor="p-email" className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     Email
                   </label>
                   <input
                     id="p-email"
                     disabled
                     value={user?.email || ''}
-                    className="h-10 w-full rounded-lg border border-hairline bg-gray-50 px-3 text-sm text-gray-500" />
+                    className="h-10 w-full rounded-xl border border-hairline bg-slate-100/60 dark:bg-slate-900/40 px-3 text-sm text-gray-500 dark:text-slate-400" />
                 </div>
                 <div>
-                  <label htmlFor="p-team" className="mb-1.5 block text-sm font-medium text-navy">
+                  <label htmlFor="p-team" className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     Team
                   </label>
                   <input
                     id="p-team"
                     disabled
                     value={user?.teamName || ''}
-                    className="h-10 w-full rounded-lg border border-hairline bg-gray-50 px-3 text-sm text-gray-500" />
+                    className="h-10 w-full rounded-xl border border-hairline bg-slate-100/60 dark:bg-slate-900/40 px-3 text-sm text-gray-500 dark:text-slate-400" />
                 </div>
                 <div>
-                  <label htmlFor="p-github" className="mb-1.5 block text-sm font-medium text-navy">
+                  <label htmlFor="p-github" className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     GitHub Username
                   </label>
                   <input
                     id="p-github"
                     value={github}
                     onChange={(e) => setGithub(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-hairline px-3 text-sm text-navy" />
+                    className="glass-input h-10 w-full px-3 text-sm text-navy dark:text-white font-semibold" />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-sm font-medium text-navy">
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     Lunch Break Time Slot
                   </label>
-                  <p className="mb-2 text-xs text-gray-500">
+                  <p className="mb-2 text-xs text-gray-500 dark:text-slate-400">
                     Select your preferred lunch break hour. Check-ins and submission reminders will not be requested during this slot.
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
                       onClick={() => setLunchSlot(11)}
-                      className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all ${
+                      className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold transition-all cursor-pointer ${
                         lunchSlot === 11
-                          ? 'border-amber-400 bg-amber-50 text-amber-950 ring-2 ring-amber-400/40'
-                          : 'border-hairline bg-white text-gray-600 hover:bg-gray-50'
+                          ? 'border-amber-400 bg-amber-500/20 text-amber-950 dark:text-amber-200 ring-2 ring-amber-400/40 shadow-sm'
+                          : 'border-hairline bg-white/60 dark:bg-slate-800/60 text-gray-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
                       }`}
                     >
                       <span>🍱</span>
@@ -226,10 +227,10 @@ export function DeveloperProfile() {
                     <button
                       type="button"
                       onClick={() => setLunchSlot(12)}
-                      className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all ${
+                      className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold transition-all cursor-pointer ${
                         lunchSlot === 12
-                          ? 'border-amber-400 bg-amber-50 text-amber-950 ring-2 ring-amber-400/40'
-                          : 'border-hairline bg-white text-gray-600 hover:bg-gray-50'
+                          ? 'border-amber-400 bg-amber-500/20 text-amber-950 dark:text-amber-200 ring-2 ring-amber-400/40 shadow-sm'
+                          : 'border-hairline bg-white/60 dark:bg-slate-800/60 text-gray-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
                       }`}
                     >
                       <span>🍱</span>
@@ -238,15 +239,29 @@ export function DeveloperProfile() {
                   </div>
                 </div>
 
+                {/* Interface Theme Preference */}
+                <div className="sm:col-span-2 pt-2 border-t border-hairline">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Interface Theme
+                  </label>
+                  <div className="flex items-center justify-between rounded-2xl border border-hairline bg-slate-50/50 dark:bg-slate-800/40 p-3.5">
+                    <div>
+                      <p className="text-xs font-bold text-navy dark:text-white">Appearance Mode</p>
+                      <p className="text-[11px] text-gray-500 dark:text-slate-400">Choose between Liquid Glass Light and Midnight Dark modes</p>
+                    </div>
+                    <ThemeToggle variant="pill" />
+                  </div>
+                </div>
+
                 <div className="sm:col-span-2 flex items-center gap-3">
                   <Button type="submit">Save Changes</Button>
-                  {saved && <span className="text-xs font-semibold text-green-600">Saved ✓</span>}
+                  {saved && <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Saved ✓</span>}
                 </div>
               </form>
             </section>
 
-            <section className="rounded-card border border-hairline bg-white shadow-card">
-              <h2 className="border-b border-hairline px-5 py-4 text-sm font-bold text-navy">
+            <section className="glass-card rounded-3xl p-6 shadow-glass">
+              <h2 className="border-b border-hairline pb-3 text-sm font-bold text-navy dark:text-white">
                 Recent Activity
               </h2>
               <table className="w-full text-left text-sm">
@@ -284,27 +299,27 @@ export function DeveloperProfile() {
               </table>
             </section>
 
-            <section className="rounded-card border border-hairline bg-white p-5 shadow-card">
-              <h2 className="text-sm font-bold text-navy">GitHub Integration</h2>
+            <section className="glass-card rounded-3xl p-6 shadow-glass">
+              <h2 className="text-sm font-bold text-navy dark:text-white">GitHub Integration</h2>
 
-              <div className="mt-3 flex gap-2.5 rounded-lg border border-green-200 bg-ok-soft px-4 py-3">
-                <LinkIcon className="mt-0.5 h-4 w-4 shrink-0 text-ok" aria-hidden="true" />
-                <p className="text-sm leading-relaxed text-green-900">
+              <div className="mt-3 flex gap-2.5 rounded-2xl border border-emerald-300/80 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/30 px-4 py-3 shadow-glass">
+                <LinkIcon className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                <p className="text-xs leading-relaxed text-emerald-950 dark:text-emerald-200 font-medium">
                   Save your GitHub username to attach commit links to your work logs
                 </p>
               </div>
 
               {user?.github ?
-              <div className="mt-4 flex flex-wrap items-center gap-4 rounded-lg border border-hairline bg-canvas px-4 py-3.5">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-card">
-                    <GithubIcon className="h-4 w-4 text-navy" aria-hidden="true" />
+              <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-hairline bg-canvas p-4">
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-slate-800 shadow-glass">
+                    <GithubIcon className="h-4 w-4 text-navy dark:text-white" aria-hidden="true" />
                   </span>
                   <div className="min-w-[180px] flex-1">
-                    <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-navy">
-                      <CheckCircle2Icon className="h-4 w-4 text-ok" aria-hidden="true" />
-                      Connected as {user.github}
+                    <p className="inline-flex items-center gap-1.5 text-sm font-bold text-navy dark:text-white">
+                      <CheckCircle2Icon className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+                      Connected as https://github.com/{user.github}
                     </p>
-                    <p className="mt-0.5 text-xs text-gray-500">Change it any time from Account Settings above.</p>
+                    <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">Change it any time from Account Settings above.</p>
                   </div>
                   <button
                   type="button"
@@ -313,19 +328,19 @@ export function DeveloperProfile() {
                     setGithub('');
                     refresh();
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold text-danger transition-colors duration-150 ease-out hover:bg-danger-soft">
+                  className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer">
                     <XCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
                     Disconnect
                   </button>
                 </div> :
 
-              <div className="mt-4 flex flex-wrap items-center gap-4 rounded-lg border border-hairline bg-canvas px-4 py-3.5">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-card">
-                    <GithubIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
+              <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-hairline bg-canvas p-4">
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-slate-800 shadow-glass">
+                    <GithubIcon className="h-4 w-4 text-gray-400 dark:text-slate-500" aria-hidden="true" />
                   </span>
                   <div className="min-w-[180px] flex-1">
-                    <p className="text-sm font-semibold text-gray-500">Not connected</p>
-                    <p className="mt-0.5 text-xs text-gray-500">
+                    <p className="text-sm font-bold text-gray-500 dark:text-slate-400">Not connected</p>
+                    <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">
                       Enter your GitHub username in Account Settings and hit Save Changes.
                     </p>
                   </div>

@@ -147,7 +147,7 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy/50 p-4 sm:p-8"
+      className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-start justify-center overflow-y-auto bg-navy/50 p-4 sm:p-8 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="checkin-title">

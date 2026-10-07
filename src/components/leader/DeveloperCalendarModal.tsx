@@ -115,8 +115,8 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
     pending: 'bg-amber-500 text-white shadow-sm hover:bg-amber-600 ring-2 ring-amber-400/40 animate-pulse',
     absent: 'bg-rose-500 text-white shadow-sm hover:bg-rose-600',
     holiday: 'bg-purple-600 text-white shadow-sm hover:bg-purple-700 ring-2 ring-purple-400/40',
-    off: 'bg-slate-200 text-slate-600 hover:bg-slate-300',
-    weekend: 'bg-slate-100 text-slate-400 border border-slate-200'
+    off: 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:border dark:border-white/10',
+    weekend: 'bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-900/80 dark:text-slate-500 dark:border-white/10'
   };
 
   const monthLabel = currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
@@ -132,8 +132,8 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
   const activeApprovedTasks = activeAllTasks.filter((t) => t.review === 'approved');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4 backdrop-blur-sm animate-in fade-in">
-      <div className="relative flex flex-col w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-2xl border border-hairline bg-white shadow-2xl">
+    <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-slate-950/40 p-4 sm:p-6 lg:p-8 backdrop-blur-md animate-in fade-in">
+      <div className="glass-modal relative flex flex-col w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-3xl border border-white/90 shadow-glass-modal">
         {/* MODAL HEADER */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline bg-gradient-to-r from-brand-soft/40 via-purple-50 to-white px-6 py-4">
           <div className="flex items-center gap-3">
@@ -392,14 +392,17 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                     {/* --- TAB 1: NON-SUBMITTED LOGS --- */}
                     {dayDetailTab === 'missed' && (
                       <div className="space-y-3 animate-in fade-in duration-150">
-                        <div className="flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50/80 p-2.5 text-xs text-rose-950 font-bold">
-                          <span className="flex items-center gap-1.5">
-                            <OctagonAlertIcon className="h-4 w-4 text-rose-600" />
-                            {activeMissedSlots.length > 0
-                              ? `${activeMissedSlots.length} Check-in Slot(s) Not Submitted on ${selectedDay.dateStr}`
-                              : `0 Missed Check-ins on ${selectedDay.dateStr}`}
+                        <div className="flex items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50/80 px-3 py-2 text-xs text-rose-950 font-bold">
+                          <span className="flex items-center gap-1.5 min-w-0 leading-snug">
+                            <OctagonAlertIcon className="h-4 w-4 text-rose-600 shrink-0" />
+                            <span>
+                              {activeMissedSlots.length > 0
+                                ? `${activeMissedSlots.length} Check-in Slot(s) Not Submitted on `
+                                : '0 Missed Check-ins on '}
+                              <span className="whitespace-nowrap font-black">{selectedDay.dateStr}</span>
+                            </span>
                           </span>
-                          <span className="rounded-full bg-rose-200 text-rose-900 px-2 py-0.5 text-[10px]">
+                          <span className="shrink-0 whitespace-nowrap inline-flex items-center rounded-full bg-rose-200 text-rose-900 px-2.5 py-1 text-[11px] font-extrabold leading-none">
                             Required Slots
                           </span>
                         </div>

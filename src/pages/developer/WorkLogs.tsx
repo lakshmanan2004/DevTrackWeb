@@ -56,14 +56,14 @@ export function WorkLogs() {
         title="My Work Logs"
         subtitle={user?.leaderName ? `Only you and ${user.leaderName} can see these logs` : 'Only you and your Team Leader can see these logs'}
         actions={
-          <div className="flex items-center gap-1.5 rounded-xl border border-hairline bg-white p-1 shadow-card">
+          <div className="flex items-center gap-1.5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-1 shadow-glass">
             <button
               type="button"
               onClick={() => setDate(new Date().toISOString().slice(0, 10))}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 date === new Date().toISOString().slice(0, 10)
-                  ? 'bg-brand text-white shadow-sm'
-                  : 'text-navy hover:bg-gray-100'
+                  ? 'btn-glass-primary !text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               Today's Logs
@@ -72,25 +72,25 @@ export function WorkLogs() {
             <button
               type="button"
               onClick={() => setDate('all')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 date === 'all'
-                  ? 'bg-brand text-white shadow-sm'
-                  : 'text-navy hover:bg-gray-100'
+                  ? 'btn-glass-primary !text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               Show All Logs
             </button>
 
-            <div className="h-4 w-px bg-gray-200 mx-0.5" />
+            <div className="h-4 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
 
-            <label className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-navy cursor-pointer">
-              <CalendarIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+            <label className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
+              <CalendarIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
               <span className="sr-only">Pick a date</span>
               <input
                 type="date"
                 value={date === 'all' ? '' : date}
                 onChange={(e) => setDate(e.target.value || 'all')}
-                className="bg-transparent text-xs font-bold text-navy outline-none cursor-pointer"
+                className="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
               />
             </label>
           </div>
@@ -98,33 +98,33 @@ export function WorkLogs() {
       />
 
       <div className="flex-1 space-y-5 p-6">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-card border border-hairline bg-white px-5 py-4 shadow-card">
-          <p className="text-sm font-bold text-navy">{dateLabel}</p>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl px-5 py-4 shadow-glass">
+          <p className="text-sm font-bold text-navy dark:text-white">{dateLabel}</p>
           {loading ? (
-            <p className="text-sm text-gray-500">Loading logs…</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Loading logs…</p>
           ) : (
-            <dl className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600">
+            <dl className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 dark:text-slate-300">
               <span>
-                <dt className="inline font-semibold text-navy">{todayLogs.length}</dt>{' '}
+                <dt className="inline font-semibold text-navy dark:text-white">{todayLogs.length}</dt>{' '}
                 <dd className="inline">logs</dd>
               </span>
               {stats && (
                 <>
                   <span>
-                    <dt className="inline font-semibold text-navy">
+                    <dt className="inline font-semibold text-navy dark:text-white">
                       {Math.floor(stats.activeMinutes / 60)}h {String(stats.activeMinutes % 60).padStart(2, '0')}m
                     </dt>{' '}
                     <dd className="inline">active</dd>
                   </span>
                   <span>
-                    <dt className={`inline font-semibold ${stats.missed ? 'text-danger' : 'text-green-600'}`}>{stats.missed}</dt>{' '}
+                    <dt className={`inline font-semibold ${stats.missed ? 'text-danger' : 'text-green-600 dark:text-emerald-400'}`}>{stats.missed}</dt>{' '}
                     <dd className="inline">missed</dd>
                   </span>
                 </>
               )}
               <span>
-                <dt className="inline font-semibold font-bold text-amber-600">{counts.changes_requested}</dt>{' '}
-                <dd className="inline font-medium text-amber-900">targeted feedback notes</dd>
+                <dt className="inline font-bold text-amber-600 dark:text-amber-400">{counts.changes_requested}</dt>{' '}
+                <dd className="inline font-medium text-amber-900 dark:text-amber-200">targeted feedback notes</dd>
               </span>
             </dl>
           )}
@@ -149,12 +149,12 @@ export function WorkLogs() {
             return (
             <article
               key={log.id}
-              className={`rounded-card border border-l-4 p-5 shadow-card transition-all ${
+              className={`rounded-2xl border border-l-4 p-5 shadow-glass backdrop-blur-xl transition-all ${
                 isLate
-                  ? 'border-amber-300 border-l-amber-500 bg-amber-50/30'
+                  ? 'border-amber-300 dark:border-amber-500/30 border-l-amber-500 bg-amber-50/30 dark:bg-slate-900/80'
                   : log.review === 'changes_requested'
-                  ? 'border-amber-300 border-l-amber-500 bg-amber-50/20'
-                  : `${log.status === 'blocked' ? 'border-l-red-500' : 'border-l-green-500'} border-hairline bg-white`
+                  ? 'border-amber-300 dark:border-amber-500/30 border-l-amber-500 bg-amber-50/20 dark:bg-slate-900/80'
+                  : `${log.status === 'blocked' ? 'border-l-red-500' : 'border-l-green-500'} border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80`
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -163,12 +163,12 @@ export function WorkLogs() {
                     className={`rounded-md px-2 py-1 text-xs font-bold tabular-nums ${
                       log.status === 'blocked'
                         ? 'bg-danger-soft text-danger'
-                        : 'bg-ok-soft text-green-700'
+                        : 'bg-ok-soft text-green-700 dark:bg-emerald-950/50 dark:text-emerald-300'
                     }`}
                   >
                     {log.date ? `📅 ${log.date} · ${log.hourLabel}` : log.hourLabel}
                   </span>
-                  <h2 className="text-sm font-bold text-navy">{formatLogTitle(log.task, log.description)}</h2>
+                  <h2 className="text-sm font-bold text-navy dark:text-white">{formatLogTitle(log.task, log.description)}</h2>
                   {isLate && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-2.5 py-0.5 text-[10px] font-extrabold shadow-xs uppercase tracking-wide">
                       ⚠️ Late Submission
@@ -177,38 +177,38 @@ export function WorkLogs() {
                 </div>
                 <div className="flex items-center gap-2">
                   <TaskStatusBadge status={log.status} />
-                  <span className="text-xs text-gray-500">{log.submittedAt}</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">{log.submittedAt}</span>
                 </div>
               </div>
 
-              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-gray-700">{log.description}</p>
+              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-700 dark:text-slate-200">{log.description}</p>
 
               {/* Team Leader Targeted Feedback */}
               {log.targetedFeedback && log.targetedFeedback.length > 0 && (
-                <div className="mt-4 space-y-3 rounded-xl border border-amber-300 bg-amber-50/80 p-4">
+                <div className="mt-4 space-y-3 rounded-2xl border border-amber-300/80 dark:border-amber-500/30 bg-amber-50/80 dark:bg-amber-950/30 p-4 shadow-glass">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-900">
-                      <HighlighterIcon className="h-4 w-4 text-amber-600" />
+                    <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
+                      <HighlighterIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                       Team Leader Specific Feedback ({log.targetedFeedback.length})
                     </span>
-                    <span className="rounded-full bg-amber-200/80 px-2.5 py-0.5 text-[11px] font-bold text-amber-900">
+                    <span className="rounded-full bg-amber-200/80 dark:bg-amber-500/30 px-2.5 py-0.5 text-[10px] font-bold text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-500/30">
                       Action Needed on Highlighted Part
                     </span>
                   </div>
 
                   <div className="space-y-2.5">
                     {log.targetedFeedback.map((fb: any) => (
-                      <div key={fb.id} className="rounded-lg border border-amber-200 bg-white p-3.5 shadow-sm">
+                      <div key={fb.id} className="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-white dark:bg-slate-900/70 p-3.5 shadow-sm">
                         <div className="flex items-start justify-between gap-2">
-                          <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
-                            <HighlighterIcon className="h-3 w-3 text-amber-600" />
+                          <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 px-2.5 py-1 text-xs font-semibold text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-500/30">
+                            <HighlighterIcon className="h-3 w-3 text-amber-600 dark:text-amber-400" />
                             "{fb.highlightedText}"
                           </span>
-                          <span className="text-[11px] text-gray-400">{fb.createdAt}</span>
+                          <span className="text-[11px] text-gray-400 dark:text-slate-500">{fb.createdAt}</span>
                         </div>
 
-                        <p className="mt-2 text-xs leading-relaxed text-gray-800">
-                          <span className="font-bold text-navy">TL Feedback:</span> {fb.comment}
+                        <p className="mt-2 text-xs leading-relaxed text-gray-800 dark:text-slate-200">
+                          <span className="font-bold text-navy dark:text-white">TL Feedback:</span> {fb.comment}
                         </p>
 
                         {fb.screenshotUrl && (
@@ -350,9 +350,9 @@ export function WorkLogs() {
             </article>
           );})} 
           {!loading && visible.length === 0 && (
-            <div className="rounded-card border border-dashed border-gray-300 bg-white p-12 text-center">
-              <p className="text-sm font-semibold text-navy">No logs for this date</p>
-              <p className="mt-1 text-sm text-gray-500">Submit an hourly check-in from your dashboard.</p>
+            <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 p-12 text-center backdrop-blur-xl">
+              <p className="text-sm font-semibold text-navy dark:text-white">No logs for this date</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Submit an hourly check-in from your dashboard.</p>
             </div>
           )}
         </div>
@@ -360,7 +360,7 @@ export function WorkLogs() {
 
       {/* Screenshot Zoom Modal */}
       {activeScreenshotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-md animate-in fade-in">
+        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-md animate-in fade-in">
           <div className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-gray-900 p-4 shadow-2xl">
             <div className="mb-3 flex items-center justify-between border-b border-gray-800 pb-2 text-white">
               <span className="text-sm font-semibold">{activeScreenshotModal.title}</span>

@@ -25,7 +25,7 @@ export function CheckInAlertModal({
   const isTest = alertLevel === 'test';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 backdrop-blur-sm p-4 animate-fade-in">
+    <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-navy/60 backdrop-blur-sm p-4 animate-fade-in">
       <div
         className={`w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border-2 transition-all ${
           isUrgent ? 'border-red-500' : 'border-amber-400'

@@ -43,53 +43,53 @@ function LogCard({ log }: { log: any }) {
   const statusMeta = (taskStatusMeta[log.status as TaskStatus] || taskStatusMeta['progress']);
   return (
     <article
-      className={`rounded-card border border-l-4 p-4 shadow-card transition-all ${
+      className={`glass-card relative overflow-hidden rounded-2xl border p-4 shadow-glass transition-all duration-200 ${
         isLate
-          ? 'border-amber-300 border-l-amber-500 bg-amber-50/30 ring-1 ring-amber-400/40'
+          ? 'border-amber-300/80 bg-amber-50/40'
           : log.review === 'changes_requested'
-          ? 'border-hairline border-l-amber-500 bg-amber-50/20'
-          : `border-hairline ${statusMeta.border} bg-white`
+          ? 'border-amber-300/80 bg-amber-50/30'
+          : 'border-white/80 bg-white/70 hover:bg-white/90 hover:shadow-glass-hover'
       }`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-bold text-navy">{log.task}</h3>
+          <h3 className="text-sm font-bold tracking-tight text-navy">{log.task}</h3>
           {isLate && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-2.5 py-0.5 text-[10px] font-extrabold shadow-xs uppercase tracking-wide">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-2xs">
               ⚠️ Late Submission
             </span>
           )}
         </div>
         <TaskStatusBadge status={log.status} />
       </div>
-      <p className="mt-2 text-sm leading-relaxed text-gray-600">{log.description}</p>
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
-        <span className={`inline-flex items-center gap-1.5 ${isLate ? 'font-bold text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-md border border-amber-300' : ''}`}>
+      <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600 font-normal">{log.description}</p>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 font-medium">
+        <span className={`inline-flex items-center gap-1.5 ${isLate ? 'font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-lg border border-amber-200' : ''}`}>
           <TimerIcon className="h-3.5 w-3.5" aria-hidden="true" />
           {log.activeMinutes} active min · {isLate ? `Submitted Late at ${log.submittedAt}` : log.submittedAt}
         </span>
         {log.attachment && (
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100/80 px-2 py-0.5 border border-slate-200/60">
             <PaperclipIcon className="h-3.5 w-3.5" aria-hidden="true" />
             {log.attachment}
           </span>
         )}
         {log.commits > 0 && (
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100/80 px-2 py-0.5 border border-slate-200/60">
             <GitCommitVerticalIcon className="h-3.5 w-3.5" aria-hidden="true" />
             {log.commits} commit{log.commits > 1 ? 's' : ''}
           </span>
         )}
       </div>
       <p
-        className={`mt-3 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold ${
+        className={`mt-3 inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-semibold shadow-2xs ${
           log.review === 'approved'
-            ? 'bg-ok-soft text-green-700'
+            ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
             : log.review === 'changes_requested'
-            ? 'bg-amber-100 text-amber-900 border border-amber-300 font-bold'
+            ? 'bg-amber-500/15 text-amber-800 border border-amber-500/30 font-bold'
             : log.review === 'rejected'
-            ? 'bg-red-100 text-red-800'
-            : 'bg-warn-soft text-amber-700'
+            ? 'bg-rose-500/10 text-rose-700 border border-rose-500/20'
+            : 'bg-blue-500/10 text-blue-700 border border-blue-500/20'
         }`}
       >
         {log.review === 'approved' ? (
@@ -104,7 +104,7 @@ function LogCard({ log }: { log: any }) {
           </>
         ) : log.review === 'rejected' ? (
           <>
-            <XIcon className="h-3.5 w-3.5 text-red-600" aria-hidden="true" />
+            <XIcon className="h-3.5 w-3.5 text-rose-600" aria-hidden="true" />
             Full Log Rejected (Resubmit Needed)
           </>
         ) : (
@@ -147,38 +147,38 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
   }));
 
   return (
-    <section aria-label="Today's timeline" className="rounded-card border border-hairline bg-white shadow-card">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-5 py-4">
+    <section aria-label="Today's timeline" className="glass-card rounded-3xl p-6 sm:p-7 shadow-glass">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
         <div>
-          <h2 className="text-sm font-bold text-navy flex items-center gap-2">
+          <h2 className="text-sm sm:text-base font-bold text-navy flex items-center gap-2.5">
             Today&apos;s Timeline
             {isHoliday && (
-              <span className="rounded-full bg-purple-100 text-purple-800 border border-purple-300 text-[10px] font-extrabold px-2.5 py-0.5">
+              <span className="rounded-full bg-purple-500/10 text-purple-800 border border-purple-300 text-[10px] font-bold px-3 py-0.5 shadow-2xs">
                 🎉 Holiday: {holidayName || 'Holiday'}
               </span>
             )}
           </h2>
-          <p className="text-xs text-gray-500">
-            {isHoliday ? 'Organization Holiday — Work check-ins paused today' : '8:00 AM – 5:00 PM workday'}
+          <p className="text-xs font-medium text-slate-500 mt-0.5">
+            {isHoliday ? 'Organization Holiday — Work check-ins paused today' : '8:00 AM – 5:00 PM standard workday schedule'}
           </p>
         </div>
 
         {/* Lunch Break Slot Selector */}
         {!isHoliday && (
-          <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/70 p-1.5 shadow-xs">
+          <div className="flex items-center gap-2 rounded-2xl border border-amber-200/80 bg-amber-50/70 backdrop-blur-md p-1.5 shadow-glass">
             <div className="flex items-center gap-1.5 pl-2 pr-1 text-xs font-bold text-amber-950">
               <UtensilsIcon className="h-3.5 w-3.5 text-amber-600" />
-              <span>Lunch Time:</span>
+              <span>Lunch Slot:</span>
             </div>
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 disabled={isUpdatingLunch}
                 onClick={() => handleSelectLunchSlot(11)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                className={`rounded-xl px-3 py-1 text-xs font-bold transition-all ${
                   activeLunchSlot === 11
-                    ? 'bg-amber-500 text-white shadow-xs'
-                    : 'bg-white text-amber-900 hover:bg-amber-100/80 border border-amber-200'
+                    ? 'bg-amber-500 text-white shadow-glass'
+                    : 'bg-white/80 text-amber-900 hover:bg-white border border-amber-200'
                 }`}
               >
                 11:00 AM – 12:00 PM
@@ -187,10 +187,10 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
                 type="button"
                 disabled={isUpdatingLunch}
                 onClick={() => handleSelectLunchSlot(12)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                className={`rounded-xl px-3 py-1 text-xs font-bold transition-all ${
                   activeLunchSlot === 12
-                    ? 'bg-amber-500 text-white shadow-xs'
-                    : 'bg-white text-amber-900 hover:bg-amber-100/80 border border-amber-200'
+                    ? 'bg-amber-500 text-white shadow-glass'
+                    : 'bg-white/80 text-amber-900 hover:bg-white border border-amber-200'
                 }`}
               >
                 12:00 PM – 1:00 PM
@@ -204,7 +204,7 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
       </div>
 
       {isHoliday && logs.length === 0 ? (
-        <div className="p-8 text-center bg-purple-50/40 rounded-xl border border-dashed border-purple-200 m-5">
+        <div className="p-8 text-center bg-purple-50/40 backdrop-blur-md rounded-2xl border border-purple-200/80 my-5 shadow-glass">
           <span className="text-4xl">🎉</span>
           <h3 className="mt-2 text-base font-bold text-purple-950">Organization Holiday: {holidayName || 'Holiday'}</h3>
           <p className="mt-1 text-xs text-purple-800 max-w-md mx-auto">
@@ -212,7 +212,7 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
           </p>
         </div>
       ) : (
-        <ol className="px-5 py-4">
+        <ol className="pt-6">
           {hours.map((hour, index) => {
             const slotLogs = logs.filter((entry) => entry.hourSlot === hour.slot);
             const isCurrent = hour.slot === slot;
@@ -221,52 +221,52 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
             const hasLogs = slotLogs.length > 0;
 
             const dotTone = hour.isLunch
-              ? 'bg-amber-400'
+              ? 'bg-amber-400 ring-4 ring-amber-100'
               : hasLogs
               ? slotLogs.some((l) => l.review === 'changes_requested')
-                ? 'bg-amber-500'
+                ? 'bg-amber-500 ring-4 ring-amber-100'
                 : slotLogs.some((l) => l.review === 'rejected')
-                ? 'bg-red-500'
+                ? 'bg-rose-500 ring-4 ring-rose-100'
                 : slotLogs.some((l) => isLogLate(l))
-                ? 'bg-amber-500'
-                : 'bg-ok'
+                ? 'bg-amber-500 ring-4 ring-amber-100'
+                : 'bg-emerald-500 ring-4 ring-emerald-100'
               : isHoliday
-              ? 'bg-purple-200'
+              ? 'bg-purple-200 ring-4 ring-purple-100'
               : isCurrent
-              ? 'bg-warn dt-pulse'
+              ? 'bg-brand ring-4 ring-blue-100 animate-pulse'
               : isPast
-              ? 'bg-red-200'
-              : 'bg-gray-300';
+              ? 'bg-rose-300 ring-4 ring-rose-100'
+              : 'bg-slate-300 ring-4 ring-slate-100';
 
           return (
             <li key={hour.slot} className="flex gap-4">
-              <span className="w-14 shrink-0 pt-1 text-right text-xs font-semibold tabular-nums text-gray-500">
+              <span className="w-14 shrink-0 pt-1 text-right text-xs font-mono font-bold tabular-nums text-slate-500">
                 {hour.label}
               </span>
 
               <div className="flex w-4 shrink-0 flex-col items-center">
-                <span className={`mt-2 h-2.5 w-2.5 shrink-0 rounded-full ${dotTone}`} aria-hidden="true" />
-                {index < hours.length - 1 && <span className="w-px flex-1 bg-gray-200" aria-hidden="true" />}
+                <span className={`mt-2 h-3 w-3 shrink-0 rounded-full ${dotTone}`} aria-hidden="true" />
+                {index < hours.length - 1 && <span className="w-px flex-1 bg-slate-200/80 my-1" aria-hidden="true" />}
               </div>
 
-              <div className={`min-w-0 flex-1 ${index < hours.length - 1 ? 'pb-4' : ''}`}>
+              <div className={`min-w-0 flex-1 ${index < hours.length - 1 ? 'pb-5' : ''}`}>
                 {/* Lunch Break Display (11 AM - 12 PM or 12 PM - 1 PM) */}
                 {hour.isLunch ? (
-                  <article className="rounded-card border border-amber-200 bg-amber-50/70 p-4 shadow-xs flex items-center justify-between gap-3">
+                  <article className="rounded-2xl border border-amber-200/80 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/30 backdrop-blur-md p-4 shadow-glass flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-800 text-base">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-base shadow-inner">
                         🍱
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-bold text-amber-950">
+                          <h3 className="text-sm font-bold text-amber-950 dark:text-amber-200">
                             Lunch Break ({activeLunchSlot === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM'})
                           </h3>
-                          <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-300">
+                          <span className="rounded-full bg-amber-200/80 dark:bg-amber-500/30 px-2.5 py-0.5 text-[10px] font-bold text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-500/30">
                             Break Time
                           </span>
                         </div>
-                        <p className="mt-0.5 text-xs text-amber-800">
+                        <p className="mt-0.5 text-xs font-medium text-amber-800 dark:text-amber-300">
                           No check-in or work log required during your lunch break. Enjoy your lunch!
                         </p>
                       </div>
@@ -277,21 +277,21 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
                   <div className="space-y-3">
                     {hasLogs ? (
                       <>
-                        <div className="rounded-card border border-emerald-300 bg-emerald-50/70 p-3 flex flex-wrap items-center justify-between gap-2 shadow-xs">
+                        <div className="rounded-2xl border border-emerald-300/80 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/30 backdrop-blur-md p-3.5 flex flex-wrap items-center justify-between gap-2 shadow-glass">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="relative flex h-2 w-2">
+                              <span className="relative flex h-2.5 w-2.5">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                               </span>
-                              <h4 className="text-xs font-bold text-emerald-950">Current Hour Slot ({hour.label})</h4>
-                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800 border border-emerald-300">
+                              <h4 className="text-xs font-bold text-emerald-950 dark:text-emerald-200">Current Hour Slot ({hour.label})</h4>
+                              <span className="rounded-full bg-emerald-100/90 dark:bg-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-500/30">
                                 {slotLogs.length} log{slotLogs.length > 1 ? 's' : ''} submitted
                               </span>
                             </div>
-                            <p className="mt-0.5 text-[11px] text-emerald-700">You can submit additional logs before this hour ends.</p>
+                            <p className="mt-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">You can submit additional logs before this hour ends.</p>
                           </div>
-                          <Button size="sm" onClick={() => onLog(hour.slot)} className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs py-1 px-3">
+                          <Button size="sm" onClick={() => onLog(hour.slot)} className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-1.5 px-3.5 shadow-glass">
                             + Add Another Log
                           </Button>
                         </div>
@@ -302,13 +302,13 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
                         </div>
                       </>
                     ) : (
-                      <article className="flex flex-wrap items-center justify-between gap-3 rounded-card border-2 border-dashed border-amber-300 bg-warn-soft p-4">
+                      <article className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/80 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/30 backdrop-blur-md p-5 shadow-glass">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-bold text-amber-900">Current hour in progress</h3>
-                            <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-[10px] font-semibold text-amber-900">0 logs submitted</span>
+                            <h3 className="text-sm font-bold text-amber-900 dark:text-amber-100">Current hour in progress</h3>
+                            <span className="rounded-full bg-amber-200/80 dark:bg-amber-500/30 px-2.5 py-0.5 text-[10px] font-bold text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-500/30">0 logs submitted</span>
                           </div>
-                          <p className="mt-1 text-xs text-amber-800">
+                          <p className="mt-1 text-xs font-medium text-amber-800 dark:text-amber-300">
                             Log your work for this hour before it ends
                           </p>
                         </div>
@@ -326,9 +326,9 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
                         <LogCard key={log.id || log._id || lIdx} log={log} />
                       ))
                     ) : !hour.isLunch ? (
-                      <div className="rounded-card border border-red-200 bg-red-50/40 p-3 text-xs text-red-700 flex items-center justify-between">
-                        <span>Missed check-in for {hour.label} (0 logs submitted)</span>
-                        <button onClick={() => onLog(hour.slot)} className="text-xs font-semibold text-red-700 underline hover:text-red-900">
+                      <div className="rounded-2xl border border-rose-200/80 dark:border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/30 backdrop-blur-md p-3.5 text-xs text-rose-800 dark:text-rose-200 flex items-center justify-between shadow-2xs">
+                        <span className="font-medium">Missed check-in for {hour.label} (0 logs submitted)</span>
+                        <button onClick={() => onLog(hour.slot)} className="text-xs font-bold text-rose-700 dark:text-rose-300 underline hover:text-rose-900 dark:hover:text-rose-100 cursor-pointer">
                           Submit Late Log
                         </button>
                       </div>
@@ -337,7 +337,7 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
                 )}
 
                 {/* Future hour slot display */}
-                {isFuture && <p className="pt-1.5 text-xs text-gray-400">Upcoming — nothing to log yet</p>}
+                {isFuture && <p className="pt-1.5 text-xs font-medium text-slate-400">Upcoming — nothing to log yet</p>}
               </div>
             </li>
           );
