@@ -128,78 +128,77 @@ useEffect(() => {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-10 bg-[#f6f8fc] overflow-hidden selection:bg-brand/20 selection:text-brand">
+    <div className="relative min-h-screen w-full flex flex-col lg:grid lg:grid-cols-12 bg-slate-900 dark:bg-[#070d18] overflow-x-hidden selection:bg-brand/20 selection:text-brand">
       {/* Soft Ambient Light Glow Orbs */}
-      <div className="ambient-orb -top-32 -left-32 w-[550px] h-[550px] bg-blue-500/15" />
-      <div className="ambient-orb top-1/4 -right-28 w-[500px] h-[500px] bg-purple-500/12" />
-      <div className="ambient-orb -bottom-28 left-1/3 w-[600px] h-[600px] bg-indigo-500/15" />
+      <div className="ambient-orb -top-32 -left-32 w-[600px] h-[600px] bg-blue-500/15" />
+      <div className="ambient-orb top-1/4 -right-28 w-[550px] h-[550px] bg-purple-500/12" />
+      <div className="ambient-orb -bottom-28 left-1/3 w-[650px] h-[650px] bg-indigo-500/15" />
 
-      {/* Main Floating Glass Master Card */}
-      <div className="glass-card relative z-10 w-full max-w-5xl rounded-3xl sm:rounded-[32px] overflow-hidden shadow-glass-modal border border-white/90 grid grid-cols-1 lg:grid-cols-12">
-        {/* Left Showcase / Brand Column (5 cols) */}
-        <div className="relative lg:col-span-5 p-8 sm:p-10 lg:p-12 flex flex-col justify-between bg-gradient-to-br from-navy-900 via-navy to-slate-900 text-white overflow-hidden border-b lg:border-b-0 lg:border-r border-white/10">
-          <div className="ambient-orb -top-20 -left-20 w-72 h-72 bg-blue-500/20" />
-          <div className="ambient-orb -bottom-20 -right-20 w-72 h-72 bg-purple-500/20" />
+      {/* Left Showcase / Brand Column (5 cols on lg, 6 cols on 2xl) */}
+      <div className="relative lg:col-span-5 2xl:col-span-6 min-h-[420px] lg:min-h-screen p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-gradient-to-br from-[#070e1e] via-[#0b162e] to-[#0d1b3a] text-white overflow-hidden border-b lg:border-b-0 lg:border-r border-white/10 z-10">
+        <div className="ambient-orb -top-20 -left-20 w-80 h-80 bg-blue-500/20" />
+        <div className="ambient-orb -bottom-20 -right-20 w-80 h-80 bg-purple-500/20" />
 
-          <div className="relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-xl border border-white/25 shadow-glass p-1.5">
-                <img
-                  src="/SIMATS-logo.jpg"
-                  alt="DevTrack Logo"
-                  className="h-full w-full object-contain rounded-xl"
-                />
-              </div>
-              <div>
-                <span className="text-lg font-bold tracking-tight text-white block leading-tight">DevTrack</span>
-                <span className="text-[10px] font-semibold tracking-wider uppercase text-blue-300">Engineering Intelligence</span>
-              </div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-xl border border-white/25 shadow-glass p-2">
+              <img
+                src="/SIMATS-logo.jpg"
+                alt="DevTrack Logo"
+                className="h-full w-full object-contain rounded-xl"
+              />
             </div>
-
-            <div className="mt-10 lg:mt-14">
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/15 backdrop-blur-md px-3.5 py-1 text-xs font-semibold text-blue-200 mb-5 shadow-glass">
-                <span className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
-                Liquid Glass Workspace
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-[1.15] text-white">
-                Real Work.<br />
-                <span className="bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-200 bg-clip-text text-transparent">
-                  Real Proof.
-                </span><br />
-                Real Time.
-              </h1>
-              <p className="mt-4 text-xs sm:text-sm leading-relaxed text-slate-300/90 font-normal">
-                A high-fidelity productivity accountability system with verified logs, intelligent analytics, and frictionless oversight.
-              </p>
+            <div>
+              <span className="text-xl font-bold tracking-tight text-white block leading-tight">DevTrack</span>
+              <span className="text-[11px] font-medium tracking-wide text-blue-300">Developer Productivity &amp; Work Log Platform</span>
             </div>
           </div>
 
-          <div className="relative z-10 mt-8 lg:mt-12 space-y-5">
-            <dl className="grid grid-cols-3 gap-2.5">
-              {liveStats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-xl p-3 shadow-glass"
-                >
-                  <dd className="text-xl sm:text-2xl font-bold tabular-nums text-white tracking-tight">{stat.value}</dd>
-                  <dt className="mt-0.5 text-[10px] font-medium leading-tight text-slate-300">{stat.label}</dt>
-                </div>
-              ))}
-            </dl>
-
-            <div className="flex flex-wrap gap-1.5 text-[10px] font-medium text-slate-300">
-              {['Hourly Logs', 'Proof of Work', 'Live Approvals', 'AI Summaries'].map((tag) => (
-                <span key={tag} className="rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-2.5 py-1">
-                  {tag}
-                </span>
-              ))}
+          <div className="mt-12 lg:mt-20 max-w-lg">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/15 backdrop-blur-md px-4 py-1.5 text-xs font-semibold text-blue-200 mb-6 shadow-glass">
+              <span className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+              Live Project Tracking &amp; Accountability Portal
             </div>
+
+            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-[1.12] text-white">
+              Real Work.<br />
+              <span className="bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-200 bg-clip-text text-transparent">
+                Real Proof.
+              </span><br />
+              Real Time.
+            </h1>
+            <p className="mt-5 text-sm sm:text-base leading-relaxed text-slate-300/90 font-normal">
+              A high-fidelity productivity accountability system with verified logs, intelligent analytics, and frictionless oversight.
+            </p>
           </div>
         </div>
 
-        {/* Right Authentication Form Column (7 cols) */}
-        <div className="relative lg:col-span-7 p-8 sm:p-10 lg:p-12 flex flex-col justify-center bg-white/80 dark:bg-slate-900/85 backdrop-blur-2xl transition-colors">
+        <div className="relative z-10 mt-10 lg:mt-16 space-y-6 max-w-lg">
+          <dl className="grid grid-cols-3 gap-3">
+            {liveStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-xl p-3.5 shadow-glass"
+              >
+                <dd className="text-2xl sm:text-3xl font-bold tabular-nums text-white tracking-tight">{stat.value}</dd>
+                <dt className="mt-1 text-[11px] font-medium leading-tight text-slate-300">{stat.label}</dt>
+              </div>
+            ))}
+          </dl>
+
+          <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-300">
+            {['Hourly Logs', 'Proof of Work', 'Live Approvals', 'AI Summaries'].map((tag) => (
+              <span key={tag} className="rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-3 py-1">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Right Authentication Form Column (7 cols on lg, 6 cols on 2xl) */}
+      <div className="relative lg:col-span-7 2xl:col-span-6 min-h-screen p-6 sm:p-12 lg:p-16 xl:p-24 flex flex-col justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl transition-colors z-10">
+        <div className="w-full max-w-xl mx-auto space-y-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-navy dark:text-white">Welcome Back</h2>
@@ -210,7 +209,7 @@ useEffect(() => {
 
           {/* Role selector tabs */}
           <div
-            className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 rounded-full bg-slate-100/90 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200/70 dark:border-white/10"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 rounded-full bg-slate-100/90 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200/70 dark:border-white/10"
             role="tablist"
             aria-label="Select your role"
           >
@@ -226,7 +225,7 @@ useEffect(() => {
                     setRole(tab.id);
                     setError('');
                   }}
-                  className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-all duration-200 cursor-pointer ${
+                  className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-xs font-bold transition-all duration-200 cursor-pointer ${
                     selected
                       ? 'bg-white dark:bg-blue-600 text-brand dark:text-white shadow-glass border border-white dark:border-white/20 font-extrabold scale-[1.02]'
                       : 'text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'
@@ -239,9 +238,9 @@ useEffect(() => {
             })}
           </div>
 
-          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-4 pt-2" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
+              <label htmlFor="email" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 Email Address
               </label>
               <div className="relative">
@@ -254,7 +253,7 @@ useEffect(() => {
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  className="glass-input h-11 w-full pl-10 pr-3.5 text-sm font-medium text-navy placeholder:text-slate-400"
+                  className="glass-input h-12 w-full pl-10 pr-3.5 text-sm font-medium text-navy dark:text-white placeholder:text-slate-400"
                   placeholder="name@organization.com"
                   required
                 />
@@ -262,7 +261,7 @@ useEffect(() => {
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
+              <label htmlFor="password" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 Password
               </label>
               <div className="relative">
@@ -275,7 +274,7 @@ useEffect(() => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="glass-input h-11 w-full pl-10 pr-11 text-sm font-medium text-navy"
+                  className="glass-input h-12 w-full pl-10 pr-11 text-sm font-medium text-navy dark:text-white"
                   placeholder="••••••••"
                   required
                 />
@@ -283,27 +282,27 @@ useEffect(() => {
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-0.5">
-              <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
+            <div className="flex items-center justify-between pt-1">
+              <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={remember}
                   onChange={(event) => setRemember(event.target.checked)}
-                  className="h-4 w-4 rounded-md border-slate-300 text-brand focus:ring-brand/40"
+                  className="h-4 w-4 rounded-md border-slate-300 dark:border-slate-600 text-brand focus:ring-brand/40"
                 />
                 Remember my device
               </label>
             </div>
 
             {error && (
-              <div className="rounded-2xl border border-rose-200 bg-rose-50/90 backdrop-blur-md p-3 text-xs font-semibold text-rose-700 shadow-sm animate-shake">
+              <div className="rounded-2xl border border-rose-200 dark:border-rose-500/30 bg-rose-50/90 dark:bg-rose-950/40 backdrop-blur-md p-3.5 text-xs font-semibold text-rose-700 dark:text-rose-300 shadow-sm animate-shake">
                 {error}
               </div>
             )}
@@ -311,7 +310,7 @@ useEffect(() => {
             <button
               type="submit"
               disabled={busy}
-              className="btn-glass-primary w-full h-12 text-sm font-bold flex items-center justify-center gap-2 cursor-pointer mt-2"
+              className="btn-glass-primary w-full h-12 text-sm font-bold flex items-center justify-center gap-2 cursor-pointer mt-3"
             >
               <span>{busy ? 'Verifying Credentials…' : 'Sign In to Workspace'}</span>
               <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
@@ -319,14 +318,14 @@ useEffect(() => {
           </form>
 
           {/* Role info card */}
-          <div className="mt-6 flex items-start gap-3 rounded-2xl border border-blue-200/70 bg-blue-50/60 backdrop-blur-md p-4 shadow-glass">
-            <InfoIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+          <div className="flex items-start gap-3 rounded-2xl border border-blue-200/70 dark:border-blue-500/20 bg-blue-50/60 dark:bg-blue-950/30 backdrop-blur-md p-4 shadow-glass">
+            <InfoIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand dark:text-sky-400" aria-hidden="true" />
             <div className="text-xs">
-              <p className="font-bold tracking-wide uppercase text-brand">
+              <p className="font-bold tracking-wide uppercase text-brand dark:text-sky-400">
                 {active.label} Role Permissions
               </p>
-              <p className="mt-1 leading-relaxed text-slate-700 font-normal">{active.info}</p>
-              <p className="mt-1.5 font-medium text-slate-500 text-[11px]">
+              <p className="mt-1 leading-relaxed text-slate-700 dark:text-slate-200 font-normal">{active.info}</p>
+              <p className="mt-1.5 font-medium text-slate-500 dark:text-slate-400 text-[11px]">
                 Accounts are provisioned by your workspace Admin.
               </p>
             </div>
