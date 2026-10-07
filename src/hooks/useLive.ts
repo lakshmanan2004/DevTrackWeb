@@ -121,3 +121,10 @@ export const useTeamCalendar = (month: string) =>
 
 export const usePublicStats = () => useLive<any>('/api/auth/stats/public', ['log:new'], 60000);
 
+export const useDailyAiSummary = (date?: string, developerId?: string) =>
+  useLive<{ summary: any }>(
+    `/api/ai/daily-summary?date=${date || new Date().toISOString().slice(0, 10)}${developerId ? `&developerId=${developerId}` : ''}`,
+    ['log:new', 'log:review', 'commit:new', 'eod:new'],
+    30000
+  );
+

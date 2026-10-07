@@ -34,6 +34,7 @@ app.use('/api/eod', require('./routes/eod'));
 app.use('/api/developers', require('./routes/developers'));
 app.use('/api/alerts', require('./routes/alerts'));
 app.use('/api/tasks', require('./routes/tasks'));
+app.use('/api/ai', require('./routes/ai'));
 app.use('/api', require('./routes/org'));
 app.use('/api', require('./routes/reports'));
 

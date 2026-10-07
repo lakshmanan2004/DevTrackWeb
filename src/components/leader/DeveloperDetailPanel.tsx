@@ -7,12 +7,12 @@ import {
 'lucide-react';
 import { Avatar } from '../ui/Avatar';
 import { Badge } from '../ui/Badge';
-import { Button } from '../ui/Button';
 import { TaskStatusBadge } from '../ui/TaskStatusBadge';
 import { isLogLate } from '../../utils/logTimeliness';
-import { DailyGoalAndStandupBoard } from './DailyGoalAndStandupBoard';
+import { DailyAiConsolidatedSummary } from './DailyAiConsolidatedSummary';
 import { Developer } from '../../types';
 import { api } from '../../api/client';
+import { Button } from '../ui/Button';
 
 type Tab = 'activity' | 'logs' | 'commits' | 'eod';
 
@@ -103,10 +103,10 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
             )}
             </dl>
 
-            <DailyGoalAndStandupBoard
-              devName={developer.name}
-              dateLabel="Today"
-              logs={logs} />
+            <DailyAiConsolidatedSummary
+              developerId={developer.id}
+              developerName={developer.name}
+            />
           </>
         }
 
