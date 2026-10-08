@@ -10,8 +10,8 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, actions, showThemeToggle = false }: PageHeaderProps) {
   return (
-    <header className="glass-header sticky top-0 z-30 flex flex-wrap items-center justify-between gap-4 px-6 py-4 transition-colors">
-      <div className="min-w-0">
+    <header className="glass-header sticky top-0 z-30 flex items-center justify-between gap-4 px-6 py-3.5 transition-colors">
+      <div className="min-w-0 flex-1">
         <h1 className="truncate text-lg font-black tracking-tight text-slate-950 dark:text-white">{title}</h1>
         {subtitle && <p className="mt-0.5 truncate text-xs font-semibold text-slate-600 dark:text-slate-400">{subtitle}</p>}
       </div>

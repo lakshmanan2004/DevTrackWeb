@@ -11,12 +11,12 @@ import {
   FolderKanbanIcon,
   GitBranchIcon,
   ExternalLinkIcon,
-  Volume2Icon
+  Volume2Icon,
+  PlusIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { HeaderClock } from '../../components/layout/HeaderClock';
 import { StatCard } from '../../components/ui/StatCard';
-import { Banner } from '../../components/ui/Banner';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { ActiveTimerCard } from '../../components/developer/ActiveTimerCard';
@@ -25,7 +25,7 @@ import { CheckInModal } from '../../components/developer/CheckInModal';
 import { CheckInAlertModal } from '../../components/developer/CheckInAlertModal';
 import { DeveloperCalendarWidget } from '../../components/developer/DeveloperCalendarWidget';
 import { useAuth } from '../../context/AuthContext';
-import { useMyLogs, useTasks, useProjects, usePendingWorks } from '../../hooks/useLive';
+import { useMyLogs, useProjects, usePendingWorks } from '../../hooks/useLive';
 import { playAlertSound, showWindowsNotification } from '../../utils/audioAlerts';
 
 function fmtDuration(min: number) {
@@ -37,15 +37,16 @@ function fmtDuration(min: number) {
 export function DeveloperDashboard() {
   const { user } = useAuth();
   const { data } = useMyLogs();
-  const { data: taskData } = useTasks();
   const { data: projectData } = useProjects('mine');
   const { data: pendingData } = usePendingWorks();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTargetSlot, setModalTargetSlot] = useState<number | undefined>(undefined);
   const handleOpenLog = (slot?: number) => {
     setModalTargetSlot(slot);
     setModalOpen(true);
   };
+
   const [alertModalState, setAlertModalState] = useState<{
     open: boolean;
     level: 'pop' | 'warning' | 'urgent' | 'late' | 'test';
@@ -59,7 +60,6 @@ export function DeveloperDashboard() {
   });
 
   const lastAlertRef = useRef<{ slot: number; level: string } | null>(null);
-
   const navigate = useNavigate();
 
   const logs = data?.logs || [];
@@ -75,8 +75,6 @@ export function DeveloperDashboard() {
   const isBeforeWork = currentHour < 8;
   const isAfterWork = currentHour >= 17;
   const isOutsideWorkHours = isBeforeWork || isAfterWork;
-  const deadline = new Date(now);
-  deadline.setMinutes(59, 59, 0);
   const currentMinute = now.getMinutes();
   const minutesLeft = Math.max(0, 60 - currentMinute);
   const currentSlot = stats?.currentSlot ?? (isBeforeWork ? 8 : isAfterWork ? 16 : currentHour);
@@ -122,9 +120,7 @@ export function DeveloperDashboard() {
   const isHoliday = !!(data as any)?.isHoliday || !!stats?.isHoliday;
   const holidayName = (data as any)?.holiday?.name || stats?.holidayName || 'Holiday';
 
-  // Background monitor for STRICT milestones: 20m, 10m, 5m, and deadline (0m)
-  // ONLY for developer role, strictly active between 8:00 AM and 5:00 PM (17:00).
-  // Uses persistent session storage key per day + slot + milestone so it triggers exactly once per milestone.
+  // Automated background milestone check-in monitor (20m, 10m, 5m, deadline)
   useEffect(() => {
     if (isHoliday) return;
     if (user?.role !== 'developer') return;
@@ -137,12 +133,8 @@ export function DeveloperDashboard() {
       const d = new Date();
       const h = d.getHours();
       
-      // Workday runs strictly from 8:00 AM to 5:00 PM (17:00).
       if (h < 8 || h >= 17) return;
-
-      const slot = h; // Actual clock hour slot (8..16)
-      
-      // Lunch break is exempt from all check-in alerts
+      const slot = h;
       if (slot === devLunchSlot) return;
 
       const min = d.getMinutes();
@@ -154,10 +146,17 @@ export function DeveloperDashboard() {
       const slotLabel = `${slot > 12 ? slot - 12 : slot} ${slot >= 12 ? 'PM' : 'AM'}`;
       const todayKey = d.toISOString().slice(0, 10);
 
-      const triggerMilestone = (milestoneKey: '20m' | '10m' | '5m' | 'deadline', level: 'pop' | 'warning' | 'urgent' | 'late', soundType: 'pop' | 'notification' | 'urgent', title: string, body: string, minsForModal: number) => {
+      const triggerMilestone = (
+        milestoneKey: '20m' | '10m' | '5m' | 'deadline',
+        level: 'pop' | 'warning' | 'urgent' | 'late',
+        soundType: 'pop' | 'notification' | 'urgent',
+        title: string,
+        body: string,
+        minsForModal: number
+      ) => {
         const storageKey = `devtrack_alert_${todayKey}_slot${slot}_${milestoneKey}`;
         if (sessionStorage.getItem(storageKey)) {
-          return; // Already notified for this exact milestone
+          return;
         }
         sessionStorage.setItem(storageKey, 'true');
         lastAlertRef.current = { slot, level };
@@ -167,7 +166,6 @@ export function DeveloperDashboard() {
         setAlertModalState({ open: true, level, slotLabel, minsLeft: minsForModal });
       };
 
-      // Exact Milestone 1: 20 minutes remaining (triggered at minute 40, i.e., 20 mins remaining)
       if (remainingMins === 20) {
         triggerMilestone(
           '20m',
@@ -177,9 +175,7 @@ export function DeveloperDashboard() {
           `You have 20 minutes remaining to submit your work log for the ${slotLabel} slot.`,
           20
         );
-      }
-      // Exact Milestone 2: 10 minutes remaining (triggered at minute 50, i.e., 10 mins remaining)
-      else if (remainingMins === 10) {
+      } else if (remainingMins === 10) {
         triggerMilestone(
           '10m',
           'warning',
@@ -188,9 +184,7 @@ export function DeveloperDashboard() {
           `Only 10 minutes remaining! Submit your work log for the ${slotLabel} slot.`,
           10
         );
-      }
-      // Exact Milestone 3: 5 minutes remaining (triggered at minute 55, i.e., 5 mins remaining)
-      else if (remainingMins === 5) {
+      } else if (remainingMins === 5) {
         triggerMilestone(
           '5m',
           'urgent',
@@ -199,9 +193,7 @@ export function DeveloperDashboard() {
           `Deadline approaching! Only 5 minutes left to submit your ${slotLabel} check-in!`,
           5
         );
-      }
-      // Exact Milestone 4: Deadline (triggered at final minute 59 or 0 mins remaining)
-      else if (remainingMins <= 1) {
+      } else if (remainingMins <= 1) {
         triggerMilestone(
           'deadline',
           'late',
@@ -213,82 +205,104 @@ export function DeveloperDashboard() {
       }
     };
 
-    // Check immediately and then every 10 seconds to catch exact minute marks
     checkMilestoneAlerts();
     const checkTimer = setInterval(checkMilestoneAlerts, 10000);
-
     return () => clearInterval(checkTimer);
   }, [logs, devLunchSlot, isHoliday, user?.role]);
 
   const firstName = user?.name?.split(' ')[0] || 'there';
+  const greetingTime = now.getHours() < 12 ? 'Good morning' : now.getHours() < 17 ? 'Good afternoon' : 'Good evening';
+  const formattedDate = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
     <>
+      {/* 1. FIXED TOP NAVBAR */}
       <PageHeader
-        title="My Dashboard"
-        subtitle="Track hourly productivity, active tasks, and daily work log submissions in real time"
+        title="Developer Dashboard"
+        subtitle="Work Logs, Active Time Tracking & Daily Status"
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <Button
               size="sm"
               variant="secondary"
               onClick={triggerTestAlert}
-              icon={<Volume2Icon className="h-3.5 w-3.5 text-brand" />}
+              icon={<Volume2Icon className="h-3.5 w-3.5 text-brand dark:text-[#5AA9FF]" />}
             >
-              Test Audio & Windows Alert
+              Test Audio Alert
             </Button>
             <HeaderClock />
           </div>
         }
       />
 
-      <div className="flex-1 space-y-5 p-6">
-        <div className="glass-card flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6 rounded-3xl shadow-glass">
-          <div>
-            <h2 className="text-2xl sm:text-[28px] font-black leading-tight text-navy dark:text-white">
-              {now.getHours() < 12 ? 'Good morning' : now.getHours() < 17 ? 'Good afternoon' : 'Good evening'}, {firstName} 👋
-            </h2>
-            <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
-              {now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · Team: <span className="font-bold text-slate-900 dark:text-white">{user?.teamName || 'Unassigned'}</span> · Project: <span className="font-bold text-brand dark:text-indigo-400">{user?.projectName || activeProject?.name || 'Unassigned'}</span>
-            </p>
-          </div>
-          <Badge tone="green" dot>
-            Active
-          </Badge>
-        </div>
+      {/* 2. SCROLLABLE DASHBOARD CONTENT */}
+      <div className="flex-1 p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
+        
+        {/* 3. HERO / GREETING SECTION */}
+        <section className="glass-card rounded-3xl p-6 sm:p-7 shadow-glass relative overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-5 relative z-10">
+            <div className="space-y-1.5 min-w-0">
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 dark:text-[#F5F5F5]">
+                {greetingTime}, {firstName} 👋
+              </h2>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-semibold text-slate-600 dark:text-[#A1A1AA]">
+                <span>{formattedDate}</span>
+                <span>•</span>
+                <span>Team: <strong className="text-slate-800 dark:text-slate-200">{user?.teamName || 'Unassigned'}</strong></span>
+                <span>•</span>
+                <span>Project: <strong className="text-slate-800 dark:text-slate-200">{user?.projectName || activeProject?.name || 'Unassigned'}</strong></span>
+              </div>
+            </div>
 
-        {/* My Involved Project Card */}
+            <div className="flex items-center gap-3 shrink-0">
+              <Badge tone="green" dot className="px-3 py-1.5 text-xs font-bold shadow-2xs">
+                Active
+              </Badge>
+              <Button
+                size="md"
+                onClick={() => handleOpenLog(isLunchSlot ? undefined : currentSlot)}
+                icon={<PlusIcon className="h-4 w-4" />}
+              >
+                Log Work Now
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. INVOLVED PROJECT CARD */}
         {activeProject ? (
-          <section className="glass-card rounded-3xl p-5 sm:p-6 shadow-glass space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 border border-brand/20 text-brand shadow-glass">
-                  <FolderKanbanIcon className="h-5 w-5" />
+          <section className="glass-surface rounded-3xl p-5 sm:p-6 shadow-glass space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/10 dark:bg-[rgba(22,131,255,0.16)] border border-brand/20 dark:border-[rgba(22,131,255,0.35)] text-brand dark:text-[#5AA9FF] shadow-glass shrink-0">
+                  <FolderKanbanIcon className="h-6 w-6" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-navy flex items-center gap-2">
-                    Involved Project: {activeProject.name}
-                    <Badge tone={activeProject.status === 'completed' ? 'green' : 'blue'} className="text-[10px]">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h3 className="text-base font-bold text-slate-950 dark:text-[#F5F5F5] truncate">
+                      Involved Project: {activeProject.name}
+                    </h3>
+                    <Badge tone={activeProject.status === 'completed' ? 'green' : 'blue'} className="text-[10px] font-extrabold uppercase">
                       {activeProject.status.toUpperCase()}
                     </Badge>
-                  </h3>
-                  <p className="text-xs font-medium text-slate-500 mt-0.5">
-                    Team: <span className="text-slate-700 font-semibold">{activeProject.team || user?.teamName}</span> · Lead: <span className="text-slate-700 font-semibold">{activeProject.leader || 'Unassigned'}</span> · Manager: <span className="text-slate-700 font-semibold">{activeProject.manager || 'Unassigned'}</span>
+                  </div>
+                  <p className="text-xs font-medium text-slate-500 dark:text-[#A1A1AA] mt-1">
+                    Team: <span className="text-slate-800 dark:text-slate-200 font-semibold">{activeProject.team || user?.teamName}</span> · Lead: <span className="text-slate-800 dark:text-slate-200 font-semibold">{activeProject.leader || 'Unassigned'}</span> · Manager: <span className="text-slate-800 dark:text-slate-200 font-semibold">{activeProject.manager || 'Unassigned'}</span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-3">
                 {activeProject.repoUrl && (
                   <a
                     href={activeProject.repoUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/80 bg-white/70 backdrop-blur-md px-3.5 text-xs font-bold text-brand hover:bg-white shadow-glass transition-all"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/60 dark:border-white/10 bg-white/70 dark:bg-white/[0.06] backdrop-blur-md px-3.5 text-xs font-bold text-brand dark:text-[#5AA9FF] hover:bg-white dark:hover:bg-white/10 shadow-glass transition-all"
                   >
-                    <GitBranchIcon className="h-3.5 w-3.5 text-slate-500" />
+                    <GitBranchIcon className="h-3.5 w-3.5 text-slate-500 dark:text-[#A1A1AA]" />
                     <span>Repo</span>
-                    <ExternalLinkIcon className="h-3 w-3 text-slate-400" />
+                    <ExternalLinkIcon className="h-3 w-3 text-slate-400 dark:text-slate-500" />
                   </a>
                 )}
                 <Button
@@ -302,10 +316,10 @@ export function DeveloperDashboard() {
             </div>
           </section>
         ) : (
-          <div className="glass-card rounded-2xl border border-dashed border-slate-300 p-4 text-center text-xs text-slate-500 flex items-center justify-between shadow-2xs">
+          <div className="glass-surface rounded-2xl border border-dashed border-slate-300 dark:border-white/15 p-4 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between shadow-2xs">
             <span className="flex items-center gap-2 font-medium">
               <FolderKanbanIcon className="h-4 w-4 text-slate-400" />
-              Not currently assigned to a project team.
+              Not currently assigned to an active project team.
             </span>
             <Button size="sm" variant="secondary" onClick={() => navigate('/developer/projects')}>
               View My Projects
@@ -313,142 +327,154 @@ export function DeveloperDashboard() {
           </div>
         )}
 
-        {/* Persistent Check-In Status & Windows Alert Banner or Holiday Banner */}
+        {/* 5. DEDICATED WORK STATUS & ALERT SECTION */}
         {isHoliday ? (
-          <div className="rounded-2xl border-2 border-purple-300 bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 p-5 shadow-card">
+          <div className="glass-surface rounded-2xl border border-purple-300/60 dark:border-purple-500/30 bg-purple-50/40 dark:bg-purple-950/20 p-5 shadow-glass">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-2xl shadow-inner">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-500/15 text-2xl">
                   🎉
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-extrabold text-purple-950">
+                    <h3 className="text-sm font-bold text-purple-950 dark:text-purple-200">
                       Organization Holiday: {holidayName}
-                    </h2>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-2xs">
+                    </h3>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs">
                       ✨ Holiday Active
                     </span>
                   </div>
-                  <p className="mt-1 text-xs font-medium text-purple-800">
-                    Today is marked as an organization holiday on the system calendar. No hourly check-ins, active timers, or work logs are required today. Enjoy your day off!
+                  <p className="mt-0.5 text-xs font-medium text-purple-800 dark:text-purple-300">
+                    Today is marked as an organization holiday. No mandatory check-ins, active timers, or work logs are required today.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => handleOpenLog()}
-                  className="bg-white text-purple-900 border-purple-200 hover:bg-purple-100/60"
-                >
-                  Optional Check-in
-                </Button>
-              </div>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => handleOpenLog()}
+                className="bg-white/80 dark:bg-slate-800 text-purple-900 dark:text-purple-200 border-purple-200 dark:border-purple-500/30"
+              >
+                Optional Check-in
+              </Button>
             </div>
           </div>
         ) : isBeforeWork ? (
-          <Banner
-            tone="blue"
-            icon={<AlarmClockIcon className="h-4 w-4 text-blue-600" />}
-            title={`Office Hours Begin at 8:00 AM (${minutesLeft}m remaining)`}
-            action={
-              <Button onClick={() => handleOpenLog()}>
-                + Early Check-in
-              </Button>
-            }
-          >
-            Mandatory check-in slots run from 8:00 AM to 5:00 PM. Automated audio pop sounds and Windows desktop notifications will activate starting from the 8:00 AM slot.
-          </Banner>
+          <div className="glass-surface rounded-2xl border border-blue-300/60 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/20 p-4 sm:p-5 shadow-glass flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400">
+                <AlarmClockIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-blue-950 dark:text-blue-200">
+                  Office Hours Begin at 8:00 AM ({minutesLeft}m remaining)
+                </h3>
+                <p className="text-xs font-medium text-blue-800 dark:text-blue-300 mt-0.5">
+                  Mandatory hourly check-ins run from 8:00 AM to 5:00 PM. Automated audio pop reminders activate at the 8:00 AM slot.
+                </p>
+              </div>
+            </div>
+            <Button size="sm" onClick={() => handleOpenLog()}>
+              + Early Check-in
+            </Button>
+          </div>
         ) : isAfterWork ? (
-          <Banner
-            tone="green"
-            icon={<CheckCircle2Icon className="h-4 w-4 text-emerald-600" />}
-            title="Workday Completed (Office Hours Ended at 5:00 PM)"
-            action={
-              <Button onClick={() => handleOpenLog()}>
-                + Add Log
-              </Button>
-            }
-          >
-            All daily mandatory hourly check-in slots are closed for today. Audio alerts and screen pop-up notifications are turned off until 8:00 AM tomorrow.
-          </Banner>
+          <div className="glass-surface rounded-2xl border border-emerald-300/60 dark:border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 sm:p-5 shadow-glass flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2Icon className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-emerald-950 dark:text-emerald-200">
+                  Workday Completed (Office Hours Ended at 5:00 PM)
+                </h3>
+                <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300 mt-0.5">
+                  All daily mandatory check-in slots are completed for today. Automated alerts are paused until 8:00 AM tomorrow.
+                </p>
+              </div>
+            </div>
+            <Button size="sm" variant="secondary" onClick={() => handleOpenLog()}>
+              + Add Log
+            </Button>
+          </div>
         ) : (
-          <Banner
-            tone={
-              isLunchSlot
-                ? 'yellow'
-                : hasLoggedCurrentSlot
-                ? 'green'
-                : minutesLeft <= 5
-                ? 'red'
-                : 'yellow'
-            }
-            icon={
-              isLunchSlot ? (
-                <span className="text-sm">🍱</span>
-              ) : (
-                <AlarmClockIcon
-                  className={`h-4 w-4 ${
-                    hasLoggedCurrentSlot
-                      ? 'text-emerald-600'
-                      : minutesLeft <= 5
-                      ? 'text-red-600 animate-bounce'
-                      : 'text-amber-600'
-                  }`}
-                />
-              )
-            }
-            title={
-              isLunchSlot
-                ? `🍱 Lunch Break (${lunchSlotLabel}) — ${minutesLeft}m remaining`
-                : hasLoggedCurrentSlot
-                ? `✓ Work Log Submitted for ${currentSlotLabel} Slot (${minutesLeft}m remaining in this slot)`
-                : minutesLeft <= 5
-                ? `URGENT: Only ${minutesLeft} minutes left to log this hour slot!`
-                : minutesLeft <= 10
-                ? `WARNING: ${minutesLeft} minutes left to log this hour slot!`
-                : minutesLeft <= 20
-                ? `Check-In Reminder: ${minutesLeft} minutes remaining for ${currentSlotLabel} slot`
-                : `Current Slot in Progress (${currentSlotLabel}) — ${minutesLeft}m remaining`
-            }
-            action={
-              <Button onClick={() => handleOpenLog(isLunchSlot ? undefined : currentSlot)}>
-                {hasLoggedCurrentSlot || isLunchSlot ? '+ Add Log' : 'Log Now'}
-              </Button>
-            }
-          >
-            {isLunchSlot
-              ? `Lunch Break is in progress! No mandatory check-in is required during ${lunchSlotLabel}. Automated check-in alerts resume at ${lunchEndLabel}.`
+          <div className={`glass-surface rounded-2xl border p-4 sm:p-5 shadow-glass flex flex-wrap items-center justify-between gap-4 ${
+            isLunchSlot
+              ? 'border-amber-300/60 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20'
               : hasLoggedCurrentSlot
-              ? 'Your check-in for this hour is recorded. Automated audio pop sounds and Windows notifications will alert you before the next slot ends.'
-              : 'Automated audio pop sounds and Windows screen pop-up notifications will alert you at 20m, 10m, 5m, and deadline.'}
-          </Banner>
+              ? 'border-emerald-300/60 dark:border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20'
+              : minutesLeft <= 5
+              ? 'border-rose-300/60 dark:border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/20'
+              : 'border-amber-300/60 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20'
+          }`}>
+            <div className="flex items-center gap-3.5">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                hasLoggedCurrentSlot ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+              }`}>
+                {isLunchSlot ? (
+                  <span className="text-base">🍱</span>
+                ) : (
+                  <AlarmClockIcon className="h-5 w-5" />
+                )}
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {isLunchSlot
+                    ? `Lunch Break (${lunchSlotLabel}) — ${minutesLeft}m remaining`
+                    : hasLoggedCurrentSlot
+                    ? `✓ Work Log Submitted for ${currentSlotLabel} Slot (${minutesLeft}m remaining in this slot)`
+                    : minutesLeft <= 5
+                    ? `URGENT: Only ${minutesLeft} minutes left to log ${currentSlotLabel} slot!`
+                    : `Current Slot in Progress (${currentSlotLabel}) — ${minutesLeft}m remaining`}
+                </h3>
+                <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">
+                  {isLunchSlot
+                    ? `Lunch break in progress. Automated check-in reminders resume at ${lunchEndLabel}.`
+                    : hasLoggedCurrentSlot
+                    ? 'Your hourly submission is logged. Audio pop reminders will alert you for the next slot.'
+                    : 'Submit your work log before the hour ends to maintain 100% on-time check-in record.'}
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => handleOpenLog(isLunchSlot ? undefined : currentSlot)}
+            >
+              {hasLoggedCurrentSlot || isLunchSlot ? '+ Add Log' : 'Log Now'}
+            </Button>
+          </div>
         )}
 
-        {/* Banner for Team Lead Targeted Feedback / Rejection */}
+        {/* Pending Revisions Banner (if TL requested changes) */}
         {pendingRevisionsCount > 0 && (
-          <Banner
-            tone="yellow"
-            icon={<AlertTriangleIcon className="h-4 w-4 text-amber-600" />}
-            title={`${pendingRevisionsCount} Pending Resubmit Task${pendingRevisionsCount > 1 ? 's' : ''} Assigned by Team Lead`}
-            action={
-              <Button
-                className="bg-amber-600 text-white hover:bg-amber-700 border-none"
-                onClick={() => navigate('/developer/pending')}
-              >
-                View Pending Works
-              </Button>
-            }
-          >
-            Your Team Leader gave feedback/screenshots on your log submission. Click to review the highlighted parts and update your work log.
-          </Banner>
+          <div className="glass-surface rounded-2xl border border-amber-300/70 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/25 p-4 sm:p-5 shadow-glass flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                <AlertTriangleIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-amber-950 dark:text-amber-200">
+                  {pendingRevisionsCount} Pending Resubmit Task{pendingRevisionsCount > 1 ? 's' : ''} Assigned by Team Lead
+                </h3>
+                <p className="text-xs font-medium text-amber-800 dark:text-amber-300 mt-0.5">
+                  Your Team Leader provided targeted feedback/screenshots. Review the annotations and update your submission.
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              className="bg-amber-600 text-white hover:bg-amber-700 border-none"
+              onClick={() => navigate('/developer/pending')}
+            >
+              View Pending Works
+            </Button>
+          </div>
         )}
 
-        {/* Monthly Task Completion & Pending Status Calendar Widget */}
+        {/* 6. DASHBOARD GRID: CALENDAR & TODAY'S WORK */}
         <DeveloperCalendarWidget />
 
-        {/* 5 Summary Stat Cards */}
+        {/* 7. PRODUCTIVITY STAT CARDS */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <StatCard
             label="Active Time"
@@ -482,8 +508,7 @@ export function DeveloperDashboard() {
             icon={<CheckCircle2Icon className="h-4 w-4" />}
           />
 
-          {/* 5th Card: Pending Tasks / Resubmit */}
-          <Link to="/developer/pending" className="block transition-transform hover:-translate-y-0.5">
+          <Link to="/developer/pending" className="block">
             <StatCard
               label="Pending Tasks / Resubmit"
               value={String(pendingRevisionsCount)}
@@ -494,6 +519,7 @@ export function DeveloperDashboard() {
           </Link>
         </div>
 
+        {/* 8. ACTIVE SESSION TIMER */}
         <ActiveTimerCard
           onLog={handleOpenLog}
           activeMinutes={stats?.activeMinutes ?? 0}
@@ -501,7 +527,7 @@ export function DeveloperDashboard() {
           missed={stats?.missed ?? 0}
         />
 
-        {/* Today's Timeline */}
+        {/* 9. TODAY'S TIMELINE */}
         <TodayTimeline
           logs={logs}
           currentSlot={currentSlot}
@@ -512,7 +538,15 @@ export function DeveloperDashboard() {
         />
       </div>
 
-      <CheckInModal open={modalOpen} targetSlot={modalTargetSlot} onClose={() => { setModalOpen(false); setModalTargetSlot(undefined); }} />
+      {/* 10. MODALS */}
+      <CheckInModal
+        open={modalOpen}
+        targetSlot={modalTargetSlot}
+        onClose={() => {
+          setModalOpen(false);
+          setModalTargetSlot(undefined);
+        }}
+      />
       <CheckInAlertModal
         open={alertModalState.open}
         onClose={() => setAlertModalState((prev) => ({ ...prev, open: false }))}

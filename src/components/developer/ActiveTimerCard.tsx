@@ -22,9 +22,6 @@ export function ActiveTimerCard({ onLog, activeMinutes, firstSeen, missed }: Act
       aria-label="Active session timer"
       className="glass-card relative overflow-hidden rounded-3xl p-6 sm:p-7 shadow-glass"
     >
-      {/* Ambient background light spot */}
-      <div className="ambient-orb -top-16 -right-16 w-52 h-52 bg-brand/10 pointer-events-none" />
-
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-x-8 gap-y-6">
         <div className="flex items-center gap-4 min-w-[180px]">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 border border-brand/20 shadow-glass text-brand">

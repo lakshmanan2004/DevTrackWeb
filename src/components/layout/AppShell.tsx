@@ -24,13 +24,6 @@ export function AppShell({ role }: AppShellProps) {
         />
       )}
 
-      {/* AMBIENT BACKGROUND GLOW ORBS (Fixed & Theme-Independent Layer) */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden z-0 select-none">
-        <div className="absolute -top-[15%] left-[10%] h-[480px] w-[480px] rounded-full bg-gradient-to-br from-blue-400/15 via-indigo-300/10 to-transparent blur-3xl" />
-        <div className="absolute top-[20%] right-[5%] h-[540px] w-[540px] rounded-full bg-gradient-to-bl from-purple-400/12 via-pink-300/8 to-transparent blur-3xl" />
-        <div className="absolute -bottom-[10%] left-[30%] h-[600px] w-[600px] rounded-full bg-gradient-to-tr from-emerald-400/10 via-teal-300/8 to-transparent blur-3xl" />
-      </div>
-
       {/* FLOATING FROSTED SIDEBAR */}
       <Sidebar role={role} />
 

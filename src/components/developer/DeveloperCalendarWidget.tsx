@@ -58,7 +58,7 @@ export function DeveloperCalendarWidget() {
 
   const dayCellStyles: Record<string, string> = {
     approved: 'bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 ring-2 ring-emerald-400/30',
-    pending: 'bg-amber-500 text-white shadow-sm hover:bg-amber-600 ring-2 ring-amber-400/40 animate-pulse',
+    pending: 'bg-amber-500 text-white shadow-sm hover:bg-amber-600 ring-2 ring-amber-400/40',
     absent: 'bg-rose-500 text-white shadow-sm hover:bg-rose-600',
     holiday: 'bg-purple-600 text-white shadow-sm hover:bg-purple-700 ring-2 ring-purple-400/40',
     off: 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:border dark:border-white/10',
@@ -187,7 +187,7 @@ export function DeveloperCalendarWidget() {
                 key={day.dateStr}
                 onClick={() => setSelectedDay(day)}
                 title={`${day.fullLabel} — ${(day.isHoliday ? 'HOLIDAY (' + (day.holidayName || 'Holiday') + ')' : day.status).toUpperCase()} (${day.tasksCount} tasks)`}
-                className={`flex h-9 w-full items-center justify-center rounded-xl text-xs font-extrabold transition-all duration-150 transform hover:scale-105 active:scale-95 cursor-pointer shadow-glass ${
+                className={`flex h-9 w-full items-center justify-center rounded-xl text-xs font-extrabold transition-colors duration-150 hover:brightness-110 active:opacity-90 cursor-pointer shadow-glass ${
                   dayCellStyles[day.status]
                 }`}
               >
@@ -204,7 +204,7 @@ export function DeveloperCalendarWidget() {
               <span className="font-semibold text-slate-700">All Approved / Done</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-amber-300/40 animate-pulse" />
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-amber-300/40" />
               <span className="font-bold text-amber-800">Pending Feedback</span>
             </div>
             <div className="flex items-center gap-1.5">

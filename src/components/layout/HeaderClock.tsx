@@ -22,9 +22,9 @@ export function HeaderClock() {
   }, []);
 
   return (
-    <span className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-3 py-1.5 text-xs font-semibold text-gray-600">
-      <CalendarClockIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+    <span className="glass-surface inline-flex items-center gap-2 rounded-xl border border-white/60 dark:border-white/10 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs">
+      <CalendarClockIcon className="h-3.5 w-3.5 text-brand dark:text-blue-400" aria-hidden="true" />
       {now}
-    </span>);
-
+    </span>
+  );
 }
