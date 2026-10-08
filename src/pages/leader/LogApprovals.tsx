@@ -146,23 +146,26 @@ export function LogApprovals() {
       />
 
       <div className="flex-1 space-y-5 p-6">
-        <div className="relative z-20 flex flex-wrap items-center justify-between gap-3">
-          <FilterPills
-            ariaLabel="Filter approvals"
-            value={filter}
-            onChange={setFilter}
-            options={[
-              { id: 'all', label: 'All', count: counts.all },
-              { id: 'pending', label: 'Pending', count: counts.pending },
-              { id: 'changes_requested', label: 'Changes Requested', count: counts.changes_requested },
-              { id: 'approved', label: 'Approved', count: counts.approved },
-              { id: 'rejected', label: 'Rejected', count: counts.rejected }
-            ]}
-          />
+        <div className="relative z-30 flex flex-wrap items-center justify-between gap-3 overflow-visible">
+          <div className="shrink-0">
+            <FilterPills
+              size="sm"
+              ariaLabel="Filter approvals"
+              value={filter}
+              onChange={setFilter}
+              options={[
+                { id: 'all', label: 'All', count: counts.all },
+                { id: 'pending', label: 'Pending', count: counts.pending },
+                { id: 'changes_requested', label: 'Changes Requested', count: counts.changes_requested },
+                { id: 'approved', label: 'Approved', count: counts.approved },
+                { id: 'rejected', label: 'Rejected', count: counts.rejected }
+              ]}
+            />
+          </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2.5 shrink-0">
             {developers.length > 0 && (
-              <div className="w-56">
+              <div className="w-48 xl:w-52">
                 <Select
                   size="sm"
                   fullWidth
@@ -186,11 +189,11 @@ export function LogApprovals() {
               </div>
             )}
 
-            <div className="glass-surface flex items-center gap-1.5 rounded-2xl p-1">
+            <div className="glass-surface flex items-center gap-1 rounded-2xl p-1">
               <button
                 type="button"
                 onClick={() => setDateFilter(getTodayStr())}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                className={`rounded-xl px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
                   dateFilter === getTodayStr()
                     ? 'btn-glass-primary !text-white shadow-sm'
                     : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/10'
@@ -202,7 +205,7 @@ export function LogApprovals() {
               <button
                 type="button"
                 onClick={() => setDateFilter('all')}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                className={`rounded-xl px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
                   dateFilter === 'all'
                     ? 'btn-glass-primary !text-white shadow-sm'
                     : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/10'
@@ -213,7 +216,7 @@ export function LogApprovals() {
 
               <div className="h-4 w-px bg-white/20 dark:bg-white/10 mx-0.5" />
 
-              <label className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
+              <label className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
                 <CalendarIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                 <span className="sr-only">Pick a date</span>
                 <input
@@ -226,7 +229,7 @@ export function LogApprovals() {
             </div>
 
             {moduleNames.length > 0 && (
-              <div className="w-52">
+              <div className="w-44 xl:w-48">
                 <Select
                   size="sm"
                   fullWidth

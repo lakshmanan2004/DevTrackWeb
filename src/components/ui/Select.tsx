@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { ChevronDownIcon, CheckIcon, SearchIcon } from 'lucide-react';
+import { ChevronDownIcon, CheckIcon } from 'lucide-react';
 
 export interface SelectOption {
   value: string | number;
@@ -38,53 +38,35 @@ export function Select({
   size = 'md',
   fullWidth = true,
   align = 'left',
-  searchable = false,
   minMenuWidth
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const selectedOption = options.find((opt) => String(opt.value) === String(value));
-
-  // Filter options if searchable
-  const filteredOptions = searchable && searchQuery.trim()
-    ? options.filter((opt) =>
-        opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (opt.description && opt.description.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    : options;
 
   // Close on outside click
   const handleClickOutside = useCallback((e: MouseEvent) => {
     if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
       setIsOpen(false);
-      setSearchQuery('');
     }
   }, []);
 
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      if (searchable && searchInputRef.current) {
-        setTimeout(() => searchInputRef.current?.focus(), 50);
-      }
     } else {
       document.removeEventListener('mousedown', handleClickOutside);
-      setSearchQuery('');
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, handleClickOutside, searchable]);
+  }, [isOpen, handleClickOutside]);
 
   // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (disabled) return;
     if (e.key === 'Enter' || e.key === ' ') {
-      if (!searchable || !isOpen) {
-        e.preventDefault();
-        setIsOpen((prev) => !prev);
-      }
+      e.preventDefault();
+      setIsOpen((prev) => !prev);
     } else if (e.key === 'Escape') {
       setIsOpen(false);
     } else if (e.key === 'ArrowDown') {
@@ -92,10 +74,10 @@ export function Select({
       if (!isOpen) {
         setIsOpen(true);
       } else {
-        const currentIndex = filteredOptions.findIndex((opt) => String(opt.value) === String(value));
-        const nextIndex = (currentIndex + 1) % filteredOptions.length;
-        if (filteredOptions[nextIndex]) {
-          onChange(filteredOptions[nextIndex].value);
+        const currentIndex = options.findIndex((opt) => String(opt.value) === String(value));
+        const nextIndex = (currentIndex + 1) % options.length;
+        if (options[nextIndex]) {
+          onChange(options[nextIndex].value);
         }
       }
     } else if (e.key === 'ArrowUp') {
@@ -103,10 +85,10 @@ export function Select({
       if (!isOpen) {
         setIsOpen(true);
       } else {
-        const currentIndex = filteredOptions.findIndex((opt) => String(opt.value) === String(value));
-        const prevIndex = (currentIndex - 1 + filteredOptions.length) % filteredOptions.length;
-        if (filteredOptions[prevIndex]) {
-          onChange(filteredOptions[prevIndex].value);
+        const currentIndex = options.findIndex((opt) => String(opt.value) === String(value));
+        const prevIndex = (currentIndex - 1 + options.length) % options.length;
+        if (options[prevIndex]) {
+          onChange(options[prevIndex].value);
         }
       }
     }
@@ -176,37 +158,21 @@ export function Select({
         />
       </button>
 
-      {/* FLOATING LIQUID GLASS DROPDOWN MENU */}
+      {/* FLOATING LIQUID GLASS DROPDOWN MENU WITH CLEAN SCROLLBAR */}
       {isOpen && (
         <div
           role="listbox"
           style={minMenuWidth ? { minWidth: minMenuWidth } : undefined}
-          className={`glass-dropdown absolute z-[100] max-h-64 w-full min-w-[190px] overflow-y-auto rounded-2xl p-1.5 backdrop-blur-3xl animate-in fade-in zoom-in-95 duration-150 ${
+          className={`glass-dropdown absolute z-[100] max-h-60 w-full min-w-[190px] overflow-y-auto rounded-2xl p-1.5 backdrop-blur-3xl animate-in fade-in zoom-in-95 duration-150 custom-scrollbar ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
         >
-          {searchable && (
-            <div className="p-1 pb-1.5 border-b border-slate-200/50 dark:border-white/10 mb-1">
-              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-100/80 dark:bg-white/5 border border-slate-200/50 dark:border-white/5">
-                <SearchIcon className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent text-xs text-slate-800 dark:text-white placeholder-slate-400 outline-none font-medium"
-                />
-              </div>
-            </div>
-          )}
-
-          {filteredOptions.length === 0 ? (
+          {options.length === 0 ? (
             <div className="px-3 py-3 text-center text-xs text-slate-400 italic">
-              No options found
+              No options available
             </div>
           ) : (
-            filteredOptions.map((option) => {
+            options.map((option) => {
               const isSelected = String(option.value) === String(value);
               return (
                 <div
@@ -216,7 +182,6 @@ export function Select({
                   onClick={() => {
                     onChange(option.value);
                     setIsOpen(false);
-                    setSearchQuery('');
                   }}
                   className={`flex items-center justify-between gap-2.5 rounded-xl px-3 py-2 text-xs transition-all duration-150 cursor-pointer select-none border ${
                     isSelected
