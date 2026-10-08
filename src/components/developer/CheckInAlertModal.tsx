@@ -43,20 +43,20 @@ export function CheckInAlertModal({
           <div className="flex items-start gap-4">
             {/* Ambient Icon Circle */}
             <div
-              className={`flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border shadow-sm ${
+              className={`flex h-14 w-14 sm:h-16 sm:w-16 min-w-[56px] min-h-[56px] shrink-0 items-center justify-center rounded-2xl border shadow-sm transition-transform ${
                 isUrgent
-                  ? 'border-rose-500/30 bg-rose-500/15 text-rose-600 dark:text-rose-400 animate-bounce'
+                  ? 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400'
                   : isTest
-                  ? 'border-amber-500/30 bg-amber-500/15 text-amber-600 dark:text-amber-400'
-                  : 'border-blue-500/30 bg-blue-500/15 text-blue-600 dark:text-blue-400'
+                  ? 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                  : 'border-blue-500/40 bg-blue-500/15 text-blue-600 dark:text-blue-400'
               }`}
             >
               {isTest ? (
-                <Volume2Icon className="h-6 w-6" />
+                <Volume2Icon className="h-7 w-7 sm:h-8 sm:w-8 shrink-0" strokeWidth={2.2} />
               ) : isUrgent ? (
-                <AlertTriangleIcon className="h-6 w-6" />
+                <AlertTriangleIcon className="h-7 w-7 sm:h-8 sm:w-8 shrink-0" strokeWidth={2.2} />
               ) : (
-                <AlarmClockIcon className="h-6 w-6" />
+                <AlarmClockIcon className="h-7 w-7 sm:h-8 sm:w-8 shrink-0" strokeWidth={2.2} />
               )}
             </div>
 

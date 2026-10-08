@@ -122,8 +122,9 @@ export function DeveloperDashboard() {
   const isHoliday = !!(data as any)?.isHoliday || !!stats?.isHoliday;
   const holidayName = (data as any)?.holiday?.name || stats?.holidayName || 'Holiday';
 
-  // Background monitor for 20m, 10m, 5m audio pop/chime sounds & Windows desktop notifications + Screen Pop-up Modal
+  // Background monitor for STRICT milestones: 20m, 10m, 5m, and deadline (0m)
   // ONLY for developer role, strictly active between 8:00 AM and 5:00 PM (17:00).
+  // Uses persistent session storage key per day + slot + milestone so it triggers exactly once per milestone.
   useEffect(() => {
     if (isHoliday) return;
     if (user?.role !== 'developer') return;
@@ -132,17 +133,16 @@ export function DeveloperDashboard() {
       Notification.requestPermission().catch(() => {});
     }
 
-    const checkTimer = setInterval(() => {
+    const checkMilestoneAlerts = () => {
       const d = new Date();
       const h = d.getHours();
       
       // Workday runs strictly from 8:00 AM to 5:00 PM (17:00).
-      // Before 8:00 AM or after 5:00 PM, silence all alerts.
       if (h < 8 || h >= 17) return;
 
       const slot = h; // Actual clock hour slot (8..16)
       
-      // Lunch break (chosen slot 11 or 12) is exempt from all log check-in alerts and popups
+      // Lunch break is exempt from all check-in alerts
       if (slot === devLunchSlot) return;
 
       const min = d.getMinutes();
@@ -152,36 +152,70 @@ export function DeveloperDashboard() {
       if (!unlogged) return;
 
       const slotLabel = `${slot > 12 ? slot - 12 : slot} ${slot >= 12 ? 'PM' : 'AM'}`;
+      const todayKey = d.toISOString().slice(0, 10);
 
-      if (remainingMins <= 20 && remainingMins > 10) {
-        if (lastAlertRef.current?.slot === slot && lastAlertRef.current?.level === 'pop') return;
-        lastAlertRef.current = { slot, level: 'pop' };
-        playAlertSound('pop');
-        showWindowsNotification(
-          'DevTrack Reminder: 20 Mins Left!',
-          `You have ${remainingMins} minutes remaining to submit your work log for ${slotLabel}.`
+      const triggerMilestone = (milestoneKey: '20m' | '10m' | '5m' | 'deadline', level: 'pop' | 'warning' | 'urgent' | 'late', soundType: 'pop' | 'notification' | 'urgent', title: string, body: string, minsForModal: number) => {
+        const storageKey = `devtrack_alert_${todayKey}_slot${slot}_${milestoneKey}`;
+        if (sessionStorage.getItem(storageKey)) {
+          return; // Already notified for this exact milestone
+        }
+        sessionStorage.setItem(storageKey, 'true');
+        lastAlertRef.current = { slot, level };
+
+        playAlertSound(soundType);
+        showWindowsNotification(title, body);
+        setAlertModalState({ open: true, level, slotLabel, minsLeft: minsForModal });
+      };
+
+      // Exact Milestone 1: 20 minutes remaining (triggered at minute 40, i.e., 20 mins remaining)
+      if (remainingMins === 20) {
+        triggerMilestone(
+          '20m',
+          'pop',
+          'pop',
+          'DevTrack Reminder: 20 Minutes Left!',
+          `You have 20 minutes remaining to submit your work log for the ${slotLabel} slot.`,
+          20
         );
-        setAlertModalState({ open: true, level: 'pop', slotLabel, minsLeft: remainingMins });
-      } else if (remainingMins <= 10 && remainingMins > 5) {
-        if (lastAlertRef.current?.slot === slot && lastAlertRef.current?.level === 'warning') return;
-        lastAlertRef.current = { slot, level: 'warning' };
-        playAlertSound('notification');
-        showWindowsNotification(
-          'DevTrack Warning: 10 Mins Left!',
-          `Only ${remainingMins} minutes remaining! Submit your work log for ${slotLabel} before time runs out.`
-        );
-        setAlertModalState({ open: true, level: 'warning', slotLabel, minsLeft: remainingMins });
-      } else if (remainingMins <= 5 && remainingMins > 0) {
-        if (lastAlertRef.current?.slot === slot && lastAlertRef.current?.level === 'urgent') return;
-        lastAlertRef.current = { slot, level: 'urgent' };
-        playAlertSound('urgent');
-        showWindowsNotification(
-          'DevTrack URGENT: 5 Mins Left!',
-          `Dead time approaching! Only ${remainingMins} minutes left to submit your ${slotLabel} check-in!`
-        );
-        setAlertModalState({ open: true, level: 'urgent', slotLabel, minsLeft: remainingMins });
       }
-    }, 5000);
+      // Exact Milestone 2: 10 minutes remaining (triggered at minute 50, i.e., 10 mins remaining)
+      else if (remainingMins === 10) {
+        triggerMilestone(
+          '10m',
+          'warning',
+          'notification',
+          'DevTrack Warning: 10 Minutes Left!',
+          `Only 10 minutes remaining! Submit your work log for the ${slotLabel} slot.`,
+          10
+        );
+      }
+      // Exact Milestone 3: 5 minutes remaining (triggered at minute 55, i.e., 5 mins remaining)
+      else if (remainingMins === 5) {
+        triggerMilestone(
+          '5m',
+          'urgent',
+          'urgent',
+          'DevTrack URGENT: 5 Minutes Left!',
+          `Deadline approaching! Only 5 minutes left to submit your ${slotLabel} check-in!`,
+          5
+        );
+      }
+      // Exact Milestone 4: Deadline (triggered at final minute 59 or 0 mins remaining)
+      else if (remainingMins <= 1) {
+        triggerMilestone(
+          'deadline',
+          'late',
+          'urgent',
+          'DevTrack DEADLINE: Hour Slot Closing Now!',
+          `Final minute for ${slotLabel} slot! Submit your work log before the slot closes.`,
+          remainingMins
+        );
+      }
+    };
+
+    // Check immediately and then every 10 seconds to catch exact minute marks
+    checkMilestoneAlerts();
+    const checkTimer = setInterval(checkMilestoneAlerts, 10000);
 
     return () => clearInterval(checkTimer);
   }, [logs, devLunchSlot, isHoliday, user?.role]);
@@ -374,7 +408,9 @@ export function DeveloperDashboard() {
                 ? `URGENT: Only ${minutesLeft} minutes left to log this hour slot!`
                 : minutesLeft <= 10
                 ? `WARNING: ${minutesLeft} minutes left to log this hour slot!`
-                : `Check-In Due: ${minutesLeft} minutes remaining for ${currentSlotLabel} slot`
+                : minutesLeft <= 20
+                ? `Check-In Reminder: ${minutesLeft} minutes remaining for ${currentSlotLabel} slot`
+                : `Current Slot in Progress (${currentSlotLabel}) — ${minutesLeft}m remaining`
             }
             action={
               <Button onClick={() => handleOpenLog(isLunchSlot ? undefined : currentSlot)}>

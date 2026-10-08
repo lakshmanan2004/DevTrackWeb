@@ -17,7 +17,9 @@ import {
   CheckIcon,
   UtensilsIcon,
   PaletteIcon,
-  ImageIcon
+  ImageIcon,
+  Volume2Icon,
+  PlayIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
@@ -28,6 +30,12 @@ import { useProjects, useTeams, useLive } from '../../hooks/useLive';
 import { api } from '../../api/client';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { useTheme } from '../../context/ThemeContext';
+import { NotificationSoundModal } from '../../components/ui/NotificationSoundModal';
+import {
+  getSavedNotificationSound,
+  NOTIFICATION_SOUNDS,
+  playMelodiousSound
+} from '../../utils/audioAlerts';
 
 const roleLabels: Record<string, string> = {
   developer: 'Developer',
@@ -47,6 +55,12 @@ export function UserProfile() {
   const { user, refresh } = useAuth();
   const { openWallpaperModal } = useTheme();
   const role = user?.role || 'leader';
+
+  const [isSoundModalOpen, setIsSoundModalOpen] = useState(false);
+  const [selectedSoundId, setSelectedSoundId] = useState(getSavedNotificationSound());
+
+  const currentSoundMeta =
+    NOTIFICATION_SOUNDS.find((s) => s.id === selectedSoundId) || NOTIFICATION_SOUNDS[0];
 
   const { data: projData } = useProjects('mine');
   const { data: teamData } = useTeams();
@@ -319,9 +333,47 @@ export function UserProfile() {
                     </span>
                     <ThemeToggle variant="pill" />
                   </div>
+
+                  {/* Notification Alert Sound */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 py-2 border-t border-white/10 dark:border-white/5">
+                    <div>
+                      <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium">
+                        <Volume2Icon className="h-4 w-4 text-indigo-500 shrink-0" />
+                        <span>Notification Alert Sound</span>
+                      </span>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 pl-6">
+                        Active: <span className="font-semibold text-slate-900 dark:text-white">{currentSoundMeta.previewEmoji} {currentSoundMeta.name}</span>
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => playMelodiousSound(selectedSoundId)}
+                        className="glass-surface inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-white/10 transition-colors cursor-pointer"
+                        title="Preview sound"
+                      >
+                        <PlayIcon className="h-3 w-3 fill-current text-amber-500" />
+                        <span>Play</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsSoundModalOpen(true)}
+                        className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold text-indigo-500 dark:text-indigo-400 hover:bg-white/10 transition-colors cursor-pointer"
+                      >
+                        <Volume2Icon className="h-3.5 w-3.5" />
+                        <span>Choose Sound</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+
+            <NotificationSoundModal
+              open={isSoundModalOpen}
+              onClose={() => setIsSoundModalOpen(false)}
+              onSoundChanged={(id) => setSelectedSoundId(id)}
+            />
 
             {/* PASSWORD & SECURITY CARD */}
             <div className="glass-card rounded-2xl p-6">

@@ -12,7 +12,9 @@ import {
   UtensilsIcon,
   PaletteIcon,
   ImageIcon,
-  SparklesIcon
+  SparklesIcon,
+  Volume2Icon,
+  PlayIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
@@ -25,6 +27,12 @@ import { useLive } from '../../hooks/useLive';
 import { api } from '../../api/client';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { useTheme } from '../../context/ThemeContext';
+import { NotificationSoundModal } from '../../components/ui/NotificationSoundModal';
+import {
+  getSavedNotificationSound,
+  NOTIFICATION_SOUNDS,
+  playMelodiousSound
+} from '../../utils/audioAlerts';
 
 export function DeveloperProfile() {
   const { user, refresh } = useAuth();
@@ -38,6 +46,11 @@ export function DeveloperProfile() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [passwordMessage, setPasswordMessage] = useState('');
+  const [isSoundModalOpen, setIsSoundModalOpen] = useState(false);
+  const [selectedSoundId, setSelectedSoundId] = useState(getSavedNotificationSound());
+
+  const currentSoundMeta =
+    NOTIFICATION_SOUNDS.find((s) => s.id === selectedSoundId) || NOTIFICATION_SOUNDS[0];
 
   const logs = logData?.logs || [];
   const stats = logData?.stats;
@@ -325,7 +338,45 @@ export function DeveloperProfile() {
                     </div>
                     <ThemeToggle variant="pill" />
                   </div>
+
+                  {/* Notification Alert Sound */}
+                  <div className="glass-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl p-3.5">
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <Volume2Icon className="h-3.5 w-3.5 text-indigo-500" />
+                        Notification Alert Sound
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Melodious alert chime for check-in popups (Active: <span className="font-semibold text-slate-900 dark:text-white">{currentSoundMeta.previewEmoji} {currentSoundMeta.name}</span>)
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => playMelodiousSound(selectedSoundId)}
+                        className="glass-surface inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-white/10 transition-colors cursor-pointer shadow-sm"
+                        title="Preview sound"
+                      >
+                        <PlayIcon className="h-3 w-3 fill-current text-amber-500" />
+                        <span>Play</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsSoundModalOpen(true)}
+                        className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold text-indigo-500 dark:text-indigo-400 hover:bg-white/10 transition-colors cursor-pointer shadow-sm"
+                      >
+                        <Volume2Icon className="h-3.5 w-3.5" />
+                        <span>Choose Sound</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
+
+                <NotificationSoundModal
+                  open={isSoundModalOpen}
+                  onClose={() => setIsSoundModalOpen(false)}
+                  onSoundChanged={(id) => setSelectedSoundId(id)}
+                />
 
                 <div className="sm:col-span-2 flex items-center gap-3">
                   <Button type="submit">Save Changes</Button>

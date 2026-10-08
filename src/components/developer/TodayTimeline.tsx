@@ -1,20 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   CheckCircle2Icon,
   GitCommitVerticalIcon,
   PaperclipIcon,
   TimerIcon,
   HighlighterIcon,
-  XIcon,
-  UtensilsIcon,
-  Loader2Icon
+  XIcon
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { TaskStatusBadge, taskStatusMeta } from '../ui/TaskStatusBadge';
 import { TaskStatus } from '../../types';
 import { isLogLate } from '../../utils/logTimeliness';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../api/client';
 
 const baseHours = [
   { slot: 8, label: '8 AM' },
@@ -119,27 +116,9 @@ function LogCard({ log }: { log: any }) {
 }
 
 export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isHoliday, holidayName, onLog }: TodayTimelineProps) {
-  const { user, refresh } = useAuth();
-  const [isUpdatingLunch, setIsUpdatingLunch] = useState(false);
+  const { user } = useAuth();
   const activeLunchSlot = propLunchSlot ?? user?.lunchSlot ?? 12;
-
   const slot = currentSlot ?? new Date().getHours();
-
-  const handleSelectLunchSlot = async (newSlot: number) => {
-    if (newSlot === activeLunchSlot || isUpdatingLunch) return;
-    setIsUpdatingLunch(true);
-    try {
-      await api('/api/users/lunch', {
-        method: 'PATCH',
-        body: { lunchSlot: newSlot }
-      });
-      await refresh();
-    } catch (err: any) {
-      console.error('Failed to update lunch slot:', err);
-    } finally {
-      setIsUpdatingLunch(false);
-    }
-  };
 
   const hours = baseHours.map((h) => ({
     ...h,
@@ -163,44 +142,6 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
           </p>
         </div>
 
-        {/* Lunch Break Slot Selector */}
-        {!isHoliday && (
-          <div className="flex items-center gap-2 rounded-2xl border border-amber-200/80 bg-amber-50/70 backdrop-blur-md p-1.5 shadow-glass">
-            <div className="flex items-center gap-1.5 pl-2 pr-1 text-xs font-bold text-amber-950">
-              <UtensilsIcon className="h-3.5 w-3.5 text-amber-600" />
-              <span>Lunch Slot:</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                disabled={isUpdatingLunch}
-                onClick={() => handleSelectLunchSlot(11)}
-                className={`rounded-xl px-3 py-1 text-xs font-bold transition-all ${
-                  activeLunchSlot === 11
-                    ? 'bg-amber-500 text-white shadow-glass'
-                    : 'bg-white/80 text-amber-900 hover:bg-white border border-amber-200'
-                }`}
-              >
-                11:00 AM – 12:00 PM
-              </button>
-              <button
-                type="button"
-                disabled={isUpdatingLunch}
-                onClick={() => handleSelectLunchSlot(12)}
-                className={`rounded-xl px-3 py-1 text-xs font-bold transition-all ${
-                  activeLunchSlot === 12
-                    ? 'bg-amber-500 text-white shadow-glass'
-                    : 'bg-white/80 text-amber-900 hover:bg-white border border-amber-200'
-                }`}
-              >
-                12:00 PM – 1:00 PM
-              </button>
-            </div>
-            {isUpdatingLunch && (
-              <Loader2Icon className="h-3.5 w-3.5 animate-spin text-amber-600 mr-1" />
-            )}
-          </div>
-        )}
       </div>
 
       {isHoliday && logs.length === 0 ? (
