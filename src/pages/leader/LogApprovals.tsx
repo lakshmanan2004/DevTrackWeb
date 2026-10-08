@@ -600,7 +600,7 @@ export function LogApprovals() {
 
       {/* Screenshot Zoom Modal */}
       {activeScreenshotModal && (
-        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xl animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xl animate-in fade-in">
           <div className="glass-modal relative max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl p-4 shadow-2xl border border-white/30 dark:border-white/15">
             <div className="mb-3 flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-2 text-white">
               <span className="text-sm font-semibold text-slate-900 dark:text-white">{activeScreenshotModal.title}</span>

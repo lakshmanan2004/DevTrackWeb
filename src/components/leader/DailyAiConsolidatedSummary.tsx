@@ -5,16 +5,16 @@ import {
   CopyIcon,
   RefreshCwIcon,
   LayersIcon,
-  ClockIcon,
   CheckCircle2Icon,
   AlertTriangleIcon,
   HourglassIcon,
   ChevronRightIcon,
   CpuIcon,
-  FileTextIcon
+  FileTextIcon,
+  LayoutGridIcon,
+  ListTodoIcon
 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
-import { ProgressBar } from '../ui/ProgressBar';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { useDailyAiSummary } from '../../hooks/useLive';
 
@@ -26,6 +26,7 @@ interface Props {
 export function DailyAiConsolidatedSummary({ developerId, developerName }: Props) {
   const todayStr = new Date().toISOString().slice(0, 10);
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
+  const [activeTab, setActiveTab] = useState<'modules' | 'pending'>('modules');
   const [copied, setCopied] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -70,6 +71,9 @@ ${pendingText || 'No pending tasks or blockers reported.'}
   const handleQuickDate = (type: 'today' | 'yesterday') => {
     setSelectedDate(type === 'today' ? todayStr : yesterdayStr);
   };
+
+  const modulesCount = summary?.mainModulesAndFocusAreas?.length || 0;
+  const pendingCount = summary?.inProgressAndPendingWorks?.length || 0;
 
   return (
     <div className="space-y-6">
@@ -209,164 +213,192 @@ ${pendingText || 'No pending tasks or blockers reported.'}
           )}
         </div>
 
-        {/* 2 SUB-CARDS GRID */}
-        <div className="grid gap-5 grid-cols-1 md:grid-cols-2 pt-1">
-          {/* SUB-CARD 1: MAIN MODULES AND FOCUS AREA */}
-          <div className="flex flex-col rounded-2xl border border-indigo-200/60 bg-indigo-50/40 backdrop-blur-md p-5 shadow-glass space-y-3.5">
-            <div className="flex items-start justify-between gap-3 border-b border-indigo-100/80 pb-3">
-              <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 shrink-0 mt-0.5">
-                  <LayersIcon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-950 leading-snug">
-                    Main Modules &amp; Focus Area
-                  </h4>
-                  <p className="text-[11px] font-medium text-indigo-800/80 leading-tight mt-0.5">
-                    Key feature deliverables &amp; milestones
-                  </p>
-                </div>
-              </div>
-              <span className="shrink-0 whitespace-nowrap inline-flex items-center rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 text-[11px] font-bold text-indigo-900 leading-none shadow-2xs mt-0.5">
-                {summary?.mainModulesAndFocusAreas?.length || 0} Modules
-              </span>
-            </div>
-
-            <div className="space-y-2.5 flex-1 max-h-80 overflow-y-auto pr-1">
-              {summary?.mainModulesAndFocusAreas && summary.mainModulesAndFocusAreas.length > 0 ? (
-                summary.mainModulesAndFocusAreas.map((m: any, idx: number) => (
-                  <div
-                    key={idx}
-                    className="rounded-2xl border border-white/80 bg-white/70 backdrop-blur-md p-3.5 shadow-glass space-y-2 hover:bg-white/90 transition-all"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h5 className="text-xs font-bold text-navy">{m.module}</h5>
-                        <p className="mt-0.5 text-[11px] text-slate-600 leading-snug font-normal">
-                          {m.focus}
-                        </p>
-                      </div>
-                      <Badge
-                        tone={
-                          m.status === 'completed'
-                            ? 'green'
-                            : m.status === 'blocked'
-                            ? 'red'
-                            : 'blue'
-                        }
-                        className="capitalize shrink-0"
-                      >
-                        {m.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 text-[10px] text-slate-500">
-                      <span>Tasks: <strong>{m.completedTasksCount}/{m.totalTasksCount}</strong> Done</span>
-                      <span>Time: <strong>{m.activeHours || '—'}</strong></span>
-                    </div>
-
-                    {m.highlights && m.highlights.length > 0 && (
-                      <div className="space-y-1 pt-1">
-                        {m.highlights.map((h: string, hIdx: number) => (
-                          <div key={hIdx} className="flex items-start gap-1.5 text-[11px] text-slate-700">
-                            <CheckCircle2Icon className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                            <span className="truncate">{h}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="py-8 text-center text-xs font-medium text-slate-400 italic bg-white/40 rounded-2xl border border-dashed border-slate-200">
-                  No module work recorded for this date.
-                </div>
-              )}
-            </div>
+        {/* SECTION VIEW CONTROLS */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">View Section:</span>
+            <SegmentedControl
+              size="sm"
+              options={[
+                { id: 'modules', label: `Main Modules (${modulesCount})` },
+                { id: 'pending', label: `Pending Works (${pendingCount})` }
+              ]}
+              value={activeTab}
+              onChange={(val) => setActiveTab(val as 'modules' | 'pending')}
+            />
           </div>
+        </div>
+
+        {/* SUB-CARDS CONTAINER */}
+        <div className="w-full">
+          {/* SUB-CARD 1: MAIN MODULES AND FOCUS AREA */}
+          {activeTab === 'modules' && (
+            <div className="flex flex-col rounded-3xl border border-indigo-200/70 bg-indigo-50/40 backdrop-blur-xl p-6 shadow-glass space-y-4">
+              <div className="flex items-center justify-between gap-3 border-b border-indigo-100/80 pb-3.5">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 shrink-0">
+                    <LayersIcon className="h-4.5 w-4.5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-950">
+                      Main Modules &amp; Focus Area
+                    </h4>
+                    <p className="text-[11px] font-medium text-indigo-800/80">
+                      Key feature deliverables &amp; milestones
+                    </p>
+                  </div>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 text-xs font-bold text-indigo-900 shadow-2xs">
+                  {modulesCount} Modules
+                </span>
+              </div>
+
+              <div className="space-y-3 flex-1 max-h-[520px] overflow-y-auto pr-1 custom-scrollbar">
+                {summary?.mainModulesAndFocusAreas && summary.mainModulesAndFocusAreas.length > 0 ? (
+                  summary.mainModulesAndFocusAreas.map((m: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="rounded-2xl border border-white/80 bg-white/75 backdrop-blur-md p-4 shadow-glass space-y-2.5 hover:bg-white/95 transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <h5 className="text-sm font-bold text-navy leading-snug">{m.module}</h5>
+                          <p className="mt-1 text-xs text-slate-600 leading-relaxed font-normal">
+                            {m.focus}
+                          </p>
+                        </div>
+                        <Badge
+                          tone={
+                            m.status === 'completed'
+                              ? 'green'
+                              : m.status === 'blocked'
+                              ? 'red'
+                              : 'blue'
+                          }
+                          className="capitalize shrink-0 text-xs px-2.5 py-0.5"
+                        >
+                          {m.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500 font-medium">
+                        <span>Tasks: <strong className="text-navy">{m.completedTasksCount}/{m.totalTasksCount}</strong> Done</span>
+                        <span>Active Time: <strong className="text-navy">{m.activeHours || '—'}</strong></span>
+                      </div>
+
+                      {m.highlights && m.highlights.length > 0 && (
+                        <div className="space-y-1.5 pt-1">
+                          {m.highlights.map((h: string, hIdx: number) => (
+                            <div key={hIdx} className="flex items-start gap-2 text-xs text-slate-700">
+                              <CheckCircle2Icon className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                              <span>{h}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-12 text-center text-xs font-medium text-slate-400 italic bg-white/40 rounded-2xl border border-dashed border-slate-200">
+                    No module work recorded for this date.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* SUB-CARD 2: INPROGRESS OR PENDING WORKS */}
-          <div className="flex flex-col rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-md p-5 shadow-glass space-y-3.5">
-            <div className="flex items-start justify-between gap-3 border-b border-amber-100/80 pb-3">
-              <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 shrink-0 mt-0.5">
-                  <HourglassIcon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-950 leading-snug">
-                    InProgress &amp; Pending Works
-                  </h4>
-                  <p className="text-[11px] font-medium text-amber-800/80 leading-tight mt-0.5">
-                    Active tasks, review items &amp; blockers
-                  </p>
-                </div>
-              </div>
-              <span className="shrink-0 whitespace-nowrap inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-[11px] font-bold text-amber-900 leading-none shadow-2xs mt-0.5">
-                {summary?.inProgressAndPendingWorks?.length || 0} Pending
-              </span>
-            </div>
-
-            <div className="space-y-2.5 flex-1 max-h-80 overflow-y-auto pr-1">
-              {summary?.inProgressAndPendingWorks && summary.inProgressAndPendingWorks.length > 0 ? (
-                summary.inProgressAndPendingWorks.map((p: any, idx: number) => (
-                  <div
-                    key={p.id || idx}
-                    className={`rounded-2xl border p-3.5 shadow-glass space-y-2 ${
-                      p.status === 'blocked' || p.blocker
-                        ? 'border-rose-300/80 bg-rose-50/60'
-                        : p.status === 'pending_review'
-                        ? 'border-amber-300/80 bg-amber-50/60'
-                        : 'border-white/80 bg-white/70 backdrop-blur-md'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-navy/10 text-[10px] font-bold text-navy">
-                          {p.developerInitials || (p.developerName ? p.developerName.slice(0, 2).toUpperCase() : 'DV')}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <h5 className="text-xs font-bold text-navy truncate">{p.task}</h5>
-                          <span className="text-[10px] text-slate-500 font-medium">{p.developerName || 'Developer'}</span>
-                        </div>
-                      </div>
-
-                      <Badge
-                        tone={
-                          p.status === 'blocked' || p.blocker
-                            ? 'red'
-                            : p.status === 'pending_review'
-                            ? 'amber'
-                            : 'blue'
-                        }
-                        className="capitalize shrink-0"
-                      >
-                        {p.status === 'pending_review' ? 'Pending Review' : p.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
-
-                    {/* Blocker Alert Box */}
-                    {p.blocker && (
-                      <div className="rounded-xl border border-rose-200/80 bg-rose-50/90 p-2.5 text-[11px] text-rose-950 font-semibold flex items-start gap-1.5 shadow-2xs">
-                        <AlertTriangleIcon className="h-3.5 w-3.5 text-rose-600 shrink-0 mt-0.5" />
-                        <span><strong>Blocker:</strong> {p.blocker}</span>
-                      </div>
-                    )}
-
-                    {p.nextAction && (
-                      <div className="flex items-center gap-1.5 text-[10px] text-slate-600 pt-0.5">
-                        <ChevronRightIcon className="h-3 w-3 text-brand shrink-0" />
-                        <span>Next: {p.nextAction}</span>
-                      </div>
-                    )}
+          {activeTab === 'pending' && (
+            <div className="flex flex-col rounded-3xl border border-amber-200/70 bg-amber-50/40 backdrop-blur-xl p-6 shadow-glass space-y-4">
+              <div className="flex items-center justify-between gap-3 border-b border-amber-100/80 pb-3.5">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 shrink-0">
+                    <HourglassIcon className="h-4.5 w-4.5" />
                   </div>
-                ))
-              ) : (
-                <div className="py-8 text-center text-xs font-medium text-slate-400 italic bg-white/40 rounded-2xl border border-dashed border-slate-200">
-                  🎉 No active blockers or pending tasks reported for this date!
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-950">
+                      InProgress &amp; Pending Works
+                    </h4>
+                    <p className="text-[11px] font-medium text-amber-800/80">
+                      Active tasks, review items &amp; blockers
+                    </p>
+                  </div>
                 </div>
-              )}
+                <span className="inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-bold text-amber-900 shadow-2xs">
+                  {pendingCount} Pending
+                </span>
+              </div>
+
+              <div className="space-y-3 flex-1 max-h-[520px] overflow-y-auto pr-1 custom-scrollbar">
+                {summary?.inProgressAndPendingWorks && summary.inProgressAndPendingWorks.length > 0 ? (
+                  summary.inProgressAndPendingWorks.map((p: any, idx: number) => (
+                    <div
+                      key={p.id || idx}
+                      className={`rounded-2xl border p-4 shadow-glass space-y-3 transition-all ${
+                        p.status === 'blocked' || p.blocker
+                          ? 'border-rose-300/80 bg-rose-50/70'
+                          : p.status === 'pending_review'
+                          ? 'border-amber-300/80 bg-amber-50/70'
+                          : 'border-white/80 bg-white/75 backdrop-blur-md'
+                      }`}
+                    >
+                      {/* Top Header: Developer Pill + Status Badge */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-navy/10 text-[10px] font-extrabold text-navy shadow-2xs">
+                            {p.developerInitials || (p.developerName ? p.developerName.slice(0, 2).toUpperCase() : 'DV')}
+                          </span>
+                          <span className="text-xs font-bold text-slate-800 truncate">
+                            {p.developerName || 'Developer'}
+                          </span>
+                        </div>
+
+                        <Badge
+                          tone={
+                            p.status === 'blocked' || p.blocker
+                              ? 'red'
+                              : p.status === 'pending_review'
+                              ? 'amber'
+                              : 'blue'
+                          }
+                          className="capitalize shrink-0 text-xs px-2.5 py-0.5"
+                        >
+                          {p.status === 'pending_review' ? 'Pending Review' : p.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
+
+                      {/* Full Task Description */}
+                      <div>
+                        <h5 className="text-xs sm:text-sm font-bold text-navy leading-snug">
+                          {p.task}
+                        </h5>
+                      </div>
+
+                      {/* Blocker Alert Box */}
+                      {p.blocker && (
+                        <div className="rounded-xl border border-rose-200/80 bg-rose-50/90 p-2.5 text-xs text-rose-950 font-semibold flex items-start gap-2 shadow-2xs">
+                          <AlertTriangleIcon className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
+                          <span><strong>Blocker:</strong> {p.blocker}</span>
+                        </div>
+                      )}
+
+                      {/* Next Action */}
+                      {p.nextAction && (
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 pt-1 border-t border-slate-200/50">
+                          <ChevronRightIcon className="h-3.5 w-3.5 text-brand shrink-0" />
+                          <span>Next: {p.nextAction}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-12 text-center text-xs font-medium text-slate-400 italic bg-white/40 rounded-2xl border border-dashed border-slate-200">
+                    🎉 No active blockers or pending tasks reported for this date!
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
     </div>

@@ -234,7 +234,7 @@ export function DeveloperCalendarWidget() {
 
       {/* DATE DETAILS MODAL */}
       {selectedDay && (
-        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-slate-950/40 p-4 sm:p-6 backdrop-blur-md animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 sm:p-6 backdrop-blur-md animate-in fade-in">
           <div className="glass-modal relative w-full max-w-xl rounded-3xl p-6 shadow-glass-modal">
             <div className="flex items-center justify-between border-b border-slate-200/60 pb-4">
               <div className="flex items-center gap-3">

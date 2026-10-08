@@ -614,7 +614,7 @@ export function ProjectModulesSection({
 
       {/* FULL SCREENSHOT EXPAND MODAL */}
       {activeScreenshot && (
-        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-md animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-md animate-in fade-in">
           <div className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-gray-900 p-4 shadow-2xl">
             <div className="mb-3 flex items-center justify-between border-b border-gray-800 pb-2 text-white">
               <span className="text-sm font-semibold">{activeScreenshot.title}</span>

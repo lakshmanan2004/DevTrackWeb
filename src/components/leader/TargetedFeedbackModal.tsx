@@ -98,7 +98,7 @@ export function TargetedFeedbackModal({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-xl animate-in fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-xl animate-in fade-in">
       <div className="glass-modal relative w-full max-w-2xl rounded-3xl border border-white/30 dark:border-white/15 p-6 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-4">

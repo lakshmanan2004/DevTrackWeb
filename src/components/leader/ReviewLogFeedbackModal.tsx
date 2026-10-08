@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   CheckIcon,
   AlertTriangleIcon,
@@ -77,9 +78,9 @@ export function ReviewLogFeedbackModal({
     onClose();
   };
 
-  return (
+  const modalNode = (
     <div
-      className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center overflow-y-auto bg-navy/70 p-4 backdrop-blur-md animate-in fade-in"
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-md animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="review-modal-title"
@@ -107,7 +108,7 @@ export function ReviewLogFeedbackModal({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-white transition-colors"
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-white transition-colors cursor-pointer"
           >
             <XIcon className="h-5 w-5" />
           </button>
@@ -258,7 +259,7 @@ export function ReviewLogFeedbackModal({
 
       {/* Screenshot Zoom Popup Modal with High Z-Index */}
       {previewScreenshot && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-navy/85 p-4 backdrop-blur-md animate-in fade-in">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-navy/85 p-4 backdrop-blur-md animate-in fade-in">
           <div className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-gray-900 p-4 shadow-2xl border border-white/10 animate-in zoom-in-95">
             <div className="mb-3 flex items-center justify-between border-b border-gray-800 pb-2 text-white">
               <span className="text-sm font-semibold">{previewScreenshot.title}</span>
@@ -280,4 +281,6 @@ export function ReviewLogFeedbackModal({
       )}
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalNode, document.body) : modalNode;
 }

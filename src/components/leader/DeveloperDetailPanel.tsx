@@ -10,6 +10,7 @@ import { Badge } from '../ui/Badge';
 import { TaskStatusBadge } from '../ui/TaskStatusBadge';
 import { isLogLate } from '../../utils/logTimeliness';
 import { DailyAiConsolidatedSummary } from './DailyAiConsolidatedSummary';
+import { ReviewLogFeedbackModal } from './ReviewLogFeedbackModal';
 import { Developer } from '../../types';
 import { api } from '../../api/client';
 import { Button } from '../ui/Button';
@@ -31,13 +32,32 @@ interface DeveloperDetailPanelProps {
 
 export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: DeveloperDetailPanelProps) {
   const [tab, setTab] = useState<Tab>('activity');
+  const [selectedReviewLog, setSelectedReviewLog] = useState<any | null>(null);
+  const [reviewMode, setReviewMode] = useState<'approve' | 'reject'>('approve');
+  const [isReviewing, setIsReviewing] = useState(false);
 
   const logs = detail?.logs || [];
-  const panelLogs = logs.slice(0, 4);
+  const panelLogs = logs.slice(0, 8);
 
-  const review = async (logId: string, action: 'approve' | 'reject') => {
-    await api(`/api/logs/${logId}/review`, { method: 'POST', body: { action } });
-    onChanged();
+  const handleOpenReview = (log: any, mode: 'approve' | 'reject') => {
+    setSelectedReviewLog(log);
+    setReviewMode(mode);
+  };
+
+  const handleExecuteReview = async (action: 'approve' | 'changes_requested' | 'reject', note: string) => {
+    if (!selectedReviewLog) return;
+    setIsReviewing(true);
+    try {
+      await api(`/api/logs/${selectedReviewLog.id || selectedReviewLog._id}/review`, {
+        method: 'POST',
+        body: { action, reviewNote: note }
+      });
+      onChanged();
+    } catch (err: any) {
+      console.error('Failed to review log:', err);
+    } finally {
+      setIsReviewing(false);
+    }
   };
 
   return (
@@ -156,7 +176,7 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
                           size="sm"
                           variant="success"
                           icon={<CheckIcon className="h-3.5 w-3.5" />}
-                          onClick={() => review(log.id, 'approve')}
+                          onClick={() => handleOpenReview(log, 'approve')}
                         >
                           Approve
                         </Button>
@@ -164,7 +184,7 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
                           size="sm"
                           variant="danger"
                           icon={<XIcon className="h-3.5 w-3.5" />}
-                          onClick={() => review(log.id, 'reject')}
+                          onClick={() => handleOpenReview(log, 'reject')}
                         >
                           Reject
                         </Button>
@@ -224,5 +244,22 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
           </div>
         )}
       </div>
-    </section>);
+
+      {selectedReviewLog && (
+        <ReviewLogFeedbackModal
+          isOpen={!!selectedReviewLog}
+          onClose={() => setSelectedReviewLog(null)}
+          log={{
+            ...selectedReviewLog,
+            developerName: selectedReviewLog.developerName || developer.name,
+            developerInitials: selectedReviewLog.developerInitials || developer.initials,
+            developerEmail: selectedReviewLog.developerEmail || (developer as any).email
+          }}
+          mode={reviewMode}
+          onReview={handleExecuteReview}
+          busy={isReviewing}
+        />
+      )}
+    </section>
+  );
 }

@@ -338,7 +338,7 @@ export function MyPendingWorks() {
 
       {/* FULL WORK LOG SUBMISSION MODAL */}
       {resubmitModalItem && (
-        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md animate-in fade-in">
           <div className="glass-modal relative w-full max-w-lg rounded-3xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div className="flex items-center justify-between border-b border-hairline pb-4">
               <div>
@@ -518,7 +518,7 @@ export function MyPendingWorks() {
 
       {/* Screenshot Expand Modal */}
       {activeScreenshotModal && (
-        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xl animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xl animate-in fade-in">
           <div className="glass-modal relative max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl p-4 shadow-2xl">
             <div className="mb-3 flex items-center justify-between border-b border-hairline pb-2 text-white">
               <span className="text-sm font-semibold text-navy dark:text-white">{activeScreenshotModal.title}</span>
