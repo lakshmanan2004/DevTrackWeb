@@ -218,7 +218,7 @@ function projectDto(project, team, stats = {}) {
     leader: team && team.leader ? team.leader.name : '',
     leaderId: team && team.leader ? String(team.leader._id || team.leader) : '',
     team: team ? team.name : '',
-    teamId: team ? String(project.team) : '',
+    teamId: team ? String(team._id || (project.team && project.team._id) || project.team) : '',
     developers: team ? team.members.length : 0,
     developerNames: team && team.members ? team.members.map((m) => m.name) : [],
     started: fmtDateMDY(project.startedAt),

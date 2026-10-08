@@ -17,7 +17,7 @@ import { Banner } from '../../components/ui/Banner';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { ProgressBar } from '../../components/ui/ProgressBar';
-import { SegmentedControl } from '../../components/ui/SegmentedControl';
+import { Select } from '../../components/ui/Select';
 import { useProjects } from '../../hooks/useLive';
 import { Project } from '../../types';
 import { api } from '../../api/client';
@@ -177,10 +177,25 @@ export function ProjectsOverview() {
   const { data, refetch } = useProjects('all');
   const projects = (data?.projects || []) as unknown as Project[];
   const [filterTab, setFilterTab] = useState<string>('all');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
 
   const ongoing = projects.filter((project) => project.status === 'ongoing');
   const completed = projects.filter((project) => project.status === 'completed');
   const hold = projects.filter((project) => project.status === 'hold');
+
+  const uniqueTeamsCount = new Set(
+    projects
+      .map((p) => (p.team && typeof p.team === 'string' && p.team.trim() ? p.team.trim() : (p.teamId && p.teamId !== '[object Object]' ? p.teamId : '')))
+      .filter(Boolean)
+  ).size;
+
+  const summaryPills = [
+    { id: 'all', label: 'All Projects', value: projects.length, tone: 'text-navy dark:text-white' },
+    { id: 'ongoing', label: 'Ongoing', value: ongoing.length, tone: 'text-blue-500 dark:text-blue-400' },
+    { id: 'completed', label: 'Completed', value: completed.length, tone: 'text-emerald-500 dark:text-emerald-400' },
+    { id: 'hold', label: 'On Hold', value: hold.length, tone: 'text-amber-500 dark:text-amber-400' },
+    { id: 'teams', label: 'Total Teams', value: uniqueTeamsCount, tone: 'text-purple-500 dark:text-purple-400' }
+  ];
 
   const filteredProjects =
     filterTab === 'ongoing'
@@ -189,15 +204,15 @@ export function ProjectsOverview() {
       ? completed
       : filterTab === 'hold'
       ? hold
+      : filterTab === 'teams'
+      ? projects.filter((p) => p.teamId || p.team)
       : projects;
 
-  const summaryPills = [
-    { label: 'All Projects', value: projects.length, tone: 'text-navy dark:text-white' },
-    { label: 'Ongoing', value: ongoing.length, tone: 'text-blue-500 dark:text-blue-400' },
-    { label: 'Completed', value: completed.length, tone: 'text-emerald-500 dark:text-emerald-400' },
-    { label: 'On Hold', value: hold.length, tone: 'text-amber-500 dark:text-amber-400' },
-    { label: 'Total Teams', value: new Set(projects.map((p) => p.teamId)).size, tone: 'text-purple-500 dark:text-purple-400' }
-  ];
+  const displayedProjects = selectedProjectId === 'all'
+    ? filteredProjects
+    : filteredProjects.filter((p) => p.id === selectedProjectId);
+
+  const filterLabel = filterTab === 'ongoing' ? 'Ongoing' : filterTab === 'completed' ? 'Completed' : filterTab === 'hold' ? 'On Hold' : filterTab === 'teams' ? 'Team' : 'All';
 
   return (
     <>
@@ -214,34 +229,61 @@ export function ProjectsOverview() {
         {/* SUMMARY STATS & FILTER CONTROLS */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <dl className="flex flex-wrap gap-2.5">
-            {summaryPills.map((pill) => (
-              <div
-                key={pill.label}
-                className="glass-surface inline-flex items-center gap-2 rounded-2xl px-3.5 py-1.5 shadow-glass text-xs"
-              >
-                <dt className="font-semibold text-slate-500 dark:text-slate-400">{pill.label}</dt>
-                <dd className={`font-bold tabular-nums ${pill.tone}`}>{pill.value}</dd>
-              </div>
-            ))}
+            {summaryPills.map((pill) => {
+              const isActive = filterTab === pill.id;
+              return (
+                <button
+                  key={pill.label}
+                  type="button"
+                  onClick={() => {
+                    setFilterTab(pill.id);
+                    setSelectedProjectId('all');
+                  }}
+                  className={`inline-flex items-center gap-2 rounded-2xl px-3.5 py-1.5 shadow-glass text-xs transition-all duration-200 cursor-pointer border ${
+                    isActive
+                      ? 'btn-glass-primary !text-white border-transparent scale-[1.02] shadow-md ring-2 ring-indigo-500/30'
+                      : 'border-white/80 bg-white/70 dark:bg-slate-900/60 dark:border-white/10 backdrop-blur-md hover:bg-white/95 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <dt className={`font-semibold ${isActive ? 'text-white/90' : 'text-slate-500 dark:text-slate-400'}`}>
+                    {pill.label}
+                  </dt>
+                  <dd className={`font-bold tabular-nums ${isActive ? '!text-white' : pill.tone}`}>
+                    {pill.value}
+                  </dd>
+                </button>
+              );
+            })}
           </dl>
 
-          {/* Liquid Bubble Filter Segmented Control */}
-          <SegmentedControl
-            size="sm"
-            options={[
-              { id: 'all', label: 'All', count: projects.length },
-              { id: 'ongoing', label: 'Ongoing', count: ongoing.length },
-              { id: 'completed', label: 'Completed', count: completed.length },
-              { id: 'hold', label: 'On Hold', count: hold.length }
-            ]}
-            value={filterTab}
-            onChange={(val) => setFilterTab(val)}
-          />
+          {/* Dynamic Project Dropdown for the active filter */}
+          {filteredProjects.length > 0 && (
+            <div className="w-full sm:w-72">
+              <Select
+                size="sm"
+                icon={<FolderKanbanIcon className="h-4 w-4 text-indigo-500" />}
+                value={selectedProjectId}
+                onChange={(val) => setSelectedProjectId(String(val))}
+                options={[
+                  {
+                    value: 'all',
+                    label: `All ${filterLabel} Projects (${filteredProjects.length})`
+                  },
+                  ...filteredProjects.map((p) => ({
+                    value: p.id,
+                    label: p.name,
+                    badge: p.status === 'completed' ? 'Completed' : p.status === 'hold' ? 'On Hold' : 'Ongoing',
+                    tone: p.status === 'completed' ? ('green' as const) : p.status === 'hold' ? ('yellow' as const) : ('blue' as const)
+                  }))
+                ]}
+              />
+            </div>
+          )}
         </div>
 
         {/* RESPONSIVE PROJECT CARDS GRID */}
-        {filteredProjects.length === 0 ? (
-          <div className="glass-card rounded-3xl p-12 text-center shadow-glass space-y-2">
+        {displayedProjects.length === 0 ? (
+          <div className="glass-card rounded-3xl p-12 text-center shadow-glass space-y-3">
             <FolderKanbanIcon className="mx-auto h-10 w-10 text-slate-400" />
             <p className="text-sm font-bold text-navy dark:text-white">
               No {filterTab !== 'all' ? filterTab : ''} projects found
@@ -249,10 +291,20 @@ export function ProjectsOverview() {
             <p className="text-xs text-slate-500 dark:text-slate-400">
               There are currently no projects matching this status filter.
             </p>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setFilterTab('all');
+                setSelectedProjectId('all');
+              }}
+            >
+              Show All Projects
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredProjects.map((project) => (
+            {displayedProjects.map((project) => (
               <ProjectCard key={project.id} project={project} onDelete={refetch} />
             ))}
           </div>

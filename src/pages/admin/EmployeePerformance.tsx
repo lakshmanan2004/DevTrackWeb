@@ -15,7 +15,8 @@ import {
   ZapIcon,
   CalendarX2Icon,
   ListCheckIcon,
-  RefreshCwIcon
+  RefreshCwIcon,
+  UsersIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Banner } from '../../components/ui/Banner';
@@ -139,22 +140,14 @@ export function EmployeePerformance() {
 
   // Currently selected developer detailed data object
   const activeDev = useMemo(() => {
-    if (!developersData.length) return null;
-    return developersData.find((d) => d.id === selectedDevId) || filteredDevs[0] || developersData[0];
-  }, [selectedDevId, filteredDevs, developersData]);
+    if (!selectedDevId || !developersData.length) return null;
+    return developersData.find((d) => d.id === selectedDevId) || null;
+  }, [selectedDevId, developersData]);
 
   const activeStyles = activeDev ? getTierBadgeStyles(activeDev.tier) : getTierBadgeStyles('Good');
 
   // Maximum value for daily chart calculation
   const maxDailyScore = 100;
-
-  if (!activeDev) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Loading performance data…</p>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -209,13 +202,17 @@ export function EmployeePerformance() {
                 <Select
                   size="sm"
                   fullWidth
-                  value={activeDev.id}
+                  placeholder="Select an employee..."
+                  value={selectedDevId}
                   onChange={(val) => setSelectedDevId(val)}
-                  options={filteredDevs.map((d) => ({
-                    value: d.id,
-                    label: d.name,
-                    badge: `${d.score}% · ${d.tier}`
-                  }))}
+                  options={[
+                    { value: '', label: 'Select an employee...' },
+                    ...filteredDevs.map((d) => ({
+                      value: d.id,
+                      label: d.name,
+                      badge: `${d.score}% · ${d.tier}`
+                    }))
+                  ]}
                   searchable
                 />
               </div>
@@ -223,10 +220,26 @@ export function EmployeePerformance() {
           </div>
         </div>
 
-        {/* SINGLE DEVELOPER DETAILED HERO CARD */}
-        <div className={`glass-card rounded-3xl p-6 shadow-glass transition-colors ${
-          activeDev.tier === 'Poor' ? 'border-rose-500/30 bg-rose-500/10' : ''
-        }`}>
+        {!activeDev ? (
+          <div className="glass-card rounded-3xl p-16 text-center shadow-glass space-y-4">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 shadow-inner">
+              <UsersIcon className="h-8 w-8" />
+            </div>
+            <div className="max-w-md mx-auto space-y-1.5">
+              <h3 className="text-base font-bold text-navy dark:text-white">
+                Select an Employee to View Performance
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Choose a developer from the dropdown above to inspect their detailed attendance, metric breakdown, and weekly performance trends.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* SINGLE DEVELOPER DETAILED HERO CARD */}
+            <div className={`glass-card rounded-3xl p-6 shadow-glass transition-colors ${
+              activeDev.tier === 'Poor' ? 'border-rose-500/30 bg-rose-500/10' : ''
+            }`}>
           <div className="flex flex-wrap items-center justify-between gap-6 border-b border-hairline pb-6">
             {/* Left: Avatar & Profile Info */}
             <div className="flex items-center gap-4">
@@ -780,6 +793,8 @@ export function EmployeePerformance() {
             )}
           </div>
         )}
+      </>
+    )}
 
         {/* HOW SCORE IS CALCULATED FOOTER (4 CORE METRICS x 25% WEIGHT) */}
         <div className="glass-card rounded-3xl p-6 shadow-glass space-y-4">

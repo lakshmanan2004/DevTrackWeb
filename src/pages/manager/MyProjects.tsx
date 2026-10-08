@@ -8,12 +8,14 @@ import {
   TrophyIcon,
   UserCogIcon,
   UsersIcon,
-  Trash2Icon
+  Trash2Icon,
+  FolderKanbanIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { ProgressBar } from '../../components/ui/ProgressBar';
+import { Select } from '../../components/ui/Select';
 import { useProjects } from '../../hooks/useLive';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../api/client';
@@ -32,6 +34,9 @@ export function MyProjects() {
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [selectedProjectForClose, setSelectedProjectForClose] = useState<any>(null);
 
+  const [filter, setFilter] = useState<'all' | 'ongoing' | 'completed' | 'teams'>('all');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
+
   const handleDeleteProject = async (project: any) => {
     if (!window.confirm(`Are you sure you want to permanently delete project "${project.name}"?\n\nThis will dissolve the team and free up developers.`)) {
       return;
@@ -44,12 +49,39 @@ export function MyProjects() {
     }
   };
 
+  const ongoingCount = myProjects.filter((p: any) => p.status === 'ongoing' || (p.status !== 'completed' && p.status !== 'hold')).length;
+  const completedCount = myProjects.filter((p: any) => p.status === 'completed').length;
+  const teamProjectsCount = new Set(
+    myProjects
+      .map((p: any) => (p.team && typeof p.team === 'string' && p.team.trim() ? p.team.trim() : (p.teamId && p.teamId !== '[object Object]' ? p.teamId : '')))
+      .filter(Boolean)
+  ).size;
+
   const summary = [
-    { label: 'Total', value: myProjects.length, tone: 'text-navy dark:text-white' },
-    { label: 'Ongoing', value: myProjects.filter((p: any) => p.status === 'ongoing').length, tone: 'text-brand dark:text-indigo-400' },
-    { label: 'Completed', value: myProjects.filter((p: any) => p.status === 'completed').length, tone: 'text-emerald-500 dark:text-emerald-400' },
-    { label: 'Teams', value: new Set(myProjects.map((p: any) => p.teamId)).size, tone: 'text-violet-500 dark:text-violet-400' }
+    { id: 'all' as const, label: 'Total', value: myProjects.length, tone: 'text-navy dark:text-white' },
+    { id: 'ongoing' as const, label: 'Ongoing', value: ongoingCount, tone: 'text-brand dark:text-indigo-400' },
+    { id: 'completed' as const, label: 'Completed', value: completedCount, tone: 'text-emerald-500 dark:text-emerald-400' },
+    { id: 'teams' as const, label: 'Teams', value: teamProjectsCount, tone: 'text-violet-500 dark:text-violet-400' }
   ];
+
+  const filteredProjects = myProjects.filter((project: any) => {
+    if (filter === 'ongoing') {
+      return project.status === 'ongoing' || (project.status !== 'completed' && project.status !== 'hold');
+    }
+    if (filter === 'completed') {
+      return project.status === 'completed';
+    }
+    if (filter === 'teams') {
+      return Boolean(project.team || project.teamId);
+    }
+    return true;
+  });
+
+  const displayedProjects = selectedProjectId === 'all'
+    ? filteredProjects
+    : filteredProjects.filter((p: any) => p.id === selectedProjectId);
+
+  const filterLabel = filter === 'ongoing' ? 'Ongoing' : filter === 'completed' ? 'Completed' : filter === 'teams' ? 'Team' : 'All';
 
   return (
     <>
@@ -66,17 +98,59 @@ export function MyProjects() {
       />
 
       <div className="flex-1 space-y-5 p-6">
-        <dl className="flex flex-wrap gap-3">
-          {summary.map((item) => (
-            <div
-              key={item.label}
-              className="glass-surface inline-flex items-center gap-2 rounded-2xl px-4 py-2 shadow-glass"
-            >
-              <dt className="text-xs font-semibold text-slate-500 dark:text-slate-400">{item.label}</dt>
-              <dd className={`text-sm font-bold tabular-nums ${item.tone}`}>{item.value}</dd>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <dl className="flex flex-wrap gap-3">
+            {summary.map((item) => {
+              const isActive = filter === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setFilter(item.id);
+                    setSelectedProjectId('all');
+                  }}
+                  className={`inline-flex items-center gap-2.5 rounded-2xl px-4 py-2 shadow-glass transition-all duration-200 cursor-pointer text-left border ${
+                    isActive
+                      ? 'btn-glass-primary !text-white border-transparent scale-[1.02] shadow-md ring-2 ring-indigo-500/30'
+                      : 'border-white/80 bg-white/70 dark:bg-slate-900/60 dark:border-white/10 backdrop-blur-md hover:bg-white/95 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <dt className={`text-xs font-semibold ${isActive ? 'text-white/90' : 'text-slate-500 dark:text-slate-400'}`}>
+                    {item.label}
+                  </dt>
+                  <dd className={`text-sm font-bold tabular-nums ${isActive ? '!text-white' : item.tone}`}>
+                    {item.value}
+                  </dd>
+                </button>
+              );
+            })}
+          </dl>
+
+          {/* Dynamic Project Dropdown for the active filter */}
+          {filteredProjects.length > 0 && (
+            <div className="w-full sm:w-72">
+              <Select
+                size="sm"
+                icon={<FolderKanbanIcon className="h-4 w-4 text-indigo-500" />}
+                value={selectedProjectId}
+                onChange={(val) => setSelectedProjectId(String(val))}
+                options={[
+                  {
+                    value: 'all',
+                    label: `All ${filterLabel} Projects (${filteredProjects.length})`
+                  },
+                  ...filteredProjects.map((p: any) => ({
+                    value: p.id,
+                    label: p.name,
+                    badge: p.status === 'completed' ? 'Completed' : 'Ongoing',
+                    tone: p.status === 'completed' ? ('green' as const) : ('blue' as const)
+                  }))
+                ]}
+              />
             </div>
-          ))}
-        </dl>
+          )}
+        </div>
 
         {myProjects.length === 0 && (
           <div className="glass-card rounded-3xl p-12 text-center shadow-glass">
@@ -85,8 +159,29 @@ export function MyProjects() {
           </div>
         )}
 
+        {myProjects.length > 0 && displayedProjects.length === 0 && (
+          <div className="glass-card rounded-3xl p-10 text-center shadow-glass space-y-3">
+            <p className="text-sm font-bold text-navy dark:text-white">
+              No {filter === 'ongoing' ? 'ongoing' : filter === 'completed' ? 'completed' : filter === 'teams' ? 'team' : ''} projects found
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              There are currently no projects matching this filter criteria.
+            </p>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setFilter('all');
+                setSelectedProjectId('all');
+              }}
+            >
+              Show All Projects
+            </Button>
+          </div>
+        )}
+
         <ul className="space-y-4">
-          {myProjects.map((project: any) => {
+          {displayedProjects.map((project: any) => {
             const completed = project.status === 'completed';
             return (
               <li
