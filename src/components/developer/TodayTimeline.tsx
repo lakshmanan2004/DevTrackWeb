@@ -42,38 +42,38 @@ function LogCard({ log }: { log: any }) {
     <article
       className={`glass-card relative overflow-hidden rounded-2xl border p-4 shadow-glass transition-all duration-200 ${
         isLate
-          ? 'border-amber-300/80 bg-amber-50/40'
+          ? 'border-amber-300/80 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20'
           : log.review === 'changes_requested'
-          ? 'border-amber-300/80 bg-amber-50/30'
-          : 'border-white/80 bg-white/70 hover:bg-white/90 hover:shadow-glass-hover'
+          ? 'border-amber-300/80 dark:border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/20'
+          : 'border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 hover:bg-white/90 dark:hover:bg-slate-800/90'
       }`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-bold tracking-tight text-navy">{log.task}</h3>
+          <h3 className="text-sm font-bold tracking-tight text-navy dark:text-white">{log.task}</h3>
           {isLate && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-2xs">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 dark:bg-amber-500/25 border border-amber-500/30 dark:border-amber-500/40 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-2xs">
               ⚠️ Late Submission
             </span>
           )}
         </div>
         <TaskStatusBadge status={log.status} />
       </div>
-      <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600 font-normal">{log.description}</p>
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 font-medium">
-        <span className={`inline-flex items-center gap-1.5 ${isLate ? 'font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-lg border border-amber-200' : ''}`}>
+      <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-normal">{log.description}</p>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
+        <span className={`inline-flex items-center gap-1.5 ${isLate ? 'font-bold text-amber-800 dark:text-amber-200 bg-amber-100/80 dark:bg-amber-950/60 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-500/30' : 'text-slate-500 dark:text-slate-400'}`}>
           <TimerIcon className="h-3.5 w-3.5" aria-hidden="true" />
           {log.activeMinutes} active min · {isLate ? `Submitted Late at ${log.submittedAt}` : log.submittedAt}
         </span>
         {log.attachment && (
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100/80 px-2 py-0.5 border border-slate-200/60">
-            <PaperclipIcon className="h-3.5 w-3.5" aria-hidden="true" />
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-800/80 px-2.5 py-1 border border-slate-200/60 dark:border-white/10 text-slate-700 dark:text-slate-200">
+            <PaperclipIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
             {log.attachment}
           </span>
         )}
         {log.commits > 0 && (
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100/80 px-2 py-0.5 border border-slate-200/60">
-            <GitCommitVerticalIcon className="h-3.5 w-3.5" aria-hidden="true" />
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100/80 dark:bg-slate-800/80 px-2.5 py-1 border border-slate-200/60 dark:border-white/10 text-slate-700 dark:text-slate-200">
+            <GitCommitVerticalIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
             {log.commits} commit{log.commits > 1 ? 's' : ''}
           </span>
         )}
@@ -81,32 +81,32 @@ function LogCard({ log }: { log: any }) {
       <p
         className={`mt-3 inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-semibold shadow-2xs ${
           log.review === 'approved'
-            ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
+            ? 'bg-emerald-500/10 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 dark:border-emerald-500/40'
             : log.review === 'changes_requested'
-            ? 'bg-amber-500/15 text-amber-800 border border-amber-500/30 font-bold'
+            ? 'bg-amber-500/15 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 border border-amber-500/30 dark:border-amber-500/40 font-bold'
             : log.review === 'rejected'
-            ? 'bg-rose-500/10 text-rose-700 border border-rose-500/20'
-            : 'bg-blue-500/10 text-blue-700 border border-blue-500/20'
+            ? 'bg-rose-500/10 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-500/20 dark:border-rose-500/40'
+            : 'bg-blue-500/10 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-500/20 dark:border-blue-500/40'
         }`}
       >
         {log.review === 'approved' ? (
           <>
-            <CheckCircle2Icon className="h-3.5 w-3.5" aria-hidden="true" />
+            <CheckCircle2Icon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
             Approved by Team Lead
           </>
         ) : log.review === 'changes_requested' ? (
           <>
-            <HighlighterIcon className="h-3.5 w-3.5 text-amber-600" aria-hidden="true" />
+            <HighlighterIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
             TL Requested Specific Changes & Resubmit
           </>
         ) : log.review === 'rejected' ? (
           <>
-            <XIcon className="h-3.5 w-3.5 text-rose-600" aria-hidden="true" />
+            <XIcon className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" aria-hidden="true" />
             Full Log Rejected (Resubmit Needed)
           </>
         ) : (
           <>
-            <TimerIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            <TimerIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
             Pending review
           </>
         )}
@@ -127,17 +127,17 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
 
   return (
     <section aria-label="Today's timeline" className="glass-card rounded-3xl p-6 sm:p-7 shadow-glass">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/60 dark:border-white/10 pb-5">
         <div>
-          <h2 className="text-sm sm:text-base font-bold text-navy flex items-center gap-2.5">
+          <h2 className="text-sm sm:text-base font-bold text-navy dark:text-white flex items-center gap-2.5">
             Today&apos;s Timeline
             {isHoliday && (
-              <span className="rounded-full bg-purple-500/10 text-purple-800 border border-purple-300 text-[10px] font-bold px-3 py-0.5 shadow-2xs">
+              <span className="rounded-full bg-purple-500/10 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30 text-[10px] font-bold px-3 py-0.5 shadow-2xs">
                 🎉 Holiday: {holidayName || 'Holiday'}
               </span>
             )}
           </h2>
-          <p className="text-xs font-medium text-slate-500 mt-0.5">
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
             {isHoliday ? 'Organization Holiday — Work check-ins paused today' : '8:00 AM – 5:00 PM standard workday schedule'}
           </p>
         </div>
@@ -145,10 +145,10 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
       </div>
 
       {isHoliday && logs.length === 0 ? (
-        <div className="p-8 text-center bg-purple-50/40 backdrop-blur-md rounded-2xl border border-purple-200/80 my-5 shadow-glass">
+        <div className="p-8 text-center bg-purple-50/40 dark:bg-purple-950/30 backdrop-blur-md rounded-2xl border border-purple-200/80 dark:border-purple-500/30 my-5 shadow-glass">
           <span className="text-4xl">🎉</span>
-          <h3 className="mt-2 text-base font-bold text-purple-950">Organization Holiday: {holidayName || 'Holiday'}</h3>
-          <p className="mt-1 text-xs text-purple-800 max-w-md mx-auto">
+          <h3 className="mt-2 text-base font-bold text-purple-950 dark:text-purple-200">Organization Holiday: {holidayName || 'Holiday'}</h3>
+          <p className="mt-1 text-xs text-purple-800 dark:text-purple-300 max-w-md mx-auto">
             Today is marked as an organization holiday on the calendar. Check-ins, attendance tracking, and work logs are paused today.
           </p>
         </div>
@@ -162,32 +162,32 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
             const hasLogs = slotLogs.length > 0;
 
             const dotTone = hour.isLunch
-              ? 'bg-amber-400 ring-4 ring-amber-100'
+              ? 'bg-amber-400 ring-4 ring-amber-100 dark:ring-amber-950/60'
               : hasLogs
               ? slotLogs.some((l) => l.review === 'changes_requested')
-                ? 'bg-amber-500 ring-4 ring-amber-100'
+                ? 'bg-amber-500 ring-4 ring-amber-100 dark:ring-amber-950/60'
                 : slotLogs.some((l) => l.review === 'rejected')
-                ? 'bg-rose-500 ring-4 ring-rose-100'
+                ? 'bg-rose-500 ring-4 ring-rose-100 dark:ring-rose-950/60'
                 : slotLogs.some((l) => isLogLate(l))
-                ? 'bg-amber-500 ring-4 ring-amber-100'
-                : 'bg-emerald-500 ring-4 ring-emerald-100'
+                ? 'bg-amber-500 ring-4 ring-amber-100 dark:ring-amber-950/60'
+                : 'bg-emerald-500 ring-4 ring-emerald-100 dark:ring-emerald-950/60'
               : isHoliday
-              ? 'bg-purple-200 ring-4 ring-purple-100'
+              ? 'bg-purple-200 ring-4 ring-purple-100 dark:ring-purple-950/60'
               : isCurrent
-              ? 'bg-brand ring-4 ring-blue-100 animate-pulse'
+              ? 'bg-brand ring-4 ring-blue-100 dark:ring-sky-950/60 animate-pulse'
               : isPast
-              ? 'bg-rose-300 ring-4 ring-rose-100'
-              : 'bg-slate-300 ring-4 ring-slate-100';
+              ? 'bg-rose-300 ring-4 ring-rose-100 dark:ring-rose-950/60'
+              : 'bg-slate-300 dark:bg-slate-700 ring-4 ring-slate-100 dark:ring-slate-800';
 
           return (
             <li key={hour.slot} className="flex gap-4">
-              <span className="w-14 shrink-0 pt-1 text-right text-xs font-mono font-bold tabular-nums text-slate-500">
+              <span className="w-14 shrink-0 pt-1 text-right text-xs font-mono font-bold tabular-nums text-slate-500 dark:text-slate-300">
                 {hour.label}
               </span>
 
               <div className="flex w-4 shrink-0 flex-col items-center">
                 <span className={`mt-2 h-3 w-3 shrink-0 rounded-full ${dotTone}`} aria-hidden="true" />
-                {index < hours.length - 1 && <span className="w-px flex-1 bg-slate-200/80 my-1" aria-hidden="true" />}
+                {index < hours.length - 1 && <span className="w-px flex-1 bg-slate-200/80 dark:bg-white/15 my-1" aria-hidden="true" />}
               </div>
 
               <div className={`min-w-0 flex-1 ${index < hours.length - 1 ? 'pb-5' : ''}`}>

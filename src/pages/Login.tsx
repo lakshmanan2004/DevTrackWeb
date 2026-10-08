@@ -94,33 +94,14 @@ export function Login() {
   }, [updateBubblePosition, role, loading]);
 
   useEffect(() => {
-    updateBubblePosition();
-    const raf1 = requestAnimationFrame(updateBubblePosition);
-    const raf2 = requestAnimationFrame(() => requestAnimationFrame(updateBubblePosition));
-    const timer1 = setTimeout(updateBubblePosition, 50);
-    const timer2 = setTimeout(updateBubblePosition, 150);
-    const timer3 = setTimeout(updateBubblePosition, 300);
-
-    window.addEventListener('resize', updateBubblePosition);
-
-    let resizeObserver: ResizeObserver | null = null;
-    if (containerRef.current && typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver(() => {
-        updateBubblePosition();
-      });
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      window.removeEventListener('resize', updateBubblePosition);
-      if (resizeObserver) resizeObserver.disconnect();
+    const handleResize = () => {
+      requestAnimationFrame(updateBubblePosition);
     };
-  }, [updateBubblePosition, loading]);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [updateBubblePosition]);
 
   const active = roleTabs.find((tab) => tab.id === role) ?? roleTabs[0];
 
@@ -186,67 +167,98 @@ export function Login() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col lg:grid lg:grid-cols-12 bg-slate-900 dark:bg-[#070d18] overflow-x-hidden selection:bg-brand/20 selection:text-brand">
-      {/* Soft Ambient Light Glow Orbs */}
-      <div className="ambient-orb -top-32 -left-32 w-[600px] h-[600px] bg-blue-500/15" />
-      <div className="ambient-orb top-1/4 -right-28 w-[550px] h-[550px] bg-purple-500/12" />
-      <div className="ambient-orb -bottom-28 left-1/3 w-[650px] h-[650px] bg-indigo-500/15" />
+    <div className="relative min-h-screen w-full flex flex-col lg:grid lg:grid-cols-12 bg-slate-50 dark:bg-[#090A0C] overflow-x-hidden selection:bg-brand/20 selection:text-brand transition-colors duration-300">
+      {/* Soft Ambient Light Glow Orbs across screen */}
+      <div className="ambient-orb -top-32 -left-32 w-[600px] h-[600px] bg-blue-500/10 dark:bg-[#1683FF]/12 pointer-events-none" />
+      <div className="ambient-orb top-1/4 -right-28 w-[550px] h-[550px] bg-purple-500/10 dark:bg-[#1683FF]/06 pointer-events-none" />
+      <div className="ambient-orb -bottom-28 left-1/3 w-[650px] h-[650px] bg-indigo-500/10 dark:bg-[#1683FF]/08 pointer-events-none" />
 
-      {/* Left Showcase / Brand Column (5 cols on lg, 6 cols on 2xl) */}
-      <div className="relative lg:col-span-5 2xl:col-span-6 min-h-[420px] lg:min-h-screen p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-gradient-to-br from-[#070e1e] via-[#0b162e] to-[#0d1b3a] text-white overflow-hidden border-b lg:border-b-0 lg:border-r border-white/10 z-10">
-        <div className="ambient-orb -top-20 -left-20 w-80 h-80 bg-blue-500/20" />
-        <div className="ambient-orb -bottom-20 -right-20 w-80 h-80 bg-purple-500/20" />
+      {/* Left Showcase / Brand Hero Column (5 cols on lg, 6 cols on 2xl) */}
+      <div className="relative lg:col-span-5 2xl:col-span-6 min-h-[440px] lg:min-h-screen p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-gradient-to-br from-[#f8fbff] via-[#edf5ff] to-[#e8f0fe] dark:from-[#090A0C] dark:via-[#111315] dark:to-[#181A1D] text-slate-900 dark:text-[#F5F5F5] overflow-hidden border-b lg:border-b-0 lg:border-r border-blue-100/90 dark:border-white/10 shadow-[6px_0_30px_rgba(37,99,235,0.04)] z-10 transition-colors duration-300">
+        {/* Aurora Atmospheric Glow Layers (Behind content) */}
+        <div className="pointer-events-none absolute -top-24 -left-24 w-[460px] h-[460px] rounded-full bg-gradient-to-br from-blue-400/25 via-sky-300/20 to-transparent blur-[80px] dark:from-[#1683FF]/15 dark:via-transparent" />
+        <div className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-radial from-white/95 via-sky-100/60 to-transparent blur-3xl dark:from-[#1683FF]/08 dark:via-transparent dark:to-transparent" />
+        <div className="pointer-events-none absolute -bottom-28 -right-20 w-[480px] h-[480px] rounded-full bg-gradient-to-tl from-indigo-300/25 via-purple-200/20 to-transparent blur-[90px] dark:from-[#1683FF]/06 dark:via-transparent" />
+        
+        {/* Subtle Decorative Floating Glass Rings */}
+        <div className="pointer-events-none absolute top-1/4 -right-16 w-72 h-72 rounded-full border border-blue-200/40 dark:border-white/5 bg-white/20 dark:bg-white/[0.02] backdrop-blur-2xl shadow-inner rotate-12" />
+        <div className="pointer-events-none absolute bottom-1/3 -left-12 w-56 h-56 rounded-full border border-indigo-200/35 dark:border-white/5 bg-gradient-to-tr from-white/30 to-transparent dark:from-white/[0.02] backdrop-blur-xl" />
 
+        {/* Top Branding Area */}
         <div className="relative z-10">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-xl border border-white/25 shadow-glass p-2">
+          <div className="relative group flex items-center gap-4">
+            {/* Soft light bloom behind logo */}
+            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-blue-400/25 to-indigo-400/25 blur-xl opacity-75 group-hover:opacity-100 transition-opacity" />
+            <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white/85 dark:bg-white/10 backdrop-blur-2xl border border-white/90 dark:border-white/20 shadow-[0_8px_32px_rgba(59,130,246,0.14)] p-2.5 transition-transform duration-300 group-hover:scale-105">
               <img
                 src="/Simats-logo.png"
                 alt="DevTrack Logo"
-                className="h-full w-full object-contain rounded-xl"
+                className="h-full w-full object-contain rounded-xl drop-shadow-xs"
               />
             </div>
             <div>
-              <span className="text-xl font-bold tracking-tight text-white block leading-tight">DevTrack</span>
-              <span className="text-[11px] font-medium tracking-wide text-blue-300">Developer Productivity &amp; Work Log Platform</span>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-[#F5F5F5] block leading-tight">
+                  DevTrack
+                </span>
+                <span className="rounded-full bg-[rgba(22,131,255,0.16)] dark:bg-[rgba(22,131,255,0.20)] border border-[rgba(22,131,255,0.35)] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-[#5AA9FF]">
+                  Pro
+                </span>
+              </div>
+              <span className="text-xs font-semibold tracking-wide text-indigo-600/90 dark:text-[#A1A1AA]">
+                Developer Productivity &amp; Work Log Platform
+              </span>
             </div>
           </div>
 
+          {/* Hero Pitch */}
           <div className="mt-12 lg:mt-20 max-w-lg">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/15 backdrop-blur-md px-4 py-1.5 text-xs font-semibold text-blue-200 mb-6 shadow-glass">
-              <span className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
-              Live Project Tracking &amp; Accountability Portal
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-blue-400/30 dark:border-[rgba(22,131,255,0.35)] bg-white/75 dark:bg-[rgba(22,131,255,0.16)] backdrop-blur-xl px-4 py-1.5 text-xs font-bold text-blue-700 dark:text-[#5AA9FF] mb-6 shadow-[0_4px_16px_rgba(37,99,235,0.08)]">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600 dark:bg-[#1683FF]" />
+              </span>
+              <span>Live Project Tracking &amp; Accountability Portal</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-[1.12] text-white">
+            <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black tracking-tight leading-[1.08] text-slate-900 dark:text-[#F5F5F5]">
               Real Work.<br />
-              <span className="bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-200 bg-clip-text text-transparent">
+              <span className="relative inline-block bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 dark:from-[#5AA9FF] dark:via-[#8CC5FF] dark:to-white bg-clip-text text-transparent drop-shadow-[0_4px_24px_rgba(22,131,255,0.25)]">
                 Real Proof.
               </span><br />
               Real Time.
             </h1>
-            <p className="mt-5 text-sm sm:text-base leading-relaxed text-slate-300/90 font-normal">
+            <p className="mt-5 text-sm sm:text-base leading-relaxed text-slate-600 dark:text-[#A1A1AA] font-medium max-w-md">
               A high-fidelity productivity accountability system with verified logs, intelligent analytics, and frictionless oversight.
             </p>
           </div>
         </div>
 
+        {/* Bottom Floating Glass Stats Tiles & Frosted Feature Pills */}
         <div className="relative z-10 mt-10 lg:mt-16 space-y-6 max-w-lg">
-          <dl className="grid grid-cols-3 gap-3">
+          <dl className="grid grid-cols-3 gap-3.5">
             {liveStats.map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-xl p-3.5 shadow-glass"
+                className="group relative rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl p-4 shadow-[0_8px_24px_rgba(37,99,235,0.08)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_12px_32px_rgba(37,99,235,0.14)] hover:border-blue-300/60 dark:hover:border-[rgba(22,131,255,0.35)] cursor-default"
               >
-                <dd className="text-2xl sm:text-3xl font-bold tabular-nums text-white tracking-tight">{stat.value}</dd>
-                <dt className="mt-1 text-[11px] font-medium leading-tight text-slate-300">{stat.label}</dt>
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white dark:via-white/20 to-transparent" />
+                <dd className="text-2xl sm:text-3xl font-black tabular-nums text-slate-900 dark:text-[#F5F5F5] tracking-tight group-hover:text-blue-600 dark:group-hover:text-[#5AA9FF] transition-colors">
+                  {stat.value}
+                </dd>
+                <dt className="mt-1 text-[11px] font-semibold leading-tight text-slate-500 dark:text-[#A1A1AA]">
+                  {stat.label}
+                </dt>
               </div>
             ))}
           </dl>
 
-          <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-300">
+          <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700 dark:text-[#A1A1AA]">
             {['Hourly Logs', 'Proof of Work', 'Live Approvals', 'AI Summaries'].map((tag) => (
-              <span key={tag} className="rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-3 py-1">
+              <span
+                key={tag}
+                className="rounded-full border border-blue-200/60 dark:border-white/10 bg-white/75 dark:bg-white/[0.06] backdrop-blur-xl px-3.5 py-1.5 shadow-[0_2px_8px_rgba(37,99,235,0.05)] hover:bg-white dark:hover:bg-white/12 hover:border-blue-300 dark:hover:border-white/20 transition-all duration-200"
+              >
                 {tag}
               </span>
             ))}
@@ -255,12 +267,12 @@ export function Login() {
       </div>
 
       {/* Right Authentication Form Column (7 cols on lg, 6 cols on 2xl) */}
-      <div className="relative lg:col-span-7 2xl:col-span-6 min-h-screen p-6 sm:p-12 lg:p-16 xl:p-24 flex flex-col justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl transition-colors z-10">
+      <div className="relative lg:col-span-7 2xl:col-span-6 min-h-screen p-6 sm:p-12 lg:p-16 xl:p-24 flex flex-col justify-center bg-white/95 dark:bg-[#111315]/90 backdrop-blur-2xl transition-colors z-10">
         <div className="w-full max-w-xl mx-auto space-y-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-navy dark:text-white">Welcome Back</h2>
-              <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Sign in to your authenticated workspace</p>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-navy dark:text-[#F5F5F5]">Welcome Back</h2>
+              <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-[#A1A1AA] font-medium">Sign in to your authenticated workspace</p>
             </div>
             <ThemeToggle variant="pill" />
           </div>
@@ -272,12 +284,11 @@ export function Login() {
             role="tablist"
             aria-label="Select your role"
           >
-            {/* Sliding Liquid Glass Bubble Indicator with Spring Physics */}
+            {/* Sliding Liquid Glass Bubble Indicator with GPU Hardware Acceleration */}
             <div
               className="liquid-glass-bubble"
               style={{
-                left: `${bubbleStyle.left}px`,
-                top: `${bubbleStyle.top}px`,
+                transform: `translate3d(${bubbleStyle.left}px, ${bubbleStyle.top}px, 0)`,
                 width: `${bubbleStyle.width}px`,
                 height: `${bubbleStyle.height}px`,
                 opacity: bubbleStyle.opacity
@@ -298,13 +309,13 @@ export function Login() {
                     setRole(tab.id);
                     setError('');
                   }}
-                  className={`segmented-tab-btn flex items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-xs font-bold cursor-pointer select-none transition-all duration-300 ${
+                  className={`segmented-tab-btn flex items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-xs font-bold cursor-pointer select-none ${
                     selected
                       ? 'text-[#0071e3] dark:text-white font-extrabold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_0_10px_rgba(56,189,248,0.7)] scale-[1.03]'
                       : 'text-slate-500 dark:text-slate-400 font-medium'
                   }`}
                 >
-                  <span className={`transition-transform duration-300 ${selected ? 'text-[#0071e3] dark:text-sky-300 scale-110' : 'text-slate-400 dark:text-slate-400'}`}>
+                  <span className={`transition-transform duration-200 ${selected ? 'text-[#0071e3] dark:text-sky-300 scale-110' : 'text-slate-400 dark:text-slate-400'}`}>
                     {tab.icon}
                   </span>
                   <span className="truncate">{tab.label}</span>
@@ -320,7 +331,7 @@ export function Login() {
               </label>
               <div className="relative">
                 <MailIcon
-                  className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                  className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400"
                   aria-hidden="true"
                 />
                 <input
@@ -341,7 +352,7 @@ export function Login() {
               </label>
               <div className="relative">
                 <LockIcon
-                  className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                  className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400"
                   aria-hidden="true"
                 />
                 <input
@@ -357,7 +368,7 @@ export function Login() {
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
+                  className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
                 </button>
@@ -393,14 +404,14 @@ export function Login() {
           </form>
 
           {/* Role info card */}
-          <div className="flex items-start gap-3 rounded-2xl border border-blue-200/70 dark:border-blue-500/20 bg-blue-50/60 dark:bg-blue-950/30 backdrop-blur-md p-4 shadow-glass">
-            <InfoIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand dark:text-sky-400" aria-hidden="true" />
+          <div className="flex items-start gap-3 rounded-2xl border border-blue-200/70 dark:border-[rgba(22,131,255,0.25)] bg-blue-50/60 dark:bg-[rgba(22,131,255,0.08)] backdrop-blur-md p-4 shadow-glass">
+            <InfoIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand dark:text-[#5AA9FF]" aria-hidden="true" />
             <div className="text-xs">
-              <p className="font-bold tracking-wide uppercase text-brand dark:text-sky-400">
+              <p className="font-bold tracking-wide uppercase text-brand dark:text-[#5AA9FF]">
                 {active.label} Role Permissions
               </p>
-              <p className="mt-1 leading-relaxed text-slate-700 dark:text-slate-200 font-normal">{active.info}</p>
-              <p className="mt-1.5 font-medium text-slate-500 dark:text-slate-400 text-[11px]">
+              <p className="mt-1 leading-relaxed text-slate-700 dark:text-[#F5F5F5] font-normal">{active.info}</p>
+              <p className="mt-1.5 font-medium text-slate-500 dark:text-[#A1A1AA] text-[11px]">
                 Accounts are provisioned by your workspace Admin.
               </p>
             </div>

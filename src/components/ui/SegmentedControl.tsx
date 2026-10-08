@@ -51,12 +51,7 @@ export function SegmentedControl({
     }
 
     const activeEl = tabRefs.current[activeIndex];
-    const containerEl = containerRef.current;
-
-    if (activeEl && containerEl) {
-      const activeRect = activeEl.getBoundingClientRect();
-      const containerRect = containerEl.getBoundingClientRect();
-
+    if (activeEl && activeEl.offsetWidth > 0) {
       setBubbleStyle({
         left: activeEl.offsetLeft,
         top: activeEl.offsetTop,
@@ -72,31 +67,12 @@ export function SegmentedControl({
   }, [updateBubblePosition, value, options]);
 
   useEffect(() => {
-    updateBubblePosition();
-    const raf1 = requestAnimationFrame(updateBubblePosition);
-    const raf2 = requestAnimationFrame(() => requestAnimationFrame(updateBubblePosition));
-    const timer1 = setTimeout(updateBubblePosition, 50);
-    const timer2 = setTimeout(updateBubblePosition, 150);
-    const timer3 = setTimeout(updateBubblePosition, 300);
-
-    window.addEventListener('resize', updateBubblePosition);
-
-    let resizeObserver: ResizeObserver | null = null;
-    if (containerRef.current && typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver(() => {
-        updateBubblePosition();
-      });
-      resizeObserver.observe(containerRef.current);
-    }
-
+    const handleResize = () => {
+      requestAnimationFrame(updateBubblePosition);
+    };
+    window.addEventListener('resize', handleResize);
     return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      window.removeEventListener('resize', updateBubblePosition);
-      if (resizeObserver) resizeObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
     };
   }, [updateBubblePosition]);
 
@@ -115,12 +91,11 @@ export function SegmentedControl({
         fullWidth ? 'w-full' : ''
       } ${className}`}
     >
-      {/* Sliding Apple Liquid Glass Bubble Indicator */}
+      {/* Sliding Apple Liquid Glass Bubble Indicator with GPU Acceleration */}
       <div
         className="liquid-glass-bubble"
         style={{
-          left: `${bubbleStyle.left}px`,
-          top: `${bubbleStyle.top}px`,
+          transform: `translate3d(${bubbleStyle.left}px, ${bubbleStyle.top}px, 0)`,
           width: `${bubbleStyle.width}px`,
           height: `${bubbleStyle.height}px`,
           opacity: bubbleStyle.opacity,
@@ -138,7 +113,7 @@ export function SegmentedControl({
             role="tab"
             aria-selected={isSelected}
             onClick={() => onChange(option.id)}
-            className={`segmented-tab-btn relative z-[2] inline-flex items-center justify-center gap-1.5 rounded-full font-bold cursor-pointer select-none transition-all duration-300 ${
+            className={`segmented-tab-btn relative z-[2] inline-flex items-center justify-center gap-1.5 rounded-full font-bold cursor-pointer select-none ${
               fullWidth ? 'flex-1' : ''
             } ${sizeClasses[size]} ${
               isSelected

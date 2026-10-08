@@ -24,17 +24,17 @@ import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 
 const severityShell: Record<string, string> = {
-  critical: 'border-rose-500/50 bg-white/90 dark:bg-slate-900/90 shadow-[0_4px_20px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/20',
-  warning: 'border-amber-500/50 bg-white/90 dark:bg-slate-900/90 shadow-[0_4px_20px_rgba(245,158,11,0.12)] ring-1 ring-amber-500/20',
-  flag: 'border-orange-500/50 bg-white/90 dark:bg-slate-900/90 shadow-[0_4px_20px_rgba(249,115,22,0.12)] ring-1 ring-orange-500/20',
-  seen: 'glass-card bg-white/85 dark:bg-slate-900/85'
+  critical: 'border-rose-500/60 dark:border-rose-500/40 bg-rose-500/15 dark:bg-rose-950/45 shadow-[0_4px_20px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/20 backdrop-blur-2xl',
+  warning: 'border-amber-500/60 dark:border-amber-500/40 bg-amber-500/15 dark:bg-amber-950/45 shadow-[0_4px_20px_rgba(245,158,11,0.12)] ring-1 ring-amber-500/20 backdrop-blur-2xl',
+  flag: 'border-orange-500/60 dark:border-orange-500/40 bg-orange-500/15 dark:bg-orange-950/45 shadow-[0_4px_20px_rgba(249,115,22,0.12)] ring-1 ring-orange-500/20 backdrop-blur-2xl',
+  seen: 'border-white/80 dark:border-white/15 bg-white/80 dark:bg-slate-900/70 shadow-glass backdrop-blur-2xl'
 };
 
 const severityIconShell: Record<string, string> = {
   critical: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30',
   warning: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30',
   flag: 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30',
-  seen: 'glass-surface text-slate-500 dark:text-slate-400 border border-white/20'
+  seen: 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-white/20'
 };
 
 const categoryIcon: Record<string, React.ReactNode> = {
@@ -198,7 +198,7 @@ export function LeaderAlerts() {
             const isUnread = alert.unread;
             const shellStyle = isUnread
               ? severityShell[alert.severity] || severityShell.seen
-              : 'glass-card opacity-80';
+              : severityShell.seen;
             const iconStyle = isUnread
               ? severityIconShell[alert.severity] || severityIconShell.seen
               : severityIconShell.seen;

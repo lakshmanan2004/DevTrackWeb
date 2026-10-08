@@ -20,9 +20,14 @@ import { useAuth } from '../../context/AuthContext';
 import { isLogLate } from '../../utils/logTimeliness';
 import { formatLogTitle } from '../../utils/logTitle';
 
+const getTodayDateStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 export function WorkLogs() {
   const { user } = useAuth();
-  const [date, setDate] = useState<string>('all');
+  const [date, setDate] = useState<string>(getTodayDateStr);
   const { data, loading } = useMyLogs(date);
   const todayLogs = data?.logs || [];
   const stats = data?.stats;
@@ -50,6 +55,8 @@ export function WorkLogs() {
         weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
       });
 
+  const todayStr = getTodayDateStr();
+
   return (
     <>
       <PageHeader
@@ -59,9 +66,9 @@ export function WorkLogs() {
           <div className="flex items-center gap-1.5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-1 shadow-glass">
             <button
               type="button"
-              onClick={() => setDate(new Date().toISOString().slice(0, 10))}
+              onClick={() => setDate(todayStr)}
               className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                date === new Date().toISOString().slice(0, 10)
+                date === todayStr
                   ? 'btn-glass-primary !text-white shadow-sm'
                   : 'text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
@@ -149,12 +156,14 @@ export function WorkLogs() {
             return (
             <article
               key={log.id}
-              className={`rounded-2xl border border-l-4 p-5 shadow-glass backdrop-blur-xl transition-all ${
-                isLate
-                  ? 'border-amber-300 dark:border-amber-500/30 border-l-amber-500 bg-amber-50/30 dark:bg-slate-900/80'
-                  : log.review === 'changes_requested'
-                  ? 'border-amber-300 dark:border-amber-500/30 border-l-amber-500 bg-amber-50/20 dark:bg-slate-900/80'
-                  : `${log.status === 'blocked' ? 'border-l-red-500' : 'border-l-green-500'} border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80`
+              className={`glass-card rounded-2xl p-5 shadow-glass transition-all ${
+                isLate || log.review === 'changes_requested'
+                  ? 'border-l-4 border-l-amber-500'
+                  : log.status === 'blocked' || log.review === 'rejected'
+                  ? 'border-l-4 border-l-rose-500'
+                  : log.review === 'approved'
+                  ? 'border-l-4 border-l-emerald-500'
+                  : 'border-l-4 border-l-brand'
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -265,20 +274,20 @@ export function WorkLogs() {
                 </div>
               )}
 
-              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-hairline pt-3 text-xs text-gray-500">
+              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-hairline dark:border-white/10 pt-3 text-xs text-gray-500 dark:text-slate-400">
                 <span className="inline-flex items-center gap-1.5">
-                  <PaperclipIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                  <PaperclipIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                   {log.attachmentUrl ? (
                     (log.attachmentUrl.split('?')[0].toLowerCase().endsWith('.pdf') || (log.attachment && log.attachment.toLowerCase().endsWith('.pdf'))) ? (
                       <a
                         href={fileUrl(log.attachmentUrl)}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 font-semibold text-red-700 hover:underline cursor-pointer"
+                        className="inline-flex items-center gap-1 font-semibold text-red-700 dark:text-rose-300 hover:underline cursor-pointer"
                       >
-                        <FileTextIcon className="h-3.5 w-3.5 text-red-600" />
+                        <FileTextIcon className="h-3.5 w-3.5 text-red-600 dark:text-rose-400" />
                         <span>{log.attachment || 'document.pdf'}</span>
-                        <span className="rounded bg-red-100 text-red-800 px-1 py-0.5 text-[10px] font-bold">Open PDF ↗</span>
+                        <span className="rounded bg-red-100 dark:bg-rose-950/60 text-red-800 dark:text-rose-200 px-1 py-0.5 text-[10px] font-bold">Open PDF ↗</span>
                       </a>
                     ) : (
                       <button
@@ -289,13 +298,13 @@ export function WorkLogs() {
                             title: log.attachment || 'Screenshot Proof'
                           })
                         }
-                        className="font-semibold text-brand hover:underline cursor-pointer"
+                        className="font-semibold text-brand dark:text-sky-300 hover:underline cursor-pointer"
                       >
                         {log.attachment}
                       </button>
                     )
                   ) : (
-                    log.attachment
+                    <span className="text-slate-700 dark:text-slate-300">{log.attachment}</span>
                   )}
                 </span>
                 {log.commits > 0 && (
@@ -303,45 +312,45 @@ export function WorkLogs() {
                     href={log.commitUrl || '#'}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 font-semibold text-brand hover:underline"
+                    className="inline-flex items-center gap-1.5 font-semibold text-brand dark:text-sky-300 hover:underline"
                   >
-                    <GitCommitVerticalIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                    <GitCommitVerticalIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                     {log.commits} commit{log.commits > 1 ? 's' : ''} linked
                   </a>
                 )}
                 <span className="inline-flex items-center gap-1.5">
-                  <TimerIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                  <TimerIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                   {log.activeMinutes} min active
                 </span>
                 <span
                   className={`ml-auto inline-flex items-center gap-1.5 font-semibold ${
                     log.review === 'approved'
-                      ? 'text-green-600'
+                      ? 'text-green-600 dark:text-emerald-400'
                       : log.review === 'changes_requested'
-                      ? 'text-amber-700 font-bold'
+                      ? 'text-amber-700 dark:text-amber-300 font-bold'
                       : log.review === 'rejected'
-                      ? 'text-red-600'
-                      : 'text-amber-600'
+                      ? 'text-red-600 dark:text-rose-400'
+                      : 'text-amber-600 dark:text-amber-300'
                   }`}
                 >
                   {log.review === 'approved' ? (
                     <>
-                      <CheckCircle2Icon className="h-3.5 w-3.5 text-green-600" aria-hidden="true" />
+                      <CheckCircle2Icon className="h-3.5 w-3.5 text-green-600 dark:text-emerald-400" aria-hidden="true" />
                       Approved
                     </>
                   ) : log.review === 'changes_requested' ? (
                     <>
-                      <HighlighterIcon className="h-3.5 w-3.5 text-amber-600" aria-hidden="true" />
+                      <HighlighterIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                       Specific Feedback Provided (Resubmit Part)
                     </>
                   ) : log.review === 'rejected' ? (
                     <>
-                      <XIcon className="h-3.5 w-3.5 text-red-600" aria-hidden="true" />
+                      <XIcon className="h-3.5 w-3.5 text-red-600 dark:text-rose-400" aria-hidden="true" />
                       Rejected
                     </>
                   ) : (
                     <>
-                      <TimerIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                      <TimerIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                       Pending review
                     </>
                   )}

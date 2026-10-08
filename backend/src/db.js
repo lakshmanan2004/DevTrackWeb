@@ -7,8 +7,13 @@ let memServer = null;
 async function dropLegacyIndexes() {
   try {
     if (mongoose.connection && mongoose.connection.db) {
-      await mongoose.connection.db.collection('worklogs').dropIndex('developer_1_date_1_hourSlot_1');
-      console.log('[db] Successfully dropped legacy unique index developer_1_date_1_hourSlot_1');
+      const collections = await mongoose.connection.db.listCollections().toArray();
+      for (const col of collections) {
+        try {
+          await mongoose.connection.db.collection(col.name).dropIndex('id_1');
+          console.log(`[db] Dropped legacy index id_1 on ${col.name}`);
+        } catch (_ignore) {}
+      }
     }
   } catch (_err) {
     /* ignore if index was already dropped */

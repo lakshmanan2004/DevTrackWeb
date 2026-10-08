@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+import React, { useRef, useState, useCallback, useEffect, useLayoutEffect } from 'react';
 import { SunIcon, MoonIcon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -24,7 +24,7 @@ export function ThemeToggle({ variant = 'pill', className = '' }: ThemeTogglePro
 
   const updateBubblePosition = useCallback(() => {
     const activeEl = tabRefs.current[activeIdx];
-    if (activeEl) {
+    if (activeEl && activeEl.offsetWidth > 0) {
       setBubbleStyle({
         left: activeEl.offsetLeft,
         top: activeEl.offsetTop,
@@ -35,14 +35,17 @@ export function ThemeToggle({ variant = 'pill', className = '' }: ThemeTogglePro
     }
   }, [activeIdx]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     updateBubblePosition();
-    // Use requestAnimationFrame to guarantee layout computation after render
-    const rafId = requestAnimationFrame(updateBubblePosition);
-    window.addEventListener('resize', updateBubblePosition);
+  }, [updateBubblePosition, theme]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      requestAnimationFrame(updateBubblePosition);
+    };
+    window.addEventListener('resize', handleResize);
     return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', updateBubblePosition);
+      window.removeEventListener('resize', handleResize);
     };
   }, [updateBubblePosition]);
 
@@ -84,8 +87,7 @@ export function ThemeToggle({ variant = 'pill', className = '' }: ThemeTogglePro
         <div
           className="liquid-glass-bubble"
           style={{
-            left: `${bubbleStyle.left}px`,
-            top: `${bubbleStyle.top}px`,
+            transform: `translate3d(${bubbleStyle.left}px, ${bubbleStyle.top}px, 0)`,
             width: `${bubbleStyle.width}px`,
             height: `${bubbleStyle.height}px`,
             opacity: bubbleStyle.opacity
@@ -99,14 +101,14 @@ export function ThemeToggle({ variant = 'pill', className = '' }: ThemeTogglePro
           role="tab"
           aria-selected={!isDark}
           onClick={() => setTheme('light')}
-          className={`segmented-tab-btn flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold cursor-pointer select-none transition-all duration-300 ${
+          className={`segmented-tab-btn flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold cursor-pointer select-none ${
             !isDark
               ? 'text-amber-600 dark:text-amber-400 font-extrabold scale-105'
               : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
           }`}
           title="Light Theme"
         >
-          <SunIcon className={`h-3.5 w-3.5 transition-transform duration-300 ${!isDark ? 'scale-110 text-amber-500' : 'text-slate-400'}`} />
+          <SunIcon className={`h-3.5 w-3.5 transition-transform duration-200 ${!isDark ? 'scale-110 text-amber-500' : 'text-slate-400'}`} />
         </button>
 
         <button
@@ -115,14 +117,14 @@ export function ThemeToggle({ variant = 'pill', className = '' }: ThemeTogglePro
           role="tab"
           aria-selected={isDark}
           onClick={() => setTheme('dark')}
-          className={`segmented-tab-btn flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold cursor-pointer select-none transition-all duration-300 ${
+          className={`segmented-tab-btn flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold cursor-pointer select-none ${
             isDark
               ? 'text-sky-300 font-extrabold scale-105'
               : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
           }`}
           title="Dark Theme"
         >
-          <MoonIcon className={`h-3.5 w-3.5 transition-transform duration-300 ${isDark ? 'scale-110 text-blue-300' : 'text-slate-400'}`} />
+          <MoonIcon className={`h-3.5 w-3.5 transition-transform duration-200 ${isDark ? 'scale-110 text-blue-300' : 'text-slate-400'}`} />
         </button>
       </div>
     );
@@ -135,12 +137,11 @@ export function ThemeToggle({ variant = 'pill', className = '' }: ThemeTogglePro
       role="tablist"
       aria-label="Theme selection"
     >
-      {/* Sliding Liquid Glass Bubble Indicator with Spring Physics */}
+      {/* Sliding Liquid Glass Bubble Indicator with GPU Hardware Acceleration */}
       <div
         className="liquid-glass-bubble"
         style={{
-          left: `${bubbleStyle.left}px`,
-          top: `${bubbleStyle.top}px`,
+          transform: `translate3d(${bubbleStyle.left}px, ${bubbleStyle.top}px, 0)`,
           width: `${bubbleStyle.width}px`,
           height: `${bubbleStyle.height}px`,
           opacity: bubbleStyle.opacity
@@ -155,14 +156,14 @@ export function ThemeToggle({ variant = 'pill', className = '' }: ThemeTogglePro
         role="tab"
         aria-selected={!isDark}
         onClick={() => setTheme('light')}
-        className={`segmented-tab-btn flex items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold cursor-pointer select-none transition-all duration-300 ${
+        className={`segmented-tab-btn flex items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold cursor-pointer select-none ${
           !isDark
             ? 'text-[#0071e3] font-extrabold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] scale-[1.02]'
             : 'text-slate-500 dark:text-slate-400 font-medium'
         }`}
       >
         <SunIcon
-          className={`h-3.5 w-3.5 transition-transform duration-300 ${
+          className={`h-3.5 w-3.5 transition-transform duration-200 ${
             !isDark ? 'text-amber-500 scale-110 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]' : 'text-slate-400'
           }`}
         />
@@ -176,14 +177,14 @@ export function ThemeToggle({ variant = 'pill', className = '' }: ThemeTogglePro
         role="tab"
         aria-selected={isDark}
         onClick={() => setTheme('dark')}
-        className={`segmented-tab-btn flex items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold cursor-pointer select-none transition-all duration-300 ${
+        className={`segmented-tab-btn flex items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold cursor-pointer select-none ${
           isDark
             ? 'text-white font-extrabold drop-shadow-[0_0_10px_rgba(56,189,248,0.7)] scale-[1.02]'
             : 'text-slate-500 dark:text-slate-400 font-medium'
         }`}
       >
         <MoonIcon
-          className={`h-3.5 w-3.5 transition-transform duration-300 ${
+          className={`h-3.5 w-3.5 transition-transform duration-200 ${
             isDark ? 'text-sky-300 scale-110 drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]' : 'text-slate-400'
           }`}
         />

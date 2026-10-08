@@ -54,8 +54,12 @@ export function ReviewLogFeedbackModal({
 
   const handleApprove = async () => {
     setError('');
-    await onReview('approve', feedbackNote.trim());
-    onClose();
+    try {
+      await onReview('approve', feedbackNote.trim());
+      onClose();
+    } catch (err: any) {
+      setError(err?.message || 'Failed to approve log. Please try again.');
+    }
   };
 
   const handleRequestChanges = async () => {
@@ -64,8 +68,12 @@ export function ReviewLogFeedbackModal({
       return;
     }
     setError('');
-    await onReview('changes_requested', feedbackNote.trim());
-    onClose();
+    try {
+      await onReview('changes_requested', feedbackNote.trim());
+      onClose();
+    } catch (err: any) {
+      setError(err?.message || 'Failed to submit feedback. Please try again.');
+    }
   };
 
   const handleReject = async () => {
@@ -74,8 +82,12 @@ export function ReviewLogFeedbackModal({
       return;
     }
     setError('');
-    await onReview('reject', feedbackNote.trim());
-    onClose();
+    try {
+      await onReview('reject', feedbackNote.trim());
+      onClose();
+    } catch (err: any) {
+      setError(err?.message || 'Failed to reject log. Please try again.');
+    }
   };
 
   const modalNode = (

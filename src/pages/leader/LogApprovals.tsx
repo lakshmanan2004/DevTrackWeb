@@ -52,20 +52,42 @@ export function LogApprovals() {
   const { data: devData } = useDevelopers();
   const developers = devData?.developers || [];
 
-  const queue = data?.logs || [];
+  const rawQueue = data?.logs || [];
+  const [overrideReviews, setOverrideReviews] = useState<Record<string, { review: string; reviewNote?: string }>>({});
   const [filter, setFilter] = useState('all');
   const [selectedReviewLog, setSelectedReviewLog] = useState<{ log: any; mode: 'approve' | 'reject' } | null>(null);
   const [activeScreenshotModal, setActiveScreenshotModal] = useState<{ url: string; title: string } | null>(null);
   const [assignTaskModalOpen, setAssignTaskModalOpen] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
+  const queue = rawQueue.map((item: any) => {
+    const logId = item.id || item._id;
+    const override = overrideReviews[logId];
+    if (override) {
+      return { ...item, review: override.review, reviewNote: override.reviewNote || item.reviewNote };
+    }
+    return item;
+  });
+
   const moduleNames = Array.from(new Set(queue.map((i: any) => i.moduleName).filter(Boolean)));
 
   const review = async (logId: string, action: 'approve' | 'changes_requested' | 'reject' | 'reset', customNote?: string) => {
     setBusyId(logId);
+    const newReview = action === 'reset' ? 'pending' : action;
+    setOverrideReviews((prev) => ({
+      ...prev,
+      [logId]: { review: newReview, reviewNote: customNote || '' }
+    }));
     try {
       await api(`/api/logs/${logId}/review`, { method: 'POST', body: { action, note: customNote || '' } });
       refetch();
+    } catch (err: any) {
+      setOverrideReviews((prev) => {
+        const copy = { ...prev };
+        delete copy[logId];
+        return copy;
+      });
+      throw err;
     } finally {
       setBusyId(null);
     }
@@ -583,8 +605,12 @@ export function LogApprovals() {
           onClose={() => setSelectedReviewLog(null)}
           log={selectedReviewLog.log}
           mode={selectedReviewLog.mode}
-          onReview={(action, note) => review(selectedReviewLog.log.id, action, note)}
-          busy={busyId === selectedReviewLog?.log?.id}
+          onReview={async (action, note) => {
+            const logId = selectedReviewLog.log.id || selectedReviewLog.log._id;
+            await review(logId, action, note);
+            setSelectedReviewLog(null);
+          }}
+          busy={busyId === (selectedReviewLog?.log?.id || selectedReviewLog?.log?._id)}
         />
       )}
 

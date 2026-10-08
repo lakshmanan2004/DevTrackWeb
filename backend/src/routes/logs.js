@@ -91,7 +91,14 @@ router.get('/', ah(async (req, res) => {
 
   let query;
   if (req.user.role === 'developer') {
-    query = { developer: toObjId(req.user._id) };
+    const devId = toObjId(req.user._id);
+    query = {
+      $or: [
+        { developer: devId },
+        { developer: String(req.user._id) },
+        { developerId: String(req.user._id) }
+      ]
+    };
   } else if (req.query.developerId) {
     const id = String(req.query.developerId);
     const conditions = [];
@@ -301,19 +308,25 @@ router.post('/:id/resubmit', requireRole('developer'), upload.single('attachment
   res.json({ log: dto });
 }));
 
-// ---------- POST /api/logs/:id/review (leader: approve / reject) ----------
-router.post('/:id/review', requireRole('leader'), ah(async (req, res) => {
-  const { action, note } = req.body || {};
+// ---------- POST /api/logs/:id/review (leader / admin / manager: approve / reject) ----------
+router.post('/:id/review', requireRole('leader', 'admin', 'manager'), ah(async (req, res) => {
+  const { action, note, reviewNote } = req.body || {};
+  const finalNote = note || reviewNote || '';
   const log = await WorkLog.findById(req.params.id);
   if (!log) return res.status(404).json({ error: 'Log not found' });
-  const scope = await scopeFor(req.user);
-  if (!scope.developerIds.some((d) => String(d) === String(log.developer))) {
-    return res.status(403).json({ error: 'This developer is not in your team' });
+  
+  if (req.user.role === 'leader') {
+    const scope = await scopeFor(req.user);
+    const inScope = scope.developerIds.some((d) => String(d) === String(log.developer));
+    const inTeam = (log.team && req.user.team && String(log.team) === String(req.user.team));
+    if (!inScope && !inTeam) {
+      return res.status(403).json({ error: 'This developer is not in your team' });
+    }
   }
 
   if (action === 'approve') {
     log.review = 'approved';
-    log.reviewNote = note || `Approved by ${req.user.name} (Team Lead)`;
+    log.reviewNote = finalNote || `Approved by ${req.user.name} (${req.user.role === 'leader' ? 'Team Lead' : req.user.role})`;
     if (log.linkedTask) {
       const taskToComplete = await Task.findById(log.linkedTask);
       if (taskToComplete) {
@@ -325,7 +338,7 @@ router.post('/:id/review', requireRole('leader'), ah(async (req, res) => {
     }
   } else if (action === 'reject' || action === 'changes_requested') {
     log.review = action === 'changes_requested' ? 'changes_requested' : 'rejected';
-    log.reviewNote = note || (action === 'changes_requested' ? 'Specific changes requested by Team Lead.' : 'Full resubmission requested by Team Lead.');
+    log.reviewNote = finalNote || (action === 'changes_requested' ? 'Specific changes requested by Team Lead.' : 'Full resubmission requested by Team Lead.');
   } else if (action === 'reset') {
     log.review = 'pending';
     log.reviewNote = '';

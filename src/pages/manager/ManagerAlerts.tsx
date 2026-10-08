@@ -135,12 +135,12 @@ export function ManagerAlerts() {
           {filteredAlerts.map((alert: any) => (
             <div
               key={alert.id}
-              className={`glass-card rounded-3xl p-5 shadow-glass backdrop-blur-2xl transition-all hover:shadow-xl ${
+              className={`rounded-3xl p-5 shadow-glass backdrop-blur-2xl transition-all hover:shadow-xl border ${
                 alert.unread
                   ? alert.category === 'Idle'
-                    ? 'border-amber-500/50 bg-white/90 dark:bg-slate-900/90 ring-1 ring-amber-500/20 shadow-[0_4px_20px_rgba(245,158,11,0.12)]'
-                    : 'border-rose-500/50 bg-white/90 dark:bg-slate-900/90 ring-1 ring-rose-500/20 shadow-[0_4px_20px_rgba(244,63,94,0.15)]'
-                  : 'bg-white/85 dark:bg-slate-900/85'
+                    ? 'border-amber-500/60 dark:border-amber-500/40 bg-amber-500/15 dark:bg-amber-950/45 ring-1 ring-amber-500/20 shadow-[0_4px_20px_rgba(245,158,11,0.12)]'
+                    : 'border-rose-500/60 dark:border-rose-500/40 bg-rose-500/15 dark:bg-rose-950/45 ring-1 ring-rose-500/20 shadow-[0_4px_20px_rgba(244,63,94,0.15)]'
+                  : 'border-white/80 dark:border-white/15 bg-white/80 dark:bg-slate-900/70'
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">

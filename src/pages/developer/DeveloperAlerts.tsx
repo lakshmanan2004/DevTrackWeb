@@ -15,30 +15,34 @@ import { api } from '../../api/client';
 
 const kindMeta: Record<
   DevAlert['kind'],
-  { icon: React.ReactNode; wrap: string; iconWrap: string; label: string }
+  { icon: React.ReactNode; accentBorder: string; iconWrap: string; seenIconWrap: string; label: string }
 > = {
   reminder: {
     icon: <AlarmClockIcon className="h-5 w-5" />,
-    wrap: 'border-amber-400/50 bg-amber-500/15 dark:bg-amber-500/20 shadow-glass backdrop-blur-2xl ring-1 ring-amber-400/30',
-    iconWrap: 'bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/40',
+    accentBorder: 'border-l-4 border-l-amber-500',
+    iconWrap: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30',
+    seenIconWrap: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
     label: 'Reminder'
   },
   approval: {
     icon: <CheckCircle2Icon className="h-5 w-5" />,
-    wrap: 'border-emerald-400/50 bg-emerald-500/15 dark:bg-emerald-500/20 shadow-glass backdrop-blur-2xl ring-1 ring-emerald-400/30',
-    iconWrap: 'bg-emerald-500/25 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40',
+    accentBorder: 'border-l-4 border-l-emerald-500',
+    iconWrap: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30',
+    seenIconWrap: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20',
     label: 'Approval'
   },
   rejection: {
     icon: <XCircleIcon className="h-5 w-5" />,
-    wrap: 'border-rose-400/50 bg-rose-500/15 dark:bg-rose-500/20 shadow-glass backdrop-blur-2xl ring-1 ring-rose-400/30',
-    iconWrap: 'bg-rose-500/25 text-rose-800 dark:text-rose-300 border border-rose-500/40',
+    accentBorder: 'border-l-4 border-l-rose-500',
+    iconWrap: 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30',
+    seenIconWrap: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20',
     label: 'Rejection'
   },
   eod: {
     icon: <FileTextIcon className="h-5 w-5" />,
-    wrap: 'border-blue-400/50 bg-blue-500/15 dark:bg-blue-500/20 shadow-glass backdrop-blur-2xl ring-1 ring-blue-400/30',
-    iconWrap: 'bg-blue-500/25 text-blue-800 dark:text-blue-300 border border-blue-500/40',
+    accentBorder: 'border-l-4 border-l-blue-500',
+    iconWrap: 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30',
+    seenIconWrap: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20',
     label: 'EOD'
   }
 };
@@ -111,15 +115,15 @@ export function DeveloperAlerts() {
             return (
               <li
                 key={alert.id}
-                className={`flex flex-wrap items-center justify-between gap-5 rounded-3xl border px-6 py-5 backdrop-blur-2xl shadow-glass transition-all hover:shadow-xl ${
-                  alert.unread
-                    ? meta.wrap
-                    : 'glass-surface bg-white/40 dark:bg-white/[0.08] border-white/60 dark:border-white/15'
+                className={`glass-card flex flex-wrap items-center justify-between gap-5 rounded-3xl p-5 shadow-glass transition-all hover:shadow-xl ${
+                  meta.accentBorder
                 }`}
               >
                 <div className="flex items-start gap-4 flex-1 min-w-[280px]">
                   <span
-                    className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-xs ${meta.iconWrap}`}
+                    className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-xs ${
+                      alert.unread ? meta.iconWrap : meta.seenIconWrap
+                    }`}
                   >
                     {meta.icon}
                   </span>
@@ -155,7 +159,9 @@ export function DeveloperAlerts() {
                       Mark Seen
                     </Button>
                   ) : (
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300 px-2 py-1 rounded-lg bg-white/20 dark:bg-white/10">Seen</span>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 backdrop-blur-md">
+                      Seen
+                    </span>
                   )}
                   <button
                     type="button"

@@ -4,31 +4,31 @@ export type BadgeTone = 'blue' | 'green' | 'yellow' | 'amber' | 'red' | 'grey' |
 
 const tones: Record<BadgeTone, { bg: string; dot: string }> = {
   blue: {
-    bg: 'bg-blue-50/90 dark:bg-blue-950/60 text-blue-950 dark:text-blue-200 border-blue-300 dark:border-blue-500/40 shadow-xs ring-1 ring-blue-500/15',
+    bg: 'bg-blue-50/90 dark:bg-[rgba(22,131,255,0.16)] text-blue-950 dark:text-[#5AA9FF] border-blue-300 dark:border-[rgba(22,131,255,0.35)] shadow-xs ring-1 ring-blue-500/15',
     dot: 'bg-blue-600 ring-2 ring-blue-400/40'
   },
   green: {
-    bg: 'bg-emerald-50/90 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-200 border-emerald-300 dark:border-emerald-500/40 shadow-xs ring-1 ring-emerald-500/15',
+    bg: 'bg-emerald-50/90 dark:bg-emerald-500/15 text-emerald-950 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30 shadow-xs ring-1 ring-emerald-500/15',
     dot: 'bg-emerald-600 ring-2 ring-emerald-400/40'
   },
   yellow: {
-    bg: 'bg-amber-50/90 dark:bg-amber-950/60 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-500/40 shadow-xs ring-1 ring-amber-500/20',
+    bg: 'bg-amber-50/90 dark:bg-amber-500/15 text-amber-950 dark:text-amber-300 border-amber-300 dark:border-amber-500/30 shadow-xs ring-1 ring-amber-500/20',
     dot: 'bg-amber-600 ring-2 ring-amber-400/40'
   },
   amber: {
-    bg: 'bg-amber-50/95 dark:bg-amber-950/70 text-amber-950 dark:text-amber-100 border-amber-400 dark:border-amber-500/50 shadow-xs ring-1 ring-amber-500/25',
+    bg: 'bg-amber-50/95 dark:bg-amber-500/15 text-amber-950 dark:text-amber-300 border-amber-400 dark:border-amber-500/30 shadow-xs ring-1 ring-amber-500/25',
     dot: 'bg-amber-600 ring-2 ring-amber-400/50'
   },
   red: {
-    bg: 'bg-rose-50/90 dark:bg-rose-950/60 text-rose-950 dark:text-rose-200 border-rose-300 dark:border-rose-500/40 shadow-xs ring-1 ring-rose-500/15',
+    bg: 'bg-rose-50/90 dark:bg-rose-500/15 text-rose-950 dark:text-rose-300 border-rose-300 dark:border-rose-500/30 shadow-xs ring-1 ring-rose-500/15',
     dot: 'bg-rose-600 ring-2 ring-red-400/40'
   },
   grey: {
-    bg: 'bg-slate-100/90 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-600/50 shadow-xs ring-1 ring-slate-200 dark:ring-white/5',
+    bg: 'bg-slate-100/90 dark:bg-white/[0.07] text-slate-800 dark:text-[#A1A1AA] border-slate-300 dark:border-white/10 shadow-xs ring-1 ring-slate-200 dark:ring-white/5',
     dot: 'bg-slate-500 ring-2 ring-slate-400/40'
   },
   purple: {
-    bg: 'bg-purple-50/90 dark:bg-purple-950/60 text-purple-950 dark:text-purple-200 border-purple-300 dark:border-purple-500/40 shadow-xs ring-1 ring-purple-500/15',
+    bg: 'bg-purple-50/90 dark:bg-purple-500/15 text-purple-950 dark:text-purple-300 border-purple-300 dark:border-purple-500/30 shadow-xs ring-1 ring-purple-500/15',
     dot: 'bg-purple-600 ring-2 ring-purple-400/40'
   }
 };
