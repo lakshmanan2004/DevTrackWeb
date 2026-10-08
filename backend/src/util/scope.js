@@ -12,6 +12,7 @@ async function scopeFor(user) {
     };
   }
   if (user.role === 'leader') {
+    // Find all teams where this user is the assigned leader, or user belongs to that team
     const teams = await Team.find({
       $or: [
         { leader: user._id },
@@ -20,18 +21,37 @@ async function scopeFor(user) {
       ]
     });
     const ids = teams.map((t) => t._id);
+
+    // Also find projects where this leader is assigned
+    const projects = await Project.find({
+      $or: [
+        { leader: user.name },
+        { leader: user._id },
+        { leader: String(user._id) },
+        { team: { $in: ids } }
+      ]
+    });
+    const projectIds = projects.map((p) => p._id);
+    const projectTeamIds = projects.map((p) => p.team).filter(Boolean);
+    const allTeamIds = Array.from(new Set([...ids.map((id) => String(id)), ...projectTeamIds.map((id) => String(id))]));
+
+    // Find all developers assigned to these specific teams
     const devsFromTeam = teams.flatMap((t) => t.members || []);
-    const devsWithTeamDoc = await User.find({ role: 'developer', active: { $ne: false }, team: { $in: ids } });
+    const devsWithTeamDoc = await User.find({ role: 'developer', active: { $ne: false }, team: { $in: allTeamIds } });
+    
+    // Also check developers listed in projects if stored as array of IDs
+    const devsFromProjects = projects.flatMap((p) => (Array.isArray(p.developers) ? p.developers : []));
+
     const devIdsSet = new Set([
       ...devsFromTeam.map((d) => String(d._id || d)),
-      ...devsWithTeamDoc.map((d) => String(d._id))
+      ...devsWithTeamDoc.map((d) => String(d._id)),
+      ...devsFromProjects.map((d) => String(d._id || d)).filter((id) => id && id.length === 24)
     ]);
-    let developerIds = Array.from(devIdsSet);
-    if (!developerIds.length) {
-      const allDevs = await User.find({ role: 'developer', active: { $ne: false } }, '_id');
-      developerIds = allDevs.map((d) => String(d._id));
-    }
-    return { teams, teamIds: ids, developerIds, projectIds: teams.map((t) => t.project).filter(Boolean) };
+    
+    const developerIds = Array.from(devIdsSet);
+
+    // STRICT: Only return developers allotted to this leader's teams/projects. Never fall back to allDevs.
+    return { teams, teamIds: allTeamIds, developerIds, projectIds };
   }
   if (user.role === 'manager') {
     const projects = await Project.find({ manager: user._id }).populate('team');

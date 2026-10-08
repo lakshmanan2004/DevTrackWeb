@@ -69,17 +69,17 @@ export function RealtimeAlertsCard() {
   return (
     <section
       aria-label="Real-time reminders"
-      className="rounded-card border border-hairline bg-white p-5 shadow-card">
-
-      <div className="flex items-center justify-between gap-3">
+      className="glass-card rounded-3xl border border-white/80 p-6 shadow-glass"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/60 pb-4">
         <div>
-          <h2 className="text-sm font-bold text-navy">Live reminders</h2>
-          <p className="mt-1 text-xs text-gray-500">
+          <h2 className="text-sm font-black tracking-tight text-navy">Live Reminders</h2>
+          <p className="mt-0.5 text-xs text-slate-500 font-medium">
             Check-in reminders, approvals and rejections — pushed in real time.
           </p>
         </div>
         {permState.granted ? (
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-ok-soft px-3 py-1.5 text-xs font-bold text-green-700">
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300">
             <BellRingIcon className="h-3.5 w-3.5" /> Browser on
           </span>
         ) : permState.denied || permState.default ? (
@@ -89,13 +89,13 @@ export function RealtimeAlertsCard() {
         ) : null}
       </div>
 
-      <div className="mt-4 space-y-2.5">
+      <div className="mt-4 space-y-3">
         {alerts.length === 0 && (
-          <div className="flex items-center gap-2 rounded-lg border border-hairline bg-canvas p-3.5">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-brand-soft">
-              <ActivityIcon className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
+          <div className="glass-surface flex items-center gap-3 rounded-2xl border border-white/60 p-4 shadow-2xs">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-brand/10 border border-brand/20">
+              <ActivityIcon className="h-4 w-4 text-brand" aria-hidden="true" />
             </span>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-slate-500 font-medium">
               No active reminders right now — you are all caught up.
             </p>
           </div>
@@ -103,23 +103,24 @@ export function RealtimeAlertsCard() {
         {alerts.slice(0, 3).map((alert: any) => (
           <div
             key={alert.id}
-            className={`rounded-lg border p-3.5 ${
+            className={`glass-surface rounded-2xl border p-4 shadow-glass transition-all ${
               alert.kind === 'rejection'
-                ? 'border-red-200 bg-danger-soft'
+                ? 'border-rose-300/80 bg-rose-50/30'
                 : alert.kind === 'approval'
-                ? 'border-green-200 bg-ok-soft'
-                : 'border-amber-200 bg-warn-soft'
-            }`}>
+                ? 'border-emerald-300/80 bg-emerald-50/30'
+                : 'border-amber-300/80 bg-amber-50/30'
+            }`}
+          >
             <div className="flex items-center gap-2">
               <p className="text-xs font-bold text-navy">{alert.title}</p>
-              <span className="ml-auto text-[11px] text-gray-500">{alert.time}</span>
+              <span className="ml-auto text-[10px] text-slate-400 font-medium">{alert.time}</span>
             </div>
-            <p className="mt-1.5 text-sm font-medium text-gray-800">{alert.body}</p>
+            <p className="mt-1.5 text-xs font-medium text-slate-600 leading-relaxed">{alert.body}</p>
           </div>
         ))}
       </div>
 
-      <p className="mt-4 border-t border-hairline pt-3 text-xs leading-relaxed text-gray-500">
+      <p className="mt-4 border-t border-slate-200/60 pt-3 text-[11px] leading-relaxed text-slate-400 font-medium">
         {permission === 'granted'
           ? 'Browser notifications are on — they appear even when this tab is in the background.'
           : 'Enable browser reminders to get notified even when the DevTrack tab is in the background.'}

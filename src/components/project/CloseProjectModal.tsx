@@ -72,17 +72,17 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
 
   return (
     <div
-      className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center overflow-y-auto bg-navy/50 p-4 sm:p-6 backdrop-blur-sm"
+      className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4 sm:p-6 backdrop-blur-xl"
       role="dialog"
       aria-modal="true"
       aria-labelledby="close-project-title"
     >
-      <div className="w-full max-w-[540px] overflow-hidden rounded-2xl bg-white shadow-pop">
+      <div className="glass-modal w-full max-w-[540px] overflow-hidden rounded-3xl shadow-2xl border border-white/30 dark:border-white/15">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-hairline px-6 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-white/20 dark:border-white/10 px-6 py-4">
           <div className="flex items-center gap-3">
-            <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-              selectedStatus === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-brand-soft text-brand'
+            <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl shadow-inner ${
+              selectedStatus === 'completed' ? 'bg-emerald-500/20 text-emerald-500 ring-1 ring-emerald-500/30' : 'bg-blue-500/20 text-blue-500 ring-1 ring-blue-500/30'
             }`}>
               {selectedStatus === 'completed' ? (
                 <TrophyIcon className="h-5 w-5" aria-hidden="true" />
@@ -93,10 +93,10 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
               )}
             </span>
             <div>
-              <h2 id="close-project-title" className="text-base font-bold text-navy">
-                Project Delivery & Status
+              <h2 id="close-project-title" className="text-base font-bold text-slate-900 dark:text-white">
+                Project Delivery &amp; Status
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {project.name} · {project.team}
               </p>
             </div>
@@ -105,7 +105,7 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-xl p-1.5 text-slate-400 hover:bg-white/10 hover:text-slate-200 transition-colors"
           >
             <XIcon className="h-4 w-4" />
           </button>
@@ -114,15 +114,15 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
         {/* Content */}
         <div className="space-y-5 px-6 py-5 text-sm">
           {/* Project Snapshot Card */}
-          <div className="rounded-xl border border-hairline bg-canvas p-4">
+          <div className="glass-surface rounded-2xl p-4">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-semibold text-gray-500">Current Progress</span>
-                <p className="text-lg font-bold text-navy">{project.progress}% Complete</p>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Current Progress</span>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">{project.progress}% Complete</p>
               </div>
               <div className="text-right">
-                <span className="text-xs font-semibold text-gray-500">Modules Completed</span>
-                <p className="text-sm font-bold text-navy">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Modules Completed</span>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">
                   {completedModules} / {totalModules} Modules
                 </p>
               </div>
@@ -135,7 +135,7 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
               />
             </div>
             {project.blockers > 0 && (
-              <p className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-danger">
+              <p className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-rose-500">
                 <AlertTriangleIcon className="h-3.5 w-3.5 shrink-0" />
                 Note: {project.blockers} active blocker(s) reported by team.
               </p>
@@ -144,16 +144,16 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
 
           {/* Status Selection */}
           <div>
-            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Select Target Status
             </label>
             <div className="grid gap-2.5">
               {/* Option 1: Complete / Close */}
               <label
-                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-all ${
+                className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 transition-all ${
                   selectedStatus === 'completed'
-                    ? 'border-emerald-500 bg-emerald-50/60 ring-2 ring-emerald-400/30 shadow-xs'
-                    : 'border-hairline bg-white hover:bg-gray-50'
+                    ? 'border-emerald-500/50 bg-emerald-500/15 ring-2 ring-emerald-500/30 shadow-md backdrop-blur-md'
+                    : 'glass-surface hover:bg-white/10'
                 }`}
               >
                 <input
@@ -162,14 +162,14 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
                   value="completed"
                   checked={selectedStatus === 'completed'}
                   onChange={() => setSelectedStatus('completed')}
-                  className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500"
+                  className="mt-1 h-4 w-4 text-emerald-500 focus:ring-emerald-500"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-navy text-sm">Mark as Completed (Close Project)</span>
+                    <span className="font-bold text-slate-900 dark:text-white text-sm">Mark as Completed (Close Project)</span>
                     <Badge tone="green" dot>Completed</Badge>
                   </div>
-                  <p className="mt-0.5 text-xs text-gray-500">
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                     Finalizes the project, sets delivery date to today, and marks all milestone modules as completed.
                   </p>
                 </div>
@@ -177,10 +177,10 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
 
               {/* Option 2: Ongoing */}
               <label
-                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-all ${
+                className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 transition-all ${
                   selectedStatus === 'ongoing'
-                    ? 'border-brand bg-brand-soft/40 ring-2 ring-brand/30 shadow-xs'
-                    : 'border-hairline bg-white hover:bg-gray-50'
+                    ? 'border-blue-500/50 bg-blue-500/15 ring-2 ring-blue-500/30 shadow-md backdrop-blur-md'
+                    : 'glass-surface hover:bg-white/10'
                 }`}
               >
                 <input
@@ -189,14 +189,14 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
                   value="ongoing"
                   checked={selectedStatus === 'ongoing'}
                   onChange={() => setSelectedStatus('ongoing')}
-                  className="mt-1 h-4 w-4 text-brand focus:ring-brand"
+                  className="mt-1 h-4 w-4 text-blue-500 focus:ring-blue-500"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-navy text-sm">Keep Ongoing (Active Development)</span>
+                    <span className="font-bold text-slate-900 dark:text-white text-sm">Keep Ongoing (Active Development)</span>
                     <Badge tone="blue" dot>Ongoing</Badge>
                   </div>
-                  <p className="mt-0.5 text-xs text-gray-500">
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                     Project is actively worked on by developers and tracked by hourly check-ins.
                   </p>
                 </div>
@@ -204,10 +204,10 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
 
               {/* Option 3: Hold */}
               <label
-                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-all ${
+                className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 transition-all ${
                   selectedStatus === 'hold'
-                    ? 'border-amber-500 bg-amber-50/50 ring-2 ring-amber-400/30 shadow-xs'
-                    : 'border-hairline bg-white hover:bg-gray-50'
+                    ? 'border-amber-500/50 bg-amber-500/15 ring-2 ring-amber-500/30 shadow-md backdrop-blur-md'
+                    : 'glass-surface hover:bg-white/10'
                 }`}
               >
                 <input
@@ -216,14 +216,14 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
                   value="hold"
                   checked={selectedStatus === 'hold'}
                   onChange={() => setSelectedStatus('hold')}
-                  className="mt-1 h-4 w-4 text-amber-600 focus:ring-amber-500"
+                  className="mt-1 h-4 w-4 text-amber-500 focus:ring-amber-500"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-navy text-sm">Put Project On Hold</span>
+                    <span className="font-bold text-slate-900 dark:text-white text-sm">Put Project On Hold</span>
                     <Badge tone="yellow" dot>On Hold</Badge>
                   </div>
-                  <p className="mt-0.5 text-xs text-gray-500">
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                     Temporarily pauses project milestones and alerts.
                   </p>
                 </div>
@@ -232,16 +232,16 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
           </div>
 
           {error && (
-            <p className="rounded-lg border border-red-200 bg-danger-soft px-3 py-2 text-xs font-semibold text-danger">
+            <p className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-500">
               {error}
             </p>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-hairline bg-canvas px-6 py-4">
+        <div className="flex items-center justify-between border-t border-white/20 dark:border-white/10 px-6 py-4 glass-surface">
           <div className="flex items-center gap-2">
-            <Button variant="secondary" onClick={onClose} disabled={busy}>
+            <Button variant="secondary" onClick={onClose} disabled={busy} className="rounded-xl">
               Cancel
             </Button>
             {canDelete && (
@@ -251,20 +251,23 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
                 onClick={handleDeleteProject}
                 disabled={busy}
                 icon={<Trash2Icon className="h-4 w-4 text-rose-500" />}
-                className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 text-xs"
+                className="border-rose-500/30 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/50 text-xs rounded-xl"
               >
                 Delete Project
               </Button>
             )}
           </div>
-          <Button
+          <button
+            type="button"
             onClick={handleUpdateStatus}
             disabled={busy}
-            icon={selectedStatus === 'completed' ? <CheckCircle2Icon className="h-4 w-4" /> : undefined}
-            className={selectedStatus === 'completed' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}
+            className={`btn-glass-primary px-5 py-2.5 text-xs font-bold rounded-xl shadow-lg flex items-center gap-2 ${
+              selectedStatus === 'completed' ? 'from-emerald-500 to-teal-600' : ''
+            }`}
           >
-            {busy ? 'Updating…' : selectedStatus === 'completed' ? 'Confirm & Close Project' : 'Update Status'}
-          </Button>
+            {selectedStatus === 'completed' && <CheckCircle2Icon className="h-4 w-4" />}
+            <span>{busy ? 'Updating…' : selectedStatus === 'completed' ? 'Confirm & Close Project' : 'Update Status'}</span>
+          </button>
         </div>
       </div>
     </div>

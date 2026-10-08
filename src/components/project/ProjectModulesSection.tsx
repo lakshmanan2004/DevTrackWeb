@@ -23,6 +23,7 @@ import { Project, ProjectModule, ModuleSubmittedLog } from '../../types';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { ProgressBar } from '../ui/ProgressBar';
+import { Select } from '../ui/Select';
 import { DeveloperCalendarModal } from '../leader/DeveloperCalendarModal';
 import { api, fileUrl } from '../../api/client';
 
@@ -69,24 +70,21 @@ export function ProjectModulesSection({
           </div>
 
           {allProjects && allProjects.length > 0 && onSelectProject && (
-            <div className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white/70 backdrop-blur-md px-4 py-2 shadow-glass">
-              <label htmlFor="pms-project-select-empty" className="text-xs font-bold text-navy whitespace-nowrap flex items-center gap-1.5">
-                <LayersIcon className="h-4 w-4 text-brand" />
-                Select Project:
-              </label>
-              <select
-                id="pms-project-select-empty"
+            <div className="w-72">
+              <Select
+                size="sm"
+                fullWidth
                 value=""
-                onChange={(e) => onSelectProject(e.target.value)}
-                className="bg-transparent text-xs font-bold text-brand focus:outline-none cursor-pointer"
-              >
-                <option value="" disabled>— Click to Select a Project ({allProjects.length}) —</option>
-                {allProjects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({p.team || 'Team'})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => onSelectProject(val)}
+                placeholder={`— Select a Project (${allProjects.length}) —`}
+                icon={<LayersIcon className="h-3.5 w-3.5" />}
+                options={allProjects.map((p) => ({
+                  value: p.id,
+                  label: p.name,
+                  badge: p.team || 'Team'
+                }))}
+                searchable
+              />
             </div>
           )}
         </div>
@@ -157,23 +155,20 @@ export function ProjectModulesSection({
 
           <div className="flex flex-wrap items-center gap-3">
             {allProjects && allProjects.length > 1 && onSelectProject && (
-              <div className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white/70 backdrop-blur-md px-3.5 py-1.5 shadow-glass">
-                <label htmlFor="pms-project-select" className="text-xs font-bold text-navy whitespace-nowrap flex items-center gap-1.5">
-                  <LayersIcon className="h-4 w-4 text-brand" />
-                  Select Project:
-                </label>
-                <select
-                  id="pms-project-select"
+              <div className="w-64">
+                <Select
+                  size="sm"
+                  fullWidth
                   value={project.id}
-                  onChange={(e) => onSelectProject(e.target.value)}
-                  className="bg-transparent rounded-lg px-2 py-0.5 text-xs font-bold text-brand focus:outline-none cursor-pointer"
-                >
-                  {allProjects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.team || 'Team'})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => onSelectProject(val)}
+                  icon={<LayersIcon className="h-3.5 w-3.5" />}
+                  options={allProjects.map((p) => ({
+                    value: p.id,
+                    label: p.name,
+                    badge: p.team || 'Team'
+                  }))}
+                  searchable
+                />
               </div>
             )}
           </div>
@@ -321,33 +316,37 @@ export function ProjectModulesSection({
                   Select a module below to inspect work logs, developer proof screenshots & commit references.
                 </p>
               </div>
-              <select
-                id="pms-module-inspect-dropdown"
-                value={selectedModuleFilter}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setSelectedModuleFilter(val);
-                  if (val) {
-                    setExpandedModuleIds({ [val]: true });
-                  } else {
-                    setExpandedModuleIds({});
-                  }
-                }}
-                className="rounded-xl border-2 border-brand dark:border-sky-500/40 bg-white dark:bg-slate-900 px-3.5 py-2 text-xs font-bold text-navy dark:text-white shadow-sm focus:ring-2 focus:ring-brand/30 focus:outline-none cursor-pointer"
-              >
-                <option value="">— Show All Modules ({modules.length}) —</option>
-                {modules.map((m) => {
-                  const approvedDoneLogs = (m.submittedLogs || []).filter(
-                    (log) => (log.status === 'done' || log.status === 'completed') && log.review === 'approved'
-                  );
-                  const count = approvedDoneLogs.length || m.logsCount || 0;
-                  return (
-                    <option key={m.id || m.name} value={m.id}>
-                      {m.name} ({count} approved completed log{count !== 1 ? 's' : ''})
-                    </option>
-                  );
-                })}
-              </select>
+              <div className="w-72">
+                <Select
+                  size="md"
+                  fullWidth
+                  value={selectedModuleFilter}
+                  onChange={(val) => {
+                    setSelectedModuleFilter(val);
+                    if (val) {
+                      setExpandedModuleIds({ [val]: true });
+                    } else {
+                      setExpandedModuleIds({});
+                    }
+                  }}
+                  placeholder={`— Show All Modules (${modules.length}) —`}
+                  options={[
+                    { value: '', label: `— Show All Modules (${modules.length}) —` },
+                    ...modules.map((m) => {
+                      const approvedDoneLogs = (m.submittedLogs || []).filter(
+                        (log) => (log.status === 'done' || log.status === 'completed') && log.review === 'approved'
+                      );
+                      const count = approvedDoneLogs.length || m.logsCount || 0;
+                      return {
+                        value: m.id,
+                        label: m.name,
+                        badge: `${count} log${count !== 1 ? 's' : ''}`
+                      };
+                    })
+                  ]}
+                  searchable
+                />
+              </div>
             </div>
             {selectedModuleFilter && (
               <button

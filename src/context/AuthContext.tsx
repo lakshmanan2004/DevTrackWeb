@@ -96,27 +96,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, [refresh]);
 
-  // Real-time audio and desktop popup notification listeners
+  // Real-time audio and desktop popup notification listeners (ONLY for developers during work hours)
   useEffect(() => {
     if (!user) return;
+
+    const isDevWorkHours = () => {
+      if (user.role !== 'developer') return false;
+      const h = new Date().getHours();
+      return h >= 8 && h < 17; // Strictly 8:00 AM to 5:00 PM
+    };
+
     const unsub1 = onSocketEvent('alert:new', (payload: any) => {
       refresh();
-      playAlertSound('urgent');
-      showWindowsNotification('DevTrack Alert', payload?.title || 'New alert received');
+      if (isDevWorkHours()) {
+        playAlertSound('urgent');
+        showWindowsNotification('DevTrack Alert', payload?.title || 'New alert received');
+      }
     });
     const unsub2 = onSocketEvent('task:assigned', (payload: any) => {
       refresh();
-      playAlertSound('notification');
-      showWindowsNotification(
-        'New Task Assigned',
-        payload?.title ? `Task: ${payload.title}` : 'A new task was assigned to you'
-      );
+      if (isDevWorkHours()) {
+        playAlertSound('notification');
+        showWindowsNotification(
+          'New Task Assigned',
+          payload?.title ? `Task: ${payload.title}` : 'A new task was assigned to you'
+        );
+      }
     });
     const unsub3 = onSocketEvent('log:status', (payload: any) => {
       refresh();
-      playAlertSound('pop');
-      const statusText = payload?.status === 'approved' ? 'Log Approved ✓' : 'Log Status Update';
-      showWindowsNotification('DevTrack Work Log', statusText);
+      if (isDevWorkHours()) {
+        playAlertSound('pop');
+        const statusText = payload?.status === 'approved' ? 'Log Approved ✓' : 'Log Status Update';
+        showWindowsNotification('DevTrack Work Log', statusText);
+      }
     });
     const unsub4 = onSocketEvent('log:submitted', () => {
       refresh();

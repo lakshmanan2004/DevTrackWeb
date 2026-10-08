@@ -1,10 +1,18 @@
 // Web Audio API synthesizer for system alert sounds without external assets
-export function playAlertSound(type: 'pop' | 'notification' | 'urgent' | 'late') {
-  if (new Date().getHours() >= 17) return;
+export function playAlertSound(type: 'pop' | 'notification' | 'urgent' | 'late', force = false) {
+  if (!force) {
+    const currentHour = new Date().getHours();
+    // Strictly 8:00 AM to 5:00 PM (17:00)
+    if (currentHour < 8 || currentHour >= 17) return;
+  }
+
   try {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
 
     if (type === 'pop') {
       // 20 min pop sound: 600Hz -> 150Hz soft frequency sweep
@@ -69,8 +77,13 @@ export function playAlertSound(type: 'pop' | 'notification' | 'urgent' | 'late')
 }
 
 // Request and trigger Windows Desktop Pop-up Notification natively via ServiceWorker & Notification API
-export async function showWindowsNotification(title: string, body: string): Promise<boolean> {
-  if (new Date().getHours() >= 17) return false;
+export async function showWindowsNotification(title: string, body: string, force = false): Promise<boolean> {
+  if (!force) {
+    const currentHour = new Date().getHours();
+    // Strictly 8:00 AM to 5:00 PM (17:00)
+    if (currentHour < 8 || currentHour >= 17) return false;
+  }
+
   if (typeof Notification === 'undefined') return false;
 
   let perm = Notification.permission;

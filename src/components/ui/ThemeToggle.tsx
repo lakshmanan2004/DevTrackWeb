@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { SunIcon, MoonIcon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -10,6 +10,43 @@ interface ThemeToggleProps {
 export function ThemeToggle({ variant = 'pill', className = '' }: ThemeToggleProps) {
   const { theme, toggleTheme, setTheme, isDark } = useTheme();
 
+  // Tab references & dynamic bubble geometry measurement
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [bubbleStyle, setBubbleStyle] = useState<{ left: number; top: number; width: number; height: number; opacity: number }>({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    opacity: 0
+  });
+
+  const activeIdx = theme === 'dark' ? 1 : 0;
+
+  const updateBubblePosition = useCallback(() => {
+    const activeEl = tabRefs.current[activeIdx];
+    if (activeEl) {
+      setBubbleStyle({
+        left: activeEl.offsetLeft,
+        top: activeEl.offsetTop,
+        width: activeEl.offsetWidth,
+        height: activeEl.offsetHeight,
+        opacity: 1
+      });
+    }
+  }, [activeIdx]);
+
+  useEffect(() => {
+    updateBubblePosition();
+    // Use requestAnimationFrame to guarantee layout computation after render
+    const rafId = requestAnimationFrame(updateBubblePosition);
+    window.addEventListener('resize', updateBubblePosition);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', updateBubblePosition);
+    };
+  }, [updateBubblePosition]);
+
+  // Single Icon Button Mode
   if (variant === 'button') {
     return (
       <button
@@ -35,75 +72,121 @@ export function ThemeToggle({ variant = 'pill', className = '' }: ThemeTogglePro
     );
   }
 
+  // Compact Icon-Only Segmented Control
   if (variant === 'compact') {
     return (
       <div
-        className={`relative inline-flex items-center rounded-xl bg-slate-900/60 p-0.5 border border-white/15 backdrop-blur-md shadow-inner ${className}`}
-        role="group"
+        className={`segmented-control-track inline-flex items-center gap-1 p-1 ${className}`}
+        role="tablist"
         aria-label="Theme selection"
       >
+        {/* Sliding Liquid Glass Bubble Indicator */}
+        <div
+          className="liquid-glass-bubble"
+          style={{
+            left: `${bubbleStyle.left}px`,
+            top: `${bubbleStyle.top}px`,
+            width: `${bubbleStyle.width}px`,
+            height: `${bubbleStyle.height}px`,
+            opacity: bubbleStyle.opacity
+          }}
+          aria-hidden="true"
+        />
+
         <button
+          ref={(el) => (tabRefs.current[0] = el)}
           type="button"
+          role="tab"
+          aria-selected={!isDark}
           onClick={() => setTheme('light')}
-          className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+          className={`segmented-tab-btn flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold cursor-pointer select-none transition-all duration-300 ${
             !isDark
-              ? 'bg-white text-slate-900 shadow-sm'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'text-amber-600 dark:text-amber-400 font-extrabold scale-105'
+              : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
           }`}
           title="Light Theme"
-          aria-pressed={!isDark}
         >
-          <SunIcon className="h-3.5 w-3.5 text-amber-500" />
+          <SunIcon className={`h-3.5 w-3.5 transition-transform duration-300 ${!isDark ? 'scale-110 text-amber-500' : 'text-slate-400'}`} />
         </button>
+
         <button
+          ref={(el) => (tabRefs.current[1] = el)}
           type="button"
+          role="tab"
+          aria-selected={isDark}
           onClick={() => setTheme('dark')}
-          className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+          className={`segmented-tab-btn flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold cursor-pointer select-none transition-all duration-300 ${
             isDark
-              ? 'bg-blue-600 text-white shadow-sm ring-1 ring-white/20'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'text-sky-300 font-extrabold scale-105'
+              : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
           }`}
           title="Dark Theme"
-          aria-pressed={isDark}
         >
-          <MoonIcon className="h-3.5 w-3.5 text-white" />
+          <MoonIcon className={`h-3.5 w-3.5 transition-transform duration-300 ${isDark ? 'scale-110 text-blue-300' : 'text-slate-400'}`} />
         </button>
       </div>
     );
   }
 
-  // Default 'pill' segmented switch
+  // Full Pill-Style Sliding Animated Segmented Control
   return (
     <div
-      className={`relative inline-flex items-center rounded-2xl bg-slate-200/60 p-1 border border-white/60 dark:bg-slate-900/70 dark:border-white/10 backdrop-blur-xl shadow-xs ${className}`}
-      role="group"
+      className={`segmented-control-track inline-flex items-center gap-1 p-1 ${className}`}
+      role="tablist"
       aria-label="Theme selection"
     >
+      {/* Sliding Liquid Glass Bubble Indicator with Spring Physics */}
+      <div
+        className="liquid-glass-bubble"
+        style={{
+          left: `${bubbleStyle.left}px`,
+          top: `${bubbleStyle.top}px`,
+          width: `${bubbleStyle.width}px`,
+          height: `${bubbleStyle.height}px`,
+          opacity: bubbleStyle.opacity
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Light Option Tab */}
       <button
+        ref={(el) => (tabRefs.current[0] = el)}
         type="button"
+        role="tab"
+        aria-selected={!isDark}
         onClick={() => setTheme('light')}
-        className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all duration-200 cursor-pointer ${
+        className={`segmented-tab-btn flex items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold cursor-pointer select-none transition-all duration-300 ${
           !isDark
-            ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5'
-            : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+            ? 'text-[#0071e3] font-extrabold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] scale-[1.02]'
+            : 'text-slate-500 dark:text-slate-400 font-medium'
         }`}
-        aria-pressed={!isDark}
       >
-        <SunIcon className={`h-3.5 w-3.5 ${!isDark ? 'text-amber-500' : 'text-slate-400'}`} />
+        <SunIcon
+          className={`h-3.5 w-3.5 transition-transform duration-300 ${
+            !isDark ? 'text-amber-500 scale-110 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]' : 'text-slate-400'
+          }`}
+        />
         <span>Light</span>
       </button>
 
+      {/* Dark Option Tab */}
       <button
+        ref={(el) => (tabRefs.current[1] = el)}
         type="button"
+        role="tab"
+        aria-selected={isDark}
         onClick={() => setTheme('dark')}
-        className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all duration-200 cursor-pointer ${
+        className={`segmented-tab-btn flex items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold cursor-pointer select-none transition-all duration-300 ${
           isDark
-            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm ring-1 ring-white/20'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+            ? 'text-white font-extrabold drop-shadow-[0_0_10px_rgba(56,189,248,0.7)] scale-[1.02]'
+            : 'text-slate-500 dark:text-slate-400 font-medium'
         }`}
-        aria-pressed={isDark}
       >
-        <MoonIcon className={`h-3.5 w-3.5 ${isDark ? 'text-blue-200' : 'text-slate-500'}`} />
+        <MoonIcon
+          className={`h-3.5 w-3.5 transition-transform duration-300 ${
+            isDark ? 'text-sky-300 scale-110 drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]' : 'text-slate-400'
+          }`}
+        />
         <span>Dark</span>
       </button>
     </div>

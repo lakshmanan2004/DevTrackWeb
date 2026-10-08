@@ -2,16 +2,74 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 export type Theme = 'light' | 'dark';
 
+export interface WallpaperOption {
+  id: string;
+  name: string;
+  subtitle: string;
+  file: string;
+}
+
+export const WALLPAPERS: WallpaperOption[] = [
+  {
+    id: 'none',
+    name: 'Default (No Wallpaper)',
+    subtitle: 'Clean Apple Liquid Glass & ambient glow',
+    file: ''
+  },
+  {
+    id: 'dark-forest',
+    name: 'Dark Forest',
+    subtitle: 'Moody woodland shadows & mist',
+    file: '/DarkForest.jpg'
+  },
+  {
+    id: 'sakura-bloom',
+    name: 'Sakura Bloom',
+    subtitle: 'Pink cherry blossoms at peak bloom',
+    file: '/sakuraBloom.jpg'
+  },
+  {
+    id: 'palm-shore',
+    name: 'Palm Shore',
+    subtitle: 'Tropical palms against sunset sky',
+    file: '/PalmShore.jpg'
+  },
+  {
+    id: 'purple-sand',
+    name: 'Purple Sand',
+    subtitle: 'Starlit dunes and warm glowing sands',
+    file: '/PurpleSand.jpg'
+  },
+  {
+    id: 'milky-way',
+    name: 'Milky Way',
+    subtitle: 'Starlit galaxy & deep cosmic night',
+    file: '/MilkyWay.jpg'
+  },
+  {
+    id: 'sunset',
+    name: 'Sun Set',
+    subtitle: 'Golden hour sunset vibes & ocean horizon',
+    file: '/SunSet.jpg'
+  }
+];
+
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   isDark: boolean;
+  wallpaper: string;
+  setWallpaper: (file: string) => void;
+  isWallpaperModalOpen: boolean;
+  openWallpaperModal: () => void;
+  closeWallpaperModal: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'devtrack-theme';
+const WALLPAPER_STORAGE_KEY = 'devtrack-wallpaper';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
@@ -28,6 +86,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
     return 'light';
   });
+
+  const [wallpaper, setWallpaperState] = useState<string>(() => {
+    try {
+      const stored = localStorage.getItem(WALLPAPER_STORAGE_KEY);
+      if (stored !== null) return stored;
+    } catch {
+      // Ignore storage errors
+    }
+    return '';
+  });
+
+  const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -48,6 +118,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       // Ignore storage errors
     }
   }, [theme]);
+
+  const setWallpaper = (file: string) => {
+    setWallpaperState(file);
+    try {
+      localStorage.setItem(WALLPAPER_STORAGE_KEY, file);
+    } catch {
+      // Ignore
+    }
+  };
 
   // Listen to system theme changes if user hasn't explicitly set preference
   useEffect(() => {
@@ -72,7 +151,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, isDark: theme === 'dark' }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme,
+        toggleTheme,
+        isDark: theme === 'dark',
+        wallpaper,
+        setWallpaper,
+        isWallpaperModalOpen,
+        openWallpaperModal: () => setIsWallpaperModalOpen(true),
+        closeWallpaperModal: () => setIsWallpaperModalOpen(false)
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );

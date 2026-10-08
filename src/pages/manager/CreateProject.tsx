@@ -4,6 +4,7 @@ import { ArrowRightIcon, GithubIcon, PlusIcon, Trash2Icon, XIcon, SparklesIcon, 
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
+import { Select } from '../../components/ui/Select';
 import { useLive } from '../../hooks/useLive';
 import { api } from '../../api/client';
 
@@ -111,45 +112,48 @@ export function CreateProject() {
       <PageHeader title="Create New Project" subtitle="Project details, team assignment & weighted modules" />
 
       <div className="flex-1 p-6">
-        <div className="max-w-4xl space-y-5">
-          <section className="rounded-card border border-hairline bg-white p-5 shadow-card">
-            <h2 className="text-sm font-bold text-navy">1 · Project Details</h2>
+        <div className="max-w-4xl space-y-6">
+          <section className="glass-card rounded-3xl border border-white/80 p-6 sm:p-7 shadow-glass">
+            <h2 className="text-sm font-black text-navy tracking-tight">1 · Project Details</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label htmlFor="cp-name" className="mb-1.5 block text-sm font-medium text-navy">
-                  Project Name <span className="text-danger">*</span>
+                <label htmlFor="cp-name" className="mb-1.5 block text-xs font-bold text-navy">
+                  Project Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="cp-name"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="e.g. College ERP System"
-                  className="h-10 w-full rounded-lg border border-hairline px-3 text-sm text-navy" />
+                  className="glass-input h-10 w-full px-3.5 text-xs font-semibold text-navy placeholder:text-slate-400"
+                />
               </div>
               <div className="sm:col-span-2">
-                <label htmlFor="cp-desc" className="mb-1.5 block text-sm font-medium text-navy">
-                  Description <span className="text-danger">*</span>
+                <label htmlFor="cp-desc" className="mb-1.5 block text-xs font-bold text-navy">
+                  Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   id="cp-desc"
                   rows={3}
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
-                  className="w-full rounded-lg border border-hairline px-3 py-2.5 text-sm leading-relaxed text-navy" />
+                  className="glass-input w-full p-3.5 text-xs leading-relaxed text-navy font-medium placeholder:text-slate-400"
+                />
               </div>
               <div>
-                <label htmlFor="cp-start" className="mb-1.5 block text-sm font-medium text-navy">
-                  Start Date <span className="text-danger">*</span>
+                <label htmlFor="cp-start" className="mb-1.5 block text-xs font-bold text-navy">
+                  Start Date <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="cp-start"
                   type="date"
                   value={start}
                   onChange={(event) => setStart(event.target.value)}
-                  className="h-10 w-full rounded-lg border border-hairline px-3 text-sm text-navy" />
+                  className="glass-input h-10 w-full px-3.5 text-xs font-semibold text-navy"
+                />
               </div>
               <div>
-                <label htmlFor="cp-end" className="mb-1.5 block text-sm font-medium text-navy">
+                <label htmlFor="cp-end" className="mb-1.5 block text-xs font-bold text-navy">
                   Expected End Date
                 </label>
                 <input
@@ -157,91 +161,95 @@ export function CreateProject() {
                   type="date"
                   value={end}
                   onChange={(event) => setEnd(event.target.value)}
-                  className="h-10 w-full rounded-lg border border-hairline px-3 text-sm text-navy" />
+                  className="glass-input h-10 w-full px-3.5 text-xs font-semibold text-navy"
+                />
               </div>
               <div className="sm:col-span-2">
-                <label htmlFor="cp-repo" className="mb-1.5 block text-sm font-medium text-navy">
-                  GitHub Repository URL <span className="text-gray-400">(optional)</span>
+                <label htmlFor="cp-repo" className="mb-1.5 block text-xs font-bold text-navy">
+                  GitHub Repository URL <span className="text-slate-400 font-normal">(optional)</span>
                 </label>
                 <div className="relative">
                   <GithubIcon
-                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                    aria-hidden="true" />
+                    className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                    aria-hidden="true"
+                  />
                   <input
                     id="cp-repo"
                     type="url"
                     value={repo}
                     onChange={(event) => setRepo(event.target.value)}
                     placeholder="https://github.com/org/repo"
-                    className="h-10 w-full rounded-lg border border-hairline pl-10 pr-3 text-sm text-navy placeholder:text-gray-400" />
+                    className="glass-input h-10 w-full pl-10 pr-3.5 text-xs text-navy placeholder:text-slate-400 font-medium"
+                  />
                 </div>
               </div>
               <fieldset className="sm:col-span-2">
-                <legend className="mb-2 text-sm font-medium text-navy">Status</legend>
-                <div className="flex gap-5">
-                  {(['ongoing', 'hold'] as const).map((option) =>
-                  <label key={option} className="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <legend className="mb-2 text-xs font-bold text-navy">Status</legend>
+                <div className="flex gap-6">
+                  {(['ongoing', 'hold'] as const).map((option) => (
+                    <label key={option} className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
                       <input
-                      type="radio"
-                      name="cp-status"
-                      checked={status === option}
-                      onChange={() => setStatus(option)}
-                      className="h-4 w-4 border-gray-300 text-brand" />
-                    {option === 'ongoing' ? 'Ongoing' : 'On Hold'}
+                        type="radio"
+                        name="cp-status"
+                        checked={status === option}
+                        onChange={() => setStatus(option)}
+                        className="h-4 w-4 text-brand accent-blue-600 cursor-pointer"
+                      />
+                      {option === 'ongoing' ? 'Ongoing' : 'On Hold'}
                     </label>
-                  )}
+                  ))}
                 </div>
               </fieldset>
             </div>
           </section>
 
-          <section className="rounded-card border border-hairline bg-white p-5 shadow-card">
-            <h2 className="text-sm font-bold text-navy">2 · Team Setup</h2>
+          <section className="glass-card rounded-3xl border border-white/80 p-6 sm:p-7 shadow-glass">
+            <h2 className="text-sm font-black text-navy tracking-tight">2 · Team Setup</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="cp-team" className="mb-1.5 block text-sm font-medium text-navy">
-                  Team Name <span className="text-danger">*</span>
+                <label htmlFor="cp-team" className="mb-1.5 block text-xs font-bold text-navy">
+                  Team Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="cp-team"
                   value={teamName}
                   onChange={(event) => setTeamName(event.target.value)}
                   placeholder="e.g. Team Alpha"
-                  className="h-10 w-full rounded-lg border border-hairline px-3 text-sm text-navy" />
+                  className="glass-input h-10 w-full px-3.5 text-xs font-semibold text-navy placeholder:text-slate-400"
+                />
               </div>
               <div>
-                <label htmlFor="cp-leader" className="mb-1.5 block text-sm font-medium text-navy">
-                  Assign Team Leader <span className="text-danger">*</span>
-                </label>
-                <select
-                  id="cp-leader"
+                <Select
+                  label="Assign Team Leader *"
+                  size="lg"
+                  fullWidth
                   value={leader}
-                  onChange={(event) => setLeader(event.target.value)}
-                  className="h-10 w-full rounded-lg border border-hairline bg-white px-3 text-sm text-navy">
-                  <option value="">Select leader…</option>
-                  {leaders.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.name}{l.teamName ? ` (leads ${l.teamName})` : ''}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setLeader(val)}
+                  placeholder="Select leader…"
+                  options={leaders.map((l) => ({
+                    value: l.id,
+                    label: l.name,
+                    description: l.teamName ? `Leads ${l.teamName}` : undefined
+                  }))}
+                  searchable
+                />
               </div>
             </div>
 
-            <fieldset className="mt-4">
-              <legend className="mb-2 text-sm font-medium text-navy">
-                Add Developers <span className="text-danger">*</span> (Developers can only belong to one project)
+            <fieldset className="mt-5">
+              <legend className="mb-2 text-xs font-bold text-navy">
+                Add Developers <span className="text-red-500">*</span> (Developers can only belong to one project)
               </legend>
-              <ul className="grid gap-2 sm:grid-cols-2">
+              <ul className="grid gap-2.5 sm:grid-cols-2">
                 {availableDevelopers.map((dev) => {
                   const isAssigned = dev.hasProject || !!dev.teamName;
                   return (
                     <li key={dev.id}>
                       <label
-                        className={`flex items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition-colors ${
+                        className={`glass-surface flex items-center justify-between rounded-2xl border px-3.5 py-3 text-xs transition-all ${
                           isAssigned
-                            ? 'border-gray-200 bg-gray-100/70 text-gray-400 cursor-not-allowed'
-                            : 'border-hairline text-navy cursor-pointer hover:bg-canvas'
+                            ? 'opacity-60 cursor-not-allowed border-slate-200'
+                            : 'border-white/80 text-navy cursor-pointer hover:bg-white/90 shadow-2xs'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
@@ -250,18 +258,18 @@ export function CreateProject() {
                             disabled={isAssigned}
                             checked={selected.includes(dev.id)}
                             onChange={() => !isAssigned && toggle(dev.id)}
-                            className="h-4 w-4 rounded border-gray-300 text-brand disabled:opacity-40"
+                            className="h-4 w-4 rounded accent-blue-600 disabled:opacity-40 cursor-pointer"
                           />
-                          <span className={isAssigned ? 'line-through text-gray-500 font-normal' : 'font-medium'}>
+                          <span className={isAssigned ? 'line-through text-slate-400 font-normal' : 'font-bold'}>
                             {dev.name}
                           </span>
                         </div>
                         {isAssigned ? (
-                          <span className="rounded bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-900 border border-amber-200">
+                          <span className="rounded-lg bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300 border border-amber-500/30">
                             🔒 {dev.projectName || dev.teamName || 'Assigned'}
                           </span>
                         ) : (
-                          <span className="rounded bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
+                          <span className="rounded-lg bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
                             ✓ Available
                           </span>
                         )}
@@ -271,43 +279,45 @@ export function CreateProject() {
                 })}
               </ul>
 
-              {selectedNames.length > 0 &&
-              <div className="mt-3 flex flex-wrap gap-2">
+              {selectedNames.length > 0 && (
+                <div className="mt-3.5 flex flex-wrap gap-2">
                   {selected.map((id) => {
                     const devName = availableDevelopers.find((d) => d.id === id)?.name || '';
                     return (
-                    <span
-                      key={id}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-pm-soft px-3 py-1.5 text-xs font-semibold text-pm">
-                      {devName}
-                      <button
-                      type="button"
-                      onClick={() => toggle(id)}
-                      aria-label={`Remove ${devName}`}
-                      className="rounded-full p-0.5 transition-colors duration-150 ease-out hover:bg-violet-200">
-                        <XIcon className="h-3 w-3" />
-                      </button>
-                    </span>
+                      <span
+                        key={id}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/15 border border-purple-500/30 px-3 py-1 text-xs font-bold text-purple-800 dark:text-purple-300 backdrop-blur-md"
+                      >
+                        {devName}
+                        <button
+                          type="button"
+                          onClick={() => toggle(id)}
+                          aria-label={`Remove ${devName}`}
+                          className="rounded-full p-0.5 hover:bg-purple-500/30 transition-colors cursor-pointer"
+                        >
+                          <XIcon className="h-3 w-3" />
+                        </button>
+                      </span>
                     );
                   })}
                 </div>
-              }
+              )}
             </fieldset>
           </section>
 
           {/* SECTION 3: PROJECT MODULES & WEIGHTAGE */}
-          <section className="rounded-card border border-hairline bg-white p-5 shadow-card">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-3">
+          <section className="glass-card rounded-3xl border border-white/80 p-6 sm:p-7 shadow-glass">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/60 pb-4">
               <div>
-                <h2 className="flex items-center gap-2 text-sm font-bold text-navy">
+                <h2 className="flex items-center gap-2 text-sm font-black text-navy tracking-tight">
                   <LayersIcon className="h-4 w-4 text-brand" />
-                  3 · Project Modules & Weightage % <span className="text-danger">*</span>
+                  3 · Project Modules &amp; Weightage % <span className="text-red-500">*</span>
                 </h2>
-                <p className="mt-0.5 text-xs text-gray-500">
+                <p className="mt-0.5 text-xs text-slate-500 font-medium">
                   Define project modules (e.g. UI Design, Backend, Implementation). Team Lead marks these complete to update overall project progress.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <Button variant="secondary" size="sm" onClick={loadDefaultTemplate} icon={<SparklesIcon className="h-3.5 w-3.5 text-brand" />}>
                   Default Template
                 </Button>
@@ -319,29 +329,29 @@ export function CreateProject() {
 
             <div className="mt-4 space-y-3">
               {modules.map((m, idx) => (
-                <div key={m.id} className="grid items-start gap-3 rounded-xl border border-hairline bg-canvas p-3 sm:grid-cols-[1fr_1.5fr_100px_40px]">
+                <div key={m.id} className="glass-surface grid items-start gap-3 rounded-2xl border border-white/80 p-4 sm:grid-cols-[1fr_1.5fr_110px_40px] shadow-2xs">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Module Name #{idx + 1}</label>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Module #{idx + 1}</label>
                     <input
                       type="text"
                       value={m.name}
                       onChange={(e) => updateModuleField(m.id, 'name', e.target.value)}
                       placeholder="e.g. UI Wireframing"
-                      className="h-9 w-full rounded-lg border border-hairline bg-white px-3 text-xs font-medium text-navy focus:border-brand focus:outline-none"
+                      className="glass-input h-9 w-full px-3 text-xs font-bold text-navy"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Description</label>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Description</label>
                     <input
                       type="text"
                       value={m.description}
                       onChange={(e) => updateModuleField(m.id, 'description', e.target.value)}
                       placeholder="Short detail of what this module covers..."
-                      className="h-9 w-full rounded-lg border border-hairline bg-white px-3 text-xs text-navy focus:border-brand focus:outline-none"
+                      className="glass-input h-9 w-full px-3 text-xs text-navy font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Weight %</label>
+                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Weight %</label>
                     <div className="relative">
                       <input
                         type="number"
@@ -349,9 +359,9 @@ export function CreateProject() {
                         max="100"
                         value={m.weightPercentage}
                         onChange={(e) => updateModuleField(m.id, 'weightPercentage', e.target.value)}
-                        className="h-9 w-full rounded-lg border border-hairline bg-white pl-3 pr-6 text-xs font-bold text-navy focus:border-brand focus:outline-none"
+                        className="glass-input h-9 w-full pl-3 pr-7 text-xs font-black text-navy"
                       />
-                      <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">%</span>
+                      <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-center pt-6">
@@ -360,7 +370,7 @@ export function CreateProject() {
                       onClick={() => removeModuleRow(m.id)}
                       disabled={modules.length === 1}
                       title="Remove Module"
-                      className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-danger disabled:opacity-30"
+                      className="rounded-xl p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-30 transition-colors cursor-pointer"
                     >
                       <Trash2Icon className="h-4 w-4" />
                     </button>
@@ -376,9 +386,9 @@ export function CreateProject() {
             </div>
           </section>
 
-          <section className="rounded-card border border-hairline bg-canvas p-5">
-            <h2 className="text-sm font-bold text-navy">4 · Preview</h2>
-            <dl className="mt-3 space-y-1.5 text-sm text-gray-700">
+          <section className="glass-card rounded-3xl border border-white/80 p-6 shadow-glass">
+            <h2 className="text-sm font-black text-navy tracking-tight">4 · Preview</h2>
+            <dl className="mt-3 space-y-2 text-xs text-slate-600">
               {[
                 { label: 'Project', value: name || '—' },
                 { label: 'Team', value: teamName || '—' },
@@ -388,20 +398,20 @@ export function CreateProject() {
                 { label: 'Start', value: start }
               ].map((row) => (
                 <div key={row.label} className="flex gap-2">
-                  <dt className="w-28 shrink-0 font-semibold text-navy">{row.label}:</dt>
-                  <dd>{row.value}</dd>
+                  <dt className="w-28 shrink-0 font-bold text-navy">{row.label}:</dt>
+                  <dd className="font-medium">{row.value}</dd>
                 </div>
               ))}
             </dl>
           </section>
 
           {error && (
-            <p className="rounded-lg border border-red-200 bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">
+            <p className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs font-bold text-rose-600">
               {error}
             </p>
           )}
 
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" size="lg" onClick={() => navigate('/manager')}>
               Cancel
             </Button>

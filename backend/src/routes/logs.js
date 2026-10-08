@@ -115,7 +115,7 @@ router.get('/', ah(async (req, res) => {
     if (devObjectIds.length) conditions.push({ developer: { $in: devObjectIds } });
     if (teamObjectIds.length) conditions.push({ team: { $in: teamObjectIds } });
     if (projObjectIds.length) conditions.push({ project: { $in: projObjectIds } });
-    query = conditions.length ? { $or: conditions } : {};
+    query = conditions.length ? { $or: conditions } : { developer: { $in: [] } };
   }
 
   const settings = await Setting.get();

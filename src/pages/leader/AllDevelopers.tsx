@@ -19,7 +19,7 @@ export function AllDevelopers() {
   const [targetDevId, setTargetDevId] = useState<string | undefined>();
 
   const visible = developers
-    .filter((_dev: any) => filter === 'all' ? true : true)
+    .filter((_dev: any) => (filter === 'all' ? true : true))
     .filter((dev: any) => dev.name.toLowerCase().includes(query.toLowerCase()));
 
   const handleOpenAssign = (devId?: string) => {
@@ -37,13 +37,13 @@ export function AllDevelopers() {
             <Button
               icon={<PlusIcon className="h-4 w-4" />}
               onClick={() => handleOpenAssign()}
-              className="bg-brand text-white hover:bg-brand/90"
+              className="btn-glass-primary !from-indigo-600 !to-violet-600 text-white font-bold border-none"
             >
               Assign New Task
             </Button>
             <label className="relative">
               <SearchIcon
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
                 aria-hidden="true"
               />
               <span className="sr-only">Search developers</span>
@@ -51,7 +51,7 @@ export function AllDevelopers() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search developer..."
-                className="h-9 w-56 rounded-lg border border-hairline pl-9 pr-3 text-sm text-navy placeholder:text-gray-400"
+                className="glass-input h-10 w-56 rounded-2xl pl-9 pr-3 text-xs font-medium text-navy dark:text-white placeholder:text-slate-400 focus:outline-none"
               />
             </label>
           </div>
@@ -63,40 +63,35 @@ export function AllDevelopers() {
           ariaLabel="Filter developers"
           value={filter}
           onChange={setFilter}
-          options={[
-            { id: 'all', label: 'All', count: developers.length }
-          ]}
+          options={[{ id: 'all', label: 'All', count: developers.length }]}
         />
 
-        <section className="overflow-hidden rounded-card border border-hairline bg-white shadow-card">
+        <section className="glass-card overflow-hidden rounded-3xl shadow-glass">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-hairline bg-canvas text-xs uppercase tracking-wide text-gray-500">
-                <th scope="col" className="px-5 py-3 font-semibold">Developer</th>
-                <th scope="col" className="px-3 py-3 font-semibold">Coverage</th>
-                <th scope="col" className="px-3 py-3 font-semibold">Logs</th>
-                <th scope="col" className="px-3 py-3 font-semibold">Missed</th>
-                <th scope="col" className="px-3 py-3 font-semibold">Commits</th>
-                <th scope="col" className="px-5 py-3 text-right font-semibold">Action</th>
+              <tr className="border-b border-hairline text-xs uppercase tracking-wide text-slate-400">
+                <th scope="col" className="px-6 py-3.5 font-semibold">Developer</th>
+                <th scope="col" className="px-3 py-3.5 font-semibold">Coverage</th>
+                <th scope="col" className="px-3 py-3.5 font-semibold">Logs</th>
+                <th scope="col" className="px-3 py-3.5 font-semibold">Missed</th>
+                <th scope="col" className="px-3 py-3.5 font-semibold">Commits</th>
+                <th scope="col" className="px-6 py-3.5 text-right font-semibold">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-hairline">
               {visible.map((dev: any) => (
-                <tr key={dev.id}>
-                  <td className="px-5 py-3.5">
+                <tr key={dev.id} className="hover:bg-slate-500/5 transition-colors">
+                  <td className="px-6 py-3.5">
                     <div className="flex items-center gap-3">
                       <span className="relative">
-                        <Avatar
-                          initials={dev.initials}
-                          size="sm"
-                        />
+                        <Avatar initials={dev.initials} size="sm" />
                         {dev.online && (
-                          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-white bg-ok" title="Online now" />
+                          <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-[#101726] bg-emerald-500 shadow-sm" title="Online now" />
                         )}
                       </span>
                       <div>
-                        <p className="font-semibold text-navy">{dev.name}</p>
-                        <p className="text-xs text-gray-500">{dev.email} · last seen {dev.lastSeen}</p>
+                        <p className="font-semibold text-navy dark:text-white">{dev.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{dev.email} · last seen {dev.lastSeen}</p>
                       </div>
                     </div>
                   </td>
@@ -106,23 +101,23 @@ export function AllDevelopers() {
                       label={`${dev.name} coverage`}
                     />
                   </td>
-                  <td className="px-3 py-3.5 tabular-nums text-gray-600">{dev.logs}</td>
+                  <td className="px-3 py-3.5 tabular-nums text-slate-600 dark:text-slate-300">{dev.logs}</td>
                   <td className="px-3 py-3.5">
                     <span
                       className={`font-semibold tabular-nums ${
-                        dev.missed > 0 ? 'text-danger' : 'text-green-600'
+                        dev.missed > 0 ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-500 dark:text-emerald-400'
                       }`}
                     >
                       {dev.missed}
                     </span>
                   </td>
-                  <td className="px-3 py-3.5 tabular-nums text-gray-600">{dev.commits}</td>
-                  <td className="px-5 py-3.5 text-right">
+                  <td className="px-3 py-3.5 tabular-nums text-slate-600 dark:text-slate-300">{dev.commits}</td>
+                  <td className="px-6 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button
                         size="sm"
                         onClick={() => handleOpenAssign(dev.id)}
-                        className="bg-amber-600 text-white hover:bg-amber-700"
+                        className="btn-glass-primary !from-amber-500 !to-orange-500 hover:!from-amber-600 hover:!to-orange-600 text-white font-bold border-none"
                         icon={<PlusIcon className="h-3.5 w-3.5" />}
                       >
                         Assign Task

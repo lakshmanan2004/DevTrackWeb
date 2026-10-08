@@ -151,12 +151,12 @@ router.get('/daily-summary', ah(async (req, res) => {
     filter.developer = toObjId(req.query.developerId);
   } else if (req.user.role === 'leader') {
     const devObjectIds = (scope.developerIds || []).map(toObjId);
-    if (devObjectIds.length) filter.developer = { $in: devObjectIds };
+    filter.developer = { $in: devObjectIds };
   } else if (req.user.role === 'developer') {
     filter.developer = toObjId(req.user._id);
   } else if (req.user.role === 'manager') {
     const projObjectIds = (scope.projectIds || []).map(toObjId);
-    if (projObjectIds.length) filter.project = { $in: projObjectIds };
+    filter.project = { $in: projObjectIds };
   }
 
   const [logs, commits, eods] = await Promise.all([

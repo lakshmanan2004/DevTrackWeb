@@ -12,8 +12,8 @@ import {
   MessageSquareIcon,
   SirenIcon,
   Trash2Icon,
-  XIcon } from
-'lucide-react';
+  XIcon
+} from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Banner } from '../../components/ui/Banner';
 import { Button } from '../../components/ui/Button';
@@ -24,17 +24,17 @@ import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 
 const severityShell: Record<string, string> = {
-  critical: 'border-red-200 bg-danger-soft',
-  warning: 'border-amber-200 bg-warn-soft',
-  flag: 'border-orange-200 bg-orange-50',
-  seen: 'border-hairline bg-white'
+  critical: 'border-rose-500/50 bg-white/90 dark:bg-slate-900/90 shadow-[0_4px_20px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/20',
+  warning: 'border-amber-500/50 bg-white/90 dark:bg-slate-900/90 shadow-[0_4px_20px_rgba(245,158,11,0.12)] ring-1 ring-amber-500/20',
+  flag: 'border-orange-500/50 bg-white/90 dark:bg-slate-900/90 shadow-[0_4px_20px_rgba(249,115,22,0.12)] ring-1 ring-orange-500/20',
+  seen: 'glass-card bg-white/85 dark:bg-slate-900/85'
 };
 
 const severityIconShell: Record<string, string> = {
-  critical: 'bg-danger/15 text-danger',
-  warning: 'bg-warn/15 text-amber-600',
-  flag: 'bg-orange-500/15 text-orange-600',
-  seen: 'bg-gray-100 text-gray-500'
+  critical: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30',
+  warning: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30',
+  flag: 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30',
+  seen: 'glass-surface text-slate-500 dark:text-slate-400 border border-white/20'
 };
 
 const categoryIcon: Record<string, React.ReactNode> = {
@@ -142,7 +142,7 @@ export function LeaderAlerts() {
                 variant="secondary"
                 size="sm"
                 onClick={handleMarkAllRead}
-                icon={<CheckCheckIcon className="h-3.5 w-3.5 text-brand" />}
+                icon={<CheckCheckIcon className="h-3.5 w-3.5 text-brand dark:text-indigo-400" />}
               >
                 Mark All as Read
               </Button>
@@ -152,12 +152,12 @@ export function LeaderAlerts() {
                 variant="secondary"
                 size="sm"
                 onClick={handleClearAll}
-                icon={<Trash2Icon className="h-3.5 w-3.5 text-danger" />}
+                icon={<Trash2Icon className="h-3.5 w-3.5 text-rose-500" />}
               >
                 Clear All
               </Button>
             )}
-            <span className="inline-flex items-center gap-2 rounded-full bg-danger px-3 py-1.5 text-xs font-bold text-white">
+            <span className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm">
               <BellIcon className="h-3.5 w-3.5" aria-hidden="true" />
               {unread} unread
             </span>
@@ -172,7 +172,7 @@ export function LeaderAlerts() {
         </Banner>
 
         {toastMessage && (
-          <div className="flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-xs font-bold text-white shadow-md animate-in fade-in">
+          <div className="flex items-center gap-2 rounded-2xl bg-emerald-600/90 px-4 py-3 text-xs font-bold text-white shadow-glass backdrop-blur-md animate-in fade-in">
             <CheckCircle2Icon className="h-4 w-4" />
             {toastMessage}
           </div>
@@ -198,7 +198,7 @@ export function LeaderAlerts() {
             const isUnread = alert.unread;
             const shellStyle = isUnread
               ? severityShell[alert.severity] || severityShell.seen
-              : 'border-hairline bg-white/70 opacity-75';
+              : 'glass-card opacity-80';
             const iconStyle = isUnread
               ? severityIconShell[alert.severity] || severityIconShell.seen
               : severityIconShell.seen;
@@ -206,22 +206,22 @@ export function LeaderAlerts() {
             return (
               <li
                 key={alert.id}
-                className={`relative rounded-card border p-5 shadow-card transition-all ${shellStyle}`}
+                className={`relative rounded-3xl border p-5 shadow-glass backdrop-blur-xl transition-all hover:shadow-xl ${shellStyle}`}
               >
                 <div className="flex flex-wrap items-start gap-4">
                   <span
-                    className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconStyle}`}
+                    className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${iconStyle}`}
                   >
                     {categoryIcon[alert.category] || <SirenIcon className="h-4 w-4" />}
                   </span>
                   <div className="min-w-[220px] flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-bold text-navy">{alert.title}</h2>
+                        <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">{alert.title}</h2>
                         {isUnread ? (
-                          <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-label="Unread" />
+                          <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-indigo-400 shadow-xs" aria-label="Unread" />
                         ) : (
-                          <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-500">
+                          <span className="rounded-lg bg-slate-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:text-slate-400">
                             Seen
                           </span>
                         )}
@@ -231,28 +231,28 @@ export function LeaderAlerts() {
                         onClick={() => handleDelete(alert.id, alert.who)}
                         title="Delete Alert"
                         aria-label="Delete alert"
-                        className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-danger transition-colors"
+                        className="rounded-xl p-1.5 text-slate-400 hover:bg-rose-500/10 hover:text-rose-500 transition-colors cursor-pointer"
                       >
                         <Trash2Icon className="h-4 w-4" />
                       </button>
                     </div>
-                    <p className="mt-0.5 text-sm text-gray-700">{alert.body}</p>
-                    <p className="mt-1 text-xs text-gray-500">{alert.meta || alert.time}</p>
+                    <p className="mt-0.5 text-xs sm:text-sm font-medium text-slate-950 dark:text-slate-100 leading-relaxed">{alert.body}</p>
+                    <p className="mt-1 text-[11px] sm:text-xs font-medium text-slate-800 dark:text-slate-300">{alert.meta || alert.time}</p>
                   </div>
                 </div>
 
                 {alert.timeline && alert.timeline.length > 0 && (
-                  <div className="mt-4 rounded-lg border border-orange-200 bg-white px-4 py-3">
-                    <p className="text-xs font-bold uppercase tracking-wide text-orange-700">
+                  <div className="glass-surface mt-4 rounded-2xl border border-orange-500/30 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-orange-500 dark:text-orange-400">
                       Timeline evidence
                     </p>
                     <ol className="mt-2 space-y-1.5">
                       {alert.timeline.map((entry, i) => (
-                        <li key={i} className="flex items-center gap-3 text-xs text-gray-600">
-                          <span className="w-16 shrink-0 font-semibold tabular-nums text-navy">
+                        <li key={i} className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
+                          <span className="w-16 shrink-0 font-semibold tabular-nums text-navy dark:text-white">
                             {entry.at}
                           </span>
-                          <span className="h-px w-6 bg-gray-300" aria-hidden="true" />
+                          <span className="h-px w-6 bg-slate-400/30" aria-hidden="true" />
                           <span>{entry.what}</span>
                         </li>
                       ))}
@@ -261,24 +261,24 @@ export function LeaderAlerts() {
                 )}
 
                 {alert.detection && (
-                  <div className="mt-4 flex gap-2.5 rounded-lg bg-gray-100 px-4 py-3">
-                    <BotIcon className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" aria-hidden="true" />
+                  <div className="glass-surface mt-4 flex gap-2.5 rounded-2xl p-4">
+                    <BotIcon className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wide text-gray-500">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
                         Auto-detected
                       </p>
-                      <p className="mt-1 text-xs leading-relaxed text-gray-600">{alert.detection}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">{alert.detection}</p>
                     </div>
                   </div>
                 )}
 
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-hairline/60 pt-3">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-hairline pt-3">
                   <div className="flex flex-wrap items-center gap-2">
                     {alert.actions.map((action) => {
                       const isSeenAction = action === 'Mark Seen';
                       if (isSeenAction && !isUnread) {
                         return (
-                          <span key={action} className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400">
+                          <span key={action} className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400">
                             <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
                             Seen
                           </span>
@@ -314,7 +314,7 @@ export function LeaderAlerts() {
                     size="sm"
                     variant="ghost"
                     onClick={() => handleDelete(alert.id, alert.who)}
-                    icon={<Trash2Icon className="h-3.5 w-3.5 text-danger" />}
+                    icon={<Trash2Icon className="h-3.5 w-3.5 text-rose-500" />}
                   >
                     Delete
                   </Button>
@@ -324,10 +324,10 @@ export function LeaderAlerts() {
           })}
 
           {visible.length === 0 && (
-            <li className="rounded-card border border-hairline bg-white p-10 text-center">
-              <BotIcon className="mx-auto h-8 w-8 text-gray-300" />
-              <p className="mt-2 text-sm font-semibold text-navy">No alerts in this view</p>
-              <p className="mt-1 text-xs text-gray-500">
+            <li className="glass-card rounded-3xl p-10 text-center shadow-glass">
+              <BotIcon className="mx-auto h-8 w-8 text-slate-400" />
+              <p className="mt-2 text-sm font-semibold text-navy dark:text-white">No alerts in this view</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Automated detection runs through the workday — new alerts appear here instantly.
               </p>
             </li>

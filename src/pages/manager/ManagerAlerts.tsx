@@ -85,7 +85,7 @@ export function ManagerAlerts() {
                 variant="secondary"
                 size="sm"
                 onClick={handleMarkAllRead}
-                icon={<CheckCheckIcon className="h-3.5 w-3.5 text-brand" />}
+                icon={<CheckCheckIcon className="h-3.5 w-3.5 text-brand dark:text-indigo-400" />}
               >
                 Mark All as Read
               </Button>
@@ -95,7 +95,7 @@ export function ManagerAlerts() {
                 variant="secondary"
                 size="sm"
                 onClick={handleClearAll}
-                icon={<Trash2Icon className="h-3.5 w-3.5 text-danger" />}
+                icon={<Trash2Icon className="h-3.5 w-3.5 text-rose-500" />}
               >
                 Clear All
               </Button>
@@ -109,12 +109,12 @@ export function ManagerAlerts() {
       />
 
       <div className="flex-1 space-y-5 p-6">
-        <Banner tone="yellow" icon={<AlertTriangleIcon className="h-4 w-4 text-amber-600" />}>
+        <Banner tone="yellow" icon={<AlertTriangleIcon className="h-4 w-4 text-amber-500" />}>
           Automated session heartbeats detect when developers are idle or miss check-ins. You can ping developers or assign tasks directly — they receive it instantly.
         </Banner>
 
         {toastMessage && (
-          <div className="flex items-center gap-2 rounded-xl bg-green-700 p-3 text-xs font-bold text-white shadow-md animate-in fade-in">
+          <div className="flex items-center gap-2 rounded-2xl bg-emerald-600/90 p-3.5 text-xs font-bold text-white shadow-glass backdrop-blur-md animate-in fade-in">
             <CheckCircle2Icon className="h-4 w-4" />
             {toastMessage}
           </div>
@@ -135,47 +135,49 @@ export function ManagerAlerts() {
           {filteredAlerts.map((alert: any) => (
             <div
               key={alert.id}
-              className={`rounded-card border bg-white p-5 shadow-card transition-all ${
+              className={`glass-card rounded-3xl p-5 shadow-glass backdrop-blur-2xl transition-all hover:shadow-xl ${
                 alert.unread
-                  ? alert.category === 'Idle' ? 'border-amber-300 border-l-4 border-l-amber-500' : 'border-red-200 border-l-4 border-l-red-500'
-                  : 'border-hairline'
+                  ? alert.category === 'Idle'
+                    ? 'border-amber-500/50 bg-white/90 dark:bg-slate-900/90 ring-1 ring-amber-500/20 shadow-[0_4px_20px_rgba(245,158,11,0.12)]'
+                    : 'border-rose-500/50 bg-white/90 dark:bg-slate-900/90 ring-1 ring-rose-500/20 shadow-[0_4px_20px_rgba(244,63,94,0.15)]'
+                  : 'bg-white/85 dark:bg-slate-900/85'
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                    alert.category === 'Idle' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${
+                    alert.category === 'Idle' ? 'bg-amber-500/20 text-amber-500 dark:text-amber-400' : 'bg-rose-500/20 text-rose-500 dark:text-rose-400'
                   }`}>
                     <UserXIcon className="h-5 w-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-navy">{alert.who} — {alert.category}</h3>
+                      <h3 className="text-sm font-bold text-navy dark:text-white">{alert.who} — {alert.category}</h3>
                       <Badge tone={alert.category === 'Idle' ? 'amber' : 'red'}>
                         {alert.category === 'Idle' ? `Idle ${alert.idleTime}` : 'Critical'}
                       </Badge>
                       {!alert.unread && <Badge tone="grey">Seen</Badge>}
                     </div>
-                    <p className="mt-0.5 text-xs text-gray-500">
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                       {alert.meta || alert.time} · Last Active: {alert.lastActive || 'unknown'}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">Pushed via Socket.IO</span>
+                  <span className="text-xs text-slate-400">Pushed via Socket.IO</span>
                   <button
                     onClick={() => handleDelete(alert.id)}
                     title="Delete Alert"
                     aria-label="Delete Alert"
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-danger transition-colors"
+                    className="rounded-xl p-1.5 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-colors"
                   >
                     <Trash2Icon className="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
-              <p className="mt-3 text-xs leading-relaxed text-gray-700 bg-canvas p-3 rounded-lg border border-hairline">
-                <span className="font-bold text-navy">Detection Log:</span> {alert.body}
+              <p className="glass-surface mt-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300 p-3.5 rounded-2xl">
+                <span className="font-bold text-navy dark:text-white">Detection Log:</span> {alert.body}
                 {alert.detection ? ` — ${alert.detection}` : ''}
               </p>
 
@@ -185,6 +187,7 @@ export function ManagerAlerts() {
                     size="sm"
                     onClick={() => handleSendPing(alert)}
                     icon={<SendIcon className="h-3.5 w-3.5" />}
+                    className="btn-glass-primary !from-indigo-600 !to-violet-600 text-white font-bold border-none"
                   >
                     Send Ping Reminder
                   </Button>
@@ -196,6 +199,7 @@ export function ManagerAlerts() {
                       setAssignModalOpen(true);
                     }}
                     icon={<PlusIcon className="h-3.5 w-3.5" />}
+                    className="btn-glass-primary !from-amber-500 !to-orange-500 hover:!from-amber-600 hover:!to-orange-600 text-white font-bold border-none"
                   >
                     Assign Pending Task
                   </Button>
@@ -203,7 +207,7 @@ export function ManagerAlerts() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => handleDismiss(alert.id)}
-                    className="text-xs font-semibold text-gray-400 hover:text-navy hover:underline"
+                    className="text-xs font-semibold text-slate-400 hover:text-navy dark:hover:text-white hover:underline transition-colors"
                   >
                     Dismiss Alert
                   </button>
@@ -211,7 +215,7 @@ export function ManagerAlerts() {
                     size="sm"
                     variant="ghost"
                     onClick={() => handleDelete(alert.id)}
-                    icon={<Trash2Icon className="h-3.5 w-3.5 text-danger" />}
+                    icon={<Trash2Icon className="h-3.5 w-3.5 text-rose-500" />}
                   >
                     Delete
                   </Button>
@@ -220,10 +224,10 @@ export function ManagerAlerts() {
             </div>
           ))}
           {filteredAlerts.length === 0 && (
-            <div className="rounded-card border border-hairline bg-white p-8 text-center">
-              <CheckCircle2Icon className="mx-auto h-8 w-8 text-green-500" />
-              <h3 className="mt-2 text-sm font-bold text-navy">No Active Idle Alerts</h3>
-              <p className="mt-1 text-xs text-gray-500">All developers on your managed teams are active or on schedule.</p>
+            <div className="glass-card rounded-3xl p-10 text-center shadow-glass">
+              <CheckCircle2Icon className="mx-auto h-8 w-8 text-emerald-400" />
+              <h3 className="mt-2 text-sm font-bold text-navy dark:text-white">No Active Idle Alerts</h3>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">All developers on your managed teams are active or on schedule.</p>
             </div>
           )}
         </div>

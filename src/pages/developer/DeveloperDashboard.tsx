@@ -58,6 +58,8 @@ export function DeveloperDashboard() {
     minsLeft: 20
   });
 
+  const lastAlertRef = useRef<{ slot: number; level: string } | null>(null);
+
   const navigate = useNavigate();
 
   const logs = data?.logs || [];
@@ -69,16 +71,20 @@ export function DeveloperDashboard() {
   const pendingRevisionsCount = pendingItems.length;
 
   const now = new Date();
+  const currentHour = now.getHours();
+  const isBeforeWork = currentHour < 8;
+  const isAfterWork = currentHour >= 17;
+  const isOutsideWorkHours = isBeforeWork || isAfterWork;
   const deadline = new Date(now);
   deadline.setMinutes(59, 59, 0);
   const currentMinute = now.getMinutes();
   const minutesLeft = Math.max(0, 60 - currentMinute);
-  const currentSlot = stats?.currentSlot ?? now.getHours();
+  const currentSlot = stats?.currentSlot ?? (isBeforeWork ? 8 : isAfterWork ? 16 : currentHour);
   const hasLoggedCurrentSlot = logs.some((log: any) => log.hourSlot === currentSlot);
   const currentSlotLabel = `${currentSlot > 12 ? currentSlot - 12 : currentSlot} ${currentSlot >= 12 ? 'PM' : 'AM'}`;
 
   const triggerTestAlert = async () => {
-    playAlertSound('pop');
+    playAlertSound('pop', true);
 
     if (typeof Notification !== 'undefined') {
       if (Notification.permission === 'default') {
@@ -97,7 +103,8 @@ export function DeveloperDashboard() {
 
     showWindowsNotification(
       'DevTrack Sound & Pop-Up Check',
-      'System audio pop sound and screen pop-up alerts are active!'
+      'System audio pop sound and screen pop-up alerts are active!',
+      true
     );
     setAlertModalState({
       open: true,
@@ -108,7 +115,7 @@ export function DeveloperDashboard() {
   };
 
   const devLunchSlot = user?.lunchSlot ?? 12;
-  const isLunchSlot = currentSlot === devLunchSlot;
+  const isLunchSlot = !isOutsideWorkHours && currentSlot === devLunchSlot;
   const lunchSlotLabel = devLunchSlot === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM';
   const lunchEndLabel = devLunchSlot === 11 ? '12:00 PM' : '1:00 PM';
 
@@ -116,15 +123,24 @@ export function DeveloperDashboard() {
   const holidayName = (data as any)?.holiday?.name || stats?.holidayName || 'Holiday';
 
   // Background monitor for 20m, 10m, 5m audio pop/chime sounds & Windows desktop notifications + Screen Pop-up Modal
+  // ONLY for developer role, strictly active between 8:00 AM and 5:00 PM (17:00).
   useEffect(() => {
     if (isHoliday) return;
+    if (user?.role !== 'developer') return;
+
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       Notification.requestPermission().catch(() => {});
     }
 
     const checkTimer = setInterval(() => {
       const d = new Date();
-      const slot = stats?.currentSlot ?? d.getHours();
+      const h = d.getHours();
+      
+      // Workday runs strictly from 8:00 AM to 5:00 PM (17:00).
+      // Before 8:00 AM or after 5:00 PM, silence all alerts.
+      if (h < 8 || h >= 17) return;
+
+      const slot = h; // Actual clock hour slot (8..16)
       
       // Lunch break (chosen slot 11 or 12) is exempt from all log check-in alerts and popups
       if (slot === devLunchSlot) return;
@@ -168,7 +184,7 @@ export function DeveloperDashboard() {
     }, 5000);
 
     return () => clearInterval(checkTimer);
-  }, [stats?.currentSlot, logs, devLunchSlot, isHoliday]);
+  }, [logs, devLunchSlot, isHoliday, user?.role]);
 
   const firstName = user?.name?.split(' ')[0] || 'there';
 
@@ -176,6 +192,7 @@ export function DeveloperDashboard() {
     <>
       <PageHeader
         title="My Dashboard"
+        subtitle="Track hourly productivity, active tasks, and daily work log submissions in real time"
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -192,13 +209,13 @@ export function DeveloperDashboard() {
       />
 
       <div className="flex-1 space-y-5 p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="glass-card flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6 rounded-3xl shadow-glass">
           <div>
-            <h2 className="text-[28px] font-bold leading-tight text-navy">
+            <h2 className="text-2xl sm:text-[28px] font-black leading-tight text-navy dark:text-white">
               {now.getHours() < 12 ? 'Good morning' : now.getHours() < 17 ? 'Good afternoon' : 'Good evening'}, {firstName} 👋
             </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              {now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · Team: <span className="font-semibold text-navy">{user?.teamName || 'Unassigned'}</span> · Project: <span className="font-semibold text-brand">{user?.projectName || activeProject?.name || 'Unassigned'}</span>
+            <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
+              {now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · Team: <span className="font-bold text-slate-900 dark:text-white">{user?.teamName || 'Unassigned'}</span> · Project: <span className="font-bold text-brand dark:text-indigo-400">{user?.projectName || activeProject?.name || 'Unassigned'}</span>
             </p>
           </div>
           <Badge tone="green" dot>
@@ -296,6 +313,32 @@ export function DeveloperDashboard() {
               </div>
             </div>
           </div>
+        ) : isBeforeWork ? (
+          <Banner
+            tone="blue"
+            icon={<AlarmClockIcon className="h-4 w-4 text-blue-600" />}
+            title={`Office Hours Begin at 8:00 AM (${minutesLeft}m remaining)`}
+            action={
+              <Button onClick={() => handleOpenLog()}>
+                + Early Check-in
+              </Button>
+            }
+          >
+            Mandatory check-in slots run from 8:00 AM to 5:00 PM. Automated audio pop sounds and Windows desktop notifications will activate starting from the 8:00 AM slot.
+          </Banner>
+        ) : isAfterWork ? (
+          <Banner
+            tone="green"
+            icon={<CheckCircle2Icon className="h-4 w-4 text-emerald-600" />}
+            title="Workday Completed (Office Hours Ended at 5:00 PM)"
+            action={
+              <Button onClick={() => handleOpenLog()}>
+                + Add Log
+              </Button>
+            }
+          >
+            All daily mandatory hourly check-in slots are closed for today. Audio alerts and screen pop-up notifications are turned off until 8:00 AM tomorrow.
+          </Banner>
         ) : (
           <Banner
             tone={
@@ -334,19 +377,9 @@ export function DeveloperDashboard() {
                 : `Check-In Due: ${minutesLeft} minutes remaining for ${currentSlotLabel} slot`
             }
             action={
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={triggerTestAlert}
-                  icon={<Volume2Icon className="h-3.5 w-3.5 text-brand" />}
-                >
-                  Test Audio & Windows Alert
-                </Button>
-                <Button onClick={() => handleOpenLog(isLunchSlot ? undefined : currentSlot)}>
-                  {hasLoggedCurrentSlot || isLunchSlot ? '+ Add Log' : 'Log Now'}
-                </Button>
-              </div>
+              <Button onClick={() => handleOpenLog(isLunchSlot ? undefined : currentSlot)}>
+                {hasLoggedCurrentSlot || isLunchSlot ? '+ Add Log' : 'Log Now'}
+              </Button>
             }
           >
             {isLunchSlot

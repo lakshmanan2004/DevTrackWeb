@@ -4,8 +4,8 @@ import {
   CheckCircle2Icon,
   FileTextIcon,
   Trash2Icon,
-  XCircleIcon } from
-'lucide-react';
+  XCircleIcon
+} from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { FilterPills } from '../../components/ui/FilterPills';
 import { Button } from '../../components/ui/Button';
@@ -15,30 +15,30 @@ import { api } from '../../api/client';
 
 const kindMeta: Record<
   DevAlert['kind'],
-  {icon: React.ReactNode;wrap: string;iconWrap: string;label: string;}> =
-{
+  { icon: React.ReactNode; wrap: string; iconWrap: string; label: string }
+> = {
   reminder: {
-    icon: <AlarmClockIcon className="h-4 w-4" />,
-    wrap: 'border-amber-200 bg-warn-soft',
-    iconWrap: 'bg-warn/15 text-amber-600',
+    icon: <AlarmClockIcon className="h-5 w-5" />,
+    wrap: 'border-amber-400/50 bg-amber-500/15 dark:bg-amber-500/20 shadow-glass backdrop-blur-2xl ring-1 ring-amber-400/30',
+    iconWrap: 'bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/40',
     label: 'Reminder'
   },
   approval: {
-    icon: <CheckCircle2Icon className="h-4 w-4" />,
-    wrap: 'border-green-200 bg-ok-soft',
-    iconWrap: 'bg-ok/15 text-green-600',
+    icon: <CheckCircle2Icon className="h-5 w-5" />,
+    wrap: 'border-emerald-400/50 bg-emerald-500/15 dark:bg-emerald-500/20 shadow-glass backdrop-blur-2xl ring-1 ring-emerald-400/30',
+    iconWrap: 'bg-emerald-500/25 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40',
     label: 'Approval'
   },
   rejection: {
-    icon: <XCircleIcon className="h-4 w-4" />,
-    wrap: 'border-red-200 bg-danger-soft',
-    iconWrap: 'bg-danger/15 text-danger',
+    icon: <XCircleIcon className="h-5 w-5" />,
+    wrap: 'border-rose-400/50 bg-rose-500/15 dark:bg-rose-500/20 shadow-glass backdrop-blur-2xl ring-1 ring-rose-400/30',
+    iconWrap: 'bg-rose-500/25 text-rose-800 dark:text-rose-300 border border-rose-500/40',
     label: 'Rejection'
   },
   eod: {
-    icon: <FileTextIcon className="h-4 w-4" />,
-    wrap: 'border-hairline bg-white',
-    iconWrap: 'bg-gray-100 text-gray-500',
+    icon: <FileTextIcon className="h-5 w-5" />,
+    wrap: 'border-blue-400/50 bg-blue-500/15 dark:bg-blue-500/20 shadow-glass backdrop-blur-2xl ring-1 ring-blue-400/30',
+    iconWrap: 'bg-blue-500/25 text-blue-800 dark:text-blue-300 border border-blue-500/40',
     label: 'EOD'
   }
 };
@@ -88,79 +88,97 @@ export function DeveloperAlerts() {
               </Button>
             )}
           </div>
-        } />
+        }
+      />
 
-
-      <div className="flex-1 space-y-5 p-6">
+      <div className="flex-1 space-y-6 p-6 sm:p-8">
         <FilterPills
           ariaLabel="Filter alerts"
           value={filter}
           onChange={setFilter}
           options={[
-          { id: 'all', label: 'All', count: alerts.length },
-          { id: 'unread', label: 'Unread', count: alerts.filter((a: DevAlert) => a.unread).length },
-          { id: 'reminders', label: 'Reminders' },
-          { id: 'rejections', label: 'Rejections' },
-          { id: 'approvals', label: 'Approvals' }]
-          } />
+            { id: 'all', label: 'All', count: alerts.length },
+            { id: 'unread', label: 'Unread', count: alerts.filter((a: DevAlert) => a.unread).length },
+            { id: 'reminders', label: 'Reminders' },
+            { id: 'rejections', label: 'Rejections' },
+            { id: 'approvals', label: 'Approvals' }
+          ]}
+        />
 
-
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {visible.map((alert: DevAlert) => {
             const meta = kindMeta[alert.kind] || kindMeta.reminder;
             return (
               <li
                 key={alert.id}
-                className={`flex flex-wrap items-center gap-4 rounded-card border p-4 shadow-card ${
-                alert.unread ? meta.wrap : 'border-hairline bg-white'}`
-                }>
-                <span
-                  className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${meta.iconWrap}`}>
-                  {meta.icon}
-                </span>
-                <div className="min-w-[200px] flex-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-bold text-navy">{alert.title}</h2>
-                    {alert.unread &&
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-label="Unread" />
-                    }
+                className={`flex flex-wrap items-center justify-between gap-5 rounded-3xl border px-6 py-5 backdrop-blur-2xl shadow-glass transition-all hover:shadow-xl ${
+                  alert.unread
+                    ? meta.wrap
+                    : 'glass-surface bg-white/40 dark:bg-white/[0.08] border-white/60 dark:border-white/15'
+                }`}
+              >
+                <div className="flex items-start gap-4 flex-1 min-w-[280px]">
+                  <span
+                    className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-xs ${meta.iconWrap}`}
+                  >
+                    {meta.icon}
+                  </span>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm sm:text-base font-bold text-slate-950 dark:text-white tracking-tight leading-snug">
+                        {alert.title}
+                      </h2>
+                      {alert.unread && (
+                        <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-indigo-400 shadow-sm animate-pulse" aria-label="Unread" />
+                      )}
+                    </div>
+                    <p className="text-xs sm:text-sm font-medium text-slate-950 dark:text-slate-100 leading-relaxed">
+                      {alert.body}
+                    </p>
+                    <p className="text-[11px] sm:text-xs font-medium text-slate-800 dark:text-slate-300 pt-0.5">
+                      {alert.time}
+                    </p>
                   </div>
-                  <p className="mt-0.5 text-sm text-gray-600">{alert.body}</p>
-                  <p className="mt-1 text-xs text-gray-400">{alert.time}</p>
                 </div>
-                <div className="flex items-center gap-2">
+
+                <div className="flex items-center gap-3 shrink-0">
                   {alert.unread ? (
                     <Button
                       variant="primary"
                       size="sm"
+                      className="px-4 py-2 text-xs font-bold rounded-xl shadow-md"
                       onClick={async () => {
                         await api(`/api/alerts/${alert.id}/action`, { method: 'POST', body: { action: 'Mark Seen' } });
                         refetch();
-                      }}>
-                        Mark Seen
-                      </Button>
+                      }}
+                    >
+                      Mark Seen
+                    </Button>
                   ) : (
-                    <span className="text-xs font-semibold text-gray-400">Seen</span>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300 px-2 py-1 rounded-lg bg-white/20 dark:bg-white/10">Seen</span>
                   )}
                   <button
                     type="button"
                     onClick={() => handleDelete(alert.id)}
                     title="Delete Alert"
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-danger transition-colors"
+                    className="rounded-xl p-2 text-slate-500 dark:text-slate-300 hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
                   >
                     <Trash2Icon className="h-4 w-4" />
                   </button>
                 </div>
-              </li>);
+              </li>
+            );
           })}
           {alerts.length === 0 && (
-            <li className="rounded-card border border-hairline bg-white p-10 text-center">
-              <p className="text-sm font-semibold text-navy">No alerts yet</p>
-              <p className="mt-1 text-xs text-gray-500">Reminders, approvals and rejections will appear here in real time.</p>
+            <li className="glass-card rounded-3xl p-12 text-center shadow-glass">
+              <p className="text-base font-black text-slate-900 dark:text-white">No alerts yet</p>
+              <p className="mt-1 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300">
+                Reminders, approvals and rejections will appear here in real time.
+              </p>
             </li>
           )}
         </ul>
       </div>
-    </>);
-
+    </>
+  );
 }

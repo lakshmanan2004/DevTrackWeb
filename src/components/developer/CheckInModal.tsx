@@ -9,6 +9,7 @@ import {
   XIcon } from
 'lucide-react';
 import { Button } from '../ui/Button';
+import { Select } from '../ui/Select';
 import { TaskStatus } from '../../types';
 import { taskStatusMeta } from '../ui/TaskStatusBadge';
 import { useLive } from '../../hooks/useLive';
@@ -147,21 +148,22 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
 
   return (
     <div
-      className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-start justify-center overflow-y-auto bg-navy/50 p-4 sm:p-8 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/40 p-4 sm:p-6 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="checkin-title">
-      <div className="w-full max-w-[540px] overflow-hidden rounded-2xl bg-white shadow-pop">
-        <div className="flex items-start justify-between gap-4 border-b border-hairline px-5 py-4">
-          <div className="flex gap-3">
-            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-soft">
-              <TimerIcon className="h-4 w-4 text-brand" aria-hidden="true" />
+      aria-labelledby="checkin-title"
+    >
+      <div className="glass-modal w-full max-w-[560px] overflow-hidden p-0 shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200/60 px-6 py-5">
+          <div className="flex items-center gap-3.5">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand/10 border border-brand/20 text-brand shadow-glass">
+              <TimerIcon className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 id="checkin-title" className="text-base font-bold text-navy">
+              <h2 id="checkin-title" className="text-base font-black text-navy tracking-tight">
                 Hourly Check-in
               </h2>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="mt-0.5 text-xs text-slate-500 font-medium">
                 {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} ·
                 {' '}{targetSlot !== undefined ? `${targetSlot > 12 ? targetSlot - 12 : targetSlot} ${targetSlot >= 12 ? 'PM' : 'AM'} slot` : 'current hour slot'}
               </p>
@@ -171,53 +173,54 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
             type="button"
             onClick={onClose}
             aria-label="Close check-in form"
-            className="rounded-md p-1.5 text-gray-400 transition-colors duration-150 ease-out hover:bg-gray-100 hover:text-gray-600">
+            className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+          >
             <XIcon className="h-4 w-4" />
           </button>
         </div>
 
-        <form className="max-h-[70vh] space-y-5 overflow-y-auto px-5 py-5" onSubmit={(e) => e.preventDefault()}>
+        <form className="max-h-[72vh] space-y-5 overflow-y-auto p-6" onSubmit={(e) => e.preventDefault()}>
           {pendingTasks.length > 0 && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3">
-              <label htmlFor="ci-assigned-task" className="mb-1 block text-xs font-bold text-amber-900 flex items-center gap-1.5">
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 backdrop-blur-md">
+              <label className="mb-1.5 block text-xs font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
                 ⚡ Submit for an Assigned Lead Task? (Optional)
               </label>
-              <select
-                id="ci-assigned-task"
+              <Select
                 value={selectedTaskId}
-                onChange={(e) => handleTaskSelect(e.target.value)}
-                className="h-9 w-full rounded-lg border border-amber-300 bg-white px-3 text-xs font-medium text-navy focus:outline-none"
-              >
-                <option value="">— None (Standard Hourly Log) —</option>
-                {pendingTasks.map((t: any) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title} (Due: {t.dueDate})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => handleTaskSelect(String(val))}
+                placeholder="— None (Standard Hourly Log) —"
+                options={[
+                  { value: '', label: '— None (Standard Hourly Log) —' },
+                  ...pendingTasks.map((t: any) => ({
+                    value: t.id,
+                    label: t.title,
+                    description: `Due: ${t.dueDate} · Priority: ${t.priority || 'Normal'}`
+                  }))
+                ]}
+              />
             </div>
           )}
 
           <div>
-            <label htmlFor="ci-project" className="mb-1.5 block text-sm font-semibold text-navy">
-              Which project is this log for? <span className="text-danger">*</span>
+            <label className="mb-1.5 block text-xs font-bold text-navy dark:text-white">
+              Which project is this log for? <span className="text-red-500">*</span>
             </label>
-            <select
-              id="ci-project"
+            <Select
               value={projectId}
-              onChange={(event) => setProjectId(event.target.value)}
-              className="h-10 w-full rounded-lg border border-hairline bg-white px-3 text-sm text-navy">
-              <option value="">Select Project</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+              onChange={(val) => setProjectId(String(val))}
+              placeholder="Select Project..."
+              options={projects.map((p) => ({
+                value: p.id,
+                label: p.name,
+                description: p.description
+              }))}
+            />
             {projects.length === 0 ? (
-              <p className="mt-1.5 text-xs font-semibold text-amber-700">
+              <p className="mt-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
                 You haven't been added to a project team yet — ask your Project Manager to add you.
               </p>
             ) : (
-              <p className="mt-1.5 text-xs text-gray-500">
+              <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                 Your log will be visible to the Team Leader of the selected project only.
               </p>
             )}
@@ -225,31 +228,29 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
 
           {activeModules.length > 0 && (
             <div>
-              <label htmlFor="ci-module" className="mb-1.5 block text-sm font-semibold text-navy flex items-center justify-between">
-                <span>Select Project Module <span className="text-danger">*</span></span>
-                <span className="text-xs font-normal text-brand font-mono">Decoupled Delivery Tracker</span>
-              </label>
-              <select
-                id="ci-module"
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-xs font-bold text-navy dark:text-white">Select Project Module <span className="text-red-500">*</span></span>
+                <span className="text-[11px] font-bold text-brand font-mono">Decoupled Delivery Tracker</span>
+              </div>
+              <Select
                 value={activeModuleName}
-                onChange={(event) => setSelectedModuleName(event.target.value)}
-                className="h-10 w-full rounded-lg border border-brand bg-white px-3 text-xs font-bold text-navy shadow-xs focus:outline-none"
-              >
-                {activeModules.map((m: any) => (
-                  <option key={m.id || m.name} value={m.name}>
-                    {m.name} ({m.weightPercentage}% Weight)
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-[11px] text-gray-500">
+                onChange={(val) => setSelectedModuleName(String(val))}
+                placeholder="Select Module..."
+                options={activeModules.map((m: any) => ({
+                  value: m.name,
+                  label: m.name,
+                  badge: `${m.weightPercentage}% Weight`
+                }))}
+              />
+              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                 Grouping your work log under this module allows Team Leads to inspect proof before completing milestones.
               </p>
             </div>
           )}
 
           <div>
-            <label htmlFor="ci-desc" className="mb-1.5 block text-sm font-semibold text-navy">
-              What did you work on? <span className="text-danger">*</span>
+            <label htmlFor="ci-desc" className="mb-1.5 block text-xs font-bold text-navy">
+              What did you work on? <span className="text-red-500">*</span>
             </label>
             <textarea
               id="ci-desc"
@@ -257,23 +258,24 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               placeholder="e.g. Fixed auth bug, reviewed PR"
-              className="w-full rounded-lg border border-hairline px-3 py-2.5 text-sm leading-relaxed text-navy placeholder:text-gray-400" />
-            <div className="mt-1.5 flex items-center justify-between text-xs">
-              <span className={wordsOk ? 'font-semibold text-green-600' : 'text-gray-500'}>
+              className="glass-input w-full p-3.5 text-xs leading-relaxed text-navy placeholder:text-slate-400 font-normal"
+            />
+            <div className="mt-1.5 flex items-center justify-between text-xs font-medium">
+              <span className={wordsOk ? 'font-bold text-emerald-600' : 'text-slate-400'}>
                 {wordCount} / min {MIN_WORDS} words
               </span>
-              {!wordsOk &&
-              <span className="inline-flex items-center gap-1.5 font-semibold text-danger">
+              {!wordsOk && (
+                <span className="inline-flex items-center gap-1.5 font-bold text-rose-600">
                   <AlertTriangleIcon className="h-3.5 w-3.5" aria-hidden="true" />
                   Minimum 30 words required
                 </span>
-              }
+              )}
             </div>
           </div>
 
           <fieldset>
-            <legend className="mb-2 text-sm font-semibold text-navy">
-              Task Status <span className="text-danger">*</span>
+            <legend className="mb-2 text-xs font-bold text-navy">
+              Task Status <span className="text-red-500">*</span>
             </legend>
             <div className="flex flex-wrap gap-2">
               {statusOrder.map((option) => {
@@ -285,35 +287,38 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
                     type="button"
                     aria-pressed={selected}
                     onClick={() => setStatus(option)}
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors duration-150 ease-out ${
-                    selected ?
-                    'border-brand bg-brand text-white' :
-                    'border-hairline bg-white text-gray-600 hover:bg-gray-50'}`}
+                    className={`inline-flex items-center gap-1.5 rounded-2xl px-3.5 py-1.5 text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      selected
+                        ? 'btn-glass-primary !text-white border-transparent scale-[1.02]'
+                        : 'glass-surface border-white/80 text-slate-600 hover:bg-white/80'
+                    }`}
                   >
                     {meta.icon}
                     {meta.label}
-                  </button>);
+                  </button>
+                );
               })}
             </div>
           </fieldset>
 
-          {status === 'blocked' &&
-          <div className="rounded-lg border border-orange-200 bg-orange-50 p-3.5">
-              <label htmlFor="ci-blocker" className="block text-sm font-semibold text-orange-900">
+          {status === 'blocked' && (
+            <div className="rounded-2xl border border-orange-500/30 bg-orange-500/10 p-4 backdrop-blur-md">
+              <label htmlFor="ci-blocker" className="block text-xs font-bold text-orange-950 dark:text-orange-200">
                 What is blocking you?
               </label>
               <textarea
-              id="ci-blocker"
-              rows={3}
-              value={blocker}
-              onChange={(event) => setBlocker(event.target.value)}
-              placeholder="Describe the blocker and who can unblock you"
-              className="mt-2 w-full rounded-lg border border-orange-200 px-3 py-2.5 text-sm text-navy placeholder:text-orange-300" />
+                id="ci-blocker"
+                rows={3}
+                value={blocker}
+                onChange={(event) => setBlocker(event.target.value)}
+                placeholder="Describe the blocker and who can unblock you"
+                className="glass-input mt-2 w-full p-3 text-xs text-navy placeholder:text-orange-300"
+              />
             </div>
-          }
+          )}
 
           <div>
-            <label htmlFor="ci-minutes" className="mb-1.5 block text-sm font-semibold text-navy">
+            <label htmlFor="ci-minutes" className="mb-1.5 block text-xs font-bold text-navy">
               Active minutes this hour
             </label>
             <input
@@ -323,13 +328,14 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
               max={60}
               value={minutes}
               onChange={(event) => setMinutes(Number(event.target.value))}
-              className="w-full accent-blue-600" />
-            <p className="mt-1 text-xs font-semibold tabular-nums text-gray-600">{minutes} minutes</p>
+              className="w-full accent-blue-600"
+            />
+            <p className="mt-1 text-xs font-bold tabular-nums text-slate-500">{minutes} minutes</p>
           </div>
 
           <div>
-            <p className="mb-1.5 text-sm font-semibold text-navy">
-              Screenshot Proof <span className="text-danger">*</span>
+            <p className="mb-1.5 text-xs font-bold text-navy">
+              Screenshot Proof <span className="text-red-500">*</span>
             </p>
             <input
               ref={fileInputRef}
@@ -339,9 +345,9 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
               onChange={handleFileChange}
             />
             {file ? (
-              <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-ok-soft px-3.5 py-3">
-                <CheckCircle2Icon className="h-4 w-4 text-ok" aria-hidden="true" />
-                <p className="truncate text-sm font-semibold text-green-800">{file.name}</p>
+              <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 backdrop-blur-md">
+                <CheckCircle2Icon className="h-5 w-5 text-emerald-600 shrink-0" aria-hidden="true" />
+                <p className="truncate text-xs font-bold text-emerald-800 dark:text-emerald-300">{file.name}</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -349,7 +355,8 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
                     setFileError('');
                     if (fileInputRef.current) fileInputRef.current.value = '';
                   }}
-                  className="ml-auto text-xs font-semibold text-green-700 hover:underline">
+                  className="ml-auto text-xs font-bold text-emerald-700 hover:underline cursor-pointer"
+                >
                   Replace
                 </button>
               </div>
@@ -357,20 +364,21 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className={`flex w-full flex-col items-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 transition-colors duration-150 ease-out ${
+                className={`flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-4 py-6 transition-all duration-200 cursor-pointer ${
                   fileError
-                    ? 'border-red-300 bg-danger-soft hover:border-danger'
-                    : 'border-gray-300 bg-gray-50 hover:border-brand hover:bg-brand-soft'
-                }`}>
-                <UploadCloudIcon className={`h-5 w-5 ${fileError ? 'text-danger' : 'text-gray-400'}`} aria-hidden="true" />
-                <span className="text-sm font-semibold text-navy">
+                    ? 'border-rose-300 bg-rose-50/40 hover:border-rose-500'
+                    : 'glass-surface border-slate-300 hover:border-blue-500 hover:bg-white/80'
+                }`}
+              >
+                <UploadCloudIcon className={`h-6 w-6 ${fileError ? 'text-rose-500' : 'text-slate-400'}`} aria-hidden="true" />
+                <span className="text-xs font-bold text-navy">
                   Drop screenshot or click to browse
                 </span>
-                <span className="text-xs text-gray-500">Required · PNG JPG PDF · Max 10MB</span>
+                <span className="text-[11px] text-slate-400 font-medium">Required · PNG JPG PDF · Max 10MB</span>
               </button>
             )}
             {fileError && (
-              <div className="mt-2 flex items-start gap-2 rounded-lg border border-red-200 bg-danger-soft p-2.5 text-xs font-semibold text-danger">
+              <div className="mt-2 flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-2.5 text-xs font-bold text-rose-600">
                 <AlertTriangleIcon className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{fileError}</span>
               </div>
@@ -378,46 +386,50 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
           </div>
 
           <div>
-            <label htmlFor="ci-commit" className="mb-1.5 block text-sm font-semibold text-navy">
+            <label htmlFor="ci-commit" className="mb-1.5 block text-xs font-bold text-navy">
               GitHub Commit Link
             </label>
             <div className="relative">
               <GithubIcon
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                aria-hidden="true" />
+                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                aria-hidden="true"
+              />
               <input
                 id="ci-commit"
                 value={commitUrl}
                 onChange={(event) => setCommitUrl(event.target.value)}
                 placeholder="github.com/you/repo/commit/a3f2b1"
-                className="h-10 w-full rounded-lg border border-hairline pl-10 pr-3 text-sm text-navy placeholder:text-gray-400" />
+                className="glass-input h-10 w-full pl-10 pr-3.5 text-xs text-navy placeholder:text-slate-400 font-medium"
+              />
             </div>
-            <p className="mt-1.5 text-xs text-gray-500">Linked as proof for coding tasks</p>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Linked as proof for coding tasks</p>
           </div>
 
-          {error &&
-          <p className="rounded-lg border border-red-200 bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">
+          {error && (
+            <p className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-xs font-bold text-rose-600">
               {error}
             </p>
-          }
+          )}
         </form>
 
-        <div className="flex items-center justify-between gap-3 border-t border-hairline bg-canvas px-5 py-4">
-          <p className="text-xs text-gray-500">
-            <span className="text-danger">*</span> required fields
+        <div className="flex items-center justify-between gap-3 border-t border-slate-200/60 p-5 bg-slate-50/40">
+          <p className="text-[11px] text-slate-400 font-medium">
+            <span className="text-red-500">*</span> required fields
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>
             <Button
               disabled={!canSubmit}
               onClick={handleSubmit}
-              icon={<ArrowRightIcon className="h-4 w-4" />}>
+              icon={<ArrowRightIcon className="h-4 w-4" />}
+            >
               {busy ? 'Submitting…' : 'Submit Log'}
             </Button>
           </div>
         </div>
       </div>
-    </div>);
+    </div>
+  );
 }

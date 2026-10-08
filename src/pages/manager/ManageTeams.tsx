@@ -4,6 +4,7 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { Select } from '../../components/ui/Select';
 import { useTeams, useLive } from '../../hooks/useLive';
 import { AssignTaskModal } from '../../components/common/AssignTaskModal';
 import { api } from '../../api/client';
@@ -14,13 +15,14 @@ export function ManageTeams() {
   const { data: dir } = useLive<{ users: any[] }>('/api/directory', [], 0);
   const directory = dir?.users || [];
 
-  const [tab, setTab] = useState('all');
+  const [tab, setTab] = useState('');
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [targetDevId, setTargetDevId] = useState<string | undefined>();
   const [addSelect, setAddSelect] = useState<Record<string, string>>({});
   const [toast, setToast] = useState('');
 
-  const visible = tab === 'all' ? teams : teams.filter((team: any) => team.id === tab);
+  const selectedTeam = teams.find((team: any) => team.id === tab);
+  const visible = selectedTeam ? [selectedTeam] : [];
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -86,37 +88,36 @@ export function ManageTeams() {
         )}
 
         {/* PROJECT FILTER DROPDOWN */}
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-4 shadow-glass">
+        <div className="relative z-30 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-4 shadow-glass">
           <div className="flex flex-wrap items-center gap-3.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 dark:bg-brand/20 text-brand dark:text-sky-400">
               <FolderIcon className="h-5 w-5" />
             </div>
             <div>
-              <label htmlFor="project-filter-select" className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 block">
-                Filter by Project / Team
-              </label>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                <select
-                  id="project-filter-select"
-                  value={tab}
-                  onChange={(e) => setTab(e.target.value)}
-                  className="h-10 min-w-[280px] max-w-lg rounded-xl border border-hairline dark:border-white/10 bg-canvas/60 dark:bg-slate-800 px-3 text-sm font-semibold text-navy dark:text-white shadow-2xs focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand cursor-pointer"
-                >
-                  <option value="all">📁 All Projects &amp; Teams ({teams.length})</option>
-                  {teams.map((t: any) => (
-                    <option key={t.id} value={t.id}>
-                      {t.project ? `${t.project} (${t.name})` : t.name}
-                    </option>
-                  ))}
-                </select>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="w-80">
+                  <Select
+                    size="md"
+                    fullWidth
+                    value={tab}
+                    onChange={(val) => setTab(val)}
+                    placeholder="— Select a Project / Team —"
+                    options={teams.map((t: any) => ({
+                      value: t.id,
+                      label: t.project ? `${t.project} (${t.name})` : t.name,
+                      badge: `${t.members?.length || 0} devs`
+                    }))}
+                    searchable
+                  />
+                </div>
 
-                {tab !== 'all' && (
+                {tab && (
                   <button
                     type="button"
-                    onClick={() => setTab('all')}
+                    onClick={() => setTab('')}
                     className="rounded-xl border border-hairline dark:border-white/10 bg-canvas dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-2 text-xs font-bold text-gray-600 dark:text-slate-200 transition-colors"
                   >
-                    Clear Filter
+                    Clear Selection
                   </button>
                 )}
               </div>
@@ -124,13 +125,24 @@ export function ManageTeams() {
           </div>
 
           <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
-            <span>Showing <strong className="text-navy dark:text-white">{visible.length}</strong> of <strong className="text-navy dark:text-white">{teams.length}</strong> teams</span>
+            <span>{selectedTeam ? `Selected: 1 of ${teams.length} teams` : `${teams.length} total team${teams.length === 1 ? '' : 's'}`}</span>
           </div>
         </div>
 
         <div className="space-y-5">
-          {visible.map((team: any) => (
-            <section key={team.id} className="rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-glass">
+          {!selectedTeam ? (
+            <div className="rounded-3xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-12 text-center shadow-glass space-y-3">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 dark:bg-brand/20 text-brand dark:text-sky-400">
+                <FolderIcon className="h-7 w-7" />
+              </div>
+              <h3 className="text-base font-bold text-navy dark:text-white">Select a Project &amp; Team</h3>
+              <p className="text-xs text-gray-500 dark:text-slate-400 max-w-md mx-auto">
+                Please select a project or team from the dropdown above to view its Team Leader, manage developers, and assign tasks.
+              </p>
+            </div>
+          ) : (
+            visible.map((team: any) => (
+              <section key={team.id} className="relative z-10 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-glass">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline dark:border-white/10 px-5 py-4">
                 <div>
                   <h2 className="text-base font-bold text-navy dark:text-white">{team.name}</h2>
@@ -149,16 +161,20 @@ export function ManageTeams() {
                       </Badge>
                     </div>
                   </div>
-                  <select
-                    value=""
-                    onChange={(e) => e.target.value && changeLeader(team.id, e.target.value)}
-                    className="h-9 rounded-xl border border-hairline dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-semibold text-navy dark:text-white cursor-pointer"
-                  >
-                    <option value="">Change leader to…</option>
-                    {directory.filter((u: any) => u.role === 'leader').map((l: any) => (
-                      <option key={l.id} value={l.id}>{l.name}</option>
-                    ))}
-                  </select>
+                  <div className="w-56">
+                    <Select
+                      size="sm"
+                      fullWidth
+                      value=""
+                      placeholder="Change leader to…"
+                      onChange={(val) => val && changeLeader(team.id, val)}
+                      options={directory.filter((u: any) => u.role === 'leader').map((l: any) => ({
+                        value: l.id,
+                        label: l.name
+                      }))}
+                      searchable
+                    />
+                  </div>
                 </div>
 
                 <h3 className="mt-5 text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
@@ -199,20 +215,20 @@ export function ManageTeams() {
                 {availableToAdd(team).length > 0 && (
                   <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border-2 border-dashed border-gray-300 dark:border-white/20 px-4 py-3.5">
                     <p className="text-sm font-semibold text-navy dark:text-white">Add Developer</p>
-                    <label className="sr-only" htmlFor={`add-${team.id}`}>
-                      Select a developer to add to {team.name}
-                    </label>
-                    <select
-                      id={`add-${team.id}`}
-                      value={addSelect[team.id] || ''}
-                      onChange={(e) => setAddSelect({ ...addSelect, [team.id]: e.target.value })}
-                      className="h-9 flex-1 rounded-xl border border-hairline dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm text-navy dark:text-white cursor-pointer"
-                    >
-                      <option value="">Select developer…</option>
-                      {availableToAdd(team).map((d: any) => (
-                        <option key={d.id} value={d.id}>{d.name}</option>
-                      ))}
-                    </select>
+                    <div className="flex-1 min-w-[200px]">
+                      <Select
+                        size="sm"
+                        fullWidth
+                        value={addSelect[team.id] || ''}
+                        placeholder="Select developer…"
+                        onChange={(val) => setAddSelect({ ...addSelect, [team.id]: val })}
+                        options={availableToAdd(team).map((d: any) => ({
+                          value: d.id,
+                          label: d.name
+                        }))}
+                        searchable
+                      />
+                    </div>
                     <Button
                       size="sm"
                       variant="purple"
@@ -226,7 +242,7 @@ export function ManageTeams() {
                 )}
               </div>
             </section>
-          ))}
+          )))}
           {teams.length === 0 && (
             <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-12 text-center">
               <p className="text-sm font-semibold text-navy dark:text-white">No teams yet</p>

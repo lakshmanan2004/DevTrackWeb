@@ -45,11 +45,11 @@ export function MyProjects() {
   };
 
   const summary = [
-  { label: 'Total', value: myProjects.length, tone: 'text-navy' },
-  { label: 'Ongoing', value: myProjects.filter((p: any) => p.status === 'ongoing').length, tone: 'text-brand' },
-  { label: 'Completed', value: myProjects.filter((p: any) => p.status === 'completed').length, tone: 'text-green-600' },
-  { label: 'Teams', value: new Set(myProjects.map((p: any) => p.teamId)).size, tone: 'text-pm' }];
-
+    { label: 'Total', value: myProjects.length, tone: 'text-navy dark:text-white' },
+    { label: 'Ongoing', value: myProjects.filter((p: any) => p.status === 'ongoing').length, tone: 'text-brand dark:text-indigo-400' },
+    { label: 'Completed', value: myProjects.filter((p: any) => p.status === 'completed').length, tone: 'text-emerald-500 dark:text-emerald-400' },
+    { label: 'Teams', value: new Set(myProjects.map((p: any) => p.teamId)).size, tone: 'text-violet-500 dark:text-violet-400' }
+  ];
 
   return (
     <>
@@ -57,28 +57,31 @@ export function MyProjects() {
         title="My Projects"
         subtitle={`${user?.name} · Project Manager`}
         actions={
-        <Link to="/manager/create">
-            <Button icon={<PlusIcon className="h-4 w-4" />}>Create New Project</Button>
+          <Link to="/manager/create">
+            <Button icon={<PlusIcon className="h-4 w-4" />} className="btn-glass-primary !from-indigo-600 !to-violet-600 text-white font-bold border-none">
+              Create New Project
+            </Button>
           </Link>
-        } />
-
+        }
+      />
 
       <div className="flex-1 space-y-5 p-6">
         <dl className="flex flex-wrap gap-3">
-          {summary.map((item) =>
-          <div
-            key={item.label}
-            className="inline-flex items-center gap-2 rounded-full border border-hairline bg-white px-4 py-2 shadow-card">
-              <dt className="text-xs font-semibold text-gray-500">{item.label}</dt>
+          {summary.map((item) => (
+            <div
+              key={item.label}
+              className="glass-surface inline-flex items-center gap-2 rounded-2xl px-4 py-2 shadow-glass"
+            >
+              <dt className="text-xs font-semibold text-slate-500 dark:text-slate-400">{item.label}</dt>
               <dd className={`text-sm font-bold tabular-nums ${item.tone}`}>{item.value}</dd>
             </div>
-          )}
+          ))}
         </dl>
 
         {myProjects.length === 0 && (
-          <div className="rounded-card border border-dashed border-gray-300 bg-white p-12 text-center">
-            <p className="text-sm font-semibold text-navy">No projects yet</p>
-            <p className="mt-1 text-sm text-gray-500">Create your first project and team from the Create Project page.</p>
+          <div className="glass-card rounded-3xl p-12 text-center shadow-glass">
+            <p className="text-sm font-semibold text-navy dark:text-white">No projects yet</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Create your first project and team from the Create Project page.</p>
           </div>
         )}
 
@@ -88,20 +91,19 @@ export function MyProjects() {
             return (
               <li
                 key={project.id}
-                className={`rounded-card border border-hairline border-l-4 bg-white p-5 shadow-card ${
-                completed ? 'border-l-ok bg-gray-50' : 'border-l-brand-light'}`
-                }>
+                className="glass-card rounded-3xl p-6 shadow-glass transition-all hover:shadow-xl space-y-4"
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <h2 className="text-base font-bold text-navy">{project.name}</h2>
+                      <h2 className="text-base font-bold text-navy dark:text-white">{project.name}</h2>
                       <Badge tone={completed ? 'green' : 'blue'} dot>
                         {completed ? 'Completed' : project.status === 'hold' ? 'On Hold' : 'Ongoing'}
                       </Badge>
                     </div>
-                    <dl className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-gray-600">
+                    <dl className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400">
                       <div className="inline-flex items-center gap-1.5">
-                        <CalendarIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+                        <CalendarIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                         <dt className="sr-only">Duration</dt>
                         <dd>
                           {project.started}
@@ -109,12 +111,12 @@ export function MyProjects() {
                         </dd>
                       </div>
                       <div className="inline-flex items-center gap-1.5">
-                        <UserCogIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+                        <UserCogIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                         <dt className="sr-only">Team Leader</dt>
                         <dd>{project.leader}</dd>
                       </div>
                       <div className="inline-flex items-center gap-1.5">
-                        <UsersIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+                        <UsersIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                         <dt className="sr-only">Team</dt>
                         <dd>
                           {project.team} · {project.developers} developers
@@ -143,7 +145,7 @@ export function MyProjects() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDeleteProject(project)}
-                      className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300"
+                      className="border-rose-500/30 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/50"
                       title="Delete Project"
                     >
                       <Trash2Icon className="h-3.5 w-3.5" />
@@ -152,44 +154,46 @@ export function MyProjects() {
                 </div>
 
                 <div className="mt-4">
-                  <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
+                  <div className="flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-300">
                     <span>{project.progress}% complete</span>
-                    {completed ?
-                    <span className="inline-flex items-center gap-1.5 text-green-600">
+                    {completed ? (
+                      <span className="inline-flex items-center gap-1.5 text-emerald-500 dark:text-emerald-400">
                         <TrophyIcon className="h-3.5 w-3.5" aria-hidden="true" />
                         Delivered on time
-                      </span> :
-
-                    <Badge tone={healthTone[project.health as keyof typeof healthTone]} dot>
+                      </span>
+                    ) : (
+                      <Badge tone={healthTone[project.health as keyof typeof healthTone]} dot>
                         {project.health}
                       </Badge>
-                    }
+                    )}
                   </div>
                   <div className="mt-2">
                     <ProgressBar
                       value={project.progress}
                       tone={completed ? 'green' : 'blue'}
                       height="md"
-                      label={`${project.name} progress`} />
+                      label={`${project.name} progress`}
+                    />
                   </div>
                 </div>
 
-                {!completed &&
-                <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-hairline pt-4 sm:grid-cols-4">
+                {!completed && (
+                  <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-hairline pt-4 sm:grid-cols-4">
                     {[
-                  { label: 'Tasks Done', value: project.tasksDone, tone: 'text-navy' },
-                  { label: 'Blockers This Week', value: project.blockers, tone: 'text-danger' },
-                  { label: 'Active Devs', value: project.activeDevs, tone: 'text-green-600' },
-                  { label: 'In Progress', value: project.inProgress, tone: 'text-brand' }].
-                  map((stat) =>
-                  <div key={stat.label}>
+                      { label: 'Tasks Done', value: project.tasksDone, tone: 'text-navy dark:text-white' },
+                      { label: 'Blockers This Week', value: project.blockers, tone: 'text-rose-500 dark:text-rose-400' },
+                      { label: 'Active Devs', value: project.activeDevs, tone: 'text-emerald-500 dark:text-emerald-400' },
+                      { label: 'In Progress', value: project.inProgress, tone: 'text-brand dark:text-indigo-400' }
+                    ].map((stat) => (
+                      <div key={stat.label} className="glass-surface rounded-2xl p-3">
                         <dd className={`text-xl font-bold tabular-nums ${stat.tone}`}>{stat.value}</dd>
-                        <dt className="mt-0.5 text-xs text-gray-500">{stat.label}</dt>
+                        <dt className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{stat.label}</dt>
                       </div>
-                  )}
+                    ))}
                   </dl>
-                }
-              </li>);
+                )}
+              </li>
+            );
           })}
         </ul>
         <CloseProjectModal
@@ -199,6 +203,6 @@ export function MyProjects() {
           onSuccess={refetch}
         />
       </div>
-    </>);
-
+    </>
+  );
 }

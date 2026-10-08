@@ -13,6 +13,8 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Banner } from '../../components/ui/Banner';
 import { Avatar } from '../../components/ui/Avatar';
 import { StatCard } from '../../components/ui/StatCard';
+import { SegmentedControl } from '../../components/ui/SegmentedControl';
+import { Select } from '../../components/ui/Select';
 import { useCommits, useDevelopers } from '../../hooks/useLive';
 import { useAuth } from '../../context/AuthContext';
 
@@ -87,45 +89,33 @@ export function CommitsOverview() {
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {/* Quick date pill buttons */}
-            <div className="flex items-center gap-1 rounded-xl border border-hairline bg-white p-1 shadow-card">
+            <div className="glass-surface flex items-center gap-1 rounded-2xl p-1 shadow-glass">
               <button
                 type="button"
                 onClick={() => setSelectedDate(shiftDate(selectedDate, -1))}
-                className="rounded-lg p-1.5 text-navy hover:bg-gray-100 transition-colors"
+                className="rounded-xl p-1.5 text-navy dark:text-white hover:bg-slate-500/10 transition-colors"
                 title="Previous day"
                 aria-label="Previous day"
               >
                 <ChevronLeftIcon className="h-4 w-4" />
               </button>
 
-              <button
-                type="button"
-                onClick={() => setSelectedDate(todayStr)}
-                className={`rounded-lg px-3 py-1 text-xs font-bold transition-all ${
-                  isToday
-                    ? 'bg-brand text-white shadow-2xs'
-                    : 'text-navy hover:bg-gray-100'
-                }`}
-              >
-                Today
-              </button>
+              <SegmentedControl
+                size="sm"
+                options={[
+                  { id: todayStr, label: 'Today' },
+                  { id: yesterdayStr, label: 'Yesterday' }
+                ]}
+                value={selectedDate === todayStr ? todayStr : selectedDate === yesterdayStr ? yesterdayStr : ''}
+                onChange={(val) => {
+                  if (val) setSelectedDate(val);
+                }}
+              />
 
-              <button
-                type="button"
-                onClick={() => setSelectedDate(yesterdayStr)}
-                className={`rounded-lg px-3 py-1 text-xs font-bold transition-all ${
-                  isYesterday
-                    ? 'bg-brand text-white shadow-2xs'
-                    : 'text-navy hover:bg-gray-100'
-                }`}
-              >
-                Yesterday
-              </button>
+              <div className="h-4 w-px bg-slate-400/20 mx-0.5" />
 
-              <div className="h-4 w-px bg-gray-200 mx-0.5" />
-
-              <label className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-navy cursor-pointer hover:bg-gray-50 rounded-lg transition-colors">
-                <CalendarIcon className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
+              <label className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-navy dark:text-white cursor-pointer hover:bg-slate-500/10 rounded-xl transition-colors">
+                <CalendarIcon className="h-3.5 w-3.5 text-brand dark:text-indigo-400" aria-hidden="true" />
                 <input
                   type="date"
                   max={todayStr}
@@ -133,7 +123,7 @@ export function CommitsOverview() {
                   onChange={(e) => {
                     if (e.target.value) setSelectedDate(e.target.value);
                   }}
-                  className="bg-transparent text-xs font-bold text-navy outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-bold text-navy dark:text-white outline-none cursor-pointer"
                 />
               </label>
 
@@ -141,10 +131,10 @@ export function CommitsOverview() {
                 type="button"
                 disabled={isToday}
                 onClick={() => setSelectedDate(shiftDate(selectedDate, 1))}
-                className={`rounded-lg p-1.5 transition-colors ${
+                className={`rounded-xl p-1.5 transition-colors ${
                   isToday
-                    ? 'text-gray-300 cursor-not-allowed'
-                    : 'text-navy hover:bg-gray-100'
+                    ? 'text-slate-400 opacity-40 cursor-not-allowed'
+                    : 'text-navy dark:text-white hover:bg-slate-500/10'
                 }`}
                 title="Next day"
                 aria-label="Next day"
@@ -157,7 +147,7 @@ export function CommitsOverview() {
               <button
                 type="button"
                 onClick={() => setSelectedDate(todayStr)}
-                className="inline-flex items-center gap-1 rounded-xl border border-hairline bg-white px-3 py-2 text-xs font-bold text-brand shadow-card hover:bg-gray-50 transition-colors"
+                className="glass-surface inline-flex items-center gap-1 rounded-2xl px-3 py-2 text-xs font-bold text-brand dark:text-indigo-400 shadow-glass hover:bg-slate-500/10 transition-colors"
               >
                 <RotateCcwIcon className="h-3.5 w-3.5" />
                 Back to Today
@@ -206,67 +196,67 @@ export function CommitsOverview() {
         </div>
 
         {/* Filter Toolbar for developer / search */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative z-20 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative">
-              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+              <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search commit message, sha, branch..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-64 rounded-xl border border-hairline bg-white py-1.5 pl-9 pr-3 text-xs font-medium text-navy placeholder:text-gray-400 shadow-card focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                className="glass-input w-64 rounded-2xl py-2 pl-9 pr-3 text-xs font-medium text-navy dark:text-white placeholder:text-slate-400 shadow-glass focus:outline-none"
               />
             </div>
 
             {developers.length > 0 && (
-              <div className="flex items-center gap-2 rounded-xl border border-hairline bg-white px-3 py-1.5 shadow-card">
-                <label htmlFor="commit-dev-filter" className="text-xs font-bold text-navy flex items-center gap-1">
-                  <UsersIcon className="h-3.5 w-3.5 text-gray-400" />
-                  Developer:
-                </label>
-                <select
-                  id="commit-dev-filter"
+              <div className="w-60">
+                <Select
+                  size="sm"
+                  fullWidth
                   value={devFilter}
-                  onChange={(e) => setDevFilter(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-brand focus:outline-none cursor-pointer"
-                >
-                  <option value="">All Developers ({developers.length})</option>
-                  {developers.map((dev: any) => (
-                    <option key={dev.id || dev._id} value={dev.name}>
-                      {dev.name} {byDev[dev.name] ? `(${byDev[dev.name]})` : '(0)'}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setDevFilter(val)}
+                  icon={<UsersIcon className="h-3.5 w-3.5" />}
+                  placeholder={`All Developers (${developers.length})`}
+                  options={[
+                    { value: '', label: `All Developers (${developers.length})` },
+                    ...developers.map((dev: any) => ({
+                      value: dev.name,
+                      label: dev.name,
+                      badge: byDev[dev.name] ? `${byDev[dev.name]} commits` : '0 commits'
+                    }))
+                  ]}
+                  searchable
+                />
               </div>
             )}
           </div>
 
-          <span className="text-xs font-semibold text-gray-500">
-            Showing <strong className="text-navy">{teamCommits.length}</strong> of {rawTeamCommits.length} commit{rawTeamCommits.length === 1 ? '' : 's'}
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            Showing <strong className="text-navy dark:text-white">{teamCommits.length}</strong> of {rawTeamCommits.length} commit{rawTeamCommits.length === 1 ? '' : 's'}
           </span>
         </div>
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <section className="overflow-hidden rounded-card border border-hairline bg-white shadow-card">
-            <div className="flex items-center justify-between border-b border-hairline px-5 py-4">
-              <h2 className="text-sm font-bold text-navy">
+          <section className="glass-card overflow-hidden rounded-3xl shadow-glass">
+            <div className="flex items-center justify-between border-b border-hairline px-6 py-4">
+              <h2 className="text-sm font-bold text-navy dark:text-white">
                 {isToday ? "Today's commits" : `Commits on ${formatDisplayDate(selectedDate)}`}
               </h2>
-              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700">
+              <span className="rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-bold text-navy dark:text-slate-200">
                 {teamCommits.length} {teamCommits.length === 1 ? 'commit' : 'commits'}
               </span>
             </div>
-            <ol className="divide-y divide-gray-100">
+            <ol className="divide-y divide-hairline">
               {teamCommits.map((commit: any) => (
-                <li key={commit.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50/70 transition-colors">
+                <li key={commit.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-slate-500/5 transition-colors">
                   <Avatar initials={commit.initials || '··'} size="sm" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-navy">{commit.message}</p>
-                    <p className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
-                      <span className="font-semibold text-navy">{commit.dev}</span>
+                    <p className="truncate text-sm font-semibold text-navy dark:text-white">{commit.message}</p>
+                    <p className="mt-0.5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                      <span className="font-semibold text-navy dark:text-slate-200">{commit.dev}</span>
                       <span aria-hidden="true">·</span>
-                      <span className="inline-flex items-center gap-1 font-medium text-slate-600">
+                      <span className="inline-flex items-center gap-1 font-medium text-slate-600 dark:text-slate-300">
                         <GitBranchIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                         {commit.branch}
                       </span>
@@ -279,19 +269,19 @@ export function CommitsOverview() {
                       href={commit.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="shrink-0 text-[11px] font-semibold text-brand hover:underline"
+                      className="shrink-0 text-[11px] font-semibold text-brand dark:text-indigo-400 hover:underline"
                     >
                       view
                     </a>
                   )}
-                  <code className="shrink-0 rounded bg-gray-100 px-2 py-1 font-mono text-[11px] text-gray-600 border border-gray-200">
+                  <code className="shrink-0 rounded-lg glass-surface px-2 py-1 font-mono text-[11px] text-slate-600 dark:text-slate-300 border border-hairline">
                     {commit.sha}
                   </code>
                 </li>
               ))}
               {teamCommits.length === 0 && (
-                <li className="px-5 py-12 text-center text-xs text-gray-500">
-                  <CalendarIcon className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                <li className="px-6 py-12 text-center text-xs text-slate-400">
+                  <CalendarIcon className="mx-auto h-8 w-8 text-slate-400 mb-2" />
                   {isToday
                     ? 'No commits logged today yet.'
                     : `No commits found for ${formatDisplayDate(selectedDate)}.`}
@@ -300,20 +290,20 @@ export function CommitsOverview() {
             </ol>
           </section>
 
-          <section className="h-fit rounded-card border border-hairline bg-white shadow-card">
-            <div className="flex items-center justify-between border-b border-hairline px-5 py-4">
-              <h2 className="text-sm font-bold text-navy">Per developer</h2>
-              <span className="text-[11px] text-gray-400">
+          <section className="glass-card h-fit rounded-3xl shadow-glass overflow-hidden">
+            <div className="flex items-center justify-between border-b border-hairline px-6 py-4">
+              <h2 className="text-sm font-bold text-navy dark:text-white">Per developer</h2>
+              <span className="text-[11px] text-slate-400">
                 {isToday ? 'Today' : selectedDate}
               </span>
             </div>
-            <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-hairline">
               {developers.map((dev: any) => (
                 <li
                   key={dev.id}
                   onClick={() => setDevFilter(devFilter === dev.name ? '' : dev.name)}
-                  className={`flex items-center gap-3 px-5 py-3.5 cursor-pointer transition-colors ${
-                    devFilter === dev.name ? 'bg-brand/5 ring-1 ring-inset ring-brand/20' : 'hover:bg-slate-50'
+                  className={`flex items-center gap-3 px-6 py-3.5 cursor-pointer transition-colors ${
+                    devFilter === dev.name ? 'bg-brand/10 dark:bg-brand/20 border-l-4 border-brand' : 'hover:bg-slate-500/5'
                   }`}
                 >
                   <Avatar
@@ -322,15 +312,15 @@ export function CommitsOverview() {
                     tone={byDev[dev.name] > 0 ? 'blue' : 'grey'}
                   />
 
-                  <p className="min-w-0 flex-1 truncate text-sm font-medium text-navy">
+                  <p className="min-w-0 flex-1 truncate text-sm font-medium text-navy dark:text-white">
                     {dev.name}
                     {devFilter === dev.name && (
-                      <span className="ml-1.5 text-[10px] font-bold text-brand uppercase">Filtered</span>
+                      <span className="ml-1.5 text-[10px] font-bold text-brand dark:text-indigo-400 uppercase">Filtered</span>
                     )}
                   </p>
                   <span
                     className={`text-sm font-bold tabular-nums ${
-                      byDev[dev.name] > 0 ? 'text-navy' : 'text-danger'
+                      byDev[dev.name] > 0 ? 'text-navy dark:text-white' : 'text-rose-500 dark:text-rose-400'
                     }`}
                   >
                     {byDev[dev.name] || 0}

@@ -17,6 +17,7 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { FilterPills } from '../../components/ui/FilterPills';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { Select } from '../../components/ui/Select';
 import { usePendingWorks, useProjects } from '../../hooks/useLive';
 import { api, apiUpload, fileUrl } from '../../api/client';
 
@@ -294,8 +295,8 @@ export function MyPendingWorks() {
 
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-3">
                       {item.status === 'awaiting_lead_approval' ? (
-                        <div className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 border border-blue-200 px-3 py-1.5 text-xs font-semibold text-blue-900">
-                          <ClockIcon className="h-3.5 w-3.5 text-blue-600 animate-pulse" />
+                        <div className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/15 border border-blue-400/30 px-3 py-1.5 text-xs font-semibold text-blue-300">
+                          <ClockIcon className="h-3.5 w-3.5 text-blue-400 animate-pulse" />
                           <span>Submitted for Review · Awaiting Team Lead approval</span>
                         </div>
                       ) : (
@@ -305,12 +306,12 @@ export function MyPendingWorks() {
                       <Button
                         disabled={item.status === 'awaiting_lead_approval'}
                         onClick={item.status === 'awaiting_lead_approval' ? undefined : () => openSubmissionModal(item)}
-                        className={`font-bold border-none text-white ${
+                        className={`font-bold border-none text-white shadow-glass transition-all ${
                           item.status === 'awaiting_lead_approval'
-                            ? 'bg-blue-600/80 opacity-85 cursor-not-allowed shadow-none'
+                            ? 'bg-blue-600/60 opacity-80 cursor-not-allowed shadow-none'
                             : item.status === 'changes_requested'
-                            ? 'bg-amber-500 hover:bg-amber-600 cursor-pointer'
-                            : 'bg-emerald-600 hover:bg-emerald-700 cursor-pointer'
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 cursor-pointer shadow-amber-500/20'
+                            : 'btn-glass-primary !from-emerald-500 !to-teal-600 hover:!from-emerald-600 hover:!to-teal-700 cursor-pointer'
                         }`}
                         icon={item.status === 'awaiting_lead_approval' ? <ClockIcon className="h-3.5 w-3.5" /> : <SendIcon className="h-3.5 w-3.5" />}
                       >
@@ -327,21 +328,21 @@ export function MyPendingWorks() {
             </section>
           ))
         ) : (
-          <div className="rounded-2xl border border-hairline bg-white p-12 text-center">
-            <CheckCircle2Icon className="mx-auto h-10 w-10 text-emerald-500" />
-            <h3 className="mt-3 text-base font-bold text-navy">All Pending Works Cleared!</h3>
-            <p className="mt-1 text-xs text-gray-500">You have completed all pending tasks assigned by your Team Lead and PM.</p>
+          <div className="glass-card rounded-3xl p-12 text-center shadow-glass">
+            <CheckCircle2Icon className="mx-auto h-10 w-10 text-emerald-400" />
+            <h3 className="mt-3 text-base font-bold text-navy dark:text-white">All Pending Works Cleared!</h3>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">You have completed all pending tasks assigned by your Team Lead and PM.</p>
           </div>
         )}
       </div>
 
       {/* FULL WORK LOG SUBMISSION MODAL */}
       {resubmitModalItem && (
-        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-navy/60 p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-lg rounded-2xl border border-hairline bg-white p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md animate-in fade-in">
+          <div className="glass-modal relative w-full max-w-lg rounded-3xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div className="flex items-center justify-between border-b border-hairline pb-4">
               <div>
-                <h3 className="text-base font-bold text-navy flex items-center gap-2">
+                <h3 className="text-base font-bold text-navy dark:text-white flex items-center gap-2">
                   <ZapIcon className="h-5 w-5 text-amber-500" />
                   {resubmitModalItem.status === 'awaiting_lead_approval'
                     ? 'Update Work Log (Sent to Review)'
@@ -349,41 +350,39 @@ export function MyPendingWorks() {
                     ? 'Resubmit Work Log'
                     : 'Submit Full Work Log for Assigned Task'}
                 </h3>
-                <p className="text-xs text-gray-500">{resubmitModalItem.taskTitle} · Assigned by {resubmitModalItem.assignedBy}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{resubmitModalItem.taskTitle} · Assigned by {resubmitModalItem.assignedBy}</p>
               </div>
-              <button onClick={() => setResubmitModalItem(null)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100">
+              <button onClick={() => setResubmitModalItem(null)} className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-500/10 hover:text-white transition-all">
                 <XIcon className="h-5 w-5" />
               </button>
             </div>
 
             <div className="mt-4 space-y-4">
-              <div className="rounded-xl bg-amber-50 p-3 text-xs text-amber-900 border border-amber-200">
+              <div className="rounded-2xl bg-amber-500/10 border border-amber-500/25 p-3.5 text-xs text-amber-900 dark:text-amber-200">
                 <strong>Lead Task Note:</strong> "{resubmitModalItem.feedbackNote}"
               </div>
 
               {/* 0. Module Select */}
               {activeModules.length > 0 && (
                 <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
-                    Select Project Module <span className="text-danger">*</span>
-                  </label>
-                  <select
+                  <Select
+                    label="Select Project Module *"
+                    size="lg"
+                    fullWidth
                     value={activeModuleName}
-                    onChange={(e) => setSelectedModuleName(e.target.value)}
-                    className="h-9 w-full rounded-xl border border-hairline bg-canvas px-3 text-xs font-bold text-navy focus:border-brand focus:bg-white focus:outline-none"
-                  >
-                    {activeModules.map((m: any) => (
-                      <option key={m.id || m.name} value={m.name}>
-                        {m.name} ({m.weightPercentage}% Weight)
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setSelectedModuleName(val)}
+                    options={activeModules.map((m: any) => ({
+                      value: m.name,
+                      label: m.name,
+                      badge: `${m.weightPercentage}% Weight`
+                    }))}
+                  />
                 </div>
               )}
 
               {/* 1. Description */}
               <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy dark:text-slate-200">
                   Work Log Description <span className="text-danger">*</span>
                 </label>
                 <textarea
@@ -391,14 +390,14 @@ export function MyPendingWorks() {
                   value={resubmitText}
                   onChange={(e) => setResubmitText(e.target.value)}
                   placeholder="Describe in detail what you implemented, files changed, and tested logic (min 30 words)..."
-                  className="w-full rounded-xl border border-hairline bg-canvas p-3 text-xs text-navy focus:border-brand focus:bg-white focus:outline-none"
+                  className="glass-input w-full rounded-2xl p-3 text-xs text-navy dark:text-white focus:outline-none placeholder:text-slate-400"
                 />
                 <div className="mt-1 flex items-center justify-between text-xs">
-                  <span className={wordsOk ? 'font-semibold text-green-600' : 'text-gray-500'}>
+                  <span className={wordsOk ? 'font-semibold text-emerald-400' : 'text-slate-500 dark:text-slate-400'}>
                     {wordCount} / min 30 words
                   </span>
                   {!wordsOk && (
-                    <span className="inline-flex items-center gap-1 font-semibold text-danger">
+                    <span className="inline-flex items-center gap-1 font-semibold text-rose-400">
                       <AlertTriangleIcon className="h-3.5 w-3.5" /> Minimum 30 words required
                     </span>
                   )}
@@ -407,20 +406,20 @@ export function MyPendingWorks() {
 
               {/* 2. Screenshot Proof */}
               <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy dark:text-slate-200">
                   Screenshot Proof <span className="text-danger">*</span>
                 </label>
-                <div className={`flex items-center gap-3 rounded-xl border border-dashed p-3 ${fileError ? 'border-red-300 bg-danger-soft' : 'border-hairline bg-canvas'}`}>
-                  <ImageIcon className={`h-5 w-5 shrink-0 ${fileError ? 'text-danger' : 'text-gray-400'}`} />
+                <div className={`flex items-center gap-3 rounded-2xl border border-dashed p-3 ${fileError ? 'border-rose-400/50 bg-rose-500/10' : 'glass-surface'}`}>
+                  <ImageIcon className={`h-5 w-5 shrink-0 ${fileError ? 'text-rose-400' : 'text-slate-400'}`} />
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/pdf"
                     onChange={handleFileChange}
-                    className="w-full text-xs text-navy file:mr-3 file:rounded-lg file:border-0 file:bg-brand-soft file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand hover:file:bg-violet-100"
+                    className="w-full text-xs text-navy dark:text-slate-200 file:mr-3 file:rounded-xl file:border-0 file:bg-brand-soft file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand hover:file:bg-violet-500/20"
                   />
                 </div>
                 {fileError && (
-                  <div className="mt-2 flex items-start gap-2 rounded-lg border border-red-200 bg-danger-soft p-2.5 text-xs font-semibold text-danger">
+                  <div className="mt-2 flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/15 p-2.5 text-xs font-semibold text-rose-300">
                     <AlertTriangleIcon className="h-4 w-4 shrink-0 mt-0.5" />
                     <span>{fileError}</span>
                   </div>
@@ -429,17 +428,17 @@ export function MyPendingWorks() {
 
               {/* 3. GitHub Commit URL */}
               <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
-                  GitHub Commit URL <span className="text-gray-400 font-normal">(Optional)</span>
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy dark:text-slate-200">
+                  GitHub Commit URL <span className="text-slate-400 font-normal">(Optional)</span>
                 </label>
                 <div className="relative">
-                  <GithubIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <GithubIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input
                     type="url"
                     value={commitUrl}
                     onChange={(e) => setCommitUrl(e.target.value)}
                     placeholder="https://github.com/org/repo/commit/sha"
-                    className="h-9 w-full rounded-xl border border-hairline bg-canvas pl-9 pr-3 text-xs text-navy focus:border-brand focus:bg-white focus:outline-none"
+                    className="glass-input h-10 w-full rounded-2xl pl-10 pr-3 text-xs text-navy dark:text-white focus:outline-none placeholder:text-slate-400"
                   />
                 </div>
               </div>
@@ -447,42 +446,42 @@ export function MyPendingWorks() {
               {/* 4. Active Minutes & Task Status */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy dark:text-slate-200">
                     Active Minutes Spent
                   </label>
                   <div className="relative">
-                    <TimerIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <TimerIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
                       type="number"
                       min="5"
                       max="480"
                       value={activeMinutes}
                       onChange={(e) => setActiveMinutes(Number(e.target.value) || 45)}
-                      className="h-9 w-full rounded-xl border border-hairline bg-canvas pl-9 pr-3 text-xs font-bold text-navy focus:border-brand focus:bg-white focus:outline-none"
+                      className="glass-input h-10 w-full rounded-2xl pl-10 pr-3 text-xs font-bold text-navy dark:text-white focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy">
-                    Task Status
-                  </label>
-                  <select
+                  <Select
+                    label="Task Status"
+                    size="lg"
+                    fullWidth
                     value={taskStatus}
-                    onChange={(e) => setTaskStatus(e.target.value as any)}
-                    className="h-9 w-full rounded-xl border border-hairline bg-canvas px-3 text-xs font-bold text-navy focus:border-brand focus:bg-white focus:outline-none"
-                  >
-                    <option value="done">Completed / Ready for Review</option>
-                    <option value="progress">In Progress</option>
-                    <option value="blocked">Blocked with Issues</option>
-                  </select>
+                    onChange={(val) => setTaskStatus(val)}
+                    options={[
+                      { value: 'done', label: 'Completed / Ready for Review', tone: 'green' },
+                      { value: 'progress', label: 'In Progress', tone: 'blue' },
+                      { value: 'blocked', label: 'Blocked with Issues', tone: 'red' }
+                    ]}
+                  />
                 </div>
               </div>
 
               {/* Blocker input if blocked */}
               {taskStatus === 'blocked' && (
                 <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-danger">
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-rose-400">
                     Describe Blocker / Issue
                   </label>
                   <input
@@ -490,7 +489,7 @@ export function MyPendingWorks() {
                     value={blockerText}
                     onChange={(e) => setBlockerText(e.target.value)}
                     placeholder="What is blocking you from completing this task?"
-                    className="h-9 w-full rounded-xl border border-red-200 bg-danger-soft px-3 text-xs text-navy focus:border-danger focus:outline-none"
+                    className="glass-input h-10 w-full rounded-2xl border-rose-500/30 bg-rose-500/10 px-3 text-xs text-navy dark:text-white focus:outline-none placeholder:text-rose-300/60"
                   />
                 </div>
               )}
@@ -503,7 +502,7 @@ export function MyPendingWorks() {
               <Button
                 onClick={handleResolve}
                 disabled={busy}
-                className="bg-emerald-600 text-white hover:bg-emerald-700 font-bold border-none"
+                className="btn-glass-primary !from-emerald-500 !to-teal-600 hover:!from-emerald-600 hover:!to-teal-700 text-white font-bold border-none"
                 icon={<CheckCircle2Icon className="h-4 w-4" />}
               >
                 {busy
@@ -519,13 +518,13 @@ export function MyPendingWorks() {
 
       {/* Screenshot Expand Modal */}
       {activeScreenshotModal && (
-        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-md animate-in fade-in">
-          <div className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-gray-900 p-4 shadow-2xl">
-            <div className="mb-3 flex items-center justify-between border-b border-gray-800 pb-2 text-white">
-              <span className="text-sm font-semibold">{activeScreenshotModal.title}</span>
+        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xl animate-in fade-in">
+          <div className="glass-modal relative max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl p-4 shadow-2xl">
+            <div className="mb-3 flex items-center justify-between border-b border-hairline pb-2 text-white">
+              <span className="text-sm font-semibold text-navy dark:text-white">{activeScreenshotModal.title}</span>
               <button
                 onClick={() => setActiveScreenshotModal(null)}
-                className="rounded-lg p-1 text-gray-400 hover:bg-gray-800 hover:text-white"
+                className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-500/10 hover:text-white"
               >
                 <XIcon className="h-5 w-5" />
               </button>
@@ -533,7 +532,7 @@ export function MyPendingWorks() {
             <img
               src={activeScreenshotModal.url}
               alt="Screenshot full view"
-              className="max-h-[75vh] w-auto max-w-full rounded-lg object-contain mx-auto"
+              className="max-h-[75vh] w-auto max-w-full rounded-2xl object-contain mx-auto border border-hairline shadow-glass"
             />
           </div>
         </div>

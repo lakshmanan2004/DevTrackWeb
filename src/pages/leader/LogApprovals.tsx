@@ -20,6 +20,7 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { FilterPills } from '../../components/ui/FilterPills';
+import { Select } from '../../components/ui/Select';
 import { TaskStatusBadge } from '../../components/ui/TaskStatusBadge';
 import { ReviewLogFeedbackModal } from '../../components/leader/ReviewLogFeedbackModal';
 import { AssignTaskModal } from '../../components/common/AssignTaskModal';
@@ -145,7 +146,7 @@ export function LogApprovals() {
       />
 
       <div className="flex-1 space-y-5 p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative z-20 flex flex-wrap items-center justify-between gap-3">
           <FilterPills
             ariaLabel="Filter approvals"
             value={filter}
@@ -161,38 +162,38 @@ export function LogApprovals() {
 
           <div className="flex flex-wrap items-center gap-3">
             {developers.length > 0 && (
-              <div className="flex items-center gap-2 rounded-xl border border-hairline bg-white px-3 py-1.5 shadow-card">
-                <label htmlFor="la-dev-filter" className="text-xs font-bold text-navy flex items-center gap-1">
-                  <UsersIcon className="h-3.5 w-3.5 text-gray-400" />
-                  Developer:
-                </label>
-                <select
-                  id="la-dev-filter"
+              <div className="w-56">
+                <Select
+                  size="sm"
+                  fullWidth
                   value={developerFilter}
-                  onChange={(e) => setDeveloperFilter(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-brand focus:outline-none cursor-pointer"
-                >
-                  <option value="">All Developers ({developers.length})</option>
-                  {developers.map((dev: any) => {
-                    const dId = getDevId(dev);
-                    return (
-                      <option key={dId} value={dId}>
-                        {dev.name || dev.stat?.name || 'Developer'}
-                      </option>
-                    );
-                  })}
-                </select>
+                  onChange={(val) => setDeveloperFilter(val)}
+                  icon={<UsersIcon className="h-3.5 w-3.5" />}
+                  placeholder={`All Developers (${developers.length})`}
+                  options={[
+                    { value: '', label: `All Developers (${developers.length})` },
+                    ...developers.map((dev: any) => {
+                      const dId = getDevId(dev);
+                      return {
+                        value: dId,
+                        label: dev.name || dev.stat?.name || 'Developer',
+                        badge: dev.role || 'Developer'
+                      };
+                    })
+                  ]}
+                  searchable
+                />
               </div>
             )}
 
-            <div className="flex items-center gap-1.5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-1 shadow-glass">
+            <div className="glass-surface flex items-center gap-1.5 rounded-2xl p-1">
               <button
                 type="button"
                 onClick={() => setDateFilter(getTodayStr())}
                 className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                   dateFilter === getTodayStr()
                     ? 'btn-glass-primary !text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/10'
                 }`}
               >
                 Today's Logs
@@ -204,13 +205,13 @@ export function LogApprovals() {
                 className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                   dateFilter === 'all'
                     ? 'btn-glass-primary !text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/10'
                 }`}
               >
                 Show All Logs
               </button>
 
-              <div className="h-4 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
+              <div className="h-4 w-px bg-white/20 dark:bg-white/10 mx-0.5" />
 
               <label className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
                 <CalendarIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
@@ -225,28 +226,26 @@ export function LogApprovals() {
             </div>
 
             {moduleNames.length > 0 && (
-              <div className="flex items-center gap-2 rounded-xl border border-hairline bg-white px-3 py-1.5 shadow-card">
-                <label htmlFor="la-module-filter" className="text-xs font-bold text-navy flex items-center gap-1">
-                  Filter by Module:
-                </label>
-                <select
-                  id="la-module-filter"
+              <div className="w-52">
+                <Select
+                  size="sm"
+                  fullWidth
                   value={moduleFilter}
-                  onChange={(e) => setModuleFilter(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-brand focus:outline-none cursor-pointer"
-                >
-                  <option value="">All Project Modules</option>
-                  {moduleNames.map((modName: string) => (
-                    <option key={modName} value={modName}>
-                      {modName}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setModuleFilter(val)}
+                  placeholder="All Project Modules"
+                  options={[
+                    { value: '', label: 'All Project Modules' },
+                    ...moduleNames.map((modName: string) => ({
+                      value: modName,
+                      label: modName
+                    }))
+                  ]}
+                  searchable
+                />
               </div>
             )}
           </div>
         </div>
-
 
         <ul className="space-y-4">
           {filteredQueue.map((log: any) => {
@@ -256,28 +255,28 @@ export function LogApprovals() {
             return (
               <li
                 key={log.id}
-                className={`rounded-card border transition-all ${
+                className={`glass-card rounded-2xl transition-all overflow-hidden ${
                   isAssigned
-                    ? 'border-amber-400 bg-amber-50/20 ring-2 ring-amber-300/60 shadow-md'
+                    ? 'border-amber-500/50 bg-amber-500/10 ring-2 ring-amber-500/30'
                     : isLate
-                    ? 'border-amber-400 ring-2 ring-amber-400/30 bg-amber-50/20 shadow-md'
+                    ? 'border-amber-500/50 ring-2 ring-amber-500/30 bg-amber-500/10'
                     : log.review === 'changes_requested'
-                    ? 'border-amber-300 ring-2 ring-amber-400/20 bg-white shadow-card'
+                    ? 'border-amber-500/40 ring-2 ring-amber-500/20'
                     : log.review === 'approved'
-                    ? 'border-green-200 bg-white shadow-card'
+                    ? 'border-emerald-500/30'
                     : log.review === 'rejected'
-                    ? 'border-red-200 bg-white shadow-card'
-                    : 'border-hairline bg-white shadow-card'
+                    ? 'border-rose-500/30'
+                    : ''
                 }`}
               >
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-5 py-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/20 dark:border-white/10 px-5 py-3.5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-semibold text-navy">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
                       {log.developerName}
-                      <span className="ml-2 font-normal text-gray-500">
+                      <span className="ml-2 font-normal text-slate-500 dark:text-slate-400">
                         {log.isPendingWorkSubmission ? (
                           <>
-                            📅 Kept Pending on: <strong className="font-semibold text-amber-900">{log.originalPendingDate || log.date}</strong> ({log.hourLabel}) · Submitted on: <strong className="font-semibold text-navy">{log.pendingSubmissionDate || log.submittedDate || log.date} at {log.pendingSubmissionAt || log.submittedAt}</strong>
+                            📅 Kept Pending on: <strong className="font-semibold text-amber-900 dark:text-amber-300">{log.originalPendingDate || log.date}</strong> ({log.hourLabel}) · Submitted on: <strong className="font-semibold text-slate-900 dark:text-white">{log.pendingSubmissionDate || log.submittedDate || log.date} at {log.pendingSubmissionAt || log.submittedAt}</strong>
                           </>
                         ) : (
                           <>
@@ -287,7 +286,7 @@ export function LogApprovals() {
                       </span>
                     </p>
                     {isLate && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-2 py-0.5 text-[10px] font-extrabold shadow-2xs uppercase tracking-wide">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-2 py-0.5 text-[10px] font-extrabold shadow-sm uppercase tracking-wide">
                         ⚠️ Late
                       </span>
                     )}
@@ -316,14 +315,14 @@ export function LogApprovals() {
               <div className="grid gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_280px]">
                 <div>
                   <div className="flex flex-wrap items-center gap-3">
-                    <h2 className="text-sm font-bold text-navy">{formatLogTitle(log.task, log.description)}</h2>
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white">{formatLogTitle(log.task, log.description)}</h2>
                     <TaskStatusBadge status={log.status} />
                     {log.moduleName && (
                       <Badge tone="purple">Module: {log.moduleName}</Badge>
                     )}
                   </div>
 
-                  <div className="relative mt-2.5 rounded-2xl bg-slate-50/80 dark:bg-slate-900/70 p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs">
+                  <div className="relative mt-2.5 rounded-2xl glass-surface p-3.5">
                     <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
                       {log.description}
                     </p>
@@ -341,11 +340,11 @@ export function LogApprovals() {
                           href={fileUrl(log.attachmentUrl)}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-xl border border-red-200 dark:border-rose-500/30 bg-red-50/60 dark:bg-rose-950/30 px-3 py-2 text-xs font-semibold text-red-900 dark:text-rose-200 hover:bg-red-100 dark:hover:bg-rose-900/40 transition-colors cursor-pointer group shadow-2xs"
+                          className="glass-surface inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer group shadow-sm"
                         >
-                          <FileTextIcon className="h-3.5 w-3.5 text-red-600 dark:text-rose-400 group-hover:scale-110 transition-transform" aria-hidden="true" />
-                          <span className="underline decoration-red-300 dark:decoration-rose-500 group-hover:decoration-red-600">{log.attachment || 'document.pdf'}</span>
-                          <span className="rounded bg-red-200/80 dark:bg-rose-900/60 text-red-800 dark:text-rose-200 px-1.5 py-0.5 text-[10px] font-bold">
+                          <FileTextIcon className="h-3.5 w-3.5 text-rose-500 group-hover:scale-110 transition-transform" aria-hidden="true" />
+                          <span className="underline decoration-rose-500/30 group-hover:decoration-rose-500">{log.attachment || 'document.pdf'}</span>
+                          <span className="rounded bg-rose-500/20 text-rose-500 px-1.5 py-0.5 text-[10px] font-bold">
                             Open PDF ↗
                           </span>
                         </a>
@@ -358,57 +357,57 @@ export function LogApprovals() {
                               title: log.attachment ? `${log.developerName || 'Developer'} — ${log.attachment}` : `${log.developerName || 'Developer'} — Screenshot Proof`
                             })
                           }
-                          className="inline-flex items-center gap-2 rounded-xl border border-hairline bg-canvas px-3 py-2 text-xs font-semibold text-navy dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-brand transition-colors cursor-pointer group shadow-2xs"
+                          className="glass-surface inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white hover:text-blue-500 transition-colors cursor-pointer group shadow-sm"
                         >
-                          <ImageIcon className="h-3.5 w-3.5 text-brand group-hover:scale-110 transition-transform" aria-hidden="true" />
-                          <span className="underline decoration-slate-300 dark:decoration-slate-600 group-hover:decoration-brand">{log.attachment || 'screenshot.png'}</span>
-                          <span className="rounded bg-brand/10 dark:bg-blue-500/20 text-brand dark:text-blue-300 px-1.5 py-0.5 text-[10px] font-bold">
+                          <ImageIcon className="h-3.5 w-3.5 text-blue-500 group-hover:scale-110 transition-transform" aria-hidden="true" />
+                          <span className="underline decoration-slate-300 dark:decoration-slate-600 group-hover:decoration-blue-500">{log.attachment || 'screenshot.png'}</span>
+                          <span className="rounded bg-blue-500/20 text-blue-500 dark:text-blue-300 px-1.5 py-0.5 text-[10px] font-bold">
                             View Proof
                           </span>
                         </button>
                       )
                     ) : (
-                      <span className="inline-flex items-center gap-2 rounded-xl border border-hairline bg-canvas px-3 py-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
-                        <ImageIcon className="h-3.5 w-3.5 text-gray-400 dark:text-slate-500" aria-hidden="true" />
+                      <span className="glass-surface inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-400 dark:text-slate-500">
+                        <ImageIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" aria-hidden="true" />
                         <span>{log.attachment || 'No screenshot attached'}</span>
                       </span>
                     )}
                     {log.commits > 0 && (
-                      <span className="inline-flex items-center gap-2 rounded-xl border border-hairline bg-canvas px-3 py-2 text-xs font-semibold text-navy dark:text-white">
-                        <GitCommitVerticalIcon className="h-3.5 w-3.5 text-gray-400 dark:text-slate-500" aria-hidden="true" />
+                      <span className="glass-surface inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white">
+                        <GitCommitVerticalIcon className="h-3.5 w-3.5 text-purple-500" aria-hidden="true" />
                         {log.commitUrl ? (
-                          <a href={log.commitUrl} target="_blank" rel="noreferrer" className="hover:underline text-brand dark:text-blue-400">
+                          <a href={log.commitUrl} target="_blank" rel="noreferrer" className="hover:underline text-blue-500 dark:text-blue-400 font-bold">
                             view commit ({log.commits})
                           </a>
                         ) : (
                           `${log.commits} commit${log.commits > 1 ? 's' : ''} linked`
                         )}
-                        <CheckCircle2Icon className="h-3.5 w-3.5 text-ok" aria-hidden="true" />
+                        <CheckCircle2Icon className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
                       </span>
                     )}
                   </div>
 
                   {/* Leader Feedback Note */}
                   {log.reviewNote && (
-                    <div className={`mt-3.5 rounded-2xl border p-3.5 text-xs leading-relaxed shadow-glass ${
+                    <div className={`mt-3.5 rounded-2xl border p-3.5 text-xs leading-relaxed backdrop-blur-md ${
                       log.review === 'approved'
-                        ? 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
+                        ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200'
                         : log.review === 'changes_requested'
-                        ? 'border-amber-200 dark:border-amber-500/30 bg-amber-50/80 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200'
-                        : 'border-red-200 dark:border-rose-500/30 bg-danger-soft dark:bg-rose-950/40 text-danger dark:text-rose-200'
+                        ? 'border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200'
+                        : 'border-rose-500/30 bg-rose-500/10 text-rose-900 dark:text-rose-200'
                     }`}>
-                      <span className="font-bold text-navy dark:text-white">Team Leader Note:</span> {log.reviewNote}
+                      <span className="font-bold text-slate-900 dark:text-white">Team Leader Note:</span> {log.reviewNote}
                     </div>
                   )}
 
                   {/* Resubmission history */}
                   {log.resubmissions && log.resubmissions.length > 0 && (
-                    <div className="mt-4 rounded-2xl border border-blue-200 dark:border-blue-500/30 bg-brand-soft dark:bg-blue-950/30 p-3.5">
-                      <p className="text-xs font-bold uppercase tracking-wide text-brand dark:text-blue-300">Developer resubmissions</p>
+                    <div className="mt-4 rounded-2xl glass-surface border border-blue-500/30 p-3.5">
+                      <p className="text-xs font-bold uppercase tracking-wider text-blue-500 dark:text-blue-400">Developer resubmissions</p>
                       <ul className="mt-2 space-y-1.5">
                         {log.resubmissions.map((r: any, i: number) => (
-                          <li key={i} className="text-xs text-gray-700 dark:text-slate-300">
-                            <span className="font-semibold text-navy dark:text-white">{r.at}</span> — {r.text}
+                          <li key={i} className="text-xs text-slate-700 dark:text-slate-300">
+                            <span className="font-semibold text-slate-900 dark:text-white">{r.at}</span> — {r.text}
                           </li>
                         ))}
                       </ul>
@@ -416,14 +415,14 @@ export function LogApprovals() {
                   )}
 
                   {/* Action Buttons */}
-                  <div className="mt-4 flex flex-wrap items-center gap-2.5 border-t border-hairline pt-3">
+                  <div className="mt-4 flex flex-wrap items-center gap-2.5 border-t border-white/20 dark:border-white/10 pt-3">
                     {log.review === 'pending' ? (
                       <>
                         <button
                           type="button"
                           disabled={busyId === log.id}
                           onClick={() => setSelectedReviewLog({ log, mode: 'approve' })}
-                          className="inline-flex items-center justify-center gap-1.5 rounded-xl h-9 px-4 text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+                          className="btn-glass-primary inline-flex items-center justify-center gap-1.5 rounded-xl h-9 px-4 text-xs font-bold from-emerald-500 to-teal-600 shadow-lg cursor-pointer"
                         >
                           <CheckIcon className="h-4 w-4" />
                           Approve Log
@@ -433,7 +432,7 @@ export function LogApprovals() {
                           type="button"
                           disabled={busyId === log.id}
                           onClick={() => setSelectedReviewLog({ log, mode: 'reject' })}
-                          className="inline-flex items-center justify-center gap-1.5 rounded-xl h-9 px-4 text-xs font-bold border border-red-200 dark:border-rose-500/40 bg-red-50 dark:bg-rose-950/40 text-danger dark:text-rose-300 hover:bg-red-100 dark:hover:bg-rose-900/60 transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+                          className="btn-glass-primary inline-flex items-center justify-center gap-1.5 rounded-xl h-9 px-4 text-xs font-bold from-rose-500 to-pink-600 shadow-lg cursor-pointer"
                         >
                           <XIcon className="h-4 w-4" />
                           Reject Log
@@ -445,7 +444,7 @@ export function LogApprovals() {
                           type="button"
                           disabled={busyId === log.id}
                           onClick={() => setSelectedReviewLog({ log, mode: log.review === 'rejected' ? 'reject' : 'approve' })}
-                          className="inline-flex items-center justify-center gap-1.5 rounded-xl h-8 px-3 text-xs font-semibold border border-hairline bg-white/80 dark:bg-slate-800 text-navy dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                          className="glass-surface inline-flex items-center justify-center gap-1.5 rounded-xl h-8 px-3 text-xs font-semibold text-slate-900 dark:text-white hover:bg-white/10 transition-colors cursor-pointer"
                         >
                           {log.review === 'approved' ? '✓ Approved (Update)' : log.review === 'changes_requested' ? '⚠️ Changes Requested (Update)' : '✗ Rejected (Update)'}
                         </button>
@@ -454,7 +453,7 @@ export function LogApprovals() {
                           type="button"
                           disabled={busyId === log.id}
                           onClick={() => review(log.id, 'reset')}
-                          className="flex items-center gap-1 text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-navy dark:hover:text-white hover:underline ml-auto cursor-pointer"
+                          className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-900 dark:hover:text-white hover:underline ml-auto cursor-pointer"
                         >
                           <RotateCcwIcon className="h-3.5 w-3.5" /> Reset Status
                         </button>
@@ -464,23 +463,23 @@ export function LogApprovals() {
                 </div>
 
                 {/* Validation checklist sidebar */}
-                <div className="rounded-2xl border border-hairline bg-slate-50/50 dark:bg-slate-900/60 p-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <div className="glass-surface rounded-2xl p-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Validation checklist
                   </h3>
                   <ul className="mt-3 space-y-2.5 text-xs">
                     {log.isPendingWorkSubmission ? (
                       <>
                         <li className="flex items-start gap-2 text-slate-700 dark:text-slate-300">
-                          <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                          <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" aria-hidden="true" />
                           <span>
-                            Kept Pending: <strong className="font-semibold text-navy dark:text-white">{log.originalPendingDate || log.date}</strong>
+                            Kept Pending: <strong className="font-semibold text-slate-900 dark:text-white">{log.originalPendingDate || log.date}</strong>
                           </span>
                         </li>
                         <li className="flex items-start gap-2 text-slate-700 dark:text-slate-300">
-                          <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
+                          <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" aria-hidden="true" />
                           <span>
-                            Submitted: <strong className="font-semibold text-navy dark:text-white">{log.pendingSubmissionDate || log.submittedDate || log.date}</strong> at {log.pendingSubmissionAt || log.submittedAt}
+                            Submitted: <strong className="font-semibold text-slate-900 dark:text-white">{log.pendingSubmissionDate || log.submittedDate || log.date}</strong> at {log.pendingSubmissionAt || log.submittedAt}
                           </span>
                         </li>
                       </>
@@ -488,72 +487,72 @@ export function LogApprovals() {
                       <li className="flex items-start gap-2 text-slate-700 dark:text-slate-300">
                         {isLate ? (
                           <>
-                            <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400 font-bold" aria-hidden="true" />
-                            <span className="font-bold text-amber-900 dark:text-amber-200 bg-amber-100/90 dark:bg-amber-950/50 px-2 py-0.5 rounded-lg border border-amber-300 dark:border-amber-500/40">
+                            <ClockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500 font-bold" aria-hidden="true" />
+                            <span className="font-bold text-amber-900 dark:text-amber-200 bg-amber-500/20 px-2 py-0.5 rounded-lg border border-amber-500/30">
                               Submitted Late at {log.submittedAt}
                             </span>
                           </>
                         ) : (
                           <>
-                            <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
+                            <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" aria-hidden="true" />
                             <span>Submitted at {log.submittedAt}</span>
                           </>
                         )}
                       </li>
                     )}
-                    <li className="flex items-start gap-2 text-gray-700">
-                      <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
+                    <li className="flex items-start gap-2 text-slate-700 dark:text-slate-300">
+                      <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" aria-hidden="true" />
                       {log.wordCount} words — meets minimum
                     </li>
-                    <li className="flex items-start gap-2 text-gray-700">
+                    <li className="flex items-start gap-2 text-slate-700 dark:text-slate-300">
                       {log.attachmentUrl || log.attachment
                         ? <>
-                            <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
+                            <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" aria-hidden="true" />
                             Screenshot attached
                           </>
                         : <>
-                            <XIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-danger" aria-hidden="true" />
+                            <XIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-500" aria-hidden="true" />
                             No screenshot
                           </>}
                     </li>
-                    <li className="flex items-start gap-2 text-gray-700">
+                    <li className="flex items-start gap-2 text-slate-700 dark:text-slate-300">
                       {log.commits > 0
                         ? <>
-                            <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" aria-hidden="true" />
+                            <CheckCircle2Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" aria-hidden="true" />
                             {log.commits} GitHub commit{log.commits > 1 ? 's' : ''} linked
                           </>
                         : <>
-                            <XIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden="true" />
+                            <XIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden="true" />
                             No commit linked
                           </>}
                     </li>
 
-                    <li className="border-t border-hairline pt-2">
+                    <li className="border-t border-white/20 dark:border-white/10 pt-2">
                       {log.review === 'approved' && (
-                        <div className="flex items-center gap-1.5 font-semibold text-green-700">
-                          <CheckCircle2Icon className="h-4 w-4 text-green-600" />
+                        <div className="flex items-center gap-1.5 font-semibold text-emerald-500">
+                          <CheckCircle2Icon className="h-4 w-4 text-emerald-500" />
                           Log Approved
                         </div>
                       )}
                       {log.review === 'changes_requested' && (
-                        <div className="flex items-start gap-1.5 font-semibold text-amber-700">
-                          <HighlighterIcon className="mt-0.5 h-4 w-4 text-amber-600 shrink-0" />
+                        <div className="flex items-start gap-1.5 font-semibold text-amber-500">
+                          <HighlighterIcon className="mt-0.5 h-4 w-4 text-amber-500 shrink-0" />
                           <div>
                             <span>Targeted Changes Requested</span>
-                            <p className="text-[11px] font-normal text-amber-800">
-                              Developer notified with highlights & screenshots.
+                            <p className="text-[11px] font-normal text-amber-600 dark:text-amber-400">
+                              Developer notified with highlights &amp; screenshots.
                             </p>
                           </div>
                         </div>
                       )}
                       {log.review === 'rejected' && (
-                        <div className="flex items-center gap-1.5 font-semibold text-red-700">
-                          <XIcon className="h-4 w-4 text-red-600" />
+                        <div className="flex items-center gap-1.5 font-semibold text-rose-500">
+                          <XIcon className="h-4 w-4 text-rose-500" />
                           Full Log Rejected
                         </div>
                       )}
                       {log.review === 'pending' && (
-                        <div className="flex items-center gap-1.5 font-semibold text-amber-700">
+                        <div className="flex items-center gap-1.5 font-semibold text-amber-500">
                           <ClockIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                           Approval pending
                         </div>
@@ -566,9 +565,9 @@ export function LogApprovals() {
           );
         })}
           {filteredQueue.length === 0 && (
-            <li className="rounded-card border border-dashed border-gray-300 bg-white p-12 text-center">
-              <p className="text-sm font-semibold text-navy">Nothing here right now</p>
-              <p className="mt-1 text-sm text-gray-500">New check-ins from your team will appear here instantly.</p>
+            <li className="glass-card rounded-2xl border-dashed border-white/20 p-12 text-center">
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">Nothing here right now</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">New check-ins from your team will appear here instantly.</p>
             </li>
           )}
         </ul>
@@ -598,13 +597,13 @@ export function LogApprovals() {
 
       {/* Screenshot Zoom Modal */}
       {activeScreenshotModal && (
-        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-md animate-in fade-in">
-          <div className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-gray-900 p-4 shadow-2xl">
-            <div className="mb-3 flex items-center justify-between border-b border-gray-800 pb-2 text-white">
-              <span className="text-sm font-semibold">{activeScreenshotModal.title}</span>
+        <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xl animate-in fade-in">
+          <div className="glass-modal relative max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl p-4 shadow-2xl border border-white/30 dark:border-white/15">
+            <div className="mb-3 flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-2 text-white">
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">{activeScreenshotModal.title}</span>
               <button
                 onClick={() => setActiveScreenshotModal(null)}
-                className="rounded-lg p-1 text-gray-400 hover:bg-gray-800 hover:text-white"
+                className="rounded-xl p-1.5 text-slate-400 hover:bg-white/10 hover:text-slate-200 transition-colors"
               >
                 <XIcon className="h-5 w-5" />
               </button>
@@ -612,7 +611,7 @@ export function LogApprovals() {
             <img
               src={activeScreenshotModal.url}
               alt="Screenshot full view"
-              className="max-h-[75vh] w-auto max-w-full rounded-lg object-contain mx-auto"
+              className="max-h-[75vh] w-auto max-w-full rounded-2xl object-contain mx-auto shadow-lg"
             />
           </div>
         </div>

@@ -5,19 +5,19 @@ type Size = 'sm' | 'md' | 'lg';
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-gradient-to-b from-[#0077ed] to-[#0062c4] text-white shadow-glass-button hover:from-[#1a88ff] hover:to-[#006be0] border border-white/30 dark:border-white/20 shadow-md',
+    'bg-gradient-to-b from-[#0077ed] to-[#0062c4] text-white shadow-glass-button hover:from-[#1a88ff] hover:to-[#006be0] hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 border border-white/30 dark:border-white/20 shadow-md',
   secondary:
-    'bg-white/75 hover:bg-white/95 text-slate-800 border border-white/90 backdrop-blur-md shadow-xs hover:shadow-md hover:border-white dark:bg-slate-800/85 dark:hover:bg-slate-700/95 dark:text-slate-100 dark:border-white/15 dark:hover:border-white/30 dark:shadow-glass',
+    'bg-white/80 hover:bg-white text-slate-800 border border-slate-200/80 hover:border-slate-300 backdrop-blur-md shadow-xs hover:shadow-md hover:-translate-y-0.5 dark:!bg-white/[0.08] dark:hover:!bg-white/[0.22] dark:!text-white dark:border-white/15 dark:hover:border-white/40 dark:hover:shadow-[0_0_18px_rgba(255,255,255,0.18)]',
   ghost:
-    'bg-transparent text-slate-600 hover:bg-slate-900/5 hover:text-slate-900 border border-transparent dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white',
+    'bg-transparent text-slate-600 hover:bg-slate-900/5 hover:text-slate-900 border border-transparent dark:text-slate-300 dark:hover:!bg-white/[0.14] dark:hover:!text-white dark:hover:border-white/20 dark:hover:-translate-y-0.5',
   outline:
-    'bg-white/50 hover:bg-white/80 text-slate-800 border border-slate-200/80 backdrop-blur-sm shadow-2xs hover:shadow-xs dark:bg-slate-900/60 dark:hover:bg-slate-800/80 dark:text-slate-200 dark:border-white/20 dark:hover:border-blue-400/40 dark:hover:text-white',
+    'bg-white/50 hover:bg-white/90 text-slate-800 border border-slate-200/90 hover:border-slate-300 backdrop-blur-sm shadow-2xs hover:shadow-xs hover:-translate-y-0.5 dark:!bg-white/[0.05] dark:hover:!bg-white/[0.20] dark:text-slate-200 dark:hover:!text-white dark:border-white/20 dark:hover:border-white/45 dark:hover:shadow-[0_0_16px_rgba(255,255,255,0.15)]',
   success:
-    'bg-gradient-to-b from-[#34c759] to-[#28a745] text-white shadow-sm hover:from-[#3cd665] hover:to-[#2cb04b] border border-white/30 shadow-emerald-500/25',
+    'bg-gradient-to-b from-[#34c759] to-[#28a745] text-white shadow-sm hover:from-[#3cd665] hover:to-[#2cb04b] hover:shadow-md hover:shadow-emerald-500/35 hover:-translate-y-0.5 border border-white/30 shadow-emerald-500/25',
   danger:
-    'bg-gradient-to-b from-[#ff3b30] to-[#e0241b] text-white shadow-sm hover:from-[#ff5147] hover:to-[#eb2b22] border border-white/30 shadow-red-500/25',
+    'bg-gradient-to-b from-[#ff3b30] to-[#e0241b] text-white shadow-sm hover:from-[#ff5147] hover:to-[#eb2b22] hover:shadow-md hover:shadow-red-500/35 hover:-translate-y-0.5 border border-white/30 shadow-red-500/25',
   purple:
-    'bg-gradient-to-b from-[#af52de] to-[#9333ea] text-white shadow-sm hover:from-[#ba64e4] hover:to-[#9d3bed] border border-white/30 shadow-purple-500/25'
+    'bg-gradient-to-b from-[#af52de] to-[#9333ea] text-white shadow-sm hover:from-[#ba64e4] hover:to-[#9d3bed] hover:shadow-md hover:shadow-purple-500/35 hover:-translate-y-0.5 border border-white/30 shadow-purple-500/25'
 };
 
 const sizes: Record<Size, string> = {

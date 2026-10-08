@@ -132,45 +132,45 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
   const activeApprovedTasks = activeAllTasks.filter((t) => t.review === 'approved');
 
   return (
-    <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-slate-950/40 p-4 sm:p-6 lg:p-8 backdrop-blur-md animate-in fade-in">
-      <div className="glass-modal relative flex flex-col w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-3xl border border-white/90 shadow-glass-modal">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 sm:p-6 lg:p-8 backdrop-blur-md animate-in fade-in">
+      <div className="glass-modal relative flex flex-col w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-3xl border border-white/90 shadow-2xl p-0">
         {/* MODAL HEADER */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline bg-gradient-to-r from-brand-soft/40 via-purple-50 to-white px-6 py-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand text-sm font-extrabold text-white shadow-md ring-4 ring-brand/20">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/60 bg-gradient-to-r from-blue-500/10 via-purple-500/5 to-white/40 px-6 py-5">
+          <div className="flex items-center gap-3.5">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-black text-white shadow-md ring-2 ring-white/30">
               {developer.initials || developer.name.slice(0, 2).toUpperCase()}
             </span>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-extrabold text-navy">{developer.name}</h2>
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-base font-black text-navy tracking-tight">{developer.name}</h2>
                 <Badge tone="blue">Developer Calendar</Badge>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
                 Inspect non-submitted check-in slots &amp; pending tasks per date
               </p>
             </div>
           </div>
 
           {/* Month Switcher Controls */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-xl border border-hairline bg-white p-1 shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="glass-surface flex items-center gap-1 rounded-2xl border border-white/80 p-1 shadow-2xs">
               <button
                 type="button"
                 onClick={handlePrevMonth}
-                className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100 hover:text-navy transition-colors cursor-pointer"
+                className="rounded-xl p-1.5 text-slate-500 hover:bg-white/60 hover:text-navy transition-colors cursor-pointer"
                 title="Previous Month"
               >
                 <ChevronLeftIcon className="h-4 w-4" />
               </button>
 
-              <span className="px-3 text-xs font-bold text-navy min-w-[120px] text-center">
+              <span className="px-3 text-xs font-black text-navy min-w-[120px] text-center">
                 {monthLabel}
               </span>
 
               <button
                 type="button"
                 onClick={handleNextMonth}
-                className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100 hover:text-navy transition-colors cursor-pointer"
+                className="rounded-xl p-1.5 text-slate-500 hover:bg-white/60 hover:text-navy transition-colors cursor-pointer"
                 title="Next Month"
               >
                 <ChevronRightIcon className="h-4 w-4" />
@@ -180,14 +180,14 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
             <button
               type="button"
               onClick={handleCurrentMonth}
-              className="rounded-xl border border-hairline bg-white px-3 py-2 text-xs font-bold text-brand hover:bg-brand-soft transition-colors cursor-pointer"
+              className="btn-glass-secondary h-9 px-3.5 text-xs font-bold cursor-pointer"
             >
               This Month
             </button>
 
             <button
               onClick={onClose}
-              className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-navy transition-colors cursor-pointer"
+              className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
               aria-label="Close modal"
             >
               <XIcon className="h-5 w-5" />
@@ -196,45 +196,45 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
         </div>
 
         {/* MODAL BODY */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* MONTH STATS OVERVIEW CARDS */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-xl border border-hairline bg-canvas p-3.5 space-y-1">
-              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Month</span>
-              <p className="text-sm font-extrabold text-navy">{monthLabel}</p>
+            <div className="glass-surface rounded-2xl border border-white/80 p-4 space-y-1 shadow-2xs">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Month</span>
+              <p className="text-sm font-black text-navy">{monthLabel}</p>
             </div>
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5 space-y-1">
-              <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Submitted Tasks</span>
-              <p className="text-sm font-extrabold text-emerald-950">{totalTasksInMonth} Logs</p>
+            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 space-y-1 shadow-2xs">
+              <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">Submitted Tasks</span>
+              <p className="text-sm font-black text-emerald-950 dark:text-emerald-200">{totalTasksInMonth} Logs</p>
             </div>
-            <div className="rounded-xl border border-rose-200 bg-rose-50/60 p-3.5 space-y-1">
-              <span className="text-[11px] font-bold text-rose-800 uppercase tracking-wider">Non-Submitted Slots</span>
-              <p className="text-sm font-extrabold text-rose-950">{totalMissedSlotsInMonth} Missed</p>
+            <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 space-y-1 shadow-2xs">
+              <span className="text-[10px] font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wider">Non-Submitted Slots</span>
+              <p className="text-sm font-black text-rose-950 dark:text-rose-200">{totalMissedSlotsInMonth} Missed</p>
             </div>
-            <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3.5 space-y-1">
-              <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">Pending / Flagged Days</span>
-              <p className="text-sm font-extrabold text-amber-950">{pendingDaysCount} Days</p>
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-1 shadow-2xs">
+              <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">Pending / Flagged Days</span>
+              <p className="text-sm font-black text-amber-950 dark:text-amber-200">{pendingDaysCount} Days</p>
             </div>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-12">
+          <div className="grid gap-6 lg:grid-cols-12">
             {/* LEFT: CALENDAR GRID */}
-            <div className="lg:col-span-6 rounded-2xl border border-hairline bg-white p-5 shadow-card space-y-4">
-              <div className="flex items-center justify-between border-b border-hairline pb-3">
-                <h3 className="text-sm font-extrabold text-navy flex items-center gap-2 uppercase tracking-wider">
+            <div className="lg:col-span-6 glass-card rounded-3xl border border-white/80 p-5 shadow-glass space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                <h3 className="text-xs font-black text-navy flex items-center gap-2 uppercase tracking-wider">
                   <CalendarIcon className="h-4 w-4 text-brand" />
                   {monthLabel} Calendar
                 </h3>
-                <span className="text-[11px] text-gray-400 font-medium">Click any date to inspect details</span>
+                <span className="text-[11px] text-slate-400 font-medium">Click any date to inspect details</span>
               </div>
 
               {loading ? (
-                <div className="py-16 text-center text-xs text-gray-500 animate-pulse">
+                <div className="py-16 text-center text-xs text-slate-400 animate-pulse font-medium">
                   Loading developer calendar...
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-7 text-center text-[11px] font-extrabold text-gray-500 pb-1 border-b border-gray-100">
+                  <div className="grid grid-cols-7 text-center text-[11px] font-black text-slate-400 pb-1 border-b border-slate-200/40">
                     <span>SUN</span>
                     <span>MON</span>
                     <span>TUE</span>
@@ -250,7 +250,6 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                     ))}
                     {days.map((day) => {
                       const isSelected = selectedDay?.dateStr === day.dateStr;
-                      const hasMissed = (day.missedCount || 0) > 0;
                       return (
                         <button
                           key={day.dateStr}
@@ -279,36 +278,36 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
               )}
 
               {/* CALENDAR LEGEND */}
-              <div className="border-t border-hairline pt-3">
+              <div className="border-t border-slate-200/60 pt-3">
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-3 w-3 rounded-md bg-emerald-500" />
-                    <span className="font-semibold text-navy">Approved / Done</span>
+                  <div className="flex items-center gap-2">
+                    <span className="h-3 w-3 rounded-md bg-emerald-500 shadow-xs" />
+                    <span className="font-bold text-navy">Approved / Done</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-3 w-3 rounded-md bg-amber-500 animate-pulse" />
-                    <span className="font-bold text-amber-900">Pending / Feedback</span>
+                  <div className="flex items-center gap-2">
+                    <span className="h-3 w-3 rounded-md bg-amber-500 animate-pulse shadow-xs" />
+                    <span className="font-bold text-amber-900 dark:text-amber-200">Pending / Feedback</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-3 w-3 rounded-md bg-rose-500" />
-                    <span className="font-semibold text-navy">Absent / Missed Check-ins</span>
+                  <div className="flex items-center gap-2">
+                    <span className="h-3 w-3 rounded-md bg-rose-500 shadow-xs" />
+                    <span className="font-bold text-navy">Absent / Missed Check-ins</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-3 w-3 rounded-md bg-purple-600" />
-                    <span className="font-bold text-purple-900">🎉 Holiday</span>
+                  <div className="flex items-center gap-2">
+                    <span className="h-3 w-3 rounded-md bg-purple-600 shadow-xs" />
+                    <span className="font-bold text-purple-900 dark:text-purple-200">🎉 Holiday</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-3 w-3 rounded-md bg-slate-200 border border-slate-300" />
-                    <span className="font-semibold text-gray-500">Off / Weekend</span>
+                  <div className="flex items-center gap-2">
+                    <span className="h-3 w-3 rounded-md bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-white/10" />
+                    <span className="font-medium text-slate-400">Off / Weekend</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* RIGHT: SELECTED DAY DETAILS PANEL WITH HORIZONTAL TABS */}
-            <div className="lg:col-span-6 flex flex-col rounded-2xl border border-hairline bg-canvas p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-hairline pb-3">
-                <h3 className="text-sm font-extrabold text-navy flex items-center gap-2">
+            <div className="lg:col-span-6 flex flex-col glass-card rounded-3xl border border-white/80 p-5 space-y-4 shadow-glass">
+              <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                <h3 className="text-xs font-black text-navy flex items-center gap-2 uppercase tracking-wider">
                   <ClockIcon className="h-4 w-4 text-brand" />
                   Day Details {selectedDay ? `— ${selectedDay.dateStr}` : ''}
                 </h3>
@@ -326,32 +325,32 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
               {selectedDay ? (
                 <div className="space-y-4 flex-1 flex flex-col">
                   {/* Summary Banner */}
-                  <div className="rounded-xl bg-white p-3.5 border border-hairline shadow-2xs space-y-1.5">
+                  <div className="glass-surface rounded-2xl p-4 border border-white/80 shadow-2xs space-y-2">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-extrabold text-navy">{selectedDay.fullLabel}</p>
+                      <p className="text-xs font-black text-navy">{selectedDay.fullLabel}</p>
                       <span className="text-xs font-bold text-brand">{selectedDay.activeTime} Active</span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2.5 pt-1.5 text-[11px] text-gray-600 border-t border-gray-100">
-                      <span>Total Logs Submitted: <strong className="text-navy font-bold">{selectedDay.tasksCount}</strong></span>
+                    <div className="flex flex-wrap items-center gap-2.5 pt-2 text-[11px] text-slate-500 border-t border-slate-200/40">
+                      <span>Logs Submitted: <strong className="text-navy font-bold">{selectedDay.tasksCount}</strong></span>
                       <span>·</span>
-                      <span>Total Logs Missed: <strong className={activeMissedSlots.length > 0 ? 'text-rose-600 font-bold' : 'text-gray-700'}>{activeMissedSlots.length}</strong></span>
+                      <span>Missed: <strong className={activeMissedSlots.length > 0 ? 'text-rose-600 font-bold' : 'text-slate-700'}>{activeMissedSlots.length}</strong></span>
                       <span>·</span>
                       <span>Approved: <strong className="text-emerald-700 font-bold">{selectedDay.approvedCount || 0}</strong></span>
                       <span>·</span>
-                      <span>Pending: <strong className={activePendingTasks.length > 0 ? 'text-amber-700 font-bold' : 'text-gray-700'}>{activePendingTasks.length}</strong></span>
+                      <span>Pending: <strong className={activePendingTasks.length > 0 ? 'text-amber-700 font-bold' : 'text-slate-700'}>{activePendingTasks.length}</strong></span>
                     </div>
                   </div>
 
                   {/* HORIZONTAL TABS (Non-Submitted Logs & Pending Tasks) */}
-                  <div className="flex items-center gap-1.5 rounded-xl border border-hairline bg-white p-1 shadow-2xs">
+                  <div className="glass-surface flex items-center gap-1 rounded-2xl border border-white/80 p-1 shadow-2xs">
                     {/* 1. NON-SUBMITTED LOGS TAB */}
                     <button
                       type="button"
                       onClick={() => setDayDetailTab('missed')}
-                      className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
                         dayDetailTab === 'missed'
                           ? 'bg-rose-500 text-white shadow-xs'
-                          : 'text-gray-600 hover:bg-rose-50 hover:text-rose-700'
+                          : 'text-slate-500 hover:bg-rose-50/50 hover:text-rose-700'
                       }`}
                     >
                       <OctagonAlertIcon className="h-3.5 w-3.5" />
@@ -362,28 +361,28 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                     <button
                       type="button"
                       onClick={() => setDayDetailTab('pending')}
-                      className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
                         dayDetailTab === 'pending'
                           ? 'bg-amber-500 text-white shadow-xs'
-                          : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800'
+                          : 'text-slate-500 hover:bg-amber-50/50 hover:text-amber-800'
                       }`}
                     >
                       <ClockIcon className="h-3.5 w-3.5" />
-                      <span>Pending Tasks ({activePendingTasks.length})</span>
+                      <span>Pending ({activePendingTasks.length})</span>
                     </button>
 
                     {/* 3. APPROVED LOGS TAB */}
                     <button
                       type="button"
                       onClick={() => setDayDetailTab('approved')}
-                      className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
                         dayDetailTab === 'approved'
                           ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-800'
+                          : 'text-slate-500 hover:bg-emerald-50/50 hover:text-emerald-800'
                       }`}
                     >
                       <CheckCircle2Icon className="h-3.5 w-3.5" />
-                      <span>Approved Logs ({activeApprovedTasks.length})</span>
+                      <span>Approved ({activeApprovedTasks.length})</span>
                     </button>
                   </div>
 
@@ -392,7 +391,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                     {/* --- TAB 1: NON-SUBMITTED LOGS --- */}
                     {dayDetailTab === 'missed' && (
                       <div className="space-y-3 animate-in fade-in duration-150">
-                        <div className="flex items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50/80 px-3 py-2 text-xs text-rose-950 font-bold">
+                        <div className="flex items-center justify-between gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-950 dark:text-rose-200 font-bold">
                           <span className="flex items-center gap-1.5 min-w-0 leading-snug">
                             <OctagonAlertIcon className="h-4 w-4 text-rose-600 shrink-0" />
                             <span>
@@ -402,8 +401,8 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                               <span className="whitespace-nowrap font-black">{selectedDay.dateStr}</span>
                             </span>
                           </span>
-                          <span className="shrink-0 whitespace-nowrap inline-flex items-center rounded-full bg-rose-200 text-rose-900 px-2.5 py-1 text-[11px] font-extrabold leading-none">
-                            Required Slots
+                          <span className="shrink-0 whitespace-nowrap inline-flex items-center rounded-full bg-rose-500/20 text-rose-800 dark:text-rose-200 px-2.5 py-0.5 text-[10px] font-extrabold border border-rose-500/30">
+                            Required
                           </span>
                         </div>
 
@@ -412,11 +411,11 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                             {activeMissedSlots.map((ms, idx) => (
                               <div
                                 key={idx}
-                                className="rounded-xl border border-rose-200 bg-white p-3 shadow-2xs space-y-1.5"
+                                className="glass-surface rounded-2xl border border-rose-300/60 p-3.5 shadow-2xs space-y-1.5"
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
-                                    <span className="rounded-lg bg-rose-100 text-rose-900 px-2.5 py-1 text-xs font-extrabold border border-rose-200">
+                                    <span className="rounded-lg bg-rose-500/15 text-rose-800 dark:text-rose-300 px-2.5 py-0.5 text-xs font-black border border-rose-500/30">
                                       {ms.hourLabel} Slot
                                     </span>
                                     <span className="text-xs font-bold text-navy">{ms.timeRange}</span>
@@ -425,17 +424,17 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                                     Not Submitted
                                   </span>
                                 </div>
-                                <p className="text-[11px] text-gray-500 pl-1">
+                                <p className="text-[11px] text-slate-500 pl-1 font-medium">
                                   {ms.reason || 'Check-in was required but no hourly work log was submitted for this slot.'}
                                 </p>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="rounded-xl border border-green-200 bg-white p-6 text-center space-y-1.5">
+                          <div className="glass-surface rounded-2xl border border-emerald-500/30 p-6 text-center space-y-1.5 shadow-2xs">
                             <CheckCircle2Icon className="h-7 w-7 text-emerald-600 mx-auto" />
                             <p className="text-xs font-bold text-navy">All Required Check-ins Submitted</p>
-                            <p className="text-[11px] text-gray-500">
+                            <p className="text-[11px] text-slate-400">
                               {developer.name} completed all required hourly check-in slots for this working day.
                             </p>
                           </div>
@@ -446,14 +445,14 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                     {/* --- TAB 2: PENDING TASKS --- */}
                     {dayDetailTab === 'pending' && (
                       <div className="space-y-3 animate-in fade-in duration-150">
-                        <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/80 p-2.5 text-xs text-amber-950 font-bold">
+                        <div className="flex items-center justify-between rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-950 dark:text-amber-200 font-bold">
                           <span className="flex items-center gap-1.5">
                             <ClockIcon className="h-4 w-4 text-amber-600" />
                             {activePendingTasks.length > 0
-                              ? `${activePendingTasks.length} Pending / Kept Pending Task(s) on ${selectedDay.dateStr}`
+                              ? `${activePendingTasks.length} Pending Task(s) on ${selectedDay.dateStr}`
                               : `0 Pending Tasks on ${selectedDay.dateStr}`}
                           </span>
-                          <span className="rounded-full bg-amber-200 text-amber-900 px-2 py-0.5 text-[10px]">
+                          <span className="rounded-full bg-amber-500/20 text-amber-900 dark:text-amber-200 px-2 py-0.5 text-[10px] font-bold border border-amber-500/30">
                             Action Items
                           </span>
                         </div>
@@ -463,10 +462,10 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                             {activePendingTasks.map((t) => (
                               <div
                                 key={t.id}
-                                className="rounded-xl border border-amber-300 bg-white p-3.5 shadow-2xs space-y-2"
+                                className="glass-surface rounded-2xl border border-amber-300/60 p-4 shadow-2xs space-y-2"
                               >
                                 <div className="flex items-center justify-between gap-2">
-                                  <span className="rounded bg-navy/10 px-2 py-0.5 text-[10px] font-bold text-navy">
+                                  <span className="rounded-lg bg-navy/10 px-2 py-0.5 text-[10px] font-bold text-navy">
                                     {t.hourLabel}
                                   </span>
                                   <h4 className="text-xs font-bold text-navy flex-1 truncate">{t.title || t.task}</h4>
@@ -488,37 +487,37 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                                 </div>
 
                                 {t.description && (
-                                  <p className="text-xs text-gray-700 leading-relaxed bg-canvas p-2.5 rounded-lg border border-hairline">
+                                  <p className="text-xs text-slate-600 leading-relaxed glass-surface p-3 rounded-xl border border-white/60">
                                     {t.description}
                                   </p>
                                 )}
 
                                 {t.isPendingWorkSubmission && (
-                                  <div className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded border border-amber-300">
+                                  <div className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 dark:text-amber-200 bg-amber-500/15 px-2.5 py-0.5 rounded-lg border border-amber-500/30">
                                     <ClockIcon className="h-3 w-3 text-amber-700" />
                                     <span>Kept Pending from: <strong>{t.originalPendingDate || selectedDay.dateStr}</strong></span>
                                   </div>
                                 )}
 
                                 {t.tlNote && (
-                                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-950">
+                                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-950 dark:text-amber-200">
                                     <span className="font-bold text-navy">TL Feedback:</span> &quot;{t.tlNote}&quot;
                                   </div>
                                 )}
 
                                 {t.blocker && (
-                                  <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-900">
-                                    <span className="font-bold text-red-950">Blocker:</span> {t.blocker}
+                                  <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-2.5 text-xs text-rose-900 dark:text-rose-200">
+                                    <span className="font-bold text-rose-950">Blocker:</span> {t.blocker}
                                   </div>
                                 )}
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="rounded-xl border border-gray-200 bg-white p-6 text-center space-y-1.5">
+                          <div className="glass-surface rounded-2xl border border-slate-200 p-6 text-center space-y-1.5 shadow-2xs">
                             <CheckCircle2Icon className="h-7 w-7 text-emerald-600 mx-auto" />
                             <p className="text-xs font-bold text-navy">No Pending or Flagged Tasks</p>
-                            <p className="text-[11px] text-gray-500">
+                            <p className="text-[11px] text-slate-400">
                               All tasks logged on this day were completed and approved.
                             </p>
                           </div>
@@ -529,14 +528,14 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                     {/* --- TAB 3: APPROVED LOGS --- */}
                     {dayDetailTab === 'approved' && (
                       <div className="space-y-3 animate-in fade-in duration-150">
-                        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/80 p-2.5 text-xs text-emerald-950 font-bold">
+                        <div className="flex items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-950 dark:text-emerald-200 font-bold">
                           <span className="flex items-center gap-1.5">
                             <CheckCircle2Icon className="h-4 w-4 text-emerald-600" />
                             {activeApprovedTasks.length > 0
                               ? `${activeApprovedTasks.length} Approved Work Log(s) on ${selectedDay.dateStr}`
                               : `0 Approved Work Logs on ${selectedDay.dateStr}`}
                           </span>
-                          <span className="rounded-full bg-emerald-200 text-emerald-900 px-2 py-0.5 text-[10px]">
+                          <span className="rounded-full bg-emerald-500/20 text-emerald-900 dark:text-emerald-200 px-2 py-0.5 text-[10px] font-bold border border-emerald-500/30">
                             Verified
                           </span>
                         </div>
@@ -546,10 +545,10 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                             {activeApprovedTasks.map((t) => (
                               <div
                                 key={t.id}
-                                className="rounded-xl border border-emerald-200 bg-white p-3.5 shadow-2xs space-y-2"
+                                className="glass-surface rounded-2xl border border-emerald-500/30 p-4 shadow-2xs space-y-2"
                               >
                                 <div className="flex items-center justify-between gap-2">
-                                  <span className="rounded bg-navy/10 px-2 py-0.5 text-[10px] font-bold text-navy">
+                                  <span className="rounded-lg bg-navy/10 px-2 py-0.5 text-[10px] font-bold text-navy">
                                     {t.hourLabel}
                                   </span>
                                   <h4 className="text-xs font-bold text-navy flex-1 truncate">{t.title || t.task}</h4>
@@ -557,22 +556,22 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                                 </div>
 
                                 {t.description && (
-                                  <p className="text-xs text-gray-700 leading-relaxed bg-canvas p-2.5 rounded-lg border border-hairline">
+                                  <p className="text-xs text-slate-600 leading-relaxed glass-surface p-3 rounded-xl border border-white/60">
                                     {t.description}
                                   </p>
                                 )}
 
-                                <div className="flex items-center justify-between text-[11px] text-gray-500 pt-1 border-t border-gray-100">
+                                <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/40">
                                   <TaskStatusBadge status={t.status as TaskStatus} />
                                   {t.activeMinutes ? (
-                                    <span className="font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                                    <span className="font-bold text-emerald-700 bg-emerald-500/10 px-2.5 py-0.5 rounded-lg border border-emerald-500/20">
                                       {t.activeMinutes} mins active
                                     </span>
                                   ) : null}
                                 </div>
 
                                 {t.tlNote && (
-                                  <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 p-2 text-xs text-emerald-950">
+                                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs text-emerald-950 dark:text-emerald-200">
                                     <span className="font-bold text-navy">TL Feedback:</span> &quot;{t.tlNote}&quot;
                                   </div>
                                 )}
@@ -580,10 +579,10 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                             ))}
                           </div>
                         ) : (
-                          <div className="rounded-xl border border-gray-200 bg-white p-6 text-center space-y-1.5">
-                            <CheckCircle2Icon className="h-7 w-7 text-gray-400 mx-auto" />
+                          <div className="glass-surface rounded-2xl border border-slate-200 p-6 text-center space-y-1.5 shadow-2xs">
+                            <CheckCircle2Icon className="h-7 w-7 text-slate-400 mx-auto" />
                             <p className="text-xs font-bold text-navy">No Approved Logs Yet</p>
-                            <p className="text-[11px] text-gray-500">
+                            <p className="text-[11px] text-slate-400">
                               There are no logs approved by the team leader for this date.
                             </p>
                           </div>
@@ -594,9 +593,9 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-center space-y-2">
-                  <CalendarIcon className="h-9 w-9 text-gray-400" />
+                  <CalendarIcon className="h-9 w-9 text-slate-400" />
                   <p className="text-xs font-bold text-navy">No Day Selected</p>
-                  <p className="text-[11px] text-gray-500 max-w-[220px]">
+                  <p className="text-[11px] text-slate-400 max-w-[220px]">
                     Click any day in the calendar to inspect non-submitted check-in slots and pending tasks for that day.
                   </p>
                 </div>
@@ -606,8 +605,8 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="flex items-center justify-between border-t border-hairline bg-canvas px-6 py-3.5">
-          <p className="text-xs text-gray-500">
+        <div className="flex items-center justify-between border-t border-slate-200/60 p-5 bg-slate-50/40">
+          <p className="text-xs text-slate-500 font-medium">
             Developer: <strong className="text-navy">{developer.name}</strong> ({developer.email || 'developer'})
           </p>
           <Button variant="secondary" onClick={onClose}>

@@ -65,12 +65,70 @@ export function Login() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+  const [bubbleStyle, setBubbleStyle] = useState<{ left: number; top: number; width: number; height: number; opacity: number }>({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    opacity: 0
+  });
+
+  const updateBubblePosition = React.useCallback(() => {
+    const activeIdx = roleTabs.findIndex((t) => t.id === role);
+    const activeEl = tabRefs.current[activeIdx];
+    if (activeEl && activeEl.offsetWidth > 0) {
+      setBubbleStyle({
+        left: activeEl.offsetLeft,
+        top: activeEl.offsetTop,
+        width: activeEl.offsetWidth,
+        height: activeEl.offsetHeight,
+        opacity: 1
+      });
+    }
+  }, [role]);
+
+  React.useLayoutEffect(() => {
+    updateBubblePosition();
+  }, [updateBubblePosition, role, loading]);
+
+  useEffect(() => {
+    updateBubblePosition();
+    const raf1 = requestAnimationFrame(updateBubblePosition);
+    const raf2 = requestAnimationFrame(() => requestAnimationFrame(updateBubblePosition));
+    const timer1 = setTimeout(updateBubblePosition, 50);
+    const timer2 = setTimeout(updateBubblePosition, 150);
+    const timer3 = setTimeout(updateBubblePosition, 300);
+
+    window.addEventListener('resize', updateBubblePosition);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (containerRef.current && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        updateBubblePosition();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      window.removeEventListener('resize', updateBubblePosition);
+      if (resizeObserver) resizeObserver.disconnect();
+    };
+  }, [updateBubblePosition, loading]);
+
   const active = roleTabs.find((tab) => tab.id === role) ?? roleTabs[0];
 
   const liveStats = [
-  { value: stats ? String(stats.developers) : '—', label: 'Developers monitored' },
-  { value: stats ? String(stats.logsToday) : '—', label: 'Logs submitted today' },
-  { value: stats ? `${stats.onTimeRate}%` : '—', label: 'On-time check-in rate' }];
+    { value: stats ? String(stats.developers) : '—', label: 'Developers monitored' },
+    { value: stats ? String(stats.logsToday) : '—', label: 'Logs submitted today' },
+    { value: stats ? `${stats.onTimeRate}%` : '—', label: 'On-time check-in rate' }
+  ];
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -94,7 +152,7 @@ export function Login() {
     }
   };
 
-useEffect(() => {
+  useEffect(() => {
     if (!loading && user) {
       const home = roleTabs.find((t) => t.id === user.role)?.path || '/developer';
       navigate(home, { replace: true });
@@ -209,15 +267,30 @@ useEffect(() => {
 
           {/* Role selector tabs */}
           <div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 rounded-full bg-slate-100/90 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200/70 dark:border-white/10"
+            ref={containerRef}
+            className="segmented-control-track relative grid grid-cols-2 sm:grid-cols-4 gap-1.5"
             role="tablist"
             aria-label="Select your role"
           >
-            {roleTabs.map((tab) => {
+            {/* Sliding Liquid Glass Bubble Indicator with Spring Physics */}
+            <div
+              className="liquid-glass-bubble"
+              style={{
+                left: `${bubbleStyle.left}px`,
+                top: `${bubbleStyle.top}px`,
+                width: `${bubbleStyle.width}px`,
+                height: `${bubbleStyle.height}px`,
+                opacity: bubbleStyle.opacity
+              }}
+              aria-hidden="true"
+            />
+
+            {roleTabs.map((tab, idx) => {
               const selected = tab.id === role;
               return (
                 <button
                   key={tab.id}
+                  ref={(el) => (tabRefs.current[idx] = el)}
                   type="button"
                   role="tab"
                   aria-selected={selected}
@@ -225,13 +298,15 @@ useEffect(() => {
                     setRole(tab.id);
                     setError('');
                   }}
-                  className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-xs font-bold transition-all duration-200 cursor-pointer ${
+                  className={`segmented-tab-btn flex items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-xs font-bold cursor-pointer select-none transition-all duration-300 ${
                     selected
-                      ? 'bg-white dark:bg-blue-600 text-brand dark:text-white shadow-glass border border-white dark:border-white/20 font-extrabold scale-[1.02]'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-navy dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'
+                      ? 'text-[#0071e3] dark:text-white font-extrabold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_0_10px_rgba(56,189,248,0.7)] scale-[1.03]'
+                      : 'text-slate-500 dark:text-slate-400 font-medium'
                   }`}
                 >
-                  <span className={selected ? 'text-brand dark:text-white' : 'text-slate-400'}>{tab.icon}</span>
+                  <span className={`transition-transform duration-300 ${selected ? 'text-[#0071e3] dark:text-sky-300 scale-110' : 'text-slate-400 dark:text-slate-400'}`}>
+                    {tab.icon}
+                  </span>
                   <span className="truncate">{tab.label}</span>
                 </button>
               );

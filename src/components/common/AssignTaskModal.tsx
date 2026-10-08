@@ -8,6 +8,7 @@ import {
   FlagIcon
 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { Select } from '../ui/Select';
 import { api } from '../../api/client';
 
 interface DeveloperOption {
@@ -113,24 +114,24 @@ export function AssignTaskModal({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-navy/60 p-4 backdrop-blur-sm animate-in fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl border border-hairline bg-white p-6 shadow-2xl">
+    <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-xl animate-in fade-in">
+      <div className="glass-modal relative w-full max-w-lg rounded-3xl border border-white/30 dark:border-white/15 p-6 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-hairline pb-4">
+        <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/20 text-blue-500 ring-1 ring-blue-500/30 shadow-inner">
               <PlusCircleIcon className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-navy">Assign Task to Developer</h2>
-              <p className="text-xs text-gray-500">
-                Assigned by: <span className="font-semibold text-navy">{assignerName}</span>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Assign Task to Developer</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Assigned by: <span className="font-semibold text-slate-800 dark:text-slate-200">{assignerName}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-navy"
+            className="rounded-xl p-1.5 text-slate-400 hover:bg-white/10 hover:text-slate-200 transition-colors"
             aria-label="Close modal"
           >
             <XIcon className="h-5 w-5" />
@@ -139,38 +140,36 @@ export function AssignTaskModal({
 
         {successMessage ? (
           <div className="my-8 flex flex-col items-center justify-center space-y-2 text-center animate-in zoom-in-95">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-500 ring-1 ring-emerald-500/30">
               <CheckIcon className="h-6 w-6" />
             </div>
-            <p className="text-sm font-bold text-navy">{successMessage}</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-sm font-bold text-slate-900 dark:text-white">{successMessage}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               The task now appears on {selectedDev?.name}'s pending dashboard instantly.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600">
-                <UserCheckIcon className="h-3.5 w-3.5 text-brand" />
-                Select Developer <span className="text-red-500">*</span>
+              <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                <UserCheckIcon className="h-3.5 w-3.5 text-blue-500" />
+                Select Developer <span className="text-rose-500">*</span>
               </label>
-              <select
+              <Select
                 value={developerId}
-                onChange={(e) => setDeveloperId(e.target.value)}
-                className="w-full rounded-xl border border-hairline bg-canvas px-3.5 py-2.5 text-sm font-semibold text-navy focus:border-brand focus:bg-white focus:outline-none"
-              >
-                {developers.length === 0 && <option value="">Loading developers…</option>}
-                {developers.map((dev) => (
-                  <option key={dev.id} value={dev.id}>
-                    {dev.name} ({dev.team || dev.project})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setDeveloperId(String(val))}
+                placeholder="Choose developer..."
+                options={developers.map((dev) => ({
+                  value: dev.id,
+                  label: dev.name,
+                  description: dev.team || dev.project
+                }))}
+              />
             </div>
 
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600">
-                Task Title <span className="text-red-500">*</span>
+              <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                Task Title <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
@@ -178,40 +177,40 @@ export function AssignTaskModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Implement OTP verification for user registration"
-                className="w-full rounded-xl border border-hairline bg-canvas px-3.5 py-2.5 text-sm text-navy placeholder:text-gray-400 focus:border-brand focus:bg-white focus:outline-none"
+                className="glass-input w-full rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600">
-                  <FlagIcon className="h-3.5 w-3.5 text-amber-600" />
-                  Priority
-                </label>
-                <select
+                <Select
+                  label="Priority"
+                  size="md"
+                  fullWidth
                   value={priority}
-                  onChange={(e) => setPriority(e.target.value as any)}
-                  className="w-full rounded-xl border border-hairline bg-canvas px-3.5 py-2.5 text-sm font-semibold text-navy focus:border-brand focus:bg-white focus:outline-none"
-                >
-                  <option value="urgent">Urgent</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                </select>
+                  onChange={(val) => setPriority(val)}
+                  icon={<FlagIcon className="h-3.5 w-3.5 text-amber-500" />}
+                  options={[
+                    { value: 'urgent', label: 'Urgent', tone: 'red' },
+                    { value: 'high', label: 'High', tone: 'yellow' },
+                    { value: 'medium', label: 'Medium', tone: 'blue' }
+                  ]}
+                />
               </div>
 
               <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600">
-                  <CalendarIcon className="h-3.5 w-3.5 text-blue-600" />
-                  Due Date & Time <span className="text-red-500">*</span>
+                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                  <CalendarIcon className="h-3.5 w-3.5 text-blue-500" />
+                  Due Date &amp; Time <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="datetime-local"
                   required
                   value={dueDateVal}
                   onChange={(e) => setDueDateVal(e.target.value)}
-                  className="w-full rounded-xl border border-hairline bg-canvas px-3.5 py-2 text-xs font-semibold text-navy focus:border-brand focus:bg-white focus:outline-none cursor-pointer"
+                  className="glass-input w-full rounded-2xl px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
                 />
-                <div className="mt-1 flex flex-wrap gap-1">
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
                   <button
                     type="button"
                     onClick={() => {
@@ -220,7 +219,7 @@ export function AssignTaskModal({
                       const pad = (n: number) => String(n).padStart(2, '0');
                       setDueDateVal(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T17:00`);
                     }}
-                    className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+                    className="glass-surface rounded-lg px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-colors"
                   >
                     Today 5 PM
                   </button>
@@ -233,7 +232,7 @@ export function AssignTaskModal({
                       const pad = (n: number) => String(n).padStart(2, '0');
                       setDueDateVal(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T17:00`);
                     }}
-                    className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+                    className="glass-surface rounded-lg px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-colors"
                   >
                     Tomorrow 5 PM
                   </button>
@@ -242,7 +241,7 @@ export function AssignTaskModal({
             </div>
 
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600">
+              <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                 Instructions / Note for Developer
               </label>
               <textarea
@@ -250,19 +249,24 @@ export function AssignTaskModal({
                 onChange={(e) => setNote(e.target.value)}
                 rows={3}
                 placeholder="Specific instructions, endpoints, or requirements for this assigned task..."
-                className="w-full rounded-xl border border-hairline bg-canvas px-3.5 py-2.5 text-sm text-navy placeholder:text-gray-400 focus:border-brand focus:bg-white focus:outline-none"
+                className="glass-input w-full rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
               />
             </div>
 
-            {error && <p className="text-xs font-semibold text-danger">{error}</p>}
+            {error && <p className="text-xs font-semibold text-rose-500">{error}</p>}
 
-            <div className="flex items-center justify-end gap-3 border-t border-hairline pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
+            <div className="flex items-center justify-end gap-3 border-t border-white/20 dark:border-white/10 pt-4">
+              <Button type="button" variant="outline" onClick={onClose} className="rounded-xl">
                 Cancel
               </Button>
-              <Button type="submit" disabled={busy} icon={<CheckIcon className="h-4 w-4" />}>
-                {busy ? 'Assigning…' : 'Assign Task Now'}
-              </Button>
+              <button
+                type="submit"
+                disabled={busy}
+                className="btn-glass-primary inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold rounded-xl shadow-lg"
+              >
+                <CheckIcon className="h-4 w-4" />
+                <span>{busy ? 'Assigning…' : 'Assign Task Now'}</span>
+              </button>
             </div>
           </form>
         )}

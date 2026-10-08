@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { ProgressBar } from '../ui/ProgressBar';
+import { SegmentedControl } from '../ui/SegmentedControl';
 import { useDailyAiSummary } from '../../hooks/useLive';
 
 interface Props {
@@ -58,15 +59,17 @@ ${pendingText || 'No pending tasks or blockers reported.'}
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleQuickDate = (type: 'today' | 'yesterday') => {
-    const d = new Date();
-    if (type === 'yesterday') {
-      d.setDate(d.getDate() - 1);
-    }
-    setSelectedDate(d.toISOString().slice(0, 10));
-  };
-
   const isToday = selectedDate === todayStr;
+  const yesterdayStr = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0, 10);
+  })();
+  const isYesterday = selectedDate === yesterdayStr;
+
+  const handleQuickDate = (type: 'today' | 'yesterday') => {
+    setSelectedDate(type === 'today' ? todayStr : yesterdayStr);
+  };
 
   return (
     <div className="space-y-6">
@@ -99,30 +102,18 @@ ${pendingText || 'No pending tasks or blockers reported.'}
           {/* DATE SELECTOR & ACTIONS TOOLBAR */}
           <div className="flex flex-wrap items-center gap-3">
             {/* Today / Yesterday Toggle */}
-            <div className="inline-flex items-center rounded-full border border-slate-200/60 bg-white/70 backdrop-blur-md p-1 shadow-glass shrink-0">
-              <button
-                type="button"
-                onClick={() => handleQuickDate('today')}
-                className={`rounded-full px-3.5 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                  isToday
-                    ? 'bg-purple-600 text-white shadow-glass'
-                    : 'text-slate-600 hover:text-navy'
-                }`}
-              >
-                Today
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDate('yesterday')}
-                className={`rounded-full px-3.5 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                  !isToday
-                    ? 'bg-purple-600 text-white shadow-glass'
-                    : 'text-slate-600 hover:text-navy'
-                }`}
-              >
-                Yesterday
-              </button>
-            </div>
+            <SegmentedControl
+              size="sm"
+              options={[
+                { id: 'today', label: 'Today' },
+                { id: 'yesterday', label: 'Yesterday' }
+              ]}
+              value={isToday ? 'today' : isYesterday ? 'yesterday' : ''}
+              onChange={(val) => {
+                if (val === 'today') handleQuickDate('today');
+                else if (val === 'yesterday') handleQuickDate('yesterday');
+              }}
+            />
 
             {/* Calendar Native Date Picker */}
             <div className="relative inline-flex items-center shrink-0">
@@ -222,19 +213,21 @@ ${pendingText || 'No pending tasks or blockers reported.'}
         <div className="grid gap-5 grid-cols-1 md:grid-cols-2 pt-1">
           {/* SUB-CARD 1: MAIN MODULES AND FOCUS AREA */}
           <div className="flex flex-col rounded-2xl border border-indigo-200/60 bg-indigo-50/40 backdrop-blur-md p-5 shadow-glass space-y-3.5">
-            <div className="flex items-center justify-between gap-2 border-b border-indigo-100/80 pb-3">
-              <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 shrink-0">
+            <div className="flex items-start justify-between gap-3 border-b border-indigo-100/80 pb-3">
+              <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 shrink-0 mt-0.5">
                   <LayersIcon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-950 truncate">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-950 leading-snug">
                     Main Modules &amp; Focus Area
                   </h4>
-                  <p className="text-[11px] font-medium text-indigo-800/80 truncate">Key feature deliverables &amp; milestones</p>
+                  <p className="text-[11px] font-medium text-indigo-800/80 leading-tight mt-0.5">
+                    Key feature deliverables &amp; milestones
+                  </p>
                 </div>
               </div>
-              <span className="shrink-0 whitespace-nowrap inline-flex items-center rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 text-[11px] font-bold text-indigo-900 leading-none shadow-2xs">
+              <span className="shrink-0 whitespace-nowrap inline-flex items-center rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 text-[11px] font-bold text-indigo-900 leading-none shadow-2xs mt-0.5">
                 {summary?.mainModulesAndFocusAreas?.length || 0} Modules
               </span>
             </div>
@@ -294,19 +287,21 @@ ${pendingText || 'No pending tasks or blockers reported.'}
 
           {/* SUB-CARD 2: INPROGRESS OR PENDING WORKS */}
           <div className="flex flex-col rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-md p-5 shadow-glass space-y-3.5">
-            <div className="flex items-center justify-between gap-2 border-b border-amber-100/80 pb-3">
-              <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 shrink-0">
+            <div className="flex items-start justify-between gap-3 border-b border-amber-100/80 pb-3">
+              <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 shrink-0 mt-0.5">
                   <HourglassIcon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-950 truncate">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-950 leading-snug">
                     InProgress &amp; Pending Works
                   </h4>
-                  <p className="text-[11px] font-medium text-amber-800/80 truncate">Active tasks, review items &amp; blockers</p>
+                  <p className="text-[11px] font-medium text-amber-800/80 leading-tight mt-0.5">
+                    Active tasks, review items &amp; blockers
+                  </p>
                 </div>
               </div>
-              <span className="shrink-0 whitespace-nowrap inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-[11px] font-bold text-amber-900 leading-none shadow-2xs">
+              <span className="shrink-0 whitespace-nowrap inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-[11px] font-bold text-amber-900 leading-none shadow-2xs mt-0.5">
                 {summary?.inProgressAndPendingWorks?.length || 0} Pending
               </span>
             </div>
