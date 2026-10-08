@@ -218,8 +218,8 @@ export function DeveloperDashboard() {
     <>
       {/* 1. FIXED TOP NAVBAR */}
       <PageHeader
-        title="Developer Dashboard"
-        subtitle="Work Logs, Active Time Tracking & Daily Status"
+        title="My Dashboard"
+        subtitle="Track hourly productivity, active tasks, and daily work log submissions in real time"
         actions={
           <div className="flex items-center gap-2.5">
             <Button
