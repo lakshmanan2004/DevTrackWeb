@@ -356,10 +356,10 @@ export async function showWindowsNotification(title: string, body: string, force
       if (reg && reg.showNotification) {
         await reg.showNotification(title, {
           body,
-          icon: '/vite.svg',
+          icon: '/Simats-logo.png',
           tag: 'devtrack-checkin',
           requireInteraction: true,
-          badge: '/vite.svg'
+          badge: '/Simats-logo.png'
         });
         return true;
       }
@@ -372,7 +372,7 @@ export async function showWindowsNotification(title: string, body: string, force
   try {
     const notif = new Notification(title, {
       body,
-      icon: '/vite.svg',
+      icon: '/Simats-logo.png',
       tag: 'devtrack-checkin',
       requireInteraction: true
     });

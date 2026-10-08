@@ -168,7 +168,7 @@ export function Login() {
         <div className="glass-card relative z-10 flex flex-col items-center gap-4 p-8 rounded-3xl shadow-glass-modal">
           <div className="relative flex items-center justify-center h-16 w-16 rounded-2xl bg-white/90 backdrop-blur-xl shadow-glass-hover p-2 ring-1 ring-white/90">
             <img
-              src="/SIMATS-logo.jpg"
+              src="/Simats-logo.png"
               alt="DevTrack Logo"
               className="h-full w-full object-contain rounded-xl"
             />
@@ -201,7 +201,7 @@ export function Login() {
           <div className="flex items-center gap-3.5">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-xl border border-white/25 shadow-glass p-2">
               <img
-                src="/SIMATS-logo.jpg"
+                src="/Simats-logo.png"
                 alt="DevTrack Logo"
                 className="h-full w-full object-contain rounded-xl"
               />

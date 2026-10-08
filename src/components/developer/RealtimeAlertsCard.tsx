@@ -37,7 +37,7 @@ export function RealtimeAlertsCard() {
             if (newest) {
               new Notification('DevTrack — ' + newest.title, {
                 body: newest.body || 'You have a new alert in DevTrack',
-                icon: '/vite.svg'
+                icon: '/Simats-logo.png'
               });
             }
           } catch {

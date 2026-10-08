@@ -40,7 +40,7 @@ export function Sidebar({ role }: SidebarProps) {
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="relative">
             <img
-              src="/SIMATS-logo.jpg"
+              src="/Simats-logo.png"
               alt="DevTrack Logo"
               className="h-8 w-8 rounded-xl object-contain bg-white/95 p-1 shrink-0 shadow-md ring-1 ring-white/30"
             />
