@@ -196,27 +196,27 @@ export function CommitsOverview() {
         </div>
 
         {/* Filter Toolbar for developer / search */}
-        <div className="relative z-20 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative">
-              <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+        <div className="relative z-30 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+            <div className="relative shrink-0">
+              <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search commit message, sha, branch..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="glass-input w-64 rounded-2xl py-2 pl-9 pr-3 text-xs font-medium text-navy dark:text-white placeholder:text-slate-400 shadow-glass focus:outline-none"
+                className="glass-input h-9 w-64 sm:w-80 rounded-xl py-2 pl-10 pr-4 text-xs font-medium text-navy dark:text-white placeholder:text-slate-400 shadow-glass focus:outline-none"
               />
             </div>
 
             {developers.length > 0 && (
-              <div className="w-60">
+              <div className="w-56 sm:w-64 shrink-0">
                 <Select
-                  size="sm"
+                  size="md"
                   fullWidth
                   value={devFilter}
                   onChange={(val) => setDevFilter(val)}
-                  icon={<UsersIcon className="h-3.5 w-3.5" />}
+                  icon={<UsersIcon className="h-4 w-4" />}
                   placeholder={`All Developers (${developers.length})`}
                   options={[
                     { value: '', label: `All Developers (${developers.length})` },
@@ -232,7 +232,7 @@ export function CommitsOverview() {
             )}
           </div>
 
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-auto sm:ml-0">
             Showing <strong className="text-navy dark:text-white">{teamCommits.length}</strong> of {rawTeamCommits.length} commit{rawTeamCommits.length === 1 ? '' : 's'}
           </span>
         </div>

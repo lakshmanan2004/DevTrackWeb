@@ -149,7 +149,6 @@ html.dark body {
 .glass-level-5,
 .glass-modal,
 .glass-floating {
-  position: relative;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(245, 249, 255, 0.68) 100%);
   backdrop-filter: blur(38px) saturate(200%) brightness(1.04);
   -webkit-backdrop-filter: blur(38px) saturate(200%) brightness(1.04);
@@ -161,6 +160,33 @@ html.dark body {
     inset 0 1.5px 1px 0 rgba(255, 255, 255, 1),
     inset 0 0 28px 0 rgba(255, 255, 255, 0.25);
   border-radius: 28px;
+}
+
+/* Floating Dropdown overlay — strictly absolute and isolated from parent layout flow */
+.glass-dropdown {
+  position: absolute !important;
+  top: calc(100% + 6px) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(245, 249, 255, 0.88) 100%);
+  backdrop-filter: blur(38px) saturate(200%) brightness(1.04);
+  -webkit-backdrop-filter: blur(38px) saturate(200%) brightness(1.04);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-bottom-color: rgba(255, 255, 255, 0.50);
+  box-shadow: 
+    0 24px 60px -10px rgba(15, 23, 42, 0.22),
+    0 8px 24px -4px rgba(15, 23, 42, 0.08),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1),
+    inset 0 0 28px 0 rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+}
+
+.dark .glass-dropdown {
+  background: linear-gradient(135deg, rgba(16, 24, 44, 0.94) 0%, rgba(10, 16, 32, 0.88) 100%);
+  border-color: rgba(255, 255, 255, 0.18);
+  border-bottom-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 
+    0 24px 60px -10px rgba(0, 0, 0, 0.65),
+    0 8px 24px -4px rgba(0, 0, 0, 0.35),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* 3. Interactive Frosted Glass Card (Micro-lift & Refraction on Hover) */
@@ -604,6 +630,35 @@ select.glass-input {
 /* Global Typography & Readability on Frosted Glass */
 .text-navy {
   color: #0f172a;
+}
+
+/* Enhanced Light Mode Grey Contrast (High legibility on frosted glass without being harsh or too dark) */
+html:not(.dark) .text-slate-400,
+html:not(.dark) .text-gray-400,
+html:not(.dark) .text-zinc-400,
+body:not(.dark) .text-slate-400,
+body:not(.dark) .text-gray-400,
+body:not(.dark) .text-zinc-400 {
+  color: #52637a; /* Sophisticated medium slate grey (41% lightness) */
+}
+
+html:not(.dark) .text-slate-500,
+html:not(.dark) .text-gray-500,
+html:not(.dark) .text-zinc-500,
+body:not(.dark) .text-slate-500,
+body:not(.dark) .text-gray-500,
+body:not(.dark) .text-zinc-500 {
+  color: #3f5066; /* Balanced secondary slate */
+}
+
+/* Readable Light Mode Input & Search Placeholders */
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder,
+body:not(.dark) input::placeholder,
+body:not(.dark) textarea::placeholder,
+html:not(.dark) .placeholder-slate-400::placeholder,
+html:not(.dark) .placeholder\:text-slate-400::placeholder {
+  color: #66788f;
 }
 
 .dark .text-navy,

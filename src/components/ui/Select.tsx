@@ -181,7 +181,7 @@ export function Select({
         <div
           role="listbox"
           style={minMenuWidth ? { minWidth: minMenuWidth } : undefined}
-          className={`glass-modal absolute z-[100] mt-1.5 max-h-64 w-full min-w-[190px] overflow-y-auto rounded-2xl p-1.5 shadow-glass-modal backdrop-blur-3xl bg-white/98 dark:bg-slate-900/98 border border-white/40 dark:border-white/20 animate-in fade-in zoom-in-95 duration-150 ${
+          className={`glass-dropdown absolute z-[100] max-h-64 w-full min-w-[190px] overflow-y-auto rounded-2xl p-1.5 backdrop-blur-3xl animate-in fade-in zoom-in-95 duration-150 ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
         >
@@ -218,10 +218,10 @@ export function Select({
                     setIsOpen(false);
                     setSearchQuery('');
                   }}
-                  className={`flex items-center justify-between gap-2.5 rounded-xl px-3 py-2 text-xs transition-all duration-150 cursor-pointer select-none ${
+                  className={`flex items-center justify-between gap-2.5 rounded-xl px-3 py-2 text-xs transition-all duration-150 cursor-pointer select-none border ${
                     isSelected
-                      ? 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold shadow-2xs border border-blue-500/20'
-                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100/80 dark:hover:bg-white/10 font-medium'
+                      ? 'bg-blue-500/15 dark:bg-blue-500/30 text-blue-600 dark:text-blue-300 font-bold border-blue-500/30 shadow-2xs'
+                      : 'border-transparent text-slate-700 dark:text-slate-200 hover:bg-blue-50 hover:border-blue-200/70 hover:text-blue-700 dark:hover:bg-blue-500/20 dark:hover:border-blue-500/30 dark:hover:text-blue-300 hover:shadow-2xs font-medium hover:translate-x-0.5'
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
