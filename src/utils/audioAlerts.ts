@@ -85,19 +85,52 @@ export function setSavedNotificationSound(soundId: string): void {
   localStorage.setItem(STORAGE_KEY, soundId);
 }
 
-// Synthesize the 10 distinct melodious sound profiles
-export function playMelodiousSound(soundId?: string, isUrgentVariation = false) {
-  const selectedId = soundId || getSavedNotificationSound();
+// Global shared AudioContext singleton
+let globalAudioCtx: AudioContext | null = null;
 
-  try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-    if (ctx.state === 'suspended') {
+function getOrCreateAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+  if (!AudioCtx) return null;
+
+  if (!globalAudioCtx || globalAudioCtx.state === 'closed') {
+    globalAudioCtx = new AudioCtx();
+  }
+  return globalAudioCtx;
+}
+
+// User-gesture audio unlocker
+if (typeof window !== 'undefined') {
+  const unlockAudio = () => {
+    const ctx = getOrCreateAudioContext();
+    if (ctx && ctx.state === 'suspended') {
       ctx.resume().catch(() => {});
     }
+  };
+  window.addEventListener('click', unlockAudio, { passive: true });
+  window.addEventListener('keydown', unlockAudio, { passive: true });
+  window.addEventListener('touchstart', unlockAudio, { passive: true });
+}
 
+// Synthesize the 10 distinct melodious sound profiles
+export async function playMelodiousSound(soundId?: string, isUrgentVariation = false) {
+  const selectedId = soundId || getSavedNotificationSound();
+  const ctx = getOrCreateAudioContext();
+  if (!ctx) return;
+
+  try {
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+  } catch {
+    // continue
+  }
+
+  try {
     const now = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.85, now);
+    master.connect(ctx.destination);
 
     switch (selectedId) {
       case 'soft_marimba': {
@@ -108,12 +141,12 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
           const gain = ctx.createGain();
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(freq, now + idx * 0.06);
-          gain.gain.setValueAtTime(0.35, now + idx * 0.06);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.35);
+          gain.gain.setValueAtTime(0.65, now + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.4);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(master);
           osc.start(now + idx * 0.06);
-          osc.stop(now + idx * 0.06 + 0.35);
+          osc.stop(now + idx * 0.06 + 0.4);
         });
         break;
       }
@@ -126,12 +159,12 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
           const gain = ctx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-          gain.gain.setValueAtTime(0.28, now + idx * 0.07);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.4);
+          gain.gain.setValueAtTime(0.55, now + idx * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.45);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(master);
           osc.start(now + idx * 0.07);
-          osc.stop(now + idx * 0.07 + 0.4);
+          osc.stop(now + idx * 0.07 + 0.45);
         });
         break;
       }
@@ -144,13 +177,13 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
           const gain = ctx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, now);
-          const vol = i === 0 ? 0.35 : 0.15;
+          const vol = i === 0 ? 0.65 : 0.35;
           gain.gain.setValueAtTime(vol, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(master);
           osc.start(now);
-          osc.stop(now + 0.9);
+          osc.stop(now + 1.0);
         });
         break;
       }
@@ -164,13 +197,13 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(startFreq, now);
         osc.frequency.exponentialRampToValueAtTime(peakFreq, now + 0.08);
-        osc.frequency.exponentialRampToValueAtTime(500, now + 0.22);
-        gain.gain.setValueAtTime(0.38, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        osc.frequency.exponentialRampToValueAtTime(500, now + 0.25);
+        gain.gain.setValueAtTime(0.7, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(master);
         osc.start(now);
-        osc.stop(now + 0.22);
+        osc.stop(now + 0.25);
         break;
       }
 
@@ -182,12 +215,12 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
           const gain = ctx.createGain();
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(freq, now + i * 0.11);
-          gain.gain.setValueAtTime(0.32, now + i * 0.11);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.11 + 0.38);
+          gain.gain.setValueAtTime(0.65, now + i * 0.11);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.11 + 0.42);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(master);
           osc.start(now + i * 0.11);
-          osc.stop(now + i * 0.11 + 0.38);
+          osc.stop(now + i * 0.11 + 0.42);
         });
         break;
       }
@@ -200,12 +233,12 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
           const gain = ctx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, now + i * 0.08);
-          gain.gain.setValueAtTime(0.28, now + i * 0.08);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.35);
+          gain.gain.setValueAtTime(0.6, now + i * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(master);
           osc.start(now + i * 0.08);
-          osc.stop(now + i * 0.08 + 0.35);
+          osc.stop(now + i * 0.08 + 0.4);
         });
         break;
       }
@@ -217,13 +250,13 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, now);
         osc.frequency.linearRampToValueAtTime(880, now + 0.18);
-        gain.gain.setValueAtTime(0.05, now);
-        gain.gain.linearRampToValueAtTime(0.32, now + 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.65, now + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(master);
         osc.start(now);
-        osc.stop(now + 0.45);
+        osc.stop(now + 0.5);
         break;
       }
 
@@ -235,12 +268,12 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
           const gain = ctx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, now + i * 0.07);
-          gain.gain.setValueAtTime(0.3, now + i * 0.07);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.25);
+          gain.gain.setValueAtTime(0.65, now + i * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.3);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(master);
           osc.start(now + i * 0.07);
-          osc.stop(now + i * 0.07 + 0.25);
+          osc.stop(now + i * 0.07 + 0.3);
         });
         break;
       }
@@ -253,12 +286,12 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
           const gain = ctx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, now + idx * 0.05);
-          gain.gain.setValueAtTime(0.24, now + idx * 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.6);
+          gain.gain.setValueAtTime(0.5, now + idx * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.7);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(master);
           osc.start(now + idx * 0.05);
-          osc.stop(now + idx * 0.05 + 0.6);
+          osc.stop(now + idx * 0.05 + 0.7);
         });
         break;
       }
@@ -272,12 +305,12 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
           const gain = ctx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, now + i * 0.09);
-          gain.gain.setValueAtTime(0.32, now + i * 0.09);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.35);
+          gain.gain.setValueAtTime(0.65, now + i * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.4);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(master);
           osc.start(now + i * 0.09);
-          osc.stop(now + i * 0.09 + 0.35);
+          osc.stop(now + i * 0.09 + 0.4);
         });
         break;
       }
@@ -288,7 +321,7 @@ export function playMelodiousSound(soundId?: string, isUrgentVariation = false) 
 }
 
 // Master alert sound router that respects user preference
-export function playAlertSound(type: 'pop' | 'notification' | 'urgent' | 'late', force = false) {
+export function playAlertSound(type: 'pop' | 'notification' | 'urgent' | 'late' = 'pop', force = false) {
   if (!force) {
     const currentHour = new Date().getHours();
     // Strictly 8:00 AM to 5:00 PM (17:00)
@@ -299,16 +332,18 @@ export function playAlertSound(type: 'pop' | 'notification' | 'urgent' | 'late',
     playMelodiousSound(undefined, true);
   } else if (type === 'late') {
     // Late submission tone
+    const ctx = getOrCreateAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(220, ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.35);
-      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.setValueAtTime(0.5, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
       osc.connect(gain);
       gain.connect(ctx.destination);
