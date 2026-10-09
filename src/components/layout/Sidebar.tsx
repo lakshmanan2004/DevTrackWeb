@@ -36,7 +36,7 @@ export function Sidebar({ role }: SidebarProps) {
   return (
     <aside className="glass-dark flex h-screen w-64 shrink-0 flex-col text-[#F5F5F5] overflow-hidden select-none z-40">
       {/* APP BRANDING HEADER */}
-      <div className="flex items-center justify-between gap-2 px-4 py-4 border-b border-white/10">
+      <div className="flex h-[68px] shrink-0 items-center justify-between gap-2 px-4 border-b border-white/10">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="relative">
             <img
