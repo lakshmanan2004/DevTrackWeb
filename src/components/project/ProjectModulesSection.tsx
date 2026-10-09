@@ -53,7 +53,7 @@ export function ProjectModulesSection({
 
   if (!project) {
     return (
-      <section className="glass-card relative overflow-hidden rounded-3xl p-6 sm:p-7 shadow-glass space-y-4 animate-in fade-in">
+      <section className="glass-card relative rounded-3xl p-6 sm:p-7 shadow-glass space-y-4 animate-in fade-in">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
           <div className="flex items-center gap-3.5">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white shadow-glass">
