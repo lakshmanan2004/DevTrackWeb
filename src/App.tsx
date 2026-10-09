@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { useAuth } from './context/AuthContext';
+import { SplashScreen } from './components/ui/SplashScreen';
 import { Login } from './pages/Login';
 import { DeveloperDashboard } from './pages/developer/DeveloperDashboard';
 import { WorkLogs } from './pages/developer/WorkLogs';
@@ -39,11 +40,7 @@ const roleHome: Record<Role, string> = {
 function Protected({ role, children }: { role: Role; children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-canvas">
-        <p className="text-sm font-semibold text-gray-500">Loading DevTrack…</p>
-      </div>
-    );
+    return <SplashScreen minDurationMs={400} />;
   }
   if (!user) return <Navigate to="/" replace />;
   if (user.role !== role) return <Navigate to={roleHome[user.role]} replace />;
@@ -51,9 +48,18 @@ function Protected({ role, children }: { role: Role; children: React.ReactNode }
 }
 
 export function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
-    <BrowserRouter>
-      <Routes>
+    <>
+      {showSplash && (
+        <SplashScreen
+          minDurationMs={1300}
+          onComplete={() => setShowSplash(false)}
+        />
+      )}
+      <BrowserRouter>
+        <Routes>
         <Route path="/" element={<Login />} />
 
         <Route element={<Protected role="developer"><AppShell role="developer" /></Protected>}>
@@ -97,5 +103,6 @@ export function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+  </>
   );
 }
