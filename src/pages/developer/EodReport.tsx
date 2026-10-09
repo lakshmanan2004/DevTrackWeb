@@ -65,7 +65,7 @@ export function EodReport() {
     <>
       <PageHeader title="End of Day Report" subtitle={`${dateLabel} · ${user?.teamName || ''} · ${user?.projectName || ''}`} />
 
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6">
         <Banner
           tone={alreadySubmitted ? 'green' : isAfter345 ? 'blue' : 'yellow'}
           icon={<AlarmClockIcon className="h-4 w-4" />}

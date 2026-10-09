@@ -39,7 +39,7 @@ body,
 }
 
 body {
-  background-color: #f6f8fc;
+  background-color: #E0EFFF;
   color: #0f172a;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -50,7 +50,6 @@ body {
     radial-gradient(at 85% 15%, rgba(175, 82, 222, 0.10) 0px, transparent 50%),
     radial-gradient(at 50% 85%, rgba(52, 199, 89, 0.08) 0px, transparent 50%),
     radial-gradient(at 90% 80%, rgba(255, 149, 0, 0.08) 0px, transparent 50%);
-  background-attachment: fixed;
   transition: color 0.3s ease;
 }
 
@@ -214,25 +213,24 @@ html.dark body {
     inset 0 0 24px 0 rgba(255, 255, 255, 0.30);
 }
 
-/* 4. Frosted Glass Top Header / Navbar */
+/* 4. Frosted Liquid Glass Top Header / Navbar */
 .glass-header {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.52) 100%);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(245, 249, 255, 0.52) 100%);
+  backdrop-filter: blur(30px) saturate(180%) brightness(1.03);
+  -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.60);
   box-shadow: 
-    0 4px 20px -2px rgba(15, 23, 42, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    0 4px 16px -2px rgba(15, 23, 42, 0.03),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95);
 }
 
-/* 5. Frosted Glass Dark Sidebar / Dock */
 .glass-dark {
-  background: linear-gradient(180deg, rgba(16, 24, 40, 0.65) 0%, rgba(10, 16, 30, 0.50) 100%);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(10, 15, 30, 0.94) 100%);
   backdrop-filter: blur(32px) saturate(190%) brightness(1.06);
   -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(1.06);
-  border-right: 1px solid rgba(255, 255, 255, 0.16);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 
-    6px 0 32px 0 rgba(0, 0, 0, 0.20),
+    6px 0 32px 0 rgba(0, 0, 0, 0.25),
     inset 1px 0 0 0 rgba(255, 255, 255, 0.08),
     inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.20);
 }
@@ -448,17 +446,16 @@ select.glass-input {
   box-shadow: 
     0 18px 44px -4px rgba(0, 0, 0, 0.45),
     0 0 24px rgba(22, 131, 255, 0.16),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.16) !important;
 }
 
 .dark .glass-header {
-  background: linear-gradient(180deg, rgba(16, 22, 34, 0.75) 0%, rgba(10, 14, 24, 0.62) 100%) !important;
-  backdrop-filter: blur(24px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: linear-gradient(180deg, rgba(22, 26, 32, 0.78) 0%, rgba(16, 19, 24, 0.68) 100%) !important;
+  backdrop-filter: blur(28px) saturate(130%) brightness(1.02) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(130%) brightness(1.02) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: 
-    0 4px 24px -2px rgba(0, 0, 0, 0.40),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+    0 4px 16px -2px rgba(0, 0, 0, 0.25),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.16) !important;
 }
 
 .dark .glass-dark {
@@ -559,20 +556,8 @@ select.glass-input {
 }
 
 /* ==========================================================================
-   GLOBAL UTILITY OVERRIDES (Ensuring Frosted Glass on ALL Components)
+   GLOBAL UTILITY OVERRIDES (Refined Color Tints for Liquid Glass Hierarchy)
    ========================================================================== */
-
-/* Universal Frosted Glass on semi-transparent backgrounds */
-.bg-white\/60,
-.bg-white\/70,
-.bg-white\/75,
-.bg-white\/80,
-.bg-white\/85,
-.bg-white\/90,
-.bg-white\/95 {
-  backdrop-filter: blur(28px) saturate(175%) brightness(1.02);
-  -webkit-backdrop-filter: blur(28px) saturate(175%) brightness(1.02);
-}
 
 .dark .bg-white,
 .dark .bg-white\/40,
@@ -596,8 +581,6 @@ select.glass-input {
 .dark .bg-gray-900,
 .dark .bg-gray-800 {
   background-color: rgba(20, 23, 28, 0.72) !important;
-  backdrop-filter: blur(28px) saturate(130%) brightness(0.98) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(130%) brightness(0.98) !important;
 }
 
 .dark .bg-canvas {
@@ -610,8 +593,6 @@ select.glass-input {
 .dark .bg-slate-50\/60,
 .dark .bg-slate-50\/70 {
   background-color: rgba(20, 23, 28, 0.45) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
 }
 
 .dark .bg-gray-100,
@@ -619,8 +600,6 @@ select.glass-input {
 .dark .bg-slate-100\/90,
 .dark .bg-slate-800 {
   background-color: rgba(24, 28, 34, 0.60) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
 }
 
 .dark .bg-slate-200,

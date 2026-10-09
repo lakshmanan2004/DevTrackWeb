@@ -187,7 +187,7 @@ export function MyPendingWorks() {
         }
       />
 
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6">
         {toastMessage && (
           <div className={`flex items-center gap-2 rounded-xl p-3 text-xs font-bold text-white shadow-md animate-in fade-in ${toastMessage.includes('⚠️') ? 'bg-amber-600' : 'bg-emerald-600'}`}>
             <CheckCircle2Icon className="h-4 w-4 shrink-0" />

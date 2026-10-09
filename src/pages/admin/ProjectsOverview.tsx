@@ -212,7 +212,7 @@ export function ProjectsOverview() {
     ? filteredProjects
     : filteredProjects.filter((p) => p.id === selectedProjectId);
 
-  const filterLabel = filterTab === 'ongoing' ? 'Ongoing' : filterTab === 'completed' ? 'Completed' : filterTab === 'hold' ? 'On Hold' : filterTab === 'teams' ? 'Team' : 'All';
+  const filterLabel = filterTab === 'ongoing' ? 'Ongoing ' : filterTab === 'completed' ? 'Completed ' : filterTab === 'hold' ? 'On Hold ' : filterTab === 'teams' ? 'Team ' : '';
 
   return (
     <>
@@ -221,7 +221,7 @@ export function ProjectsOverview() {
         subtitle="Company-wide project details, milestones, and administration"
       />
 
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6">
         <Banner tone="grey" icon={<EyeIcon className="h-4 w-4" />}>
           Viewing and managing company-wide projects. Administrators have full system privileges to oversee and delete projects.
         </Banner>
@@ -267,7 +267,7 @@ export function ProjectsOverview() {
                 options={[
                   {
                     value: 'all',
-                    label: `All ${filterLabel} Projects (${filteredProjects.length})`
+                    label: `All ${filterLabel}Projects (${filteredProjects.length})`
                   },
                   ...filteredProjects.map((p) => ({
                     value: p.id,

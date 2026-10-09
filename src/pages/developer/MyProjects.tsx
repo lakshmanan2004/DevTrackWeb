@@ -28,7 +28,7 @@ export function MyProjects() {
         subtitle={`Projects assigned to ${user?.name || 'you'} (${user?.teamName || 'Team'})`}
       />
 
-      <div className="flex-1 space-y-5 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
         <Banner tone="blue" icon={<FolderKanbanIcon className="h-4 w-4" />}>
           Below are the projects you are actively involved in. All work logs, commits, and daily goals automatically link to your assigned project.
         </Banner>

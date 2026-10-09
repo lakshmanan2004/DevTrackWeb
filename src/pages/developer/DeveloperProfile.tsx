@@ -121,7 +121,7 @@ export function DeveloperProfile() {
           <button
             type="button"
             onClick={openWallpaperModal}
-            className="btn-glass-primary px-4 py-2 text-xs font-bold rounded-xl shadow-lg flex items-center gap-2 cursor-pointer"
+            className="btn-glass-primary px-3.5 py-1.5 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <PaletteIcon className="h-4 w-4 text-white" />
             <span>Theme</span>
@@ -129,7 +129,7 @@ export function DeveloperProfile() {
         }
       />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-6">
         <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
           <aside className="space-y-5">
             <section className="glass-card rounded-3xl p-5 text-center shadow-glass">

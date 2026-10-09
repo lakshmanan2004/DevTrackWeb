@@ -81,7 +81,7 @@ export function MyProjects() {
     ? filteredProjects
     : filteredProjects.filter((p: any) => p.id === selectedProjectId);
 
-  const filterLabel = filter === 'ongoing' ? 'Ongoing' : filter === 'completed' ? 'Completed' : filter === 'teams' ? 'Team' : 'All';
+  const filterLabel = filter === 'ongoing' ? 'Ongoing ' : filter === 'completed' ? 'Completed ' : filter === 'teams' ? 'Team ' : '';
 
   return (
     <>
@@ -97,7 +97,7 @@ export function MyProjects() {
         }
       />
 
-      <div className="flex-1 space-y-5 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <dl className="flex flex-wrap gap-3">
             {summary.map((item) => {
@@ -138,7 +138,7 @@ export function MyProjects() {
                 options={[
                   {
                     value: 'all',
-                    label: `All ${filterLabel} Projects (${filteredProjects.length})`
+                    label: `All ${filterLabel}Projects (${filteredProjects.length})`
                   },
                   ...filteredProjects.map((p: any) => ({
                     value: p.id,
@@ -191,7 +191,9 @@ export function MyProjects() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <h2 className="text-base font-bold text-navy dark:text-white">{project.name}</h2>
+                      <Link to={`/manager/overview?projectId=${project.id}`} className="hover:underline">
+                        <h2 className="text-base font-bold text-navy dark:text-white hover:text-brand transition-colors">{project.name}</h2>
+                      </Link>
                       <Badge tone={completed ? 'green' : 'blue'} dot>
                         {completed ? 'Completed' : project.status === 'hold' ? 'On Hold' : 'Ongoing'}
                       </Badge>
@@ -231,7 +233,7 @@ export function MyProjects() {
                     >
                       {completed ? 'Status / Reopen' : 'Close Project'}
                     </Button>
-                    <Link to="/manager/overview">
+                    <Link to={`/manager/overview?projectId=${project.id}`}>
                       <Button size="sm" icon={<BarChart3Icon className="h-3.5 w-3.5" />}>
                         {completed ? 'View Report' : 'View Progress'}
                       </Button>

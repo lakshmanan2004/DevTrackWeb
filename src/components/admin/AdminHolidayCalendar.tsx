@@ -307,7 +307,9 @@ export function AdminHolidayCalendar({
                 <button
                   key={cell.key}
                   type="button"
-                  onClick={() => setSelectedDate(cell.dateStr)}
+                  onClick={() => {
+                    if (cell.dateStr) setSelectedDate(cell.dateStr);
+                  }}
                   title={`${cell.dateStr} ${
                     cell.holidayLabel ? `— ${cell.holidayLabel}` : ''
                   }`}

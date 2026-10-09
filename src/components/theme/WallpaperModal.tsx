@@ -72,12 +72,12 @@ export function WallpaperModal({ isOpen, onClose }: WallpaperModalProps) {
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-60" />
                     </>
                   ) : (
-                    <div className="relative flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 via-blue-50/40 to-slate-200 dark:from-slate-900 dark:via-slate-800/80 dark:to-slate-950 overflow-hidden">
+                    <div className="relative flex h-full w-full items-center justify-center bg-gradient-to-br from-[#E0EFFF] via-[#EBF4FF] to-[#D8E8FD] dark:from-slate-900 dark:via-slate-800/80 dark:to-slate-950 overflow-hidden">
                       <div className="absolute -top-8 -left-8 h-28 w-28 rounded-full bg-blue-500/25 blur-2xl" />
                       <div className="absolute -bottom-8 -right-8 h-28 w-28 rounded-full bg-purple-500/20 blur-2xl" />
                       <div className="glass-surface relative z-10 flex items-center gap-1.5 rounded-xl px-3 py-1.5 border border-white/50 dark:border-white/15 shadow-xs">
                         <SparklesIcon className="h-3.5 w-3.5 text-blue-500" />
-                        <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Pure Liquid Glass</span>
+                        <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Electric Arctic Blue</span>
                       </div>
                     </div>
                   )}

@@ -182,7 +182,7 @@ export function LeaderAlerts() {
         }
       />
 
-      <div className="flex-1 space-y-5 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
         <Banner tone="red" icon={<BotIcon className="h-4 w-4" />}>
           All alerts are auto-generated. The server checks every hour for missed logs, flags batch
           submissions and monitors EOD reports — pushed to this page in real time.

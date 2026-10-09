@@ -157,7 +157,7 @@ export function EmployeePerformance() {
         subtitle="Individual developer performance analysis, attendance, pending works resolution & graphs — read only"
       />
 
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6">
         {/* INFO BANNER */}
         <Banner tone="grey" icon={<BarChart3Icon className="h-4 w-4 text-brand dark:text-indigo-400" />}>
           📊 Inspect detailed performance metrics, attendance/absence impact, pending work resolution rates, and team comparison graphs for any developer.

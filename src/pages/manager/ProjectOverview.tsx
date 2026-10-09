@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CheckCircle2Icon, TrophyIcon } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { CloseProjectModal } from '../../components/project/CloseProjectModal';
@@ -26,14 +27,34 @@ const healthToneMap: Record<string, 'green' | 'yellow' | 'red' | 'blue'> = {
 const weekHealthToneMap = { Good: 'green', Slow: 'yellow', Behind: 'red' } as const;
 
 export function ProjectOverview() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlProjectId = searchParams.get('projectId') || '';
   const { data, refetch } = useProjects('mine');
   const projects = data?.projects || [];
-  const [selectedProjectId, setSelectedProjectId] = useState('');
-  const activeId = selectedProjectId;
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(urlProjectId);
+
+  useEffect(() => {
+    if (urlProjectId) {
+      setSelectedProjectId(urlProjectId);
+    } else if (!selectedProjectId && projects.length === 1) {
+      setSelectedProjectId(projects[0].id);
+    }
+  }, [urlProjectId, projects, selectedProjectId]);
+
+  const activeId = selectedProjectId || urlProjectId || (projects.length === 1 ? projects[0]?.id : '');
   const { data: overview, refetch: refetchOverview } = useProjectOverview(activeId || null);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
 
   const selectedProject = projects.find((p: any) => p.id === activeId);
+
+  const handleSelectProject = (val: string) => {
+    setSelectedProjectId(val);
+    if (val) {
+      setSearchParams({ projectId: val });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   const modules = selectedProject?.modules || [];
   const donePercent = selectedProject?.progress ?? 0;
@@ -74,8 +95,8 @@ export function ProjectOverview() {
               <Select
                 size="sm"
                 fullWidth
-                value={selectedProjectId}
-                onChange={(val) => setSelectedProjectId(val)}
+                value={activeId}
+                onChange={(val) => handleSelectProject(val)}
                 placeholder="— Select a Project —"
                 icon={<FolderKanbanIcon className="h-3.5 w-3.5" />}
                 options={projects.map((proj: any) => ({
@@ -87,11 +108,11 @@ export function ProjectOverview() {
               />
             </div>
 
-            {selectedProjectId && (
+            {activeId && projects.length > 1 && (
               <button
                 type="button"
-                onClick={() => setSelectedProjectId('')}
-                className="rounded-xl border border-hairline dark:border-white/10 bg-white/70 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-slate-200 transition-colors shadow-2xs"
+                onClick={() => handleSelectProject('')}
+                className="rounded-xl border border-hairline dark:border-white/10 bg-white/70 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-slate-200 transition-colors shadow-2xs cursor-pointer"
               >
                 Clear
               </button>
@@ -112,7 +133,7 @@ export function ProjectOverview() {
         }
       />
 
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6">
         <Banner tone="blue" icon={<InfoIcon className="h-4 w-4" />}>
           All project metrics and progress percentages are computed live from team leader completed modules.
         </Banner>
@@ -159,8 +180,6 @@ export function ProjectOverview() {
             {/* PROJECT MODULES & WEIGHTED DELIVERY TRACKER */}
             <ProjectModulesSection
               project={selectedProject}
-              allProjects={projects}
-              onSelectProject={(id) => setSelectedProjectId(id)}
               canUpdate={true}
               onModuleUpdated={handleModuleUpdated}
             />
@@ -205,7 +224,7 @@ export function ProjectOverview() {
             </table>
           </section>
 
-          <section className="h-fit rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-glass">
+          <section className="h-fit overflow-hidden rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-glass">
             <h2 className="border-b border-hairline dark:border-white/10 px-5 py-4 text-sm font-bold text-navy dark:text-white">
               Active Blockers — {currentBlockers.length}
             </h2>

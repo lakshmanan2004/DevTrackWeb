@@ -108,7 +108,7 @@ export function ManagerAlerts() {
         }
       />
 
-      <div className="flex-1 space-y-5 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
         <Banner tone="yellow" icon={<AlertTriangleIcon className="h-4 w-4 text-amber-500" />}>
           Automated session heartbeats detect when developers are idle or miss check-ins. You can ping developers or assign tasks directly — they receive it instantly.
         </Banner>

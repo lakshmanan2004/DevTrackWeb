@@ -117,15 +117,8 @@ export function Login() {
     setBusy(true);
     try {
       const loggedIn = await login(email.trim(), password, remember);
-      if (loggedIn.role !== role) {
-        logout();
-        const actualTab = roleTabs.find((t) => t.id === loggedIn.role);
-        const actualLabel = actualTab ? actualTab.label : loggedIn.role;
-        setError(`Access denied. This account is registered as ${actualLabel}. Please select the "${actualLabel}" tab above to sign in.`);
-        return;
-      }
       const home = roleTabs.find((t) => t.id === loggedIn.role)?.path || '/developer';
-      navigate(home);
+      navigate(home, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
@@ -142,7 +135,7 @@ export function Login() {
 
   if (loading) {
     return (
-      <div className="relative flex h-screen w-full items-center justify-center bg-[#f6f8fc] overflow-hidden">
+      <div className="relative flex h-screen w-full items-center justify-center bg-[#E0EFFF] overflow-hidden">
         <div className="ambient-orb -top-20 -left-20 w-96 h-96 bg-blue-500/10" />
         <div className="ambient-orb -bottom-20 -right-20 w-96 h-96 bg-purple-500/10" />
         

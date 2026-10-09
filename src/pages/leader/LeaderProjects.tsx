@@ -16,7 +16,6 @@ import {
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { Select } from '../../components/ui/Select';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { FilterPills } from '../../components/ui/FilterPills';
 import { ProjectModulesSection } from '../../components/project/ProjectModulesSection';
@@ -38,7 +37,6 @@ export function LeaderProjects() {
   const projects = projectsData?.projects || [];
   const developers = devsData?.developers || [];
 
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInspectionProjectId, setSelectedInspectionProjectId] = useState<string | null>(null);
@@ -48,7 +46,6 @@ export function LeaderProjects() {
   const totalDevs = developers.length;
 
   const filteredProjects = projects.filter((p: any) => {
-    if (selectedProjectId !== 'all' && p.id !== selectedProjectId) return false;
     if (filter === 'active' && (p.status === 'completed' || p.status === 'hold')) return false;
     if (filter === 'completed' && p.status !== 'completed') return false;
     if (searchQuery.trim()) {
@@ -66,33 +63,9 @@ export function LeaderProjects() {
       <PageHeader
         title="Managed Projects"
         subtitle={`Projects supervised by ${user?.name || 'you'} (Team Leader) — inspect milestones, modules & developer submissions`}
-        actions={
-          projects.length > 0 ? (
-            <div className="w-56 sm:w-64">
-              <Select
-                size="sm"
-                fullWidth
-                align="right"
-                value={selectedProjectId}
-                onChange={(val) => setSelectedProjectId(val)}
-                placeholder="— All Managed Projects —"
-                icon={<FolderKanbanIcon className="h-3.5 w-3.5" />}
-                options={[
-                  { value: 'all', label: `All Managed Projects (${projects.length})` },
-                  ...projects.map((p: any) => ({
-                    value: p.id,
-                    label: p.name,
-                    badge: `${p.progress || 0}% · ${p.team || 'Team'}`
-                  }))
-                ]}
-                searchable
-              />
-            </div>
-          ) : undefined
-        }
       />
 
-      <div className="flex-1 space-y-6 p-6 sm:p-8">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6 sm:p-8">
         {/* TOP SUMMARY STATS */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="glass-card rounded-2xl p-4 shadow-glass">
@@ -128,7 +101,7 @@ export function LeaderProjects() {
           </div>
         </div>
 
-        {/* FILTER AND SELECTOR ROW */}
+        {/* FILTER ROW */}
         <div className="flex flex-wrap items-center gap-3">
           <FilterPills
             ariaLabel="Filter managed projects"
@@ -140,28 +113,6 @@ export function LeaderProjects() {
               { id: 'completed', label: 'Completed', count: completedCount }
             ]}
           />
-
-          {projects.length > 0 && (
-            <div className="w-56 sm:w-64">
-              <Select
-                size="sm"
-                fullWidth
-                value={selectedProjectId}
-                onChange={(val) => setSelectedProjectId(val)}
-                placeholder="Filter Project"
-                icon={<FolderKanbanIcon className="h-3.5 w-3.5" />}
-                options={[
-                  { value: 'all', label: `All Projects (${projects.length})` },
-                  ...projects.map((p: any) => ({
-                    value: p.id,
-                    label: p.name,
-                    badge: `${p.progress || 0}%`
-                  }))
-                ]}
-                searchable
-              />
-            </div>
-          )}
         </div>
 
         {/* PROJECT CARDS LIST */}

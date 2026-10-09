@@ -55,7 +55,7 @@ export function Sidebar({ role }: SidebarProps) {
 
   return (
     <aside
-      className={`glass-dark flex h-screen shrink-0 flex-col text-[#F5F5F5] select-none z-40 transition-all duration-300 ease-in-out ${
+      className={`relative glass-dark flex h-screen shrink-0 flex-col text-[#F5F5F5] select-none z-40 transition-all duration-300 ease-in-out ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
@@ -75,7 +75,7 @@ export function Sidebar({ role }: SidebarProps) {
             <img
               src="/Simats-logo.png"
               alt="SIMATS DevTrack"
-              className="h-8 w-8 rounded-xl object-contain bg-white/95 p-1 shrink-0 shadow-md ring-1 ring-white/30 group-hover:ring-blue-400/80 transition-all"
+              className="h-8 w-8 rounded-xl object-contain bg-white p-1 shrink-0 shadow-md ring-1 ring-white/30 group-hover:ring-blue-400/80 transition-all"
             />
             <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
             
@@ -90,13 +90,13 @@ export function Sidebar({ role }: SidebarProps) {
           {/* APP TITLE & ROLE (Hidden in collapsed mode) */}
           {!isCollapsed && (
             <div className="min-w-0 transition-opacity duration-200">
-              <p className="text-xs font-black tracking-tight text-[#F5F5F5] truncate flex items-center gap-1">
+              <p className="text-xs font-black tracking-tight text-white truncate flex items-center gap-1.5">
                 DevTrack
-                <span className="rounded-full bg-[rgba(22,131,255,0.16)] text-[#5AA9FF] border border-[rgba(22,131,255,0.35)] text-[8px] px-1.5 py-0.2 font-extrabold uppercase">
+                <span className="rounded-full bg-blue-500/20 text-blue-400 border border-blue-400/30 text-[9px] px-1.5 py-0.2 font-extrabold uppercase tracking-wider">
                   Pro
                 </span>
               </p>
-              <p className="text-[10px] text-[#A1A1AA] truncate font-medium">{roleLabels[role]}</p>
+              <p className="text-[11px] text-slate-400 truncate font-semibold">{roleLabels[role]}</p>
             </div>
           )}
         </div>
@@ -124,8 +124,8 @@ export function Sidebar({ role }: SidebarProps) {
                   : 'gap-3 px-3.5 py-2.5 rounded-xl'
               } ${
                 isActive
-                  ? 'bg-[rgba(22,131,255,0.18)] text-[#5AA9FF] border border-[rgba(22,131,255,0.40)] shadow-[0_0_24px_rgba(22,131,255,0.20)] ring-1 ring-[rgba(22,131,255,0.25)]'
-                  : 'text-[#A1A1AA] hover:bg-white/[0.06] hover:text-[#F5F5F5] border border-transparent hover:border-white/10'
+                  ? 'bg-gradient-to-r from-blue-600/30 to-blue-500/15 text-white border border-blue-400/40 shadow-[0_0_20px_rgba(37,99,235,0.25)] ring-1 ring-blue-400/30'
+                  : 'text-slate-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/10'
               }`
             }
           >
@@ -134,8 +134,8 @@ export function Sidebar({ role }: SidebarProps) {
                 <span
                   className={`shrink-0 transition-all duration-200 ${
                     isActive
-                      ? 'text-[#5AA9FF] scale-110 drop-shadow-[0_0_12px_rgba(22,131,255,0.5)]'
-                      : 'text-[#71717A] group-hover:text-[#A1A1AA]'
+                      ? 'text-blue-400 scale-110 drop-shadow-[0_0_10px_rgba(96,165,250,0.6)]'
+                      : 'text-slate-400 group-hover:text-slate-200 group-hover:scale-105'
                   }`}
                 >
                   {item.icon}
@@ -143,7 +143,11 @@ export function Sidebar({ role }: SidebarProps) {
 
                 {/* LABEL (EXPANDED MODE) */}
                 {!isCollapsed && (
-                  <span className="flex-1 truncate tracking-tight">{item.label}</span>
+                  <span className={`flex-1 truncate tracking-tight transition-colors ${
+                    isActive ? 'text-white font-bold' : 'text-slate-200 group-hover:text-white font-medium'
+                  }`}>
+                    {item.label}
+                  </span>
                 )}
 
                 {/* BADGE (EXPANDED MODE) */}
@@ -151,8 +155,8 @@ export function Sidebar({ role }: SidebarProps) {
                   <span
                     className={`min-w-[20px] h-5 rounded-full px-1.5 inline-flex items-center justify-center text-[10px] font-black tabular-nums transition-all ${
                       isActive
-                        ? 'bg-[#1683FF] text-white shadow-xs shadow-blue-500/30 font-black'
-                        : 'bg-rose-500/80 text-white shadow-xs'
+                        ? 'bg-blue-500 text-white shadow-xs font-black'
+                        : 'bg-rose-500 text-white shadow-xs font-bold'
                     }`}
                   >
                     {item.badge}
@@ -184,7 +188,7 @@ export function Sidebar({ role }: SidebarProps) {
       </nav>
 
       {/* FOOTER USER PROFILE CARD */}
-      <div className="border-t border-white/10 p-3 bg-black/25 backdrop-blur-md shrink-0">
+      <div className="border-t border-white/10 p-3 bg-black/40 backdrop-blur-md shrink-0">
         {isCollapsed ? (
           /* COLLAPSED COMPACT PROFILE */
           <div className="flex flex-col items-center gap-3 py-1">
@@ -206,7 +210,7 @@ export function Sidebar({ role }: SidebarProps) {
                 logout();
                 navigate('/');
               }}
-              className="group relative flex items-center justify-center rounded-xl p-2 text-[#A1A1AA] hover:bg-red-500/20 hover:text-red-300 transition-all cursor-pointer"
+              className="group relative flex items-center justify-center rounded-xl p-2 text-slate-400 hover:bg-red-500/20 hover:text-red-300 transition-all cursor-pointer"
               aria-label="Logout"
               title="Logout"
             >
@@ -221,7 +225,7 @@ export function Sidebar({ role }: SidebarProps) {
           <>
             <NavLink
               to={`/${role}/profile`}
-              className="flex items-center gap-3 rounded-2xl p-2.5 transition-all hover:bg-white/[0.06] group cursor-pointer border border-white/5 hover:border-white/15"
+              className="flex items-center gap-3 rounded-2xl p-2.5 transition-all hover:bg-white/[0.08] group cursor-pointer border border-white/10 hover:border-white/20 bg-white/[0.03]"
               title="View My Profile"
             >
               <div className="relative">
@@ -229,15 +233,15 @@ export function Sidebar({ role }: SidebarProps) {
                 <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold text-[#F5F5F5] group-hover:text-[#5AA9FF] transition-colors">
+                <p className="truncate text-xs font-bold text-white group-hover:text-blue-400 transition-colors">
                   {user?.name || 'Loading…'}
                 </p>
-                <p className="truncate text-[10px] text-[#A1A1AA] font-medium">{context}</p>
+                <p className="truncate text-[10px] text-slate-400 font-medium">{context}</p>
               </div>
             </NavLink>
 
             <div className="mt-2.5 flex items-center justify-between gap-2 pt-2 border-t border-white/10">
-              <Badge tone={avatarTone[role]} className="text-[10px] font-extrabold">
+              <Badge tone={avatarTone[role]} className="text-[10px] font-extrabold shadow-xs">
                 {roleLabels[role]}
               </Badge>
               <button
@@ -246,9 +250,9 @@ export function Sidebar({ role }: SidebarProps) {
                   logout();
                   navigate('/');
                 }}
-                className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-[11px] font-bold text-[#A1A1AA] transition-all hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/30 border border-transparent cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-[11px] font-bold text-slate-300 transition-all hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/30 border border-transparent cursor-pointer"
               >
-                <LogOutIcon className="h-3 w-3" aria-hidden="true" />
+                <LogOutIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Logout</span>
               </button>
             </div>

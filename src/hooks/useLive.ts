@@ -111,8 +111,8 @@ export const useTeams = () => useLive<{ teams: any[] }>('/api/teams', ['team:upd
 
 export const useUsers = () => useLive<{ users: any[] }>('/api/users', ['user:new', 'user:update'], 30000);
 
-export const useWeeklyReport = (developerId: string, week = 0) =>
-  useLive<any>(`/api/reports/weekly?developerId=${developerId}&week=${week}`, ['log:new', 'log:review', 'eod:new'], 60000);
+export const useWeeklyReport = (developerId: string | null, week = 0) =>
+  useLive<any>(developerId ? `/api/reports/weekly?developerId=${developerId}&week=${week}` : null, ['log:new', 'log:review', 'eod:new'], 60000);
 
 export const usePerformance = () => useLive<any>('/api/reports/performance', ['log:new', 'log:review', 'task:update', 'eod:new'], 60000);
 

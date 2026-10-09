@@ -5,7 +5,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   GitBranchIcon,
-  RotateCcwIcon,
   UsersIcon,
   SearchIcon
 } from 'lucide-react';
@@ -142,22 +141,11 @@ export function CommitsOverview() {
                 <ChevronRightIcon className="h-4 w-4" />
               </button>
             </div>
-
-            {!isToday && (
-              <button
-                type="button"
-                onClick={() => setSelectedDate(todayStr)}
-                className="glass-surface inline-flex items-center gap-1 rounded-2xl px-3 py-2 text-xs font-bold text-brand dark:text-indigo-400 shadow-glass hover:bg-slate-500/10 transition-colors"
-              >
-                <RotateCcwIcon className="h-3.5 w-3.5" />
-                Back to Today
-              </button>
-            )}
           </div>
         }
       />
 
-      <div className="flex-1 space-y-5 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
         <Banner
           tone={isToday ? 'green' : 'blue'}
           icon={<CheckCircle2Icon className="h-4 w-4" />}

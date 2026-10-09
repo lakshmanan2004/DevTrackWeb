@@ -192,7 +192,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
   const activeApprovedTasks = displayTasks.filter((t: any) => t.review === 'approved');
 
   return (
-    <div className="fixed inset-y-0 right-0 left-0 lg:left-64 z-50 flex items-center justify-center bg-slate-900/50 p-4 sm:p-6 lg:p-8 backdrop-blur-md animate-in fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 sm:p-6 lg:p-8 backdrop-blur-md animate-in fade-in">
       <div className="glass-modal relative flex flex-col w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-3xl border border-white/90 dark:border-white/15 shadow-2xl p-0">
         {/* MODAL HEADER */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/60 dark:border-white/10 bg-gradient-to-r from-blue-500/10 via-purple-500/5 to-white/40 dark:from-blue-500/15 dark:via-purple-500/10 dark:to-transparent px-6 py-5">

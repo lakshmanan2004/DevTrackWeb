@@ -95,7 +95,7 @@ export function DeveloperAlerts() {
         }
       />
 
-      <div className="flex-1 space-y-6 p-6 sm:p-8">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6 sm:p-8">
         <FilterPills
           ariaLabel="Filter alerts"
           value={filter}

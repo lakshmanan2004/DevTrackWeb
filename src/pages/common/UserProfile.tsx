@@ -171,7 +171,7 @@ export function UserProfile() {
   }
 
   return (
-    <div className="flex flex-col min-h-full">
+    <>
       <PageHeader
         title="My Profile"
         subtitle={`Account details, security settings, and workspace preferences for ${roleLabels[role] || 'User'}`}
@@ -179,7 +179,7 @@ export function UserProfile() {
           <button
             type="button"
             onClick={openWallpaperModal}
-            className="btn-glass-primary px-4 py-2 text-xs font-bold rounded-xl shadow-lg flex items-center gap-2 cursor-pointer"
+            className="btn-glass-primary px-3.5 py-1.5 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <PaletteIcon className="h-4 w-4" />
             <span>Theme</span>
@@ -187,7 +187,7 @@ export function UserProfile() {
         }
       />
 
-      <div className="p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 space-y-6">
         <div className="grid gap-6 xl:grid-cols-12 items-start">
           {/* ========================================================================= */}
           {/* LEFT COLUMN: USER OVERVIEW CARD & SECURITY (5 COLUMNS)                    */}
@@ -507,7 +507,7 @@ export function UserProfile() {
                     type="email"
                     disabled
                     value={user?.email || ''}
-                    className="glass-surface w-full rounded-xl px-3 py-2 text-sm text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-80"
+                    className="glass-input w-full rounded-xl px-3 py-2 text-sm text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-80"
                   />
                   <p className="mt-1 text-[11px] text-slate-400">
                     Email address is managed by the administrator.
@@ -591,7 +591,7 @@ export function UserProfile() {
                 </div>
 
                 {/* CAPABILITIES CALLOUT */}
-                <div className="rounded-2xl border border-blue-300/80 dark:border-blue-500/40 bg-white/80 dark:bg-[#121d33]/90 p-4 text-xs text-blue-950 dark:text-blue-100 space-y-1 shadow-xs ring-1 ring-blue-500/15 backdrop-blur-xl">
+                <div className="rounded-2xl border border-blue-300/80 dark:border-blue-500/40 bg-blue-50/60 dark:bg-[#121d33]/90 p-4 text-xs text-blue-950 dark:text-blue-100 space-y-1 shadow-xs ring-1 ring-blue-500/15">
                   <p className="font-black flex items-center gap-1.5 text-blue-950 dark:text-white">
                     <SparklesIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Team Leader Capabilities
                   </p>
@@ -633,7 +633,7 @@ export function UserProfile() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-purple-300/80 dark:border-purple-500/40 bg-white/80 dark:bg-[#221533]/90 p-4 text-xs text-purple-950 dark:text-purple-100 space-y-1 shadow-xs ring-1 ring-purple-500/15 backdrop-blur-xl">
+                <div className="rounded-2xl border border-purple-300/80 dark:border-purple-500/40 bg-purple-50/60 dark:bg-[#221533]/90 p-4 text-xs text-purple-950 dark:text-purple-100 space-y-1 shadow-xs ring-1 ring-purple-500/15">
                   <p className="font-black flex items-center gap-1.5 text-purple-950 dark:text-white">
                     <LayersIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" /> Project Manager Capabilities
                   </p>
@@ -654,7 +654,7 @@ export function UserProfile() {
                   <Badge tone="red">System Owner</Badge>
                 </div>
 
-                <div className="rounded-2xl border border-rose-300/80 dark:border-rose-500/40 bg-white/80 dark:bg-[#2c131a]/90 p-4 text-xs text-rose-950 dark:text-rose-100 space-y-1 shadow-xs ring-1 ring-rose-500/15 backdrop-blur-xl">
+                <div className="rounded-2xl border border-rose-300/80 dark:border-rose-500/40 bg-rose-50/60 dark:bg-[#2c131a]/90 p-4 text-xs text-rose-950 dark:text-rose-100 space-y-1 shadow-xs ring-1 ring-rose-500/15">
                   <p className="font-black text-rose-950 dark:text-white">Full Platform Access</p>
                   <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                     As an Administrator, you manage accounts in <strong className="text-slate-900 dark:text-white">User Management</strong>, inspect company-wide productivity metrics in <strong className="text-slate-900 dark:text-white">Employee Performance</strong>, and configure work policies in <strong className="text-slate-900 dark:text-white">Settings</strong>.
@@ -665,6 +665,6 @@ export function UserProfile() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

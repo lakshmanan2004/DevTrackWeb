@@ -92,7 +92,7 @@ export function WorkLogs() {
         }
       />
 
-      <div className="flex-1 space-y-5 p-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl px-5 py-4 shadow-glass">
           <p className="text-sm font-bold text-navy dark:text-white">{dateLabel}</p>
           {loading ? (

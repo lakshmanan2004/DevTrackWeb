@@ -236,7 +236,7 @@ export function DeveloperDashboard() {
       />
 
       {/* 2. SCROLLABLE DASHBOARD CONTENT */}
-      <div className="flex-1 p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
         
         {/* 3. HERO / GREETING SECTION */}
         <section className="glass-card rounded-3xl p-6 sm:p-7 shadow-glass relative overflow-hidden">
