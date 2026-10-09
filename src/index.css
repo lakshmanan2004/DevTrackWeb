@@ -160,27 +160,30 @@ html.dark body {
 .glass-dropdown {
   position: absolute !important;
   top: calc(100% + 6px) !important;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(245, 249, 255, 0.88) 100%);
-  backdrop-filter: blur(38px) saturate(200%) brightness(1.04);
-  -webkit-backdrop-filter: blur(38px) saturate(200%) brightness(1.04);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  border-bottom-color: rgba(255, 255, 255, 0.50);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 250, 255, 0.90) 100%);
+  backdrop-filter: blur(40px) saturate(190%) brightness(1.02);
+  -webkit-backdrop-filter: blur(40px) saturate(190%) brightness(1.02);
+  border: 1px solid rgba(255, 255, 255, 0.90);
+  border-bottom-color: rgba(255, 255, 255, 0.60);
   box-shadow: 
-    0 24px 60px -10px rgba(15, 23, 42, 0.22),
-    0 8px 24px -4px rgba(15, 23, 42, 0.08),
-    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1),
-    inset 0 0 28px 0 rgba(255, 255, 255, 0.25);
-  border-radius: 20px;
+    0 20px 50px -8px rgba(15, 23, 42, 0.16),
+    0 6px 18px -2px rgba(15, 23, 42, 0.05),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 1),
+    inset 0 0 24px 0 rgba(255, 255, 255, 0.30);
+  border-radius: 22px;
 }
 
-.dark .glass-dropdown {
-  background: linear-gradient(135deg, rgba(16, 24, 44, 0.94) 0%, rgba(10, 16, 32, 0.88) 100%);
-  border-color: rgba(255, 255, 255, 0.18);
-  border-bottom-color: rgba(255, 255, 255, 0.10);
-  box-shadow: 
-    0 24px 60px -10px rgba(0, 0, 0, 0.65),
-    0 8px 24px -4px rgba(0, 0, 0, 0.35),
-    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.15);
+.glass-dropdown::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.95) 50%, transparent 100%);
+  pointer-events: none;
+  border-radius: 9999px;
+  z-index: 1;
 }
 
 /* 3. Interactive Frosted Glass Card (Micro-lift & Refraction on Hover) */
@@ -220,7 +223,6 @@ html.dark body {
   box-shadow: 
     0 4px 20px -2px rgba(15, 23, 42, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  contain: paint;
 }
 
 /* 5. Frosted Glass Dark Sidebar / Dock */
@@ -421,10 +423,23 @@ select.glass-input {
     inset 0 -1px 1px 0 rgba(0, 0, 0, 0.30) !important;
 }
 
+.dark .glass-dropdown {
+  background: linear-gradient(135deg, rgba(20, 25, 36, 0.94) 0%, rgba(14, 18, 28, 0.90) 100%) !important;
+  backdrop-filter: blur(40px) saturate(140%) brightness(1.02) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(140%) brightness(1.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 
+    0 24px 60px -10px rgba(0, 0, 0, 0.65),
+    0 8px 24px -4px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
 .dark .glass-card::before,
 .dark .glass-surface::before,
+.dark .glass-dropdown::before,
 .dark .glass-modal::before {
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.25) 50%, transparent 100%) !important;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.35) 50%, transparent 100%) !important;
 }
 
 .dark .glass-card-interactive:hover {
@@ -444,7 +459,6 @@ select.glass-input {
   box-shadow: 
     0 4px 24px -2px rgba(0, 0, 0, 0.40),
     inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
-  contain: paint;
 }
 
 .dark .glass-dark {

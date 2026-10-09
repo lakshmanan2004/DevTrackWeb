@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
-import { SearchIcon, PlusIcon, UsersIcon, UserCheckIcon } from 'lucide-react';
+import { SearchIcon, PlusIcon, UsersIcon, UserCheckIcon, FolderKanbanIcon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Button } from '../../components/ui/Button';
 import { FilterPills } from '../../components/ui/FilterPills';
 import { Select } from '../../components/ui/Select';
-import { useDevelopers } from '../../hooks/useLive';
+import { useDevelopers, useProjects } from '../../hooks/useLive';
 import { AssignTaskModal } from '../../components/common/AssignTaskModal';
 import { useAuth } from '../../context/AuthContext';
 
 export function AllDevelopers() {
   const { user } = useAuth();
   const { data } = useDevelopers();
+  const { data: projectsData } = useProjects('mine');
+  
   const developers = data?.developers || [];
+  const projects = projectsData?.projects || [];
+
   const [filter, setFilter] = useState('all');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
   const [selectedDevId, setSelectedDevId] = useState<string>('all');
   const [query, setQuery] = useState('');
   const [assignModalOpen, setAssignModalOpen] = useState(false);
@@ -24,11 +29,20 @@ export function AllDevelopers() {
     all: developers.length,
     online: developers.filter((dev: any) => dev.online).length,
     missed: developers.filter((dev: any) => dev.missed > 0).length,
-    top: developers.filter((dev: any) => dev.topPerformer || (dev.activeMinutes >= 240 && dev.missed === 0)).length
+    top: developers.filter((dev: any) => dev.topPerformer || (dev.activeMinutes >= 240 && dev.missed === 0))
+      .length
   };
 
   const visible = developers
     .filter((dev: any) => {
+      if (selectedProjectId !== 'all') {
+        const p = projects.find((proj: any) => proj.id === selectedProjectId);
+        const matchProj =
+          dev.projectId === selectedProjectId ||
+          (p && dev.project && dev.project.toLowerCase() === p.name?.toLowerCase()) ||
+          (p && dev.team && dev.team.toLowerCase() === (p.team || p.teamName || '').toLowerCase());
+        if (!matchProj) return false;
+      }
       if (selectedDevId !== 'all') {
         const dId = String(dev.id || dev._id || '');
         if (dId !== selectedDevId && dev.name.toLowerCase() !== selectedDevId.toLowerCase()) {
@@ -63,29 +77,28 @@ export function AllDevelopers() {
         subtitle="Developer directory, performance indicators, module assignments, and task delegation"
         actions={
           <div className="flex flex-wrap items-center gap-2.5">
-            {developers.length > 1 && (
-              <div className="w-52 xl:w-60">
-                <Select
-                  size="sm"
-                  fullWidth
-                  value={selectedDevId}
-                  onChange={(val) => setSelectedDevId(val)}
-                  icon={<UsersIcon className="h-3.5 w-3.5 text-slate-400" />}
-                  placeholder={`All Developers (${developers.length})`}
-                  options={[
-                    { value: 'all', label: `All Developers (${developers.length})` },
-                    ...developers.map((dev: any) => ({
-                      value: String(dev.id || dev._id),
-                      label: dev.name,
-                      description: dev.email ? `${dev.email}` : undefined,
-                      badge: dev.online ? 'Online' : undefined,
-                      tone: (dev.online ? 'green' : undefined) as any
-                    }))
-                  ]}
-                  searchable
-                />
-              </div>
-            )}
+            <div className="w-48 sm:w-56">
+              <Select
+                size="sm"
+                fullWidth
+                align="right"
+                value={selectedDevId}
+                onChange={(val) => setSelectedDevId(val)}
+                icon={<UsersIcon className="h-3.5 w-3.5 text-slate-400" />}
+                placeholder={`All Developers (${developers.length})`}
+                options={[
+                  { value: 'all', label: `All Developers (${developers.length})` },
+                  ...developers.map((dev: any) => ({
+                    value: String(dev.id || dev._id),
+                    label: dev.name,
+                    description: dev.email ? `${dev.email}` : undefined,
+                    badge: dev.online ? 'Online' : undefined,
+                    tone: (dev.online ? 'green' : undefined) as any
+                  }))
+                ]}
+                searchable
+              />
+            </div>
 
             <label className="relative">
               <SearchIcon
@@ -97,7 +110,7 @@ export function AllDevelopers() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search developer..."
-                className="glass-input h-9 w-44 sm:w-52 rounded-xl pl-8 pr-3 text-xs font-medium text-navy dark:text-white placeholder:text-slate-400 focus:outline-none"
+                className="glass-input h-9 w-36 sm:w-48 rounded-xl pl-8 pr-3 text-xs font-medium text-navy dark:text-white placeholder:text-slate-400 focus:outline-none"
               />
             </label>
 
@@ -107,24 +120,72 @@ export function AllDevelopers() {
               onClick={() => handleOpenAssign()}
               className="btn-glass-primary !from-indigo-600 !to-violet-600 text-white font-bold border-none"
             >
-              Assign New Task
+              Assign Task
             </Button>
           </div>
         }
       />
 
       <div className="flex-1 space-y-5 p-6">
-        <FilterPills
-          ariaLabel="Filter developers"
-          value={filter}
-          onChange={setFilter}
-          options={[
-            { id: 'all', label: 'All', count: counts.all },
-            { id: 'online', label: 'Online Now', count: counts.online },
-            { id: 'missed', label: 'Needs Attention', count: counts.missed },
-            { id: 'top', label: 'Top Coverage', count: counts.top }
-          ]}
-        />
+        {/* FILTER BAR WITH PROJECT & DEVELOPER DROPDOWNS */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+          <FilterPills
+            ariaLabel="Filter developers"
+            value={filter}
+            onChange={setFilter}
+            options={[
+              { id: 'all', label: 'All', count: counts.all },
+              { id: 'online', label: 'Online Now', count: counts.online },
+              { id: 'missed', label: 'Needs Attention', count: counts.missed },
+              { id: 'top', label: 'Top Coverage', count: counts.top }
+            ]}
+          />
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* PROJECT DROPDOWN FILTER */}
+            <div className="w-56 sm:w-64">
+              <Select
+                size="sm"
+                fullWidth
+                value={selectedProjectId}
+                onChange={(val) => setSelectedProjectId(val)}
+                icon={<FolderKanbanIcon className="h-3.5 w-3.5 text-slate-400" />}
+                placeholder="Filter by Project"
+                options={[
+                  { value: 'all', label: `All Projects (${projects.length})` },
+                  ...projects.map((p: any) => ({
+                    value: p.id,
+                    label: p.name,
+                    badge: `${p.progress || 0}% · ${p.team || 'Team'}`
+                  }))
+                ]}
+                searchable
+              />
+            </div>
+
+            {/* DEVELOPER DROPDOWN FILTER */}
+            <div className="w-48 sm:w-56">
+              <Select
+                size="sm"
+                fullWidth
+                value={selectedDevId}
+                onChange={(val) => setSelectedDevId(val)}
+                icon={<UsersIcon className="h-3.5 w-3.5 text-slate-400" />}
+                placeholder="Filter by Developer"
+                options={[
+                  { value: 'all', label: `All Developers (${developers.length})` },
+                  ...developers.map((dev: any) => ({
+                    value: String(dev.id || dev._id),
+                    label: dev.name,
+                    badge: dev.online ? 'Online' : undefined,
+                    tone: (dev.online ? 'green' : undefined) as any
+                  }))
+                ]}
+                searchable
+              />
+            </div>
+          </div>
+        </div>
 
         <section className="glass-card overflow-hidden rounded-3xl shadow-glass">
           <table className="w-full text-left text-sm">

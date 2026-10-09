@@ -237,78 +237,19 @@ export function ProjectOverview() {
             </p>
           </section>
         </div>
-      </>
-    )}
+        </>
+      )}
 
-    <section className="rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-5 shadow-glass">
-          <div className="flex items-center justify-between border-b border-hairline dark:border-white/10 pb-4">
-            <div>
-              <h2 className="flex items-center gap-2 text-base font-bold text-navy dark:text-white">
-                <BarChart3Icon className="h-5 w-5 text-brand dark:text-sky-400" />
-                All Managed Projects Overview ({projects.length})
-              </h2>
-              <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">
-                Click any project card below to instantly view its detailed progress metrics and breakdown.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {projects.map((proj: any) => (
-              <div
-                key={proj.id}
-                onClick={() => setSelectedProjectId(proj.id)}
-                className={`group cursor-pointer rounded-2xl border p-4 transition-all ${
-                  activeId === proj.id
-                    ? 'border-brand dark:border-brand bg-brand-soft/30 dark:bg-brand/20 ring-2 ring-brand/20 shadow-md'
-                    : 'border-hairline dark:border-white/10 bg-canvas/40 dark:bg-slate-900/50 hover:border-brand/50 hover:bg-white/80 dark:hover:bg-slate-800/80 hover:shadow-sm'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h3 className="text-sm font-bold text-navy dark:text-white group-hover:text-brand dark:group-hover:text-sky-300 transition-colors">
-                      {proj.name}
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-slate-400">
-                      {proj.team} · Lead: {proj.leader}
-                    </p>
-                  </div>
-                  <Badge tone={healthToneMap[proj.health] || 'blue'} dot>
-                    {proj.health}
-                  </Badge>
-                </div>
-
-                <div className="mt-4 space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-gray-500 dark:text-slate-400">Overall Progress</span>
-                    <span className="text-navy dark:text-white">{proj.progress}%</span>
-                  </div>
-                  <ProgressBar
-                    value={proj.progress}
-                    tone={proj.progress >= 70 ? 'green' : proj.progress >= 40 ? 'yellow' : 'red'}
-                    label={`${proj.name} progress`}
-                  />
-                </div>
-
-                <div className="mt-4 flex items-center justify-between border-t border-hairline/60 dark:border-white/10 pt-3 text-xs text-gray-500 dark:text-slate-400">
-                  <span>{proj.tasksDone} tasks done</span>
-                  <span>{proj.blockers} blockers</span>
-                  <span className="font-semibold text-brand dark:text-sky-400 group-hover:underline">View Details →</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-        <CloseProjectModal
-          open={closeModalOpen}
-          project={selectedProject}
-          onClose={() => setCloseModalOpen(false)}
-          onSuccess={() => {
-            refetch();
-            refetchOverview();
-          }}
-        />
-      </div>
-    </>
-  );
+      <CloseProjectModal
+        open={closeModalOpen}
+        project={selectedProject}
+        onClose={() => setCloseModalOpen(false)}
+        onSuccess={() => {
+          refetch();
+          refetchOverview();
+        }}
+      />
+    </div>
+  </>
+);
 }

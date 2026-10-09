@@ -154,11 +154,12 @@ export function ProjectModulesSection({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {allProjects && allProjects.length > 1 && onSelectProject && (
-              <div className="w-64">
+            {allProjects && allProjects.length > 0 && onSelectProject && (
+              <div className="w-56 sm:w-64">
                 <Select
                   size="sm"
                   fullWidth
+                  align="right"
                   value={project.id}
                   onChange={(val) => onSelectProject(val)}
                   icon={<LayersIcon className="h-3.5 w-3.5" />}

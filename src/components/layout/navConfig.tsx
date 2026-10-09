@@ -53,6 +53,7 @@ export function navFor(role: Role, badges: Badges = { alerts: 0, approvals: 0, p
     return [
       { to: '/leader', label: 'Live Dashboard', icon: <RadioIcon className={size} /> },
       { to: '/leader/developers', label: 'All Developers', icon: <UsersIcon className={size} /> },
+      { to: '/leader/projects', label: 'Managed Projects', icon: <FolderKanbanIcon className={size} /> },
       { to: '/leader/alerts', label: 'Alerts', icon: <BellIcon className={size} />, badge: badges.alerts > 0 ? String(badges.alerts) : undefined },
       { to: '/leader/reports', label: 'Weekly Reports', icon: <TrendingUpIcon className={size} /> },
       { to: '/leader/commits', label: 'Commits Overview', icon: <GitCommitVerticalIcon className={size} /> },

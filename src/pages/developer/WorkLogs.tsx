@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { FilterPills } from '../../components/ui/FilterPills';
+import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { TaskStatusBadge } from '../../components/ui/TaskStatusBadge';
 import { useMyLogs } from '../../hooks/useLive';
 import { fileUrl } from '../../api/client';
@@ -63,39 +64,26 @@ export function WorkLogs() {
         title="My Work Logs"
         subtitle={user?.leaderName ? `Only you and ${user.leaderName} can see these logs` : 'Only you and your Team Leader can see these logs'}
         actions={
-          <div className="flex items-center gap-1.5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-1 shadow-glass">
-            <button
-              type="button"
-              onClick={() => setDate(todayStr)}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                date === todayStr
-                  ? 'btn-glass-primary !text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              Today's Logs
-            </button>
+          <div className="glass-surface flex items-center gap-1 rounded-full p-1">
+            <SegmentedControl
+              size="sm"
+              ariaLabel="Filter work log date"
+              value={date === todayStr ? todayStr : (date === 'all' ? 'all' : '')}
+              onChange={(val) => setDate(val)}
+              options={[
+                { id: todayStr, label: "Today's Logs" },
+                { id: 'all', label: 'Show All Logs' }
+              ]}
+            />
 
-            <button
-              type="button"
-              onClick={() => setDate('all')}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                date === 'all'
-                  ? 'btn-glass-primary !text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              Show All Logs
-            </button>
+            <div className="h-4 w-px bg-white/20 dark:bg-white/10 mx-0.5" />
 
-            <div className="h-4 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
-
-            <label className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
+            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer rounded-full hover:bg-white/40 dark:hover:bg-white/10 transition-colors">
               <CalendarIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
               <span className="sr-only">Pick a date</span>
               <input
                 type="date"
-                value={date === 'all' ? '' : date}
+                value={date === 'all' || date === todayStr ? '' : date}
                 onChange={(e) => setDate(e.target.value || 'all')}
                 className="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
               />

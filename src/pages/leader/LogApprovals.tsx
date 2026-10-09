@@ -20,6 +20,7 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { FilterPills } from '../../components/ui/FilterPills';
+import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { Select } from '../../components/ui/Select';
 import { TaskStatusBadge } from '../../components/ui/TaskStatusBadge';
 import { ReviewLogFeedbackModal } from '../../components/leader/ReviewLogFeedbackModal';
@@ -211,39 +212,26 @@ export function LogApprovals() {
               </div>
             )}
 
-            <div className="glass-surface flex items-center gap-1 rounded-2xl p-1">
-              <button
-                type="button"
-                onClick={() => setDateFilter(getTodayStr())}
-                className={`rounded-xl px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
-                  dateFilter === getTodayStr()
-                    ? 'btn-glass-primary !text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/10'
-                }`}
-              >
-                Today's Logs
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setDateFilter('all')}
-                className={`rounded-xl px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
-                  dateFilter === 'all'
-                    ? 'btn-glass-primary !text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/10'
-                }`}
-              >
-                Show All Logs
-              </button>
+            <div className="glass-surface flex items-center gap-1 rounded-full p-1">
+              <SegmentedControl
+                size="sm"
+                ariaLabel="Filter work log date"
+                value={dateFilter === getTodayStr() ? getTodayStr() : (dateFilter === 'all' ? 'all' : '')}
+                onChange={(val) => setDateFilter(val)}
+                options={[
+                  { id: getTodayStr(), label: "Today's Logs" },
+                  { id: 'all', label: 'Show All Logs' }
+                ]}
+              />
 
               <div className="h-4 w-px bg-white/20 dark:bg-white/10 mx-0.5" />
 
-              <label className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
+              <label className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer rounded-full hover:bg-white/40 dark:hover:bg-white/10 transition-colors">
                 <CalendarIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                 <span className="sr-only">Pick a date</span>
                 <input
                   type="date"
-                  value={dateFilter === 'all' ? '' : dateFilter}
+                  value={dateFilter === 'all' || dateFilter === getTodayStr() ? '' : dateFilter}
                   onChange={(e) => setDateFilter(e.target.value || 'all')}
                   className="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
                 />

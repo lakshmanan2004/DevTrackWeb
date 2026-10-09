@@ -14,6 +14,7 @@ import { MyPendingWorks } from './pages/developer/MyPendingWorks';
 import { MyProjects as DeveloperMyProjects } from './pages/developer/MyProjects';
 import { LiveDashboard } from './pages/leader/LiveDashboard';
 import { AllDevelopers } from './pages/leader/AllDevelopers';
+import { LeaderProjects } from './pages/leader/LeaderProjects';
 import { LeaderAlerts } from './pages/leader/LeaderAlerts';
 import { WeeklyReports } from './pages/leader/WeeklyReports';
 import { CommitsOverview } from './pages/leader/CommitsOverview';
@@ -76,6 +77,7 @@ export function App() {
         <Route element={<Protected role="leader"><AppShell role="leader" /></Protected>}>
           <Route path="/leader" element={<LiveDashboard />} />
           <Route path="/leader/developers" element={<AllDevelopers />} />
+          <Route path="/leader/projects" element={<LeaderProjects />} />
           <Route path="/leader/alerts" element={<LeaderAlerts />} />
           <Route path="/leader/reports" element={<WeeklyReports />} />
           <Route path="/leader/commits" element={<CommitsOverview />} />

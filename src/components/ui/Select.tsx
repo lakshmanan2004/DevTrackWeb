@@ -86,6 +86,25 @@ export function Select({
     });
   }, [options, searchQuery]);
 
+  // Auto-detect horizontal alignment if needed so menu never overflows screen
+  const [effectiveAlign, setEffectiveAlign] = useState<'left' | 'right'>(align);
+
+  useEffect(() => {
+    if (isOpen && dropdownRef.current) {
+      if (align === 'right') {
+        setEffectiveAlign('right');
+      } else {
+        const rect = dropdownRef.current.getBoundingClientRect();
+        // If trigger is on right side of viewport or would overflow
+        if (rect.left + 320 > window.innerWidth || rect.left > window.innerWidth * 0.55) {
+          setEffectiveAlign('right');
+        } else {
+          setEffectiveAlign('left');
+        }
+      }
+    }
+  }, [isOpen, align]);
+
   // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (disabled) return;
@@ -117,7 +136,7 @@ export function Select({
   return (
     <div
       ref={dropdownRef}
-      className={`relative inline-block ${isOpen ? 'z-[999]' : 'z-10'} ${fullWidth ? 'w-full' : ''} ${className}`}
+      className={`relative inline-block ${isOpen ? 'z-[1000]' : 'z-10'} ${fullWidth ? 'w-full' : ''} ${className}`}
     >
       {label && (
         <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -139,7 +158,7 @@ export function Select({
           disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-blue-400/60 hover:shadow-glass-sm'
         } ${
           isOpen
-            ? 'ring-2 ring-blue-500/40 border-blue-500 bg-white/95 dark:bg-slate-900/95 shadow-md'
+            ? 'ring-2 ring-blue-500/40 border-blue-500/80 shadow-md'
             : 'text-slate-800 dark:text-slate-100 shadow-2xs'
         }`}
       >
@@ -163,20 +182,20 @@ export function Select({
         />
       </button>
 
-      {/* FLOATING HIGH-CONTRAST DROPDOWN POPUP MENU */}
+      {/* LIQUID FROSTED GLASS DROPDOWN POPUP MENU */}
       {isOpen && (
         <div
           role="listbox"
           style={{
-            minWidth: minMenuWidth || (fullWidth ? '100%' : '280px')
+            minWidth: minMenuWidth || (fullWidth ? '100%' : '260px')
           }}
-          className={`absolute top-full mt-2 z-[9999] max-h-80 w-auto min-w-full max-w-sm sm:max-w-md overflow-hidden rounded-2xl border border-slate-200/90 dark:border-white/15 bg-white/95 dark:bg-slate-900/95 p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.7)] backdrop-blur-3xl animate-in fade-in zoom-in-95 duration-150 ${
-            align === 'right' ? 'right-0' : 'left-0'
+          className={`glass-dropdown !z-[99999] max-h-80 w-auto min-w-full max-w-[calc(100vw-32px)] sm:max-w-md overflow-hidden p-1.5 animate-in fade-in zoom-in-95 duration-150 ${
+            effectiveAlign === 'right' ? '!right-0 !left-auto origin-top-right' : '!left-0 !right-auto origin-top-left'
           }`}
         >
           {/* SEARCH INPUT BAR */}
           {showSearch && (
-            <div className="p-1 pb-1.5 border-b border-slate-200/70 dark:border-white/10 mb-1">
+            <div className="p-1 pb-1.5 border-b border-white/40 dark:border-white/10 mb-1">
               <div className="relative flex items-center">
                 <SearchIcon className="absolute left-2.5 h-3.5 w-3.5 text-slate-400" />
                 <input
@@ -185,7 +204,7 @@ export function Select({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search options…"
-                  className="w-full rounded-xl bg-slate-100/80 dark:bg-white/10 pl-8 pr-7 py-1.5 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-transparent focus:border-blue-500/40 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full rounded-xl bg-white/60 dark:bg-white/[0.08] backdrop-blur-md pl-8 pr-7 py-1.5 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 outline-none border border-white/60 dark:border-white/10 focus:border-blue-500/60 focus:bg-white/80 dark:focus:bg-white/[0.14] transition-all"
                   onClick={(e) => e.stopPropagation()}
                 />
                 {searchQuery && (
@@ -223,10 +242,10 @@ export function Select({
                       onChange(option.value);
                       setIsOpen(false);
                     }}
-                    className={`flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-xs transition-all duration-150 cursor-pointer select-none border ${
+                    className={`group flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-xs transition-all duration-150 cursor-pointer select-none border ${
                       isSelected
-                        ? 'bg-blue-500/15 dark:bg-blue-500/30 text-blue-700 dark:text-blue-300 font-bold border-blue-500/40 shadow-xs'
-                        : 'border-transparent text-slate-800 dark:text-slate-200 hover:bg-blue-50/90 hover:border-blue-200 dark:hover:bg-blue-500/20 dark:hover:border-blue-500/30 dark:hover:text-blue-300 font-medium'
+                        ? 'bg-gradient-to-r from-blue-500/15 via-blue-500/10 to-indigo-500/15 dark:from-blue-500/25 dark:to-indigo-500/25 text-blue-700 dark:text-blue-300 font-bold border-blue-500/40 shadow-xs'
+                        : 'border-transparent text-slate-800 dark:text-slate-200 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-indigo-500/10 hover:border-blue-400/40 dark:hover:bg-white/[0.08] dark:hover:border-white/15 hover:shadow-xs active:scale-[0.99] font-medium'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -235,19 +254,19 @@ export function Select({
                       )}
                       {option.icon && (
                         <span
-                          className={`shrink-0 ${
-                            isSelected ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400'
+                          className={`shrink-0 transition-transform duration-150 group-hover:scale-110 ${
+                            isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 group-hover:text-blue-500 dark:group-hover:text-sky-300'
                           }`}
                         >
                           {option.icon}
                         </span>
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className={`truncate leading-snug ${isSelected ? 'font-bold text-blue-700 dark:text-blue-300' : 'text-slate-900 dark:text-white'}`}>
+                        <p className={`truncate leading-snug transition-colors duration-150 ${isSelected ? 'font-bold text-blue-700 dark:text-blue-300' : 'text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-300 font-semibold'}`}>
                           {option.label}
                         </p>
                         {option.description && (
-                          <p className="text-[10px] text-slate-400 dark:text-slate-400 font-normal truncate mt-0.5">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal truncate mt-0.5 group-hover:text-slate-600 dark:group-hover:text-slate-300">
                             {option.description}
                           </p>
                         )}
@@ -256,12 +275,12 @@ export function Select({
 
                     <div className="flex items-center gap-2 shrink-0">
                       {option.badge && (
-                        <span className="rounded-lg bg-slate-100 dark:bg-white/10 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-white/10 shadow-2xs">
+                        <span className="rounded-lg bg-white/70 dark:bg-white/[0.08] group-hover:bg-white/90 group-hover:border-blue-300/50 dark:group-hover:bg-white/[0.12] px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:text-slate-200 border border-white/60 dark:border-white/10 shadow-2xs transition-all">
                           {option.badge}
                         </span>
                       )}
                       {isSelected && (
-                        <CheckIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                        <CheckIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 animate-in zoom-in-75 duration-150" />
                       )}
                     </div>
                   </div>
