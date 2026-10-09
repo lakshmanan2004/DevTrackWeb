@@ -276,21 +276,26 @@ export function LogApprovals() {
           {filteredQueue.map((log: any) => {
             const isAssigned = log.isAssignedTask || !!log.linkedTask;
             const isLate = isLogLate(log);
+            const note = (log.reviewNote || '').toLowerCase();
+            const isApproved = log.review === 'approved' || (note.includes('approved') && log.review !== 'rejected' && log.review !== 'changes_requested');
+            const isChangesRequested = log.review === 'changes_requested' || (note.includes('changes requested') && log.review !== 'approved');
+            const isRejected = log.review === 'rejected' || (note.includes('rejected') && log.review !== 'approved' && log.review !== 'changes_requested');
+            const isPending = !isApproved && !isChangesRequested && !isRejected;
 
             return (
               <li
                 key={log.id}
                 className={`glass-card rounded-2xl transition-all overflow-hidden ${
-                  isAssigned
+                  isApproved
+                    ? 'border-emerald-500/30'
+                    : isChangesRequested
+                    ? 'border-amber-500/40 ring-1 ring-amber-500/20'
+                    : isRejected
+                    ? 'border-rose-500/40 ring-1 ring-rose-500/20'
+                    : isAssigned
                     ? 'border-amber-500/50 bg-amber-500/10 ring-2 ring-amber-500/30'
                     : isLate
                     ? 'border-amber-500/50 ring-2 ring-amber-500/30 bg-amber-500/10'
-                    : log.review === 'changes_requested'
-                    ? 'border-amber-500/40 ring-2 ring-amber-500/20'
-                    : log.review === 'approved'
-                    ? 'border-emerald-500/30'
-                    : log.review === 'rejected'
-                    ? 'border-rose-500/30'
                     : ''
                 }`}
               >
@@ -328,12 +333,15 @@ export function LogApprovals() {
                         ⚡ Assigned Task
                       </Badge>
                     )}
-                    {log.review === 'changes_requested' && (
+                    {isApproved ? (
+                      <Badge tone="green" dot>Approved</Badge>
+                    ) : isChangesRequested ? (
                       <Badge tone="amber">Changes Requested ({log.targetedFeedback?.length || 0})</Badge>
+                    ) : isRejected ? (
+                      <Badge tone="red">Rejected</Badge>
+                    ) : (
+                      <Badge tone="blue">Pending Review</Badge>
                     )}
-                    {log.review === 'approved' && <Badge tone="green">Approved</Badge>}
-                    {log.review === 'rejected' && <Badge tone="red">Rejected</Badge>}
-                    {log.review === 'pending' && <Badge tone="blue">Pending review</Badge>}
                   </div>
                 </div>
 
@@ -415,13 +423,18 @@ export function LogApprovals() {
                   {/* Leader Feedback Note */}
                   {log.reviewNote && (
                     <div className={`mt-3.5 rounded-2xl border p-3.5 text-xs leading-relaxed backdrop-blur-md ${
-                      log.review === 'approved'
-                        ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200'
-                        : log.review === 'changes_requested'
-                        ? 'border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200'
-                        : 'border-rose-500/30 bg-rose-500/10 text-rose-900 dark:text-rose-200'
+                      isApproved
+                        ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-950 dark:text-emerald-200'
+                        : isChangesRequested
+                        ? 'border-amber-500/40 bg-amber-500/15 text-amber-950 dark:text-amber-200'
+                        : 'border-rose-500/40 bg-rose-500/15 text-rose-950 dark:text-rose-200'
                     }`}>
-                      <span className="font-bold text-slate-900 dark:text-white">Team Leader Note:</span> {log.reviewNote}
+                      <span className={`font-bold ${
+                        isApproved ? 'text-emerald-700 dark:text-emerald-300' : isChangesRequested ? 'text-amber-700 dark:text-amber-300' : 'text-rose-700 dark:text-rose-300'
+                      }`}>
+                        Team Leader Note:
+                      </span>{' '}
+                      {log.reviewNote}
                     </div>
                   )}
 
@@ -440,14 +453,14 @@ export function LogApprovals() {
                   )}
 
                   {/* Action Buttons */}
-                  <div className="mt-4 flex flex-wrap items-center gap-2.5 border-t border-white/20 dark:border-white/10 pt-3">
-                    {log.review === 'pending' ? (
-                      <>
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/20 dark:border-white/10 pt-3">
+                    {isPending ? (
+                      <div className="flex items-center gap-2.5">
                         <button
                           type="button"
                           disabled={busyId === log.id}
                           onClick={() => setSelectedReviewLog({ log, mode: 'approve' })}
-                          className="btn-glass-primary inline-flex items-center justify-center gap-1.5 rounded-xl h-9 px-4 text-xs font-bold from-emerald-500 to-teal-600 shadow-lg cursor-pointer"
+                          className="btn-glass-primary inline-flex items-center justify-center gap-1.5 rounded-xl h-9 px-4 text-xs font-bold !bg-emerald-600 hover:!bg-emerald-500 text-white shadow-lg cursor-pointer"
                         >
                           <CheckIcon className="h-4 w-4" />
                           Approve Log
@@ -457,32 +470,51 @@ export function LogApprovals() {
                           type="button"
                           disabled={busyId === log.id}
                           onClick={() => setSelectedReviewLog({ log, mode: 'reject' })}
-                          className="btn-glass-primary inline-flex items-center justify-center gap-1.5 rounded-xl h-9 px-4 text-xs font-bold from-rose-500 to-pink-600 shadow-lg cursor-pointer"
+                          className="btn-glass-primary inline-flex items-center justify-center gap-1.5 rounded-xl h-9 px-4 text-xs font-bold !bg-rose-600 hover:!bg-rose-500 text-white shadow-lg cursor-pointer"
                         >
                           <XIcon className="h-4 w-4" />
                           Reject Log
                         </button>
-                      </>
+                      </div>
                     ) : (
-                      <>
-                        <button
-                          type="button"
-                          disabled={busyId === log.id}
-                          onClick={() => setSelectedReviewLog({ log, mode: log.review === 'rejected' ? 'reject' : 'approve' })}
-                          className="glass-surface inline-flex items-center justify-center gap-1.5 rounded-xl h-8 px-3 text-xs font-semibold text-slate-900 dark:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                        >
-                          {log.review === 'approved' ? '✓ Approved (Update)' : log.review === 'changes_requested' ? '⚠️ Changes Requested (Update)' : '✗ Rejected (Update)'}
-                        </button>
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        {isApproved ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 shadow-2xs">
+                            <CheckIcon className="h-3.5 w-3.5" />
+                            Approved
+                          </span>
+                        ) : isChangesRequested ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 px-3 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 shadow-2xs">
+                            <HighlighterIcon className="h-3.5 w-3.5" />
+                            Changes Requested
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-500/15 border border-rose-500/30 px-3 py-1.5 text-xs font-bold text-rose-700 dark:text-rose-300 shadow-2xs">
+                            <XIcon className="h-3.5 w-3.5" />
+                            Rejected
+                          </span>
+                        )}
 
                         <button
                           type="button"
                           disabled={busyId === log.id}
-                          onClick={() => review(log.id, 'reset')}
-                          className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-900 dark:hover:text-white hover:underline ml-auto cursor-pointer"
+                          onClick={() => setSelectedReviewLog({ log, mode: isApproved ? 'approve' : 'reject' })}
+                          className="glass-surface inline-flex items-center justify-center gap-1.5 rounded-xl h-8 px-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-white/20 transition-colors cursor-pointer"
                         >
-                          <RotateCcwIcon className="h-3.5 w-3.5" /> Reset Status
+                          Change Review
                         </button>
-                      </>
+                      </div>
+                    )}
+
+                    {!isPending && (
+                      <button
+                        type="button"
+                        disabled={busyId === log.id}
+                        onClick={() => review(log.id, 'reset')}
+                        className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-900 dark:hover:text-white hover:underline cursor-pointer ml-auto"
+                      >
+                        <RotateCcwIcon className="h-3.5 w-3.5" /> Reset Status
+                      </button>
                     )}
                   </div>
                 </div>

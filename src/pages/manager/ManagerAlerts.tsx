@@ -132,49 +132,61 @@ export function ManagerAlerts() {
         />
 
         <div className="space-y-4">
-          {filteredAlerts.map((alert: any) => (
-            <div
-              key={alert.id}
-              className={`rounded-3xl p-5 shadow-glass backdrop-blur-2xl transition-all hover:shadow-xl border ${
-                alert.unread
-                  ? alert.category === 'Idle'
-                    ? 'border-amber-500/60 dark:border-amber-500/40 bg-amber-500/15 dark:bg-amber-950/45 ring-1 ring-amber-500/20 shadow-[0_4px_20px_rgba(245,158,11,0.12)]'
-                    : 'border-rose-500/60 dark:border-rose-500/40 bg-rose-500/15 dark:bg-rose-950/45 ring-1 ring-rose-500/20 shadow-[0_4px_20px_rgba(244,63,94,0.15)]'
-                  : 'border-white/80 dark:border-white/15 bg-white/80 dark:bg-slate-900/70'
-              }`}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${
-                    alert.category === 'Idle' ? 'bg-amber-500/20 text-amber-500 dark:text-amber-400' : 'bg-rose-500/20 text-rose-500 dark:text-rose-400'
-                  }`}>
-                    <UserXIcon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-navy dark:text-white">{alert.who} — {alert.category}</h3>
-                      <Badge tone={alert.category === 'Idle' ? 'amber' : 'red'}>
-                        {alert.category === 'Idle' ? `Idle ${alert.idleTime}` : 'Critical'}
-                      </Badge>
-                      {!alert.unread && <Badge tone="grey">Seen</Badge>}
+          {filteredAlerts.map((alert: any) => {
+            const isUnread = alert.unread;
+            const isIdle = alert.category === 'Idle';
+            const accentBorder = isUnread
+              ? (isIdle ? 'border-l-4 border-l-amber-500' : 'border-l-4 border-l-rose-500')
+              : 'border-l-4 border-l-slate-400/40 dark:border-l-slate-600/40';
+            const iconStyle = isUnread
+              ? (isIdle
+                  ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                  : 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30')
+              : (isIdle
+                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                  : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20');
+
+            return (
+              <div
+                key={alert.id}
+                className={`glass-card rounded-3xl p-5 shadow-glass transition-all hover:shadow-xl ${accentBorder}`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-xs ${iconStyle}`}>
+                      <UserXIcon className="h-5 w-5" />
                     </div>
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                      {alert.meta || alert.time} · Last Active: {alert.lastActive || 'unknown'}
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm sm:text-base font-bold text-slate-950 dark:text-white tracking-tight leading-snug">{alert.who} — {alert.category}</h3>
+                        <Badge tone={isIdle ? 'amber' : 'red'}>
+                          {isIdle ? `Idle ${alert.idleTime}` : 'Critical'}
+                        </Badge>
+                        {isUnread ? (
+                          <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-indigo-400 shadow-sm animate-pulse" aria-label="Unread" />
+                        ) : (
+                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 backdrop-blur-md">
+                            Seen
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-[11px] sm:text-xs font-medium text-slate-800 dark:text-slate-300">
+                        {alert.meta || alert.time} · Last Active: {alert.lastActive || 'unknown'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500 dark:text-slate-400">Pushed via Socket.IO</span>
+                    <button
+                      onClick={() => handleDelete(alert.id)}
+                      title="Delete Alert"
+                      aria-label="Delete Alert"
+                      className="rounded-xl p-2 text-slate-500 dark:text-slate-300 hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                    >
+                      <Trash2Icon className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400">Pushed via Socket.IO</span>
-                  <button
-                    onClick={() => handleDelete(alert.id)}
-                    title="Delete Alert"
-                    aria-label="Delete Alert"
-                    className="rounded-xl p-1.5 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-colors"
-                  >
-                    <Trash2Icon className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
 
               <p className="glass-surface mt-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300 p-3.5 rounded-2xl">
                 <span className="font-bold text-navy dark:text-white">Detection Log:</span> {alert.body}
@@ -222,7 +234,8 @@ export function ManagerAlerts() {
                 </div>
               </div>
             </div>
-          ))}
+          );
+        })}
           {filteredAlerts.length === 0 && (
             <div className="glass-card rounded-3xl p-10 text-center shadow-glass">
               <CheckCircle2Icon className="mx-auto h-8 w-8 text-emerald-400" />

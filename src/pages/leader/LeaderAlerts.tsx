@@ -23,18 +23,35 @@ import { LeaderAlert } from '../../types';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 
-const severityShell: Record<string, string> = {
-  critical: 'border-rose-500/60 dark:border-rose-500/40 bg-rose-500/15 dark:bg-rose-950/45 shadow-[0_4px_20px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/20 backdrop-blur-2xl',
-  warning: 'border-amber-500/60 dark:border-amber-500/40 bg-amber-500/15 dark:bg-amber-950/45 shadow-[0_4px_20px_rgba(245,158,11,0.12)] ring-1 ring-amber-500/20 backdrop-blur-2xl',
-  flag: 'border-orange-500/60 dark:border-orange-500/40 bg-orange-500/15 dark:bg-orange-950/45 shadow-[0_4px_20px_rgba(249,115,22,0.12)] ring-1 ring-orange-500/20 backdrop-blur-2xl',
-  seen: 'border-white/80 dark:border-white/15 bg-white/80 dark:bg-slate-900/70 shadow-glass backdrop-blur-2xl'
+const severityAccentBorder: Record<string, string> = {
+  critical: 'border-l-4 border-l-rose-500',
+  warning: 'border-l-4 border-l-amber-500',
+  flag: 'border-l-4 border-l-orange-500',
+  eod: 'border-l-4 border-l-blue-500',
+  seen: 'border-l-4 border-l-slate-400/40 dark:border-l-slate-600/40'
 };
 
-const severityIconShell: Record<string, string> = {
-  critical: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30',
-  warning: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30',
-  flag: 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30',
-  seen: 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-white/20'
+const severityIconWrap: Record<string, { active: string; seen: string }> = {
+  critical: {
+    active: 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30',
+    seen: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+  },
+  warning: {
+    active: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30',
+    seen: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+  },
+  flag: {
+    active: 'bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-500/30',
+    seen: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20'
+  },
+  eod: {
+    active: 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30',
+    seen: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
+  },
+  seen: {
+    active: 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-white/20',
+    seen: 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-white/20'
+  }
 };
 
 const categoryIcon: Record<string, React.ReactNode> = {
@@ -196,32 +213,31 @@ export function LeaderAlerts() {
         <ul className="space-y-4">
           {visible.map((alert: LeaderAlert) => {
             const isUnread = alert.unread;
-            const shellStyle = isUnread
-              ? severityShell[alert.severity] || severityShell.seen
-              : severityShell.seen;
+            const sevKey = alert.category === 'EOD Missing' ? 'eod' : alert.severity || 'warning';
+            const accentBorder = isUnread ? (severityAccentBorder[sevKey] || severityAccentBorder.warning) : severityAccentBorder.seen;
             const iconStyle = isUnread
-              ? severityIconShell[alert.severity] || severityIconShell.seen
-              : severityIconShell.seen;
+              ? (severityIconWrap[sevKey]?.active || severityIconWrap.warning.active)
+              : (severityIconWrap[sevKey]?.seen || severityIconWrap.seen.seen);
 
             return (
               <li
                 key={alert.id}
-                className={`relative rounded-3xl border p-5 shadow-glass backdrop-blur-xl transition-all hover:shadow-xl ${shellStyle}`}
+                className={`glass-card rounded-3xl p-5 shadow-glass transition-all hover:shadow-xl ${accentBorder}`}
               >
                 <div className="flex flex-wrap items-start gap-4">
                   <span
-                    className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${iconStyle}`}
+                    className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-xs ${iconStyle}`}
                   >
-                    {categoryIcon[alert.category] || <SirenIcon className="h-4 w-4" />}
+                    {categoryIcon[alert.category] || <SirenIcon className="h-5 w-5" />}
                   </span>
                   <div className="min-w-[220px] flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">{alert.title}</h2>
+                        <h2 className="text-sm sm:text-base font-bold text-slate-950 dark:text-white tracking-tight leading-snug">{alert.title}</h2>
                         {isUnread ? (
-                          <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-indigo-400 shadow-xs" aria-label="Unread" />
+                          <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-indigo-400 shadow-sm animate-pulse" aria-label="Unread" />
                         ) : (
-                          <span className="rounded-lg bg-slate-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 backdrop-blur-md">
                             Seen
                           </span>
                         )}
@@ -231,12 +247,12 @@ export function LeaderAlerts() {
                         onClick={() => handleDelete(alert.id, alert.who)}
                         title="Delete Alert"
                         aria-label="Delete alert"
-                        className="rounded-xl p-1.5 text-slate-400 hover:bg-rose-500/10 hover:text-rose-500 transition-colors cursor-pointer"
+                        className="rounded-xl p-2 text-slate-500 dark:text-slate-300 hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
                       >
                         <Trash2Icon className="h-4 w-4" />
                       </button>
                     </div>
-                    <p className="mt-0.5 text-xs sm:text-sm font-medium text-slate-950 dark:text-slate-100 leading-relaxed">{alert.body}</p>
+                    <p className="mt-1 text-xs sm:text-sm font-medium text-slate-950 dark:text-slate-100 leading-relaxed">{alert.body}</p>
                     <p className="mt-1 text-[11px] sm:text-xs font-medium text-slate-800 dark:text-slate-300">{alert.meta || alert.time}</p>
                   </div>
                 </div>
