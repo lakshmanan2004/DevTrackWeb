@@ -52,26 +52,49 @@ async function mePayload(user) {
     joined: user.joinedAt
   };
   if (user.role === 'developer') {
-    let team = user.team ? await Team.findById(user.team).populate('leader', 'name').populate('project', 'name') : null;
-    if (!team) {
-      team = await Team.findOne({
-        $or: [
-          { members: user._id },
-          { members: String(user._id) },
-          { leader: user._id },
-          { leader: String(user._id) }
-        ]
-      }).populate('leader', 'name').populate('project', 'name');
-    }
-    if (team) {
-      out.teamName = team.name;
-      out.leaderName = team.leader ? team.leader.name : '';
-      let projName = team.project ? team.project.name : '';
-      if (!projName) {
-        const proj = await Project.findOne({ team: team._id });
-        if (proj) projName = proj.name;
+    const allTeams = await Team.find({
+      $or: [
+        { members: user._id },
+        { members: String(user._id) },
+        { leader: user._id },
+        { leader: String(user._id) },
+        ...(user.team ? [{ _id: user.team }] : [])
+      ]
+    }).populate('leader', 'name').populate('project');
+
+    // Find active ongoing project first, otherwise fallback to first team
+    let activeTeam = null;
+    let activeProject = null;
+
+    for (const t of allTeams) {
+      if (t.project) {
+        if (t.project.status === 'ongoing') {
+          activeTeam = t;
+          activeProject = t.project;
+          break;
+        } else if (!activeProject) {
+          activeTeam = t;
+          activeProject = t.project;
+        }
+      } else if (!activeTeam) {
+        activeTeam = t;
       }
-      out.projectName = projName;
+    }
+
+    if (!activeProject && activeTeam) {
+      activeProject = await Project.findOne({ team: activeTeam._id });
+    }
+
+    if (activeTeam) {
+      out.teamName = activeTeam.name;
+      out.leaderName = activeTeam.leader ? activeTeam.leader.name : '';
+      if (activeProject) {
+        out.projectName = activeProject.name;
+      }
+      // Ensure user.team points to this active team
+      if (String(user.team) !== String(activeTeam._id)) {
+        User.findByIdAndUpdate(user._id, { team: activeTeam._id }).exec().catch(() => {});
+      }
     }
   } else if (user.role === 'leader') {
     const teams = await Team.find({

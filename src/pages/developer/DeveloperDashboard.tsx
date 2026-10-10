@@ -74,7 +74,11 @@ export function DeveloperDashboard() {
   const logs = data?.logs || [];
   const stats = data?.stats;
   const myProjects = projectData?.projects || [];
-  const activeProject = myProjects[0] || null;
+  const activeProject =
+    (user?.projectName ? myProjects.find((p: any) => p.name === user.projectName) : null) ||
+    myProjects.find((p: any) => p.status === 'ongoing') ||
+    myProjects[0] ||
+    null;
 
   const pendingItems = pendingData?.items || [];
   const pendingRevisionsCount = pendingItems.length;

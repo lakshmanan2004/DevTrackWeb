@@ -828,23 +828,23 @@ router.patch('/users/:id', requireRole('admin'), ah(async (req, res) => {
       }
     } else if (newRole === 'developer') {
       // If returning to developer role, re-attach to previous team or current team members
-      const targetTeamId = user.previousTeam || user.team;
+      let targetTeamId = user.previousTeam || user.team;
+      if (!targetTeamId) {
+        const existingTeam = await Team.findOne({
+          $or: [{ members: user._id }, { leader: user._id }]
+        });
+        if (existingTeam) targetTeamId = existingTeam._id;
+      }
       if (targetTeamId) {
         user.team = targetTeamId;
         await Team.findByIdAndUpdate(targetTeamId, {
           $addToSet: { members: user._id }
         });
-      } else {
-        // Find existing team where they were associated
-        const existingTeam = await Team.findOne({
-          $or: [{ members: user._id }, { leader: user._id }]
-        });
-        if (existingTeam) {
-          user.team = existingTeam._id;
-          await Team.findByIdAndUpdate(existingTeam._id, {
-            $addToSet: { members: user._id }
-          });
-        }
+        // Enforce strict single-team allocation: clean up any other team memberships
+        await Team.updateMany(
+          { _id: { $ne: targetTeamId }, members: user._id },
+          { $pull: { members: user._id } }
+        );
       }
     }
 

@@ -66,59 +66,71 @@ async function scopeFor(user) {
     const developerIds = Array.from(devIdsSet);
     return { teams, teamIds: ids, developerIds, projectIds: projects.map((p) => p._id) };
   }
-  // developer: own team only (with auto-healing fallback if user.team is missing/desynced)
-  let team = user.team ? await Team.findById(user.team) : null;
-  if (!team) {
-    team = await Team.findOne({
-      $or: [
-        { members: user._id },
-        { members: String(user._id) },
-        { leader: user._id },
-        { leader: String(user._id) }
-      ]
-    });
-    if (team) {
-      await User.findByIdAndUpdate(user._id, { team: team._id });
-      if (!team.members.some((m) => String(m) === String(user._id))) {
-        await Team.findByIdAndUpdate(team._id, { $addToSet: { members: user._id } });
+  // developer: STRICT single project allocation rule.
+  // Find all teams where user was added, prioritize the active ongoing project team,
+  // and auto-clean duplicate memberships from other teams.
+  const allTeams = await Team.find({
+    $or: [
+      { members: user._id },
+      { members: String(user._id) },
+      { leader: user._id },
+      { leader: String(user._id) },
+      ...(user.team ? [{ _id: user.team }] : [])
+    ]
+  }).populate('project');
+
+  let primaryTeam = null;
+  let primaryProject = null;
+
+  if (allTeams.length > 0) {
+    // 1. Prefer ongoing/active project team
+    for (const t of allTeams) {
+      if (t.project && t.project.status === 'ongoing') {
+        primaryTeam = t;
+        primaryProject = t.project;
+        break;
       }
     }
-  } else {
-    // If team exists, ensure developer is in members
-    if (!team.members.some((m) => String(m) === String(user._id))) {
-      await Team.findByIdAndUpdate(team._id, { $addToSet: { members: user._id } });
+    // 2. Otherwise prefer user.team
+    if (!primaryTeam && user.team) {
+      primaryTeam = allTeams.find((t) => String(t._id) === String(user.team));
+      if (primaryTeam) primaryProject = primaryTeam.project;
+    }
+    // 3. Fallback to latest team
+    if (!primaryTeam) {
+      primaryTeam = allTeams[allTeams.length - 1];
+      if (primaryTeam) primaryProject = primaryTeam.project;
+    }
+
+    // Single-project enforcement: if developer is in multiple teams, remove from all other teams
+    if (primaryTeam && allTeams.length > 1) {
+      const otherTeamIds = allTeams.filter((t) => String(t._id) !== String(primaryTeam._id)).map((t) => t._id);
+      if (otherTeamIds.length > 0) {
+        Team.updateMany(
+          { _id: { $in: otherTeamIds } },
+          { $pull: { members: user._id } }
+        ).exec().catch(() => {});
+      }
+      if (String(user.team) !== String(primaryTeam._id)) {
+        User.findByIdAndUpdate(user._id, { team: primaryTeam._id }).exec().catch(() => {});
+      }
     }
   }
 
-  let project = team ? await Project.findOne({ team: team._id }) : null;
-  if (!project && team && team.project) {
-    project = await Project.findById(team.project);
-  }
-  if (!project) {
-    project = await Project.findOne({
-      $or: [
-        { team: team?._id },
-        { leader: user.name },
-        { leader: user._id }
-      ].filter((q) => Object.values(q)[0] != null)
-    });
-    if (project && !team) {
-      team = await Team.findById(project.team);
-      if (team) {
-        await User.findByIdAndUpdate(user._id, { team: team._id });
-        await Team.findByIdAndUpdate(team._id, { $addToSet: { members: user._id } });
-      }
-    }
+  if (!primaryProject && primaryTeam) {
+    primaryProject = await Project.findOne({ team: primaryTeam._id });
   }
 
-  const resolvedTeamIds = team ? [team._id] : [];
-  const resolvedProjectIds = project ? [project._id] : (team && team.project ? [team.project] : []);
+  const teams = primaryTeam ? [primaryTeam] : [];
+  const teamIds = primaryTeam ? [primaryTeam._id] : [];
+  const projectIds = primaryProject ? [primaryProject._id] : [];
+  const developerIds = primaryTeam && primaryTeam.members ? primaryTeam.members : [user._id];
 
   return {
-    teams: team ? [team] : [],
-    teamIds: resolvedTeamIds,
-    developerIds: team && team.members && team.members.length ? team.members : [user._id],
-    projectIds: resolvedProjectIds
+    teams,
+    teamIds,
+    developerIds,
+    projectIds
   };
 }
 
