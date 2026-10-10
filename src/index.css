@@ -83,7 +83,7 @@ html.dark body {
 .glass-surface {
   position: relative;
   transform: translateZ(0);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(245, 248, 255, 0.56) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.90) 0%, rgba(246, 250, 255, 0.84) 100%);
   backdrop-filter: blur(40px) saturate(190%) brightness(1.03);
   -webkit-backdrop-filter: blur(40px) saturate(190%) brightness(1.03);
   border: 1px solid rgba(255, 255, 255, 0.70);
@@ -102,7 +102,7 @@ html.dark body {
 .glass-elevated {
   position: relative;
   transform: translateZ(0);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(245, 249, 255, 0.62) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(246, 250, 255, 0.88) 100%);
   backdrop-filter: blur(48px) saturate(190%) brightness(1.04);
   -webkit-backdrop-filter: blur(48px) saturate(190%) brightness(1.04);
   border: 1px solid rgba(255, 255, 255, 0.75);
@@ -137,7 +137,7 @@ html.dark body {
 .glass-level-4,
 .glass-active-capsule {
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.86) 0%, rgba(240, 246, 255, 0.72) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(240, 246, 255, 0.88) 100%);
   backdrop-filter: blur(40px) saturate(200%) brightness(1.06);
   -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.06);
   border: 1px solid rgba(255, 255, 255, 0.88);
@@ -153,7 +153,7 @@ html.dark body {
 .glass-level-5,
 .glass-modal,
 .glass-floating {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(245, 249, 255, 0.76) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(246, 250, 255, 0.94) 100%);
   backdrop-filter: blur(56px) saturate(200%) brightness(1.05);
   -webkit-backdrop-filter: blur(56px) saturate(200%) brightness(1.05);
   border: 1px solid rgba(255, 255, 255, 0.88);
@@ -170,7 +170,7 @@ html.dark body {
 .glass-dropdown {
   position: fixed !important;
   z-index: 999999 !important;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 250, 255, 0.92) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 250, 255, 0.95) 100%);
   backdrop-filter: blur(52px) saturate(190%) brightness(1.02);
   -webkit-backdrop-filter: blur(52px) saturate(190%) brightness(1.02);
   border: 1px solid rgba(255, 255, 255, 0.92);
@@ -199,7 +199,7 @@ html.dark body {
 /* 3. Interactive Frosted Glass Card (Micro-lift & Refraction on Hover) */
 .glass-card-interactive {
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.76) 0%, rgba(245, 249, 255, 0.58) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(246, 250, 255, 0.86) 100%);
   backdrop-filter: blur(44px) saturate(185%) brightness(1.04);
   -webkit-backdrop-filter: blur(44px) saturate(185%) brightness(1.04);
   border: 1px solid rgba(255, 255, 255, 0.72);
@@ -215,7 +215,7 @@ html.dark body {
 }
 
 .glass-card-interactive:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(245, 249, 255, 0.72) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 250, 255, 0.90) 100%);
   border-color: rgba(255, 255, 255, 0.92);
   box-shadow: 
     0 16px 40px -6px rgba(0, 113, 227, 0.12),
@@ -226,7 +226,7 @@ html.dark body {
 
 /* 4. Frosted Liquid Glass Top Header / Navbar */
 .glass-header {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(245, 249, 255, 0.72) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 250, 255, 0.92) 100%);
   backdrop-filter: blur(48px) saturate(190%) brightness(1.03);
   -webkit-backdrop-filter: blur(48px) saturate(190%) brightness(1.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.65);
@@ -421,7 +421,7 @@ select.glass-input {
 .dark .glass-card,
 .dark .glass-elevated,
 .dark .glass-card-interactive {
-  background: linear-gradient(135deg, rgba(18, 22, 30, 0.82) 0%, rgba(12, 15, 22, 0.76) 100%) !important;
+  background: linear-gradient(135deg, rgba(16, 20, 28, 0.93) 0%, rgba(10, 13, 20, 0.88) 100%) !important;
   backdrop-filter: blur(48px) saturate(150%) brightness(1.02) !important;
   -webkit-backdrop-filter: blur(48px) saturate(150%) brightness(1.02) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
@@ -434,7 +434,7 @@ select.glass-input {
 }
 
 .dark .glass-dropdown {
-  background: linear-gradient(135deg, rgba(20, 25, 36, 0.94) 0%, rgba(14, 18, 28, 0.90) 100%) !important;
+  background: linear-gradient(135deg, rgba(20, 25, 36, 0.96) 0%, rgba(14, 18, 28, 0.93) 100%) !important;
   backdrop-filter: blur(52px) saturate(150%) brightness(1.02) !important;
   -webkit-backdrop-filter: blur(52px) saturate(150%) brightness(1.02) !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
@@ -453,7 +453,7 @@ select.glass-input {
 }
 
 .dark .glass-card-interactive:hover {
-  background: linear-gradient(135deg, rgba(24, 28, 38, 0.88) 0%, rgba(18, 21, 30, 0.82) 100%) !important;
+  background: linear-gradient(135deg, rgba(24, 28, 38, 0.95) 0%, rgba(18, 21, 30, 0.90) 100%) !important;
   border-color: rgba(22, 131, 255, 0.40) !important;
   box-shadow: 
     0 18px 44px -4px rgba(0, 0, 0, 0.45),
@@ -461,7 +461,7 @@ select.glass-input {
 }
 
 .dark .glass-header {
-  background: linear-gradient(180deg, rgba(20, 24, 32, 0.88) 0%, rgba(14, 17, 24, 0.80) 100%) !important;
+  background: linear-gradient(180deg, rgba(16, 20, 28, 0.96) 0%, rgba(10, 13, 20, 0.92) 100%) !important;
   backdrop-filter: blur(48px) saturate(150%) brightness(1.02) !important;
   -webkit-backdrop-filter: blur(48px) saturate(150%) brightness(1.02) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -473,7 +473,7 @@ select.glass-input {
 }
 
 .dark .glass-dark {
-  background: linear-gradient(180deg, rgba(18, 21, 26, 0.85) 0%, rgba(12, 14, 18, 0.78) 100%) !important;
+  background: linear-gradient(180deg, rgba(18, 21, 26, 0.92) 0%, rgba(12, 14, 18, 0.88) 100%) !important;
   backdrop-filter: blur(48px) saturate(140%) brightness(0.98) !important;
   -webkit-backdrop-filter: blur(48px) saturate(140%) brightness(0.98) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.10) !important;
@@ -484,7 +484,7 @@ select.glass-input {
 
 .dark .glass-modal,
 .dark .glass-floating {
-  background: linear-gradient(135deg, rgba(22, 26, 34, 0.90) 0%, rgba(16, 19, 26, 0.84) 100%) !important;
+  background: linear-gradient(135deg, rgba(18, 22, 30, 0.97) 0%, rgba(12, 15, 22, 0.94) 100%) !important;
   backdrop-filter: blur(56px) saturate(150%) brightness(0.98) !important;
   -webkit-backdrop-filter: blur(56px) saturate(150%) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
