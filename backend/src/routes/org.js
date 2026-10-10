@@ -116,9 +116,15 @@ async function fullProjectDto(project) {
 // GET /api/projects?scope=mine|all
 router.get('/projects', ah(async (req, res) => {
   const scope = await scopeFor(req.user);
-  const filter = req.query.scope === 'all' && req.user.role === 'admin'
-    ? {}
-    : { team: { $in: scope.teamIds } };
+  let filter = {};
+  if (!(req.query.scope === 'all' && req.user.role === 'admin')) {
+    filter = {
+      $or: [
+        { team: { $in: scope.teamIds } },
+        { _id: { $in: scope.projectIds } }
+      ]
+    };
+  }
   const projects = await Project.find(filter)
     .populate('manager', 'name')
     .populate({ path: 'team', populate: { path: 'leader', select: 'name' } })
@@ -812,23 +818,43 @@ router.patch('/users/:id', requireRole('admin'), ah(async (req, res) => {
   if (newRole && ['developer', 'leader', 'manager', 'admin'].includes(newRole) && newRole !== oldRole) {
     user.role = newRole;
 
-    // If a Developer was promoted to Leader/Manager/Admin, remove them from team.members
     if (oldRole === 'developer') {
+      // If a Developer was promoted to Leader/Manager/Admin, track previous team and remove from members list
       if (user.team) {
         user.previousTeam = user.team;
         await Team.findByIdAndUpdate(user.team, {
           $pull: { members: user._id }
         });
       }
+    } else if (newRole === 'developer') {
+      // If returning to developer role, re-attach to previous team or current team members
+      const targetTeamId = user.previousTeam || user.team;
+      if (targetTeamId) {
+        user.team = targetTeamId;
+        await Team.findByIdAndUpdate(targetTeamId, {
+          $addToSet: { members: user._id }
+        });
+      } else {
+        // Find existing team where they were associated
+        const existingTeam = await Team.findOne({
+          $or: [{ members: user._id }, { leader: user._id }]
+        });
+        if (existingTeam) {
+          user.team = existingTeam._id;
+          await Team.findByIdAndUpdate(existingTeam._id, {
+            $addToSet: { members: user._id }
+          });
+        }
+      }
     }
 
-    // Notify the user about their promotion
+    // Notify the user about their role change
     await Alert.create({
-      audience: newRole === 'leader' ? 'leader' : newRole === 'manager' ? 'manager' : 'admin',
+      audience: newRole,
       user: user._id,
       kind: 'reminder',
-      title: 'Role Promotion Update',
-      body: `Congratulations! Your role has been updated from ${oldRole} to ${newRole}. Your portal and permissions have been upgraded.`
+      title: 'Role Update',
+      body: `Your role has been updated from ${oldRole} to ${newRole}. Your permissions and portal features have been configured.`
     });
     emitToUser(String(user._id), 'alert:new', { kind: 'reminder' });
   }

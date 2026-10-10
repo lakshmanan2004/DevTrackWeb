@@ -66,13 +66,59 @@ async function scopeFor(user) {
     const developerIds = Array.from(devIdsSet);
     return { teams, teamIds: ids, developerIds, projectIds: projects.map((p) => p._id) };
   }
-  // developer: own team only
-  const team = user.team ? await Team.findById(user.team) : null;
+  // developer: own team only (with auto-healing fallback if user.team is missing/desynced)
+  let team = user.team ? await Team.findById(user.team) : null;
+  if (!team) {
+    team = await Team.findOne({
+      $or: [
+        { members: user._id },
+        { members: String(user._id) },
+        { leader: user._id },
+        { leader: String(user._id) }
+      ]
+    });
+    if (team) {
+      await User.findByIdAndUpdate(user._id, { team: team._id });
+      if (!team.members.some((m) => String(m) === String(user._id))) {
+        await Team.findByIdAndUpdate(team._id, { $addToSet: { members: user._id } });
+      }
+    }
+  } else {
+    // If team exists, ensure developer is in members
+    if (!team.members.some((m) => String(m) === String(user._id))) {
+      await Team.findByIdAndUpdate(team._id, { $addToSet: { members: user._id } });
+    }
+  }
+
+  let project = team ? await Project.findOne({ team: team._id }) : null;
+  if (!project && team && team.project) {
+    project = await Project.findById(team.project);
+  }
+  if (!project) {
+    project = await Project.findOne({
+      $or: [
+        { team: team?._id },
+        { leader: user.name },
+        { leader: user._id }
+      ].filter((q) => Object.values(q)[0] != null)
+    });
+    if (project && !team) {
+      team = await Team.findById(project.team);
+      if (team) {
+        await User.findByIdAndUpdate(user._id, { team: team._id });
+        await Team.findByIdAndUpdate(team._id, { $addToSet: { members: user._id } });
+      }
+    }
+  }
+
+  const resolvedTeamIds = team ? [team._id] : [];
+  const resolvedProjectIds = project ? [project._id] : (team && team.project ? [team.project] : []);
+
   return {
     teams: team ? [team] : [],
-    teamIds: team ? [team._id] : [],
-    developerIds: team ? team.members : [],
-    projectIds: team && team.project ? [team.project] : []
+    teamIds: resolvedTeamIds,
+    developerIds: team && team.members && team.members.length ? team.members : [user._id],
+    projectIds: resolvedProjectIds
   };
 }
 

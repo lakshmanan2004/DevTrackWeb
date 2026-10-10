@@ -51,12 +51,27 @@ async function mePayload(user) {
     leaderName: '',
     joined: user.joinedAt
   };
-  if (user.role === 'developer' && user.team) {
-    const team = await Team.findById(user.team).populate('leader', 'name').populate('project', 'name');
+  if (user.role === 'developer') {
+    let team = user.team ? await Team.findById(user.team).populate('leader', 'name').populate('project', 'name') : null;
+    if (!team) {
+      team = await Team.findOne({
+        $or: [
+          { members: user._id },
+          { members: String(user._id) },
+          { leader: user._id },
+          { leader: String(user._id) }
+        ]
+      }).populate('leader', 'name').populate('project', 'name');
+    }
     if (team) {
       out.teamName = team.name;
       out.leaderName = team.leader ? team.leader.name : '';
-      if (team.project) out.projectName = team.project.name;
+      let projName = team.project ? team.project.name : '';
+      if (!projName) {
+        const proj = await Project.findOne({ team: team._id });
+        if (proj) projName = proj.name;
+      }
+      out.projectName = projName;
     }
   } else if (user.role === 'leader') {
     const teams = await Team.find({
