@@ -145,9 +145,9 @@ export function DeveloperProfile() {
         }
       />
 
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto min-w-0 max-w-full overflow-x-hidden">
-        <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[340px_minmax(0,1fr)] gap-5 items-start w-full min-w-0 max-w-full">
-          <aside className="space-y-5 w-full max-w-full min-w-0">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
+          <aside className="w-full lg:col-span-5 xl:col-span-4 space-y-6 min-w-0">
             <section className="glass-card rounded-3xl p-5 text-center shadow-glass">
               <Avatar initials={user?.initials || '··'} size="lg" className="mx-auto" />
               <h2 className="mt-3 text-xl font-bold text-navy dark:text-white">{user?.name}</h2>
@@ -234,7 +234,7 @@ export function DeveloperProfile() {
             </section>
           </aside>
 
-          <div className="space-y-5 w-full max-w-full min-w-0">
+          <div className="w-full lg:col-span-7 xl:col-span-8 space-y-6 min-w-0">
             <section className="glass-card rounded-3xl p-6 shadow-glass">
               <h2 className="text-sm font-bold text-navy dark:text-white">Account Settings</h2>
               <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); saveProfile(); }}>

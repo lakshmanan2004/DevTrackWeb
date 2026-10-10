@@ -203,12 +203,12 @@ export function UserProfile() {
         }
       />
 
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto min-w-0 max-w-full overflow-x-hidden">
-        <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[340px_minmax(0,1fr)] gap-6 items-start w-full min-w-0 max-w-full">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
           {/* ========================================================================= */}
           {/* LEFT COLUMN: USER OVERVIEW CARD & SECURITY                                */}
           {/* ========================================================================= */}
-          <div className="w-full max-w-full min-w-0 space-y-6">
+          <div className="w-full lg:col-span-5 xl:col-span-4 space-y-6 min-w-0">
             {/* USER IDENTITY CARD */}
             <div className="glass-card rounded-2xl p-6 text-center">
               <div className="flex flex-col items-center">
@@ -239,7 +239,7 @@ export function UserProfile() {
                       <MailIcon className="h-4 w-4 text-blue-500 shrink-0" />
                       <span>Email Address</span>
                     </span>
-                    <span className="font-semibold text-slate-900 dark:text-white truncate text-right pl-2 max-w-[210px]" title={user?.email}>
+                    <span className="font-semibold text-slate-900 dark:text-white truncate text-right pl-2" title={user?.email}>
                       {user?.email}
                     </span>
                   </div>
@@ -477,7 +477,7 @@ export function UserProfile() {
           {/* ========================================================================= */}
           {/* RIGHT COLUMN: PROFILE EDIT & ROLE-SPECIFIC WORKSPACE DETAILS              */}
           {/* ========================================================================= */}
-          <div className="w-full max-w-full min-w-0 space-y-6">
+          <div className="w-full lg:col-span-7 xl:col-span-8 space-y-6 min-w-0">
             {/* PROFILE EDIT FORM */}
             <div className="glass-card rounded-2xl p-6">
               <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
