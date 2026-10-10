@@ -204,11 +204,11 @@ export function UserProfile() {
       />
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
-        <div className="grid gap-6 xl:grid-cols-12 items-start">
+        <div className="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] items-start">
           {/* ========================================================================= */}
-          {/* LEFT COLUMN: USER OVERVIEW CARD & SECURITY (5 COLUMNS)                    */}
+          {/* LEFT COLUMN: USER OVERVIEW CARD & SECURITY                                */}
           {/* ========================================================================= */}
-          <div className="xl:col-span-5 space-y-6">
+          <div className="w-full space-y-6 min-w-0">
             {/* USER IDENTITY CARD */}
             <div className="glass-card rounded-2xl p-6 text-center">
               <div className="flex flex-col items-center">
@@ -475,9 +475,9 @@ export function UserProfile() {
           </div>
 
           {/* ========================================================================= */}
-          {/* RIGHT COLUMN: PROFILE EDIT & ROLE-SPECIFIC WORKSPACE DETAILS (7 COLUMNS)   */}
+          {/* RIGHT COLUMN: PROFILE EDIT & ROLE-SPECIFIC WORKSPACE DETAILS              */}
           {/* ========================================================================= */}
-          <div className="xl:col-span-7 space-y-6">
+          <div className="w-full space-y-6 min-w-0">
             {/* PROFILE EDIT FORM */}
             <div className="glass-card rounded-2xl p-6">
               <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
@@ -585,7 +585,7 @@ export function UserProfile() {
                 </div>
 
                 {/* STATS TILES */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="glass-surface rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Assigned Projects</p>
                     <p className="mt-1 text-base font-extrabold text-purple-600 dark:text-purple-400">
@@ -628,7 +628,7 @@ export function UserProfile() {
                   <Badge tone="purple">Manager Workspace</Badge>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="glass-surface rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Managed Projects</p>
                     <p className="mt-1 text-base font-extrabold text-purple-600 dark:text-purple-400">

@@ -146,8 +146,8 @@ export function DeveloperProfile() {
       />
 
       <div className="flex-1 p-5 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
-        <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
-          <aside className="space-y-5">
+        <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)] items-start">
+          <aside className="space-y-5 w-full">
             <section className="glass-card rounded-3xl p-5 text-center shadow-glass">
               <Avatar initials={user?.initials || '··'} size="lg" className="mx-auto" />
               <h2 className="mt-3 text-xl font-bold text-navy dark:text-white">{user?.name}</h2>
