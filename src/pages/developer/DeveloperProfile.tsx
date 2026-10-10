@@ -106,9 +106,25 @@ export function DeveloperProfile() {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Loading profile…</p>
-      </div>
+      <>
+        <PageHeader
+          title="My Profile"
+          subtitle="Visible to you and your Team Leader only"
+          actions={
+            <button
+              type="button"
+              onClick={openWallpaperModal}
+              className="btn-glass-primary px-3.5 py-1.5 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer shadow-xs"
+            >
+              <PaletteIcon className="h-4 w-4 text-white" />
+              <span>Theme</span>
+            </button>
+          }
+        />
+        <div className="flex-1 flex items-center justify-center p-12">
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Loading profile…</p>
+        </div>
+      </>
     );
   }
 
@@ -129,7 +145,7 @@ export function DeveloperProfile() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-6">
+      <div className="flex-1 p-5 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
         <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
           <aside className="space-y-5">
             <section className="glass-card rounded-3xl p-5 text-center shadow-glass">

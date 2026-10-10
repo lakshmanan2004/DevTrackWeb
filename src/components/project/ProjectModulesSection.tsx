@@ -227,7 +227,7 @@ export function ProjectModulesSection({
             <div className="flex flex-wrap items-center gap-3 text-xs">
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-gray-500 dark:text-slate-400">Team:</span>
-                <span className="font-extrabold text-navy dark:text-white">Team {project.team || 'VStudy'}</span>
+                <span className="font-extrabold text-navy dark:text-white">{project.team || 'Unassigned'}</span>
               </div>
               {project.leader && (
                 <div className="flex items-center gap-1.5">

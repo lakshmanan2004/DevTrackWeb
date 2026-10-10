@@ -9,13 +9,16 @@ import {
   HighlighterIcon,
   EyeIcon,
   FileTextIcon,
-  XIcon
+  XIcon,
+  PalmtreeIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { FilterPills } from '../../components/ui/FilterPills';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { TaskStatusBadge } from '../../components/ui/TaskStatusBadge';
-import { useMyLogs } from '../../hooks/useLive';
+import { Button } from '../../components/ui/Button';
+import { ApplyLeaveModal } from '../../components/developer/ApplyLeaveModal';
+import { useMyLogs, useLeaves } from '../../hooks/useLive';
 import { fileUrl } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { isLogLate } from '../../utils/logTimeliness';
@@ -29,9 +32,13 @@ const getTodayDateStr = () => {
 export function WorkLogs() {
   const { user } = useAuth();
   const [date, setDate] = useState<string>(getTodayDateStr);
-  const { data, loading } = useMyLogs(date);
+  const { data, loading, refetch: refetchLogs } = useMyLogs(date);
   const todayLogs = data?.logs || [];
   const stats = data?.stats;
+
+  const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+  const { data: leaveData, refetch: refetchLeaves } = useLeaves(date === 'all' ? undefined : date);
+  const currentDayLeave = leaveData?.leaves?.find((l: any) => l.date === date);
 
   const [filter, setFilter] = useState('all');
   const [activeScreenshotModal, setActiveScreenshotModal] = useState<{ url: string; title: string } | null>(null);
@@ -64,35 +71,45 @@ export function WorkLogs() {
         title="My Work Logs"
         subtitle={user?.leaderName ? `Only you and ${user.leaderName} can see these logs` : 'Only you and your Team Leader can see these logs'}
         actions={
-          <div className="glass-surface flex items-center gap-1 rounded-full p-1">
-            <SegmentedControl
+          <div className="flex items-center gap-2">
+            <Button
               size="sm"
-              ariaLabel="Filter work log date"
-              value={date === todayStr ? todayStr : (date === 'all' ? 'all' : '')}
-              onChange={(val) => setDate(val)}
-              options={[
-                { id: todayStr, label: "Today's Logs" },
-                { id: 'all', label: 'Show All Logs' }
-              ]}
-            />
-
-            <div className="h-4 w-px bg-white/20 dark:bg-white/10 mx-0.5" />
-
-            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer rounded-full hover:bg-white/40 dark:hover:bg-white/10 transition-colors">
-              <CalendarIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-              <span className="sr-only">Pick a date</span>
-              <input
-                type="date"
-                value={date === 'all' || date === todayStr ? '' : date}
-                onChange={(e) => setDate(e.target.value || 'all')}
-                className="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
+              variant="secondary"
+              onClick={() => setLeaveModalOpen(true)}
+              icon={<PalmtreeIcon className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />}
+            >
+              {currentDayLeave ? 'Manage Leave' : 'Apply Leave / Half-Day'}
+            </Button>
+            <div className="glass-surface flex items-center gap-1 rounded-full p-1">
+              <SegmentedControl
+                size="sm"
+                ariaLabel="Filter work log date"
+                value={date === todayStr ? todayStr : (date === 'all' ? 'all' : '')}
+                onChange={(val) => setDate(val)}
+                options={[
+                  { id: todayStr, label: "Today's Logs" },
+                  { id: 'all', label: 'Show All Logs' }
+                ]}
               />
-            </label>
+
+              <div className="h-4 w-px bg-white/20 dark:bg-white/10 mx-0.5" />
+
+              <label className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer rounded-full hover:bg-white/40 dark:hover:bg-white/10 transition-colors">
+                <CalendarIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                <span className="sr-only">Pick a date</span>
+                <input
+                  type="date"
+                  value={date === 'all' || date === todayStr ? '' : date}
+                  onChange={(e) => setDate(e.target.value || 'all')}
+                  className="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
+                />
+              </label>
+            </div>
           </div>
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
+      <div className="flex-1 space-y-5 p-6">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl px-5 py-4 shadow-glass">
           <p className="text-sm font-bold text-navy dark:text-white">{dateLabel}</p>
           {loading ? (
@@ -376,6 +393,18 @@ export function WorkLogs() {
           </div>
         </div>
       )}
+
+      {/* Leave Application Modal */}
+      <ApplyLeaveModal
+        isOpen={leaveModalOpen}
+        onClose={() => setLeaveModalOpen(false)}
+        initialDate={date === 'all' ? todayStr : date}
+        existingLeave={currentDayLeave}
+        onSuccess={() => {
+          refetchLeaves();
+          refetchLogs();
+        }}
+      />
     </>
   );
 }

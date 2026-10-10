@@ -67,7 +67,7 @@ const actionIcon: Record<string, React.ReactNode> = {
 };
 
 export function LeaderAlerts() {
-  const { user } = useAuth();
+  const { user, refresh: refreshAuth } = useAuth();
   const navigate = useNavigate();
   const { data, refetch } = useAlerts();
   const leaderAlerts: LeaderAlert[] = (data?.alerts || []).filter((a: any) => a.category);
@@ -91,6 +91,7 @@ export function LeaderAlerts() {
     try {
       await api(`/api/alerts/${alert.id}/action`, { method: 'POST', body: { action } });
       refetch();
+      refreshAuth();
       if (action.startsWith('View')) {
         if (alert.developerId) {
           navigate(`/leader?dev=${alert.developerId}`);
@@ -119,6 +120,7 @@ export function LeaderAlerts() {
     try {
       await api(`/api/alerts/${alertId}`, { method: 'DELETE' });
       refetch();
+      refreshAuth();
       showToast(`Alert ${who ? `for ${who}` : ''} deleted.`);
     } catch (err: any) {
       console.error('Delete alert error:', err);
@@ -130,6 +132,7 @@ export function LeaderAlerts() {
     try {
       await api('/api/alerts/clear-all', { method: 'DELETE' });
       refetch();
+      refreshAuth();
       showToast('All alerts cleared successfully.');
     } catch (err: any) {
       console.error('Clear all error:', err);
@@ -141,6 +144,7 @@ export function LeaderAlerts() {
     try {
       await api('/api/alerts/read-all', { method: 'POST' });
       refetch();
+      refreshAuth();
       showToast('All alerts marked as read.');
     } catch (err: any) {
       console.error('Mark all read error:', err);
@@ -182,7 +186,7 @@ export function LeaderAlerts() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
+      <div className="flex-1 space-y-5 p-6">
         <Banner tone="red" icon={<BotIcon className="h-4 w-4" />}>
           All alerts are auto-generated. The server checks every hour for missed logs, flags batch
           submissions and monitors EOD reports — pushed to this page in real time.

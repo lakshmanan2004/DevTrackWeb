@@ -18,7 +18,7 @@ export interface CalendarDayStatus {
   dateNum: number;
   dateStr: string;
   fullLabel: string;
-  status: 'approved' | 'pending' | 'absent' | 'off' | 'weekend' | 'holiday';
+  status: 'approved' | 'pending' | 'absent' | 'off' | 'weekend' | 'holiday' | 'leave' | 'half_day';
   holidayName?: string;
   isHoliday?: boolean;
   tasksCount: number;
@@ -27,6 +27,7 @@ export interface CalendarDayStatus {
   missedCount?: number;
   activeTime: string;
   notes?: string;
+  leave?: { id?: string; type: string; reason: string; slots?: number[] } | null;
   tasks: Array<{
     id: string;
     title: string;
@@ -60,6 +61,8 @@ export function DeveloperCalendarWidget() {
     approved: 'bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 ring-2 ring-emerald-400/30',
     pending: 'bg-amber-500 text-white shadow-sm hover:bg-amber-600 ring-2 ring-amber-400/40',
     absent: 'bg-rose-500 text-white shadow-sm hover:bg-rose-600',
+    leave: 'bg-amber-500 text-white shadow-sm hover:bg-amber-600 ring-2 ring-amber-400/40',
+    half_day: 'bg-indigo-500 text-white shadow-sm hover:bg-indigo-600 ring-2 ring-indigo-400/40',
     holiday: 'bg-purple-600 text-white shadow-sm hover:bg-purple-700 ring-2 ring-purple-400/40',
     off: 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:border dark:border-white/10',
     weekend: 'bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-900/80 dark:text-slate-500 dark:border-white/10'
@@ -234,8 +237,9 @@ export function DeveloperCalendarWidget() {
 
       {/* DATE DETAILS MODAL */}
       {selectedDay && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 sm:p-6 backdrop-blur-md animate-in fade-in">
-          <div className="glass-modal relative w-full max-w-xl rounded-3xl p-6 shadow-glass-modal">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-md animate-in fade-in overflow-hidden">
+          <div className="fixed inset-0 left-0 lg:left-64 flex items-center justify-center p-4 sm:p-6 pointer-events-none">
+            <div className="glass-modal relative w-full max-w-xl rounded-3xl p-6 shadow-glass-modal pointer-events-auto">
             <div className="flex items-center justify-between border-b border-slate-200/60 pb-4">
               <div className="flex items-center gap-3">
                 <div
@@ -351,6 +355,7 @@ export function DeveloperCalendarWidget() {
             </div>
           </div>
         </div>
+      </div>
       )}
     </div>
   );

@@ -24,12 +24,13 @@ import { api } from '../../api/client';
 
 const statusMeta = {
   ongoing: { label: 'Ongoing', tone: 'blue', dot: 'bg-brand' },
+  urgent: { label: '🚨 Urgent Sprint', tone: 'red', dot: 'bg-rose-500 animate-pulse' },
   completed: { label: 'Completed', tone: 'green', dot: 'bg-emerald-500' },
   hold: { label: 'On Hold', tone: 'yellow', dot: 'bg-amber-500' }
 } as const;
 
 function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () => void }) {
-  const meta = statusMeta[project.status] || statusMeta.ongoing;
+  const meta = (statusMeta as any)[project.status] || statusMeta.ongoing;
   const isCompleted = project.status === 'completed';
 
   const handleDelete = async () => {
@@ -221,7 +222,7 @@ export function ProjectsOverview() {
         subtitle="Company-wide project details, milestones, and administration"
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-6">
         <Banner tone="grey" icon={<EyeIcon className="h-4 w-4" />}>
           Viewing and managing company-wide projects. Administrators have full system privileges to oversee and delete projects.
         </Banner>

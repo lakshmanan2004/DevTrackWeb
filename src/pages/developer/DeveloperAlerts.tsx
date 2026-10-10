@@ -47,7 +47,10 @@ const kindMeta: Record<
   }
 };
 
+import { useAuth } from '../../context/AuthContext';
+
 export function DeveloperAlerts() {
+  const { refresh: refreshAuth } = useAuth();
   const { data, refetch } = useAlerts();
   const alerts: DevAlert[] = data?.alerts || [];
   const [filter, setFilter] = useState('all');
@@ -63,17 +66,20 @@ export function DeveloperAlerts() {
   const markAllRead = async () => {
     await api('/api/alerts/read-all', { method: 'POST' });
     refetch();
+    refreshAuth();
   };
 
   const handleClearAll = async () => {
     if (!alerts.length) return;
     await api('/api/alerts/clear-all', { method: 'DELETE' });
     refetch();
+    refreshAuth();
   };
 
   const handleDelete = async (id: string) => {
     await api(`/api/alerts/${id}`, { method: 'DELETE' });
     refetch();
+    refreshAuth();
   };
 
   return (
@@ -95,7 +101,7 @@ export function DeveloperAlerts() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6 sm:p-8">
+      <div className="flex-1 space-y-6 p-6 sm:p-8">
         <FilterPills
           ariaLabel="Filter alerts"
           value={filter}
@@ -154,6 +160,7 @@ export function DeveloperAlerts() {
                       onClick={async () => {
                         await api(`/api/alerts/${alert.id}/action`, { method: 'POST', body: { action: 'Mark Seen' } });
                         refetch();
+                        refreshAuth();
                       }}
                     >
                       Mark Seen

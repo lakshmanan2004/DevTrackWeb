@@ -12,7 +12,10 @@ import {
   GitBranchIcon,
   ExternalLinkIcon,
   Volume2Icon,
-  PlusIcon
+  PlusIcon,
+  PalmtreeIcon,
+  SunIcon,
+  MoonIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { HeaderClock } from '../../components/layout/HeaderClock';
@@ -23,9 +26,10 @@ import { ActiveTimerCard } from '../../components/developer/ActiveTimerCard';
 import { TodayTimeline } from '../../components/developer/TodayTimeline';
 import { CheckInModal } from '../../components/developer/CheckInModal';
 import { CheckInAlertModal } from '../../components/developer/CheckInAlertModal';
+import { ApplyLeaveModal } from '../../components/developer/ApplyLeaveModal';
 import { DeveloperCalendarWidget } from '../../components/developer/DeveloperCalendarWidget';
 import { useAuth } from '../../context/AuthContext';
-import { useMyLogs, useProjects, usePendingWorks } from '../../hooks/useLive';
+import { useMyLogs, useProjects, usePendingWorks, useLeaves } from '../../hooks/useLive';
 import { playAlertSound, showWindowsNotification } from '../../utils/audioAlerts';
 
 function fmtDuration(min: number) {
@@ -36,11 +40,16 @@ function fmtDuration(min: number) {
 
 export function DeveloperDashboard() {
   const { user } = useAuth();
-  const { data } = useMyLogs();
+  const { data, refetch: refetchLogs } = useMyLogs();
   const { data: projectData } = useProjects('mine');
   const { data: pendingData } = usePendingWorks();
 
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const { data: leaveData, refetch: refetchLeaves } = useLeaves(todayStr);
+  const todayLeave = leaveData?.leaves?.find((l: any) => l.date === todayStr);
+
   const [modalOpen, setModalOpen] = useState(false);
+  const [leaveModalOpen, setLeaveModalOpen] = useState(false);
   const [modalTargetSlot, setModalTargetSlot] = useState<number | undefined>(undefined);
   const handleOpenLog = (slot?: number) => {
     setModalTargetSlot(slot);
@@ -137,6 +146,12 @@ export function DeveloperDashboard() {
       const slot = h;
       if (slot === devLunchSlot) return;
 
+      // Suppress alert if developer has an approved leave/half-day covering this slot
+      if (todayLeave) {
+        if (todayLeave.type === 'full_day') return;
+        if (todayLeave.slots && todayLeave.slots.includes(slot)) return;
+      }
+
       const min = d.getMinutes();
       const remainingMins = 60 - min;
       const unlogged = !logs.some((log: any) => log.hourSlot === slot);
@@ -208,7 +223,7 @@ export function DeveloperDashboard() {
     checkMilestoneAlerts();
     const checkTimer = setInterval(checkMilestoneAlerts, 10000);
     return () => clearInterval(checkTimer);
-  }, [logs, devLunchSlot, isHoliday, user?.role]);
+  }, [logs, devLunchSlot, isHoliday, user?.role, todayLeave]);
 
   const firstName = user?.name?.split(' ')[0] || 'there';
   const greetingTime = now.getHours() < 12 ? 'Good morning' : now.getHours() < 17 ? 'Good afternoon' : 'Good evening';
@@ -225,6 +240,14 @@ export function DeveloperDashboard() {
             <Button
               size="sm"
               variant="secondary"
+              onClick={() => setLeaveModalOpen(true)}
+              icon={<PalmtreeIcon className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />}
+            >
+              {todayLeave ? 'Manage Leave' : 'Apply Leave / Half-Day'}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
               onClick={triggerTestAlert}
               icon={<Volume2Icon className="h-3.5 w-3.5 text-brand dark:text-[#5AA9FF]" />}
             >
@@ -236,8 +259,45 @@ export function DeveloperDashboard() {
       />
 
       {/* 2. SCROLLABLE DASHBOARD CONTENT */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
+      <div className="flex-1 p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
         
+        {/* ACTIVE LEAVE BANNER IF MARKED TODAY */}
+        {todayLeave && (
+          <div className="glass-card rounded-3xl p-4 sm:p-5 border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 flex flex-wrap items-center justify-between gap-4 animate-fade-in">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="p-3 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-300 shrink-0">
+                {todayLeave.type === 'full_day' ? (
+                  <PalmtreeIcon className="h-6 w-6" />
+                ) : todayLeave.type === 'half_day_morning' ? (
+                  <SunIcon className="h-6 w-6" />
+                ) : (
+                  <MoonIcon className="h-6 w-6" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-bold text-navy dark:text-white">
+                    {todayLeave.type === 'full_day'
+                      ? '🌴 Full-Day Leave Active'
+                      : todayLeave.type === 'half_day_morning'
+                      ? '☀️ Morning Half-Day Active (9 AM – 1 PM)'
+                      : '⛅ Afternoon Half-Day Active (2 PM – 6 PM)'}
+                  </span>
+                  <Badge tone="yellow" className="text-[10px] font-bold">
+                    Excused Check-ins
+                  </Badge>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 truncate">
+                  Reason: &ldquo;{todayLeave.reason}&rdquo; · Alerts suppressed for TL & PM.
+                </p>
+              </div>
+            </div>
+            <Button size="sm" variant="secondary" onClick={() => setLeaveModalOpen(true)}>
+              Edit / Cancel
+            </Button>
+          </div>
+        )}
+
         {/* 3. HERO / GREETING SECTION */}
         <section className="glass-card rounded-3xl p-6 sm:p-7 shadow-glass relative overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-5 relative z-10">
@@ -255,8 +315,8 @@ export function DeveloperDashboard() {
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
-              <Badge tone="green" dot className="px-3 py-1.5 text-xs font-bold shadow-2xs">
-                Active
+              <Badge tone={todayLeave ? 'yellow' : 'green'} dot className="px-3 py-1.5 text-xs font-bold shadow-2xs">
+                {todayLeave ? (todayLeave.type === 'full_day' ? 'On Leave' : 'Half-Day') : 'Active'}
               </Badge>
               <Button
                 size="md"
@@ -557,6 +617,15 @@ export function DeveloperDashboard() {
         minutesLeft={alertModalState.minsLeft}
         slotLabel={alertModalState.slotLabel}
         alertLevel={alertModalState.level}
+      />
+      <ApplyLeaveModal
+        isOpen={leaveModalOpen}
+        onClose={() => setLeaveModalOpen(false)}
+        existingLeave={todayLeave}
+        onSuccess={() => {
+          refetchLeaves();
+          refetchLogs();
+        }}
       />
     </>
   );

@@ -80,9 +80,15 @@ async function mePayload(user) {
   return out;
 }
 
+const { alertQueryFor } = require('./alerts');
+
 async function badgeCounts(user) {
   const today = dayStr();
   const badges = { alerts: 0, approvals: 0, pendingWorks: 0 };
+  
+  const alertQuery = await alertQueryFor(user);
+  badges.alerts = await Alert.countDocuments({ ...alertQuery, read: false });
+
   if (user.role === 'developer') {
     // Cleanup any orphaned targeted feedback tasks whose linked log has been approved
     const orphanedTasks = await Task.find({
@@ -96,8 +102,6 @@ async function badgeCounts(user) {
         await ot.save();
       }
     }
-
-    badges.alerts = await Alert.countDocuments({ audience: 'developer', user: user._id, read: false });
 
     // Work logs requiring developer action or currently in progress / blocked
     const inProgressLogs = await WorkLog.find({
@@ -131,14 +135,9 @@ async function badgeCounts(user) {
   } else if (user.role === 'leader') {
     const { scopeFor } = require('../util/scope');
     const scope = await scopeFor(user);
-    badges.alerts = await Alert.countDocuments({
-      audience: 'leader', developerId: { $in: scope.developerIds.map(String) }, read: false
-    });
     badges.approvals = await WorkLog.countDocuments({
       team: { $in: scope.teamIds }, date: today, review: 'pending'
     });
-  } else if (user.role === 'manager') {
-    badges.alerts = await Alert.countDocuments({ audience: 'manager', managerScope: user._id, read: false });
   }
   return badges;
 }

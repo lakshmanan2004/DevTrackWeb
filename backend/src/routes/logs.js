@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { WorkLog, Commit, Task, Alert, Team, Project, User, Setting } = require('../models');
+const { WorkLog, Commit, Task, Alert, Team, Project, User, Setting, Leave } = require('../models');
 const { authRequired, attachUser, requireRole, ah } = require('../middleware/auth');
 const { workLogDto, dayStats } = require('../util/dto');
 const { scopeFor } = require('../util/scope');
@@ -287,7 +287,14 @@ router.post('/:id/resubmit', requireRole('developer'), upload.single('attachment
   if (!log) return res.status(404).json({ error: 'Log not found' });
   if (String(log.developer) !== String(req.user._id)) return res.status(403).json({ error: 'Not your log' });
 
-  log.resubmissions.push({ text: req.body.text || 'Updated the highlighted part and attached proof.', at: new Date() });
+  const resubText = req.body.text || 'Updated the highlighted part and attached proof.';
+  log.resubmissions.push({ text: resubText, at: new Date() });
+  if (req.body.text) log.description = req.body.text;
+  if (req.body.moduleName) log.moduleName = req.body.moduleName;
+  if (req.body.status) log.status = req.body.status;
+  if (req.body.minutes) log.minutes = Number(req.body.minutes) || log.minutes;
+  if (req.body.commitUrl !== undefined) log.commitUrl = req.body.commitUrl;
+  if (req.body.blocker !== undefined) log.blocker = req.body.blocker;
   if (req.file) {
     const attachment = await saveUpload(req.file);
     log.attachmentName = attachment.name || log.attachmentName;
@@ -441,6 +448,11 @@ router.get('/calendar', ah(async (req, res) => {
     developer: me,
     date: { $gte: `${y}-${String(m).padStart(2, '0')}-01`, $lte: `${y}-${String(m).padStart(2, '0')}-${daysInMonth}` }
   });
+  const leaves = await Leave.find({
+    developer: me,
+    date: { $gte: `${y}-${String(m).padStart(2, '0')}-01`, $lte: `${y}-${String(m).padStart(2, '0')}-${daysInMonth}` },
+    status: 'approved'
+  });
 
   const required = requiredSlots(settings, devLunchSlot);
   const days = [];
@@ -450,6 +462,7 @@ router.get('/calendar', ah(async (req, res) => {
     const dow = date.getDay();
     const dayLogs = logs.filter((l) => l.date === ds);
     const eod = eods.find((e) => e.date === ds);
+    const dayLeave = leaves.find((l) => l.date === ds);
 
     const loggedSlots = new Set(dayLogs.map((l) => l.hourSlot));
     const isWork = isWorkday(date, settings);
@@ -463,6 +476,9 @@ router.get('/calendar', ah(async (req, res) => {
 
       for (const slot of required) {
         if (isToday && slot > currentHour) continue;
+        if (dayLeave && (dayLeave.type === 'full_day' || (dayLeave.slots && dayLeave.slots.includes(slot)))) {
+          continue; // Excused: on leave / half-day
+        }
         if (!loggedSlots.has(slot)) {
           const startH = slot % 12 === 0 ? 12 : slot % 12;
           const startAp = slot >= 12 ? 'PM' : 'AM';
@@ -534,18 +550,26 @@ router.get('/calendar', ah(async (req, res) => {
       status = holidayInfo.type === 'weekend' ? 'weekend' : 'holiday';
     } else if (ds < joinedStr) {
       status = 'off';
+    } else if (dayLeave && dayLeave.type === 'full_day') {
+      status = 'leave';
     } else if (dayLogs.length === 0) {
       if (ds > todayStr) status = 'off';
       else if (ds === todayStr) status = 'pending';
       else status = 'absent';
     } else {
       const hasUnresolved = dayLogs.some((l) => l.review !== 'approved');
-      status = !hasUnresolved && eod ? 'approved' : 'pending';
+      status = dayLeave ? 'half_day' : (!hasUnresolved && eod ? 'approved' : 'pending');
     }
 
     let dayNotes = undefined;
     if (holidayInfo.isHoliday && holidayInfo.type !== 'weekend') {
       dayNotes = `🎉 Organization Holiday: ${holidayInfo.name || 'Holiday'} — No work check-ins required.`;
+    } else if (dayLeave) {
+      if (dayLeave.type === 'full_day') {
+        dayNotes = `🌴 Full-Day Leave: ${dayLeave.reason}`;
+      } else {
+        dayNotes = `⛅ Half-Day (${dayLeave.type === 'half_day_morning' ? 'Morning' : 'Afternoon'}): ${dayLeave.reason}`;
+      }
     } else if (dayLogs.some((l) => l.review !== 'approved')) {
       dayNotes = `${dayLogs.filter((l) => l.review !== 'approved').length} task(s) require action / resubmission.`;
     }
@@ -568,6 +592,14 @@ router.get('/calendar', ah(async (req, res) => {
       allTasks: allTasksList,
       activeTime: fmtDuration(dayLogs.reduce((s, l) => s + (l.activeMinutes || 0), 0)),
       notes: dayNotes,
+      leave: dayLeave
+        ? {
+            id: String(dayLeave._id),
+            type: dayLeave.type,
+            reason: dayLeave.reason,
+            slots: dayLeave.slots
+          }
+        : null,
       tasks: allTasksList
     });
   }
@@ -628,8 +660,10 @@ router.get('/pending-works', requireRole('developer'), ah(async (req, res) => {
         : log.status === 'blocked'
         ? `Blocker: ${log.blocker || 'Blocked'}`
         : log.description,
-      screenshotUrl: fb && fb.screenshotUrl ? fb.screenshotUrl : (log.attachmentUrl || undefined),
-      screenshotName: fb && fb.screenshotName ? fb.screenshotName : (log.attachmentName || undefined),
+      screenshotUrl: fb && fb.screenshotUrl ? fb.screenshotUrl : undefined,
+      screenshotName: fb && fb.screenshotName ? fb.screenshotName : undefined,
+      devOriginalAttachmentUrl: log.attachmentUrl || undefined,
+      devOriginalAttachmentName: log.attachmentName || undefined,
       status: isRevision
         ? 'changes_requested'
         : isSubmittedPending
@@ -737,6 +771,12 @@ router.get('/team-calendar', ah(async (req, res) => {
     date: { $gte: monthStartStr, $lte: monthEndStr }
   }).populate('developer', 'name initials email jobTitle').populate('project', 'name').sort({ date: 1, hourSlot: 1 });
 
+  // Fetch all leaves for this month
+  const allMonthLeaves = await Leave.find({
+    date: { $gte: monthStartStr, $lte: monthEndStr },
+    status: 'approved'
+  });
+
   // Fetch all tasks created in or relevant to this month
   const allTasks = await Task.find({
     status: { $ne: 'completed' }
@@ -762,8 +802,11 @@ router.get('/team-calendar', ah(async (req, res) => {
     for (const dev of developers) {
       const devLunchSlot = dev.lunchSlot || 12;
       const devReqSlots = requiredSlots(settings, devLunchSlot);
-      const dayApplicableSlots = isToday ? devReqSlots.filter((s) => s <= currentSlot) : devReqSlots;
-      const dayRequiredCount = dayApplicableSlots.length || devReqSlots.length;
+      const devLeave = allMonthLeaves.find((l) => String(l.developer) === String(dev._id) && l.date === dStr);
+      const excusedSlots = new Set(devLeave ? (devLeave.type === 'full_day' ? devReqSlots : devLeave.slots || []) : []);
+
+      const dayApplicableSlots = (isToday ? devReqSlots.filter((s) => s <= currentSlot) : devReqSlots).filter((s) => !excusedSlots.has(s));
+      const dayRequiredCount = dayApplicableSlots.length;
 
       // Only evaluate check-ins from the date the developer was created
       const devCreatedDate = dev.joinedAt || (dev._id && dev._id.getTimestamp ? dev._id.getTimestamp() : null);
@@ -783,7 +826,9 @@ router.get('/team-calendar', ah(async (req, res) => {
       const activeMin = devLogs.reduce((acc, l) => acc + (l.activeMinutes || 0), 0);
 
       if ((isPast || isToday) && isWork) {
-        if (submittedCount < dayRequiredCount || missedSlotsNums.length > 0) {
+        if (devLeave && devLeave.type === 'full_day') {
+          // Dev is on Full-day leave, not missing
+        } else if (dayRequiredCount > 0 && (submittedCount < dayRequiredCount || missedSlotsNums.length > 0)) {
           unsubmittedDevelopers.push({
             developerId: String(dev._id),
             developerName: dev.name,
@@ -796,7 +841,8 @@ router.get('/team-calendar', ah(async (req, res) => {
             totalRequired: dayRequiredCount,
             activeMinutes: activeMin,
             lastSeenAt: dev.lastSeenAt,
-            status: submittedCount === 0 ? 'Not Submitted' : 'Partially Submitted'
+            leave: devLeave ? { type: devLeave.type, reason: devLeave.reason } : null,
+            status: submittedCount === 0 ? (devLeave ? 'Half-Day Leave' : 'Not Submitted') : 'Partially Submitted'
           });
         }
       }

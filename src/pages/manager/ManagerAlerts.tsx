@@ -15,10 +15,12 @@ import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { FilterPills } from '../../components/ui/FilterPills';
 import { AssignTaskModal } from '../../components/common/AssignTaskModal';
+import { useAuth } from '../../context/AuthContext';
 import { useAlerts, useLive } from '../../hooks/useLive';
 import { api } from '../../api/client';
 
 export function ManagerAlerts() {
+  const { refresh: refreshAuth } = useAuth();
   const { data, refetch } = useAlerts();
   const { data: dir } = useLive<{ users: any[] }>('/api/directory', [], 0);
   const devOptions = (dir?.users || [])
@@ -35,11 +37,13 @@ export function ManagerAlerts() {
   const handleDismiss = async (id: string) => {
     await api(`/api/alerts/${id}/action`, { method: 'POST', body: { action: 'Mark Seen' } });
     refetch();
+    refreshAuth();
   };
 
   const handleDelete = async (id: string) => {
     await api(`/api/alerts/${id}`, { method: 'DELETE' });
     refetch();
+    refreshAuth();
     setToastMessage('Alert deleted.');
     setTimeout(() => setToastMessage(''), 2500);
   };
@@ -48,6 +52,7 @@ export function ManagerAlerts() {
     if (!unreadCount) return;
     await api('/api/alerts/read-all', { method: 'POST' });
     refetch();
+    refreshAuth();
     setToastMessage('All alerts marked as read.');
     setTimeout(() => setToastMessage(''), 2500);
   };
@@ -56,6 +61,7 @@ export function ManagerAlerts() {
     if (!alerts.length) return;
     await api('/api/alerts/clear-all', { method: 'DELETE' });
     refetch();
+    refreshAuth();
     setToastMessage('All alerts cleared.');
     setTimeout(() => setToastMessage(''), 2500);
   };
@@ -65,6 +71,7 @@ export function ManagerAlerts() {
     setToastMessage(`Ping & reminder notification sent to ${alert.who}!`);
     setTimeout(() => setToastMessage(''), 2500);
     refetch();
+    refreshAuth();
   };
 
   const filteredAlerts = filter === 'all'
@@ -108,7 +115,7 @@ export function ManagerAlerts() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
+      <div className="flex-1 space-y-5 p-6">
         <Banner tone="yellow" icon={<AlertTriangleIcon className="h-4 w-4 text-amber-500" />}>
           Automated session heartbeats detect when developers are idle or miss check-ins. You can ping developers or assign tasks directly — they receive it instantly.
         </Banner>

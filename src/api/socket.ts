@@ -8,6 +8,8 @@ export function getSocket(): Socket | null {
   return socket;
 }
 
+let heartbeatTimer: any = null;
+
 export function connectSocket(): Socket | null {
   const token = getToken();
   if (!token) return null;
@@ -27,7 +29,8 @@ export function connectSocket(): Socket | null {
   });
 
   // developer presence heartbeat
-  setInterval(() => {
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
+  heartbeatTimer = setInterval(() => {
     if (socket?.connected) socket.emit('presence:heartbeat');
   }, 30000);
   socket.on('connect', () => socket?.emit('presence:heartbeat'));
@@ -36,6 +39,10 @@ export function connectSocket(): Socket | null {
 }
 
 export function disconnectSocket() {
+  if (heartbeatTimer) {
+    clearInterval(heartbeatTimer);
+    heartbeatTimer = null;
+  }
   socket?.disconnect();
   socket = null;
 }

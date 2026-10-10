@@ -48,6 +48,10 @@ export function MyPendingWorks() {
   const wordCount = resubmitText.trim().split(/\s+/).filter(Boolean).length;
   const wordsOk = wordCount >= 30;
 
+  const isBlocked = taskStatus === 'blocked';
+  const blockerValid = !isBlocked || blockerText.trim().length > 0;
+  const canSubmit = wordsOk && !!resubmitFile && !fileError && blockerValid && !busy;
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     if (!selectedFile) {
@@ -84,7 +88,7 @@ export function MyPendingWorks() {
 
   const openSubmissionModal = (item: any) => {
     setResubmitModalItem(item);
-    setResubmitText(item.feedbackNote && !item.feedbackNote.includes('Work log submitted') ? item.feedbackNote : '');
+    setResubmitText('');
     setResubmitFile(null);
     setFileError('');
     setSelectedModuleName('');
@@ -100,40 +104,47 @@ export function MyPendingWorks() {
 
   const handleResolve = async () => {
     if (!resubmitModalItem) return;
+
+    if (!wordsOk) {
+      setToastMessage(`⚠️ Description must be at least 30 words (currently ${wordCount} words).`);
+      setTimeout(() => setToastMessage(''), 3500);
+      return;
+    }
+    if (!resubmitFile) {
+      setToastMessage('⚠️ Screenshot proof is required (*). Please choose an image or document proof.');
+      setTimeout(() => setToastMessage(''), 3500);
+      return;
+    }
+    if (fileError) {
+      setToastMessage(fileError);
+      setTimeout(() => setToastMessage(''), 3500);
+      return;
+    }
+    if (taskStatus === 'blocked' && !blockerText.trim()) {
+      setToastMessage('⚠️ Please provide details about what is blocking your task.');
+      setTimeout(() => setToastMessage(''), 3500);
+      return;
+    }
+
     setBusy(true);
     try {
       if (resubmitModalItem.kind === 'log') {
         const fd = new FormData();
-        fd.append('text', resubmitText || 'Updated log and attached proof.');
+        fd.append('text', resubmitText);
         if (activeModuleName) fd.append('moduleName', activeModuleName);
-        if (resubmitFile) fd.append('attachment', resubmitFile);
-        if (resubmitFile) {
-          await apiUpload(`/api/logs/${resubmitModalItem.logId}/resubmit`, fd);
-        } else {
-          await api(`/api/logs/${resubmitModalItem.logId}/resubmit`, {
-            method: 'POST',
-            body: { text: resubmitText, moduleName: activeModuleName }
-          });
-        }
-        setToastMessage('Resubmission sent to Team Lead!');
+        if (taskStatus) fd.append('status', taskStatus);
+        if (activeMinutes) fd.append('minutes', String(activeMinutes));
+        if (commitUrl) fd.append('commitUrl', commitUrl);
+        if (taskStatus === 'blocked' && blockerText) fd.append('blocker', blockerText);
+        fd.append('attachment', resubmitFile);
+
+        await apiUpload(`/api/logs/${resubmitModalItem.logId}/resubmit`, fd);
+        setToastMessage('Resubmission sent to Team Lead for approval!');
       } else {
         // Full Work Log submission for Assigned Task
-        if (!resubmitFile) {
-          setToastMessage('⚠️ Screenshot proof is required to submit work log.');
-          setTimeout(() => setToastMessage(''), 3000);
-          setBusy(false);
-          return;
-        }
-        if (!wordsOk) {
-          setToastMessage(`⚠️ Description must be at least 30 words (currently ${wordCount}).`);
-          setTimeout(() => setToastMessage(''), 3000);
-          setBusy(false);
-          return;
-        }
-
         const fd = new FormData();
         fd.append('projectId', resubmitModalItem.projectId || defaultProjectId);
-        fd.append('taskId', resubmitModalItem.taskId);
+        if (resubmitModalItem.taskId) fd.append('taskId', resubmitModalItem.taskId);
         fd.append('isPendingWork', 'true');
         fd.append('originalPendingDate', resubmitModalItem.dateStr || '');
         if (activeModuleName) fd.append('moduleName', activeModuleName);
@@ -148,7 +159,7 @@ export function MyPendingWorks() {
         setToastMessage('Full Work Log submitted & sent to Team Lead for approval!');
       }
 
-      setTimeout(() => setToastMessage(''), 3000);
+      setTimeout(() => setToastMessage(''), 3500);
       setResubmitModalItem(null);
       setResubmitText('');
       setResubmitFile(null);
@@ -156,7 +167,7 @@ export function MyPendingWorks() {
       refetch();
     } catch (err: any) {
       setToastMessage(err.message || 'Failed to submit work log');
-      setTimeout(() => setToastMessage(''), 3000);
+      setTimeout(() => setToastMessage(''), 3500);
     } finally {
       setBusy(false);
     }
@@ -187,7 +198,7 @@ export function MyPendingWorks() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-6">
         {toastMessage && (
           <div className={`flex items-center gap-2 rounded-xl p-3 text-xs font-bold text-white shadow-md animate-in fade-in ${toastMessage.includes('⚠️') ? 'bg-amber-600' : 'bg-emerald-600'}`}>
             <CheckCircle2Icon className="h-4 w-4 shrink-0" />
@@ -409,15 +420,33 @@ export function MyPendingWorks() {
                 <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-navy dark:text-slate-200">
                   Screenshot Proof <span className="text-danger">*</span>
                 </label>
-                <div className={`flex items-center gap-3 rounded-2xl border border-dashed p-3 ${fileError ? 'border-rose-400/50 bg-rose-500/10' : 'glass-surface'}`}>
-                  <ImageIcon className={`h-5 w-5 shrink-0 ${fileError ? 'text-rose-400' : 'text-slate-400'}`} />
+                <div className={`flex items-center gap-3 rounded-2xl border border-dashed p-3 transition-all ${
+                  fileError
+                    ? 'border-rose-400/50 bg-rose-500/10'
+                    : resubmitFile
+                    ? 'border-emerald-500/50 bg-emerald-500/10'
+                    : 'glass-surface hover:border-blue-400/50'
+                }`}>
+                  <ImageIcon className={`h-5 w-5 shrink-0 ${fileError ? 'text-rose-400' : resubmitFile ? 'text-emerald-400' : 'text-slate-400'}`} />
                   <input
                     type="file"
-                    accept="image/png,image/jpeg,image/pdf"
+                    accept="image/png,image/jpeg,image/jpg,application/pdf"
                     onChange={handleFileChange}
-                    className="w-full text-xs text-navy dark:text-slate-200 file:mr-3 file:rounded-xl file:border-0 file:bg-brand-soft file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand hover:file:bg-violet-500/20"
+                    className="w-full text-xs text-navy dark:text-slate-200 file:mr-3 file:rounded-xl file:border-0 file:bg-brand-soft file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand hover:file:bg-violet-500/20 cursor-pointer"
                   />
                 </div>
+                {resubmitFile && !fileError && (
+                  <p className="mt-1 text-[11px] font-semibold text-emerald-500 dark:text-emerald-400 flex items-center gap-1">
+                    <CheckCircle2Icon className="h-3.5 w-3.5 shrink-0" />
+                    Selected: {resubmitFile.name} ({(resubmitFile.size / 1024).toFixed(0)} KB)
+                  </p>
+                )}
+                {!resubmitFile && !fileError && (
+                  <p className="mt-1 text-[11px] font-medium text-rose-400 flex items-center gap-1">
+                    <AlertTriangleIcon className="h-3.5 w-3.5 shrink-0" />
+                    Screenshot proof is required to submit log
+                  </p>
+                )}
                 {fileError && (
                   <div className="mt-2 flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/15 p-2.5 text-xs font-semibold text-rose-300">
                     <AlertTriangleIcon className="h-4 w-4 shrink-0 mt-0.5" />
@@ -482,7 +511,7 @@ export function MyPendingWorks() {
               {taskStatus === 'blocked' && (
                 <div>
                   <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-rose-400">
-                    Describe Blocker / Issue
+                    Describe Blocker / Issue <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -501,8 +530,12 @@ export function MyPendingWorks() {
               </Button>
               <Button
                 onClick={handleResolve}
-                disabled={busy}
-                className="btn-glass-primary !from-emerald-500 !to-teal-600 hover:!from-emerald-600 hover:!to-teal-700 text-white font-bold border-none"
+                disabled={!canSubmit}
+                className={`font-bold border-none text-white transition-all ${
+                  canSubmit
+                    ? 'btn-glass-primary !from-emerald-500 !to-teal-600 hover:!from-emerald-600 hover:!to-teal-700 shadow-md cursor-pointer'
+                    : 'bg-slate-400/40 dark:bg-slate-700/40 text-slate-400 dark:text-slate-500 opacity-60 cursor-not-allowed shadow-none'
+                }`}
                 icon={<CheckCircle2Icon className="h-4 w-4" />}
               >
                 {busy

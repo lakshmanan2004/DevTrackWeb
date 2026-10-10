@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { api, getToken, onUnauthorized, setToken } from '../api/client';
 import { connectSocket, disconnectSocket, onSocketEvent } from '../api/socket';
 import { playAlertSound, showWindowsNotification } from '../utils/audioAlerts';
@@ -59,17 +59,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<MeResponse['settings'] | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const isRefreshingRef = useRef(false);
+  const refreshTimeoutRef = useRef<any>(null);
+
   const refresh = useCallback(async () => {
     if (!getToken()) {
       setUser(null);
       setLoading(false);
       return;
     }
+    if (isRefreshingRef.current) return;
+    isRefreshingRef.current = true;
     try {
       const me = await api<MeResponse>('/api/auth/me');
-      setUser(me.user);
-      setBadges(me.badges);
-      setSettings(me.settings);
+      
+      setUser((prev) => {
+        if (!prev && !me.user) return null;
+        if (
+          prev &&
+          me.user &&
+          prev.id === me.user.id &&
+          prev.name === me.user.name &&
+          prev.email === me.user.email &&
+          prev.role === me.user.role &&
+          prev.lunchSlot === me.user.lunchSlot &&
+          prev.teamName === me.user.teamName &&
+          prev.projectName === me.user.projectName &&
+          prev.leaderName === me.user.leaderName &&
+          prev.jobTitle === me.user.jobTitle &&
+          prev.github === me.user.github
+        ) {
+          return prev;
+        }
+        return me.user;
+      });
+
+      setBadges((prev) => {
+        if (
+          prev.alerts === me.badges.alerts &&
+          prev.approvals === me.badges.approvals &&
+          prev.pendingWorks === me.badges.pendingWorks
+        ) {
+          return prev;
+        }
+        return me.badges;
+      });
+
+      setSettings((prev) => {
+        if (!prev && !me.settings) return null;
+        if (
+          prev &&
+          me.settings &&
+          prev.workStartHour === me.settings.workStartHour &&
+          prev.workEndHour === me.settings.workEndHour &&
+          prev.minWords === me.settings.minWords &&
+          prev.eodDeadline === me.settings.eodDeadline
+        ) {
+          return prev;
+        }
+        return me.settings;
+      });
     } catch (err: any) {
       if (err.status === 401 || err.message?.includes('401')) {
         setToken(null);
@@ -77,9 +126,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         disconnectSocket();
       }
     } finally {
+      isRefreshingRef.current = false;
       setLoading(false);
     }
   }, []);
+
+  const debouncedRefresh = useCallback(() => {
+    if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
+    refreshTimeoutRef.current = setTimeout(() => {
+      refresh();
+    }, 150);
+  }, [refresh]);
 
   useEffect(() => {
     const unsub = onUnauthorized(() => {
@@ -87,7 +144,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       disconnectSocket();
     });
-    return unsub;
+    return () => {
+      unsub();
+      if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -107,14 +167,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const unsub1 = onSocketEvent('alert:new', (payload: any) => {
-      refresh();
+      debouncedRefresh();
       if (isDevWorkHours()) {
         playAlertSound('urgent');
         showWindowsNotification('DevTrack Alert', payload?.title || 'New alert received');
       }
     });
     const unsub2 = onSocketEvent('task:assigned', (payload: any) => {
-      refresh();
+      debouncedRefresh();
       if (isDevWorkHours()) {
         playAlertSound('notification');
         showWindowsNotification(
@@ -124,7 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
     const unsub3 = onSocketEvent('log:status', (payload: any) => {
-      refresh();
+      debouncedRefresh();
       if (isDevWorkHours()) {
         playAlertSound('pop');
         const statusText = payload?.status === 'approved' ? 'Log Approved ✓' : 'Log Status Update';
@@ -132,16 +192,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
     const unsub4 = onSocketEvent('log:submitted', () => {
-      refresh();
+      debouncedRefresh();
     });
     const unsub5 = onSocketEvent('task:new', () => {
-      refresh();
+      debouncedRefresh();
     });
     const unsub6 = onSocketEvent('task:update', () => {
-      refresh();
+      debouncedRefresh();
     });
     const unsub7 = onSocketEvent('log:review', () => {
-      refresh();
+      debouncedRefresh();
+    });
+    const unsub8 = onSocketEvent('alert:update', () => {
+      debouncedRefresh();
     });
 
     return () => {
@@ -152,21 +215,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       unsub5();
       unsub6();
       unsub7();
+      unsub8();
     };
-  }, [user, refresh]);
+  }, [user, debouncedRefresh]);
 
   // keep sidebar badges fresh when alerts/tasks change server-side
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     const poll = setInterval(() => {
-      if (!cancelled) refresh();
+      if (!cancelled) debouncedRefresh();
     }, 60000);
     return () => {
       cancelled = true;
       clearInterval(poll);
     };
-  }, [user, refresh]);
+  }, [user, debouncedRefresh]);
 
   const login = useCallback(
     async (email: string, password: string, remember: boolean = true) => {

@@ -1,6 +1,6 @@
 // Automated detection jobs (node-cron). All alerts are deduped via Alert.dedupeKey.
 const cron = require('node-cron');
-const { WorkLog, EodReport, Alert, User, Team, Project, Setting } = require('../models');
+const { WorkLog, EodReport, Alert, User, Team, Project, Setting, Leave } = require('../models');
 const { dayStr, hourLabel, fmtTime, fmtDateMDY, slotForNow, requiredSlots, isWorkday } = require('../util/time');
 const { emitToRoles, emitToUser } = require('../sockets');
 
@@ -54,6 +54,13 @@ async function reminderCheck() {
   for (const dev of devs) {
     const devLunchSlot = dev.lunchSlot || 12;
     if (slot === devLunchSlot) continue; // Lunch break: no reminders or alerts
+    
+    // Check if developer is on leave for this slot
+    const leave = await Leave.findOne({ developer: dev._id, date, status: 'approved' });
+    if (leave && (leave.type === 'full_day' || (leave.slots && leave.slots.includes(slot)))) {
+      continue; // Excused: on leave / half-day
+    }
+
     const has = await WorkLog.findOne({ developer: dev._id, date, hourSlot: slot });
     if (!has) {
       const dedupeKey = `reminder:${dev._id}:${date}:${slot}`;
@@ -83,8 +90,18 @@ async function missedLogCheck() {
   const devs = await activeDevelopers();
   for (const dev of devs) {
     const devLunchSlot = dev.lunchSlot || 12;
-    const checkSlots = requiredSlots(settings, devLunchSlot).filter((s) => s < currentSlot);
+    let checkSlots = requiredSlots(settings, devLunchSlot).filter((s) => s < currentSlot);
     if (!checkSlots.length) continue;
+
+    // Check for approved leave/half-day on this date
+    const leave = await Leave.findOne({ developer: dev._id, date, status: 'approved' });
+    if (leave) {
+      if (leave.type === 'full_day') continue; // Entire day is excused
+      const excusedSlots = new Set(leave.slots || []);
+      checkSlots = checkSlots.filter((s) => !excusedSlots.has(s));
+      if (!checkSlots.length) continue;
+    }
+
     const justEnded = checkSlots[checkSlots.length - 1];
 
     const team = dev.team;
@@ -143,6 +160,13 @@ async function eodMissingCheck() {
   for (const dev of devs) {
     const team = dev.team;
     if (!team) continue;
+
+    // If on full day leave or afternoon leave, skip EOD missing alert
+    const leave = await Leave.findOne({ developer: dev._id, date, status: 'approved' });
+    if (leave && (leave.type === 'full_day' || leave.type === 'half_day_afternoon')) {
+      continue;
+    }
+
     const hasEod = await EodReport.findOne({ developer: dev._id, date });
     if (hasEod) continue;
     const project = team.project ? await Project.findById(team.project) : null;

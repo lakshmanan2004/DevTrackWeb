@@ -36,6 +36,9 @@ body,
 #root {
   height: 100%;
   overflow: hidden;
+  scrollbar-gutter: stable;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -50,11 +53,17 @@ body {
     radial-gradient(at 85% 15%, rgba(175, 82, 222, 0.10) 0px, transparent 50%),
     radial-gradient(at 50% 85%, rgba(52, 199, 89, 0.08) 0px, transparent 50%),
     radial-gradient(at 90% 80%, rgba(255, 149, 0, 0.08) 0px, transparent 50%);
-  transition: color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .dark body,
 html.dark body {
+  background-color: #090d16;
+  background-image:
+    radial-gradient(at 15% 10%, rgba(22, 131, 255, 0.15) 0px, transparent 50%),
+    radial-gradient(at 85% 15%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 85%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+    radial-gradient(at 90% 80%, rgba(22, 131, 255, 0.10) 0px, transparent 50%);
   color: #F5F5F5;
 }
 
@@ -73,6 +82,7 @@ html.dark body {
 .glass-level-2,
 .glass-surface {
   position: relative;
+  transform: translateZ(0);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.60) 0%, rgba(245, 248, 255, 0.42) 100%);
   backdrop-filter: blur(26px) saturate(175%) brightness(1.02);
   -webkit-backdrop-filter: blur(26px) saturate(175%) brightness(1.02);
@@ -91,6 +101,7 @@ html.dark body {
 .glass-card,
 .glass-elevated {
   position: relative;
+  transform: translateZ(0);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.68) 0%, rgba(245, 249, 255, 0.48) 100%);
   backdrop-filter: blur(30px) saturate(180%) brightness(1.03);
   -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.03);
@@ -155,10 +166,10 @@ html.dark body {
   border-radius: 28px;
 }
 
-/* Floating Dropdown overlay — strictly absolute and isolated from parent layout flow */
+/* Floating Dropdown overlay — portaled and fixed over all stacking contexts */
 .glass-dropdown {
-  position: absolute !important;
-  top: calc(100% + 6px) !important;
+  position: fixed !important;
+  z-index: 999999 !important;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 250, 255, 0.90) 100%);
   backdrop-filter: blur(40px) saturate(190%) brightness(1.02);
   -webkit-backdrop-filter: blur(40px) saturate(190%) brightness(1.02);
@@ -215,13 +226,15 @@ html.dark body {
 
 /* 4. Frosted Liquid Glass Top Header / Navbar */
 .glass-header {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(245, 249, 255, 0.52) 100%);
-  backdrop-filter: blur(30px) saturate(180%) brightness(1.03);
-  -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.03);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(245, 249, 255, 0.65) 100%);
+  backdrop-filter: blur(32px) saturate(190%) brightness(1.02);
+  -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(1.02);
   border-bottom: 1px solid rgba(255, 255, 255, 0.60);
   box-shadow: 
-    0 4px 16px -2px rgba(15, 23, 42, 0.03),
-    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95);
+    0 8px 32px 0 rgba(15, 23, 42, 0.06),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.90);
+  transition: none;
+  overscroll-behavior: none;
 }
 
 .glass-dark {
@@ -449,13 +462,15 @@ select.glass-input {
 }
 
 .dark .glass-header {
-  background: linear-gradient(180deg, rgba(22, 26, 32, 0.78) 0%, rgba(16, 19, 24, 0.68) 100%) !important;
-  backdrop-filter: blur(28px) saturate(130%) brightness(1.02) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(130%) brightness(1.02) !important;
+  background: linear-gradient(180deg, rgba(22, 26, 32, 0.88) 0%, rgba(16, 19, 24, 0.78) 100%) !important;
+  backdrop-filter: blur(32px) saturate(140%) brightness(1.02) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(140%) brightness(1.02) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: 
-    0 4px 16px -2px rgba(0, 0, 0, 0.25),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.16) !important;
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12) !important;
+  transition: none !important;
+  overscroll-behavior: none;
 }
 
 .dark .glass-dark {
@@ -478,16 +493,6 @@ select.glass-input {
   box-shadow: 
     0 32px 85px -10px rgba(0, 0, 0, 0.65),
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.14) !important;
-}
-
-.dark .glass-dropdown {
-  background: linear-gradient(135deg, rgba(22, 26, 32, 0.94) 0%, rgba(16, 19, 24, 0.90) 100%) !important;
-  backdrop-filter: blur(36px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(140%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  box-shadow: 
-    0 20px 50px -10px rgba(0, 0, 0, 0.65),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12) !important;
 }
 
 .dark .glass-input {

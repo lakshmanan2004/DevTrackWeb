@@ -20,7 +20,7 @@ export function CreateProject() {
   const [start, setStart] = useState(() => new Date().toISOString().slice(0, 10));
   const [end, setEnd] = useState('');
   const [repo, setRepo] = useState('');
-  const [status, setStatus] = useState<'ongoing' | 'hold'>('ongoing');
+  const [status, setStatus] = useState<'ongoing' | 'urgent' | 'hold'>('ongoing');
   const [teamName, setTeamName] = useState('');
   const [leader, setLeader] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
@@ -67,8 +67,8 @@ export function CreateProject() {
 
   const submit = async () => {
     setError('');
-    if (!name.trim() || !teamName.trim() || !leader || selected.length === 0) {
-      setError('Project name, team name, a leader and at least one developer are required.');
+    if (!name.trim() || !teamName.trim() || !leader) {
+      setError('Project name, team name, and a team leader are required.');
       return;
     }
     if (modules.length === 0) {
@@ -184,20 +184,52 @@ export function CreateProject() {
                 </div>
               </div>
               <fieldset className="sm:col-span-2">
-                <legend className="mb-2 text-xs font-bold text-navy">Status</legend>
-                <div className="flex gap-6">
-                  {(['ongoing', 'hold'] as const).map((option) => (
-                    <label key={option} className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="cp-status"
-                        checked={status === option}
-                        onChange={() => setStatus(option)}
-                        className="h-4 w-4 text-brand accent-blue-600 cursor-pointer"
-                      />
-                      {option === 'ongoing' ? 'Ongoing' : 'On Hold'}
-                    </label>
-                  ))}
+                <legend className="mb-2 text-xs font-bold text-navy dark:text-white">Project Priority & Status</legend>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {[
+                    { id: 'ongoing', label: '🔵 Ongoing', sub: 'Standard project (Available devs only)' },
+                    { id: 'urgent', label: '🚨 Urgent Sprint', sub: 'Priority delivery (Unlocks all devs for reallocation)' },
+                    { id: 'hold', label: '⏸️ On Hold', sub: 'Draft or paused project' }
+                  ].map((option) => {
+                    const isSelected = status === option.id;
+                    return (
+                      <label
+                        key={option.id}
+                        className={`flex flex-col gap-1 rounded-2xl border p-3.5 text-xs transition-all cursor-pointer ${
+                          isSelected
+                            ? option.id === 'urgent'
+                              ? 'border-rose-500/80 bg-rose-500/15 text-rose-900 dark:text-rose-200 ring-2 ring-rose-500/30 shadow-md'
+                              : 'border-brand bg-brand-soft/70 text-navy dark:text-white ring-2 ring-brand/30 shadow-md'
+                            : 'border-hairline dark:border-white/10 bg-white/60 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:bg-white/90 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="cp-status"
+                            checked={isSelected}
+                            onChange={() => {
+                              setStatus(option.id as any);
+                              if (option.id !== 'urgent') {
+                                // If leaving Urgent, deselect developers who are already assigned to other teams
+                                setSelected((prev) =>
+                                  prev.filter((id) => {
+                                    const d = availableDevelopers.find((u) => u.id === id);
+                                    return !d?.hasProject && !d?.teamName;
+                                  })
+                                );
+                              }
+                            }}
+                            className="h-4 w-4 text-brand accent-blue-600 cursor-pointer"
+                          />
+                          <span className="font-bold text-sm">{option.label}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 pl-6 leading-tight">
+                          {option.sub}
+                        </p>
+                      </label>
+                    );
+                  })}
                 </div>
               </fieldset>
             </div>
@@ -228,8 +260,7 @@ export function CreateProject() {
                   placeholder="Select leader…"
                   options={leaders.map((l) => ({
                     value: l.id,
-                    label: l.name,
-                    description: l.teamName ? `Leads ${l.teamName}` : undefined
+                    label: l.name
                   }))}
                   searchable
                 />
@@ -237,36 +268,99 @@ export function CreateProject() {
             </div>
 
             <fieldset className="mt-5">
-              <legend className="mb-2 text-xs font-bold text-navy">
-                Add Developers <span className="text-red-500">*</span> (Developers can only belong to one project)
-              </legend>
+              <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-xs font-bold text-navy dark:text-white">
+                  Add Developers <span className="text-slate-400 font-normal">(1 Project per Dev)</span>
+                </legend>
+                {status === 'urgent' ? (
+                  <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 animate-pulse">
+                    ⚡ Urgent Sprint: All assigned developers unlocked for reallocation
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Only available developers can be assigned
+                  </span>
+                )}
+              </div>
+
+              {status === 'urgent' ? (
+                <div className="mb-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-800 dark:text-rose-200 flex items-center gap-2.5">
+                  <span className="text-base">🚨</span>
+                  <div>
+                    <span className="font-bold">Urgent Sprint Mode:</span> You can click & select any developer from existing teams to reallocate them to this urgent project.
+                  </div>
+                </div>
+              ) : (
+                availableDevelopers.every((d) => d.hasProject || !!d.teamName) && (
+                  <div className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-200 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span>🔒</span>
+                      <span>All developers are currently assigned to active projects.</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setStatus('urgent')}
+                      className="rounded-lg bg-rose-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-700 transition-colors shadow-xs"
+                    >
+                      Switch to Urgent Sprint
+                    </button>
+                  </div>
+                )
+              )}
+
               <ul className="grid gap-2.5 sm:grid-cols-2">
                 {availableDevelopers.map((dev) => {
                   const isAssigned = dev.hasProject || !!dev.teamName;
+                  const isUrgent = status === 'urgent';
+                  const isDisabled = isAssigned && !isUrgent;
+                  const isSelected = selected.includes(dev.id);
+
                   return (
                     <li key={dev.id}>
                       <label
-                        className={`glass-surface flex items-center justify-between rounded-2xl border px-3.5 py-3 text-xs transition-all ${
-                          isAssigned
-                            ? 'opacity-60 cursor-not-allowed border-slate-200'
-                            : 'border-white/80 text-navy cursor-pointer hover:bg-white/90 shadow-2xs'
+                        className={`glass-surface flex items-center justify-between rounded-2xl border px-3.5 py-3 text-xs transition-all shadow-2xs ${
+                          isDisabled
+                            ? 'opacity-60 cursor-not-allowed border-slate-200 bg-slate-50/50 dark:bg-slate-900/30'
+                            : isSelected
+                            ? isUrgent && isAssigned
+                              ? 'border-rose-500/50 bg-rose-500/10 text-rose-950 dark:text-rose-200 cursor-pointer'
+                              : 'border-purple-500/50 bg-purple-500/10 text-purple-950 dark:text-purple-200 cursor-pointer'
+                            : isUrgent && isAssigned
+                            ? 'border-amber-300/80 bg-amber-50/40 hover:bg-amber-100/50 dark:hover:bg-amber-950/20 text-navy cursor-pointer'
+                            : 'border-white/80 text-navy cursor-pointer hover:bg-white/90'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <input
                             type="checkbox"
-                            disabled={isAssigned}
-                            checked={selected.includes(dev.id)}
-                            onChange={() => !isAssigned && toggle(dev.id)}
-                            className="h-4 w-4 rounded accent-blue-600 disabled:opacity-40 cursor-pointer"
+                            disabled={isDisabled}
+                            checked={isSelected}
+                            onChange={() => !isDisabled && toggle(dev.id)}
+                            className="h-4 w-4 rounded accent-rose-600 disabled:opacity-40 cursor-pointer"
                           />
-                          <span className={isAssigned ? 'line-through text-slate-400 font-normal' : 'font-bold'}>
+                          <span
+                            className={`font-bold ${
+                              isDisabled
+                                ? 'line-through text-slate-400 font-normal'
+                                : 'text-navy dark:text-white'
+                            }`}
+                          >
                             {dev.name}
                           </span>
                         </div>
-                        {isAssigned ? (
-                          <span className="rounded-lg bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                            🔒 {dev.projectName || dev.teamName || 'Assigned'}
+                        {isSelected && isAssigned ? (
+                          <span className="rounded-lg bg-rose-500/15 px-2 py-0.5 text-[10px] font-bold text-rose-800 dark:text-rose-300 border border-rose-500/30 animate-pulse">
+                            ⚡ Reallocating
+                          </span>
+                        ) : isAssigned ? (
+                          <span
+                            className={`rounded-lg px-2 py-0.5 text-[10px] font-bold border ${
+                              isUrgent
+                                ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30'
+                                : 'bg-slate-200/60 text-slate-500 border-slate-300/60'
+                            }`}
+                          >
+                            {isUrgent ? '⚡ In ' : '🔒 '}{dev.projectName || dev.teamName || 'Assigned'}
                           </span>
                         ) : (
                           <span className="rounded-lg bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
@@ -279,27 +373,38 @@ export function CreateProject() {
                 })}
               </ul>
 
-              {selectedNames.length > 0 && (
-                <div className="mt-3.5 flex flex-wrap gap-2">
+              {selectedNames.length > 0 ? (
+                <div className="mt-3.5 flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-500">Allocating ({selected.length}):</span>
                   {selected.map((id) => {
-                    const devName = availableDevelopers.find((d) => d.id === id)?.name || '';
+                    const dev = availableDevelopers.find((d) => d.id === id);
+                    const devName = dev?.name || '';
+                    const wasAssigned = dev?.hasProject || !!dev?.teamName;
                     return (
                       <span
                         key={id}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/15 border border-purple-500/30 px-3 py-1 text-xs font-bold text-purple-800 dark:text-purple-300 backdrop-blur-md"
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold backdrop-blur-md ${
+                          wasAssigned
+                            ? 'bg-rose-500/15 border-rose-500/30 text-rose-900 dark:text-rose-200'
+                            : 'bg-purple-500/15 border-purple-500/30 text-purple-800 dark:text-purple-300'
+                        }`}
                       >
-                        {devName}
+                        {wasAssigned && '⚡'} {devName}
                         <button
                           type="button"
                           onClick={() => toggle(id)}
                           aria-label={`Remove ${devName}`}
-                          className="rounded-full p-0.5 hover:bg-purple-500/30 transition-colors cursor-pointer"
+                          className="rounded-full p-0.5 hover:bg-black/10 transition-colors cursor-pointer"
                         >
                           <XIcon className="h-3 w-3" />
                         </button>
                       </span>
                     );
                   })}
+                </div>
+              ) : (
+                <div className="mt-3 rounded-xl border border-dashed border-slate-300 dark:border-white/15 bg-slate-50/50 dark:bg-slate-900/40 p-3 text-xs text-slate-500">
+                  💡 <span className="font-semibold text-navy dark:text-white">Tip:</span> You can create this project with just the Team Leader, and transfer developers into it anytime using <strong>Manage Teams</strong>.
                 </div>
               )}
             </fieldset>

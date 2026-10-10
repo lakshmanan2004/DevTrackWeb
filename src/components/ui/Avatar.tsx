@@ -24,13 +24,13 @@ interface AvatarProps {
   className?: string;
 }
 
-export function Avatar({ initials, tone = 'blue', size = 'md', className = '' }: AvatarProps) {
+export const Avatar = React.memo(function Avatar({ initials, tone = 'blue', size = 'md', className = '' }: AvatarProps) {
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex shrink-0 items-center justify-center rounded-full font-bold tracking-wide ${tones[tone]} ${sizes[size]} ${className}`}>
-      
+      className={`inline-flex shrink-0 items-center justify-center rounded-full font-bold tracking-wide ${tones[tone]} ${sizes[size]} ${className}`}
+    >
       {initials}
-    </span>);
-
-}
+    </span>
+  );
+});

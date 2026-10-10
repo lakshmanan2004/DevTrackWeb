@@ -57,7 +57,7 @@ export interface CalendarDayStatus {
   dateNum: number;
   dateStr: string;
   fullLabel: string;
-  status: 'approved' | 'pending' | 'absent' | 'off' | 'weekend' | 'holiday';
+  status: 'approved' | 'pending' | 'absent' | 'off' | 'weekend' | 'holiday' | 'leave' | 'half_day';
   holidayName?: string;
   isHoliday?: boolean;
   tasksCount: number;
@@ -70,6 +70,7 @@ export interface CalendarDayStatus {
   allTasks?: DayTask[];
   activeTime: string;
   notes?: string;
+  leave?: { id?: string; type: string; reason: string; slots?: number[] } | null;
   tasks: DayTask[];
 }
 
@@ -166,6 +167,8 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
     approved: 'bg-emerald-500/90 text-white shadow-sm hover:bg-emerald-600 dark:bg-emerald-500/70 dark:text-emerald-100 dark:border dark:border-emerald-400/40 ring-1 ring-emerald-400/30',
     pending: 'bg-amber-500/90 text-white shadow-sm hover:bg-amber-600 dark:bg-amber-500/70 dark:text-amber-100 dark:border dark:border-amber-400/40 ring-1 ring-amber-400/40 animate-pulse',
     absent: 'bg-rose-500/90 text-white shadow-sm hover:bg-rose-600 dark:bg-rose-500/70 dark:text-rose-100 dark:border dark:border-rose-400/40',
+    leave: 'bg-amber-500/90 text-white shadow-sm hover:bg-amber-600 dark:bg-amber-500/70 dark:text-amber-100 dark:border dark:border-amber-400/40 ring-1 ring-amber-400/40',
+    half_day: 'bg-indigo-500/90 text-white shadow-sm hover:bg-indigo-600 dark:bg-indigo-500/70 dark:text-indigo-100 dark:border dark:border-indigo-400/40 ring-1 ring-indigo-400/40',
     holiday: 'bg-purple-600/90 text-white shadow-sm hover:bg-purple-700 dark:bg-purple-600/70 dark:text-purple-100 dark:border dark:border-purple-400/40 ring-1 ring-purple-400/40',
     off: 'bg-slate-100/80 text-slate-600 hover:bg-white/80 border border-slate-200/60 dark:bg-white/[0.05] dark:text-slate-300 dark:hover:bg-white/15 dark:border-white/10',
     weekend: 'bg-slate-100/50 text-slate-400 border border-slate-200/50 dark:bg-white/[0.02] dark:text-slate-500 dark:border-white/5 dark:hover:bg-white/[0.05]'
@@ -192,9 +195,11 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
   const activeApprovedTasks = displayTasks.filter((t: any) => t.review === 'approved');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 sm:p-6 lg:p-8 backdrop-blur-md animate-in fade-in">
-      <div className="glass-modal relative flex flex-col w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-3xl border border-white/90 dark:border-white/15 shadow-2xl p-0">
-        {/* MODAL HEADER */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-md animate-in fade-in overflow-hidden">
+      {/* Centered bounding container between sidebar/navbar end and right side of screen */}
+      <div className="fixed inset-0 left-0 lg:left-64 flex items-center justify-center p-4 sm:p-6 lg:p-8 pointer-events-none">
+        <div className="glass-modal relative flex flex-col w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-3xl border border-white/90 dark:border-white/15 shadow-2xl p-0 pointer-events-auto">
+          {/* MODAL HEADER */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/60 dark:border-white/10 bg-gradient-to-r from-blue-500/10 via-purple-500/5 to-white/40 dark:from-blue-500/15 dark:via-purple-500/10 dark:to-transparent px-6 py-5">
           <div className="flex items-center gap-3.5">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-black text-white shadow-md ring-2 ring-white/30">
@@ -345,8 +350,8 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                     <span className="font-bold text-navy dark:text-slate-200">Approved / Done</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="h-3 w-3 rounded-md bg-amber-500 animate-pulse shadow-xs" />
-                    <span className="font-bold text-amber-900 dark:text-amber-300">Pending / Feedback</span>
+                    <span className="h-3 w-3 rounded-md bg-amber-500 shadow-xs" />
+                    <span className="font-bold text-amber-900 dark:text-amber-300">🌴 Full / Half Leave</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="h-3 w-3 rounded-md bg-rose-500 shadow-xs" />
@@ -384,6 +389,24 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
 
               {selectedDay ? (
                 <div className="space-y-4 flex-1 flex flex-col">
+                  {/* Leave Banner if present */}
+                  {selectedDay.leave && (
+                    <div className="rounded-2xl p-3.5 bg-amber-500/15 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs font-semibold flex items-center gap-2.5 animate-fade-in shadow-2xs">
+                      <span className="text-base">🌴</span>
+                      <div>
+                        <span className="font-bold">
+                          {selectedDay.leave.type === 'full_day'
+                            ? 'Full-Day Leave'
+                            : selectedDay.leave.type === 'half_day_morning'
+                            ? 'Morning Half-Day (9 AM – 1 PM)'
+                            : 'Afternoon Half-Day (2 PM – 6 PM)'}
+                          :
+                        </span>{' '}
+                        <span>&ldquo;{selectedDay.leave.reason}&rdquo;</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Summary Banner */}
                   <div className="glass-surface rounded-2xl p-4 border border-white/80 dark:border-white/10 shadow-2xs space-y-2">
                     <div className="flex items-center justify-between">
@@ -679,6 +702,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
             Close Calendar
           </Button>
         </div>
+      </div>
       </div>
 
       {selectedReviewLog && (

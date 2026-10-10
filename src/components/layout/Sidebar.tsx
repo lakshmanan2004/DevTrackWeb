@@ -26,7 +26,7 @@ const roleLabels: Record<Role, string> = {
   admin: 'Admin'
 };
 
-export function Sidebar({ role }: SidebarProps) {
+export const Sidebar = React.memo(function Sidebar({ role }: SidebarProps) {
   const navigate = useNavigate();
   const { user, badges, logout } = useAuth();
   const nav = navFor(role, badges);
@@ -261,4 +261,4 @@ export function Sidebar({ role }: SidebarProps) {
       </div>
     </aside>
   );
-}
+});

@@ -15,18 +15,42 @@ export function useLive<T = any>(
   const pathRef = useRef(path);
   pathRef.current = path;
 
+  const isMountedRef = useRef(true);
+  const socketDebounceRef = useRef<any>(null);
+
   const refetch = useCallback(async () => {
     const p = pathRef.current;
     if (!p) return;
     try {
       const res = await api<T>(p);
-      setData(res);
-      setError(null);
+      if (isMountedRef.current) {
+        setData(res);
+        setError(null);
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to load');
+      if (isMountedRef.current) {
+        setError(err.message || 'Failed to load');
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
+  }, []);
+
+  const debouncedSocketRefetch = useCallback(() => {
+    if (socketDebounceRef.current) clearTimeout(socketDebounceRef.current);
+    socketDebounceRef.current = setTimeout(() => {
+      refetch();
+    }, 120);
+  }, [refetch]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (socketDebounceRef.current) clearTimeout(socketDebounceRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -38,17 +62,19 @@ export function useLive<T = any>(
     refetch();
   }, [path, refetch]);
 
+  const eventsKey = events.join(',');
+
   useEffect(() => {
-    if (!path) return;
-    const offs = events.map((e) => onSocketEvent(e, () => refetch()));
+    if (!path || !eventsKey) return;
+    const currentEvents = eventsKey.split(',').filter(Boolean);
+    const offs = currentEvents.map((e) => onSocketEvent(e, () => debouncedSocketRefetch()));
     let poll: number | undefined;
     if (pollMs > 0) poll = window.setInterval(() => refetch(), pollMs);
     return () => {
       offs.forEach((off) => off());
       if (poll) window.clearInterval(poll);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, refetch, events.join(','), pollMs]);
+  }, [path, refetch, debouncedSocketRefetch, eventsKey, pollMs]);
 
   return { data, loading, error, refetch };
 }
@@ -127,4 +153,12 @@ export const useDailyAiSummary = (date?: string, developerId?: string) =>
     ['log:new', 'log:review', 'commit:new', 'eod:new'],
     30000
   );
+
+export const useLeaves = (date?: string, month?: string) =>
+  useLive<{ leaves: any[] }>(
+    `/api/leaves${date ? `?date=${date}` : month ? `?month=${month}` : ''}`,
+    ['leave:new', 'leave:update', 'leave:delete'],
+    30000
+  );
+
 

@@ -10,9 +10,9 @@ import { AssignTaskModal } from '../../components/common/AssignTaskModal';
 import { api } from '../../api/client';
 
 export function ManageTeams() {
-  const { data } = useTeams();
+  const { data, refetch: refetchTeams } = useTeams();
   const teams = data?.teams || [];
-  const { data: dir } = useLive<{ users: any[] }>('/api/directory', [], 0);
+  const { data: dir, refetch: refetchDir } = useLive<{ users: any[] }>('/api/directory', [], 0);
   const directory = dir?.users || [];
 
   const [tab, setTab] = useState('');
@@ -26,13 +26,15 @@ export function ManageTeams() {
 
   const showToast = (msg: string) => {
     setToast(msg);
-    setTimeout(() => setToast(''), 2500);
+    setTimeout(() => setToast(''), 3000);
   };
 
   const changeLeader = async (teamId: string, leaderId: string) => {
     try {
       await api(`/api/teams/${teamId}`, { method: 'PATCH', body: { leaderId } });
       showToast('Team leader updated.');
+      refetchTeams();
+      refetchDir();
     } catch (err: any) {
       showToast(err.message);
     }
@@ -44,6 +46,9 @@ export function ManageTeams() {
     try {
       await api(`/api/teams/${teamId}`, { method: 'PATCH', body: { addMemberId: memberId } });
       showToast('Developer added to the team.');
+      setAddSelect({ ...addSelect, [teamId]: '' });
+      refetchTeams();
+      refetchDir();
     } catch (err: any) {
       showToast(err.message);
     }
@@ -53,6 +58,8 @@ export function ManageTeams() {
     try {
       await api(`/api/teams/${teamId}`, { method: 'PATCH', body: { removeMemberId: memberId } });
       showToast('Developer removed from the team.');
+      refetchTeams();
+      refetchDir();
     } catch (err: any) {
       showToast(err.message);
     }
@@ -212,34 +219,51 @@ export function ManageTeams() {
                   ))}
                 </ul>
 
-                {availableToAdd(team).length > 0 && (
-                  <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border-2 border-dashed border-gray-300 dark:border-white/20 px-4 py-3.5">
-                    <p className="text-sm font-semibold text-navy dark:text-white">Add Developer</p>
-                    <div className="flex-1 min-w-[200px]">
-                      <Select
+                <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border-2 border-dashed border-gray-300 dark:border-white/20 px-4 py-3.5">
+                  <p className="text-sm font-semibold text-navy dark:text-white">Add Developer</p>
+                  {availableToAdd(team).length > 0 ? (
+                    <>
+                      <div className="flex-1 min-w-[200px]">
+                        <Select
+                          size="sm"
+                          fullWidth
+                          value={addSelect[team.id] || ''}
+                          placeholder="Select developer…"
+                          onChange={(val) => setAddSelect({ ...addSelect, [team.id]: val })}
+                          options={availableToAdd(team).map((d: any) => ({
+                            value: d.id,
+                            label: d.name
+                          }))}
+                          searchable
+                        />
+                      </div>
+                      <Button
                         size="sm"
-                        fullWidth
-                        value={addSelect[team.id] || ''}
-                        placeholder="Select developer…"
-                        onChange={(val) => setAddSelect({ ...addSelect, [team.id]: val })}
-                        options={availableToAdd(team).map((d: any) => ({
-                          value: d.id,
-                          label: d.name
-                        }))}
-                        searchable
-                      />
+                        variant="purple"
+                        onClick={() => addMember(team.id)}
+                        disabled={!addSelect[team.id]}
+                        icon={<PlusIcon className="h-3.5 w-3.5" />}
+                      >
+                        Add
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="flex-1 min-w-[200px] flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400 italic">
+                        All registered developers are currently assigned to project teams.
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled
+                        className="opacity-50 cursor-not-allowed text-xs"
+                        icon={<PlusIcon className="h-3.5 w-3.5" />}
+                      >
+                        Add
+                      </Button>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="purple"
-                      onClick={() => addMember(team.id)}
-                      disabled={!addSelect[team.id]}
-                      icon={<PlusIcon className="h-3.5 w-3.5" />}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </section>
           )))}

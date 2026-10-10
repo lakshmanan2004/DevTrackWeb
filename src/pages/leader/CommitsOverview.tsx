@@ -145,7 +145,7 @@ export function CommitsOverview() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
+      <div className="flex-1 space-y-5 p-6">
         <Banner
           tone={isToday ? 'green' : 'blue'}
           icon={<CheckCircle2Icon className="h-4 w-4" />}

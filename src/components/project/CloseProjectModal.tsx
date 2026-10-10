@@ -172,6 +172,10 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
                   <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                     Finalizes the project, sets delivery date to today, and marks all milestone modules as completed.
                   </p>
+                  <div className="mt-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-[11px] text-emerald-800 dark:text-emerald-200 flex items-center gap-2">
+                    <span className="text-sm">⚡</span>
+                    <span><strong>Auto-Handover:</strong> All developers allocated to this sprint will be automatically restored to their original projects.</span>
+                  </div>
                 </div>
               </label>
 

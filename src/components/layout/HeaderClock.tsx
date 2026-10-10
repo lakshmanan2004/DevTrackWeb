@@ -13,7 +13,7 @@ function label(d: Date) {
 }
 
 // Live client clock — ticks every second.
-export function HeaderClock() {
+export const HeaderClock = React.memo(function HeaderClock() {
   const [now, setNow] = useState(() => label(new Date()));
 
   useEffect(() => {
@@ -27,4 +27,4 @@ export function HeaderClock() {
       {now}
     </span>
   );
-}
+});

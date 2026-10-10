@@ -174,8 +174,8 @@ export function Login() {
         <div className="pointer-events-none absolute -bottom-28 -right-20 w-[480px] h-[480px] rounded-full bg-gradient-to-tl from-indigo-300/25 via-purple-200/20 to-transparent blur-[90px] dark:from-[#1683FF]/06 dark:via-transparent" />
         
         {/* Subtle Decorative Floating Glass Rings */}
-        <div className="pointer-events-none absolute top-1/4 -right-16 w-72 h-72 rounded-full border border-blue-200/40 dark:border-white/5 bg-white/20 dark:bg-white/[0.02] backdrop-blur-2xl shadow-inner rotate-12" />
-        <div className="pointer-events-none absolute bottom-1/3 -left-12 w-56 h-56 rounded-full border border-indigo-200/35 dark:border-white/5 bg-gradient-to-tr from-white/30 to-transparent dark:from-white/[0.02] backdrop-blur-xl" />
+        <div className="pointer-events-none absolute top-1/4 -right-16 w-72 h-72 rounded-full border border-blue-200/40 dark:border-white/5 bg-white/20 dark:bg-white/[0.02] shadow-inner rotate-12" />
+        <div className="pointer-events-none absolute bottom-1/3 -left-12 w-56 h-56 rounded-full border border-indigo-200/35 dark:border-white/5 bg-gradient-to-tr from-white/30 to-transparent dark:from-white/[0.02]" />
 
         {/* Top Branding Area */}
         <div className="relative z-10">

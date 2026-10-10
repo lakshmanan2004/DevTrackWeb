@@ -30,6 +30,7 @@ export interface Developer {
   project: string;
   topPerformer?: boolean;
   lunchSlot?: number;
+  leave?: { id?: string; type: string; reason: string; slots?: number[] } | null;
 }
 
 export interface WorkLog {

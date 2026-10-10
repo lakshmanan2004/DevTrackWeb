@@ -21,6 +21,8 @@ const UserSchema = new Schema({
   github: { type: String, default: '' },
   active: { type: Boolean, default: true },
   team: { type: Types.ObjectId, ref: 'Team', default: null },
+  previousTeam: { type: Types.ObjectId, ref: 'Team', default: null },
+  previousProject: { type: Types.ObjectId, ref: 'Project', default: null },
   jobTitle: { type: String, default: 'Developer' },
   lunchSlot: { type: Number, enum: [11, 12], default: 12 },
   joinedAt: { type: Date, default: Date.now },
@@ -37,7 +39,7 @@ const TeamSchema = new Schema({
 const ProjectSchema = new Schema({
   name: { type: String, required: true },
   description: { type: String, default: '' },
-  status: { type: String, enum: ['ongoing', 'completed', 'hold'], default: 'ongoing' },
+  status: { type: String, enum: ['ongoing', 'urgent', 'completed', 'hold'], default: 'ongoing' },
   manager: { type: Types.ObjectId, ref: 'User', required: true },
   team: { type: Types.ObjectId, ref: 'Team', required: true },
   repoUrl: { type: String, default: '' },
@@ -198,6 +200,28 @@ SettingSchema.statics.get = async function () {
   return s;
 };
 
+const LeaveSchema = new Schema({
+  developer: { type: Types.ObjectId, ref: 'User', required: true },
+  team: { type: Types.ObjectId, ref: 'Team' },
+  project: { type: Types.ObjectId, ref: 'Project' },
+  date: { type: String, required: true },
+  type: {
+    type: String,
+    enum: ['half_day_morning', 'half_day_afternoon', 'full_day'],
+    required: true
+  },
+  slots: [{ type: Number }],
+  reason: { type: String, required: true },
+  status: {
+    type: String,
+    enum: ['approved', 'pending', 'rejected'],
+    default: 'approved'
+  },
+  appliedAt: { type: Date, default: Date.now },
+  approvedBy: { type: Types.ObjectId, ref: 'User' }
+});
+LeaveSchema.index({ developer: 1, date: 1 }, { unique: true });
+
 const User = model('User', UserSchema);
 const Team = model('Team', TeamSchema);
 const Project = model('Project', ProjectSchema);
@@ -207,5 +231,6 @@ const EodReport = model('EodReport', EodReportSchema);
 const Task = model('Task', TaskSchema);
 const Alert = model('Alert', AlertSchema);
 const Setting = model('Setting', SettingSchema);
+const Leave = model('Leave', LeaveSchema);
 
-module.exports = { User, Team, Project, WorkLog, Commit, EodReport, Task, Alert, Setting };
+module.exports = { User, Team, Project, WorkLog, Commit, EodReport, Task, Alert, Setting, Leave };

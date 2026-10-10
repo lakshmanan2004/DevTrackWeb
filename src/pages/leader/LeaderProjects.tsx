@@ -65,7 +65,7 @@ export function LeaderProjects() {
         subtitle={`Projects supervised by ${user?.name || 'you'} (Team Leader) — inspect milestones, modules & developer submissions`}
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6 sm:p-8">
+      <div className="flex-1 space-y-6 p-6 sm:p-8">
         {/* TOP SUMMARY STATS */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="glass-card rounded-2xl p-4 shadow-glass">

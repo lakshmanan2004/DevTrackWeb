@@ -131,24 +131,29 @@ router.get('/projects', ah(async (req, res) => {
 
 // POST /api/projects — manager creates project + team + modules in one step
 router.post('/projects', requireRole('manager', 'admin'), ah(async (req, res) => {
-  const { name, description, startedAt, targetDate, repoUrl, status, teamName, leaderId, developerIds, modules } = req.body || {};
-  if (!name || !teamName || !leaderId || !developerIds || !developerIds.length) {
-    return res.status(400).json({ error: 'Project name, team name, leader and at least one developer are required' });
+  const { name, description, startedAt, targetDate, repoUrl, status, teamName, leaderId, developerIds = [], modules, reallocateAssigned = false } = req.body || {};
+  if (!name || !teamName || !leaderId) {
+    return res.status(400).json({ error: 'Project name, team name, and leader are required' });
   }
   const leader = await User.findById(leaderId);
   if (!leader || leader.role !== 'leader') return res.status(400).json({ error: 'Select a valid team leader' });
 
-  // Enforce single-project rule for developers
-  const alreadyAssigned = await User.find({
-    _id: { $in: developerIds },
-    team: { $ne: null }
-  }).populate('team', 'name');
+  const safeDevIds = Array.isArray(developerIds) ? [...new Set(developerIds.map(String))] : [];
 
-  if (alreadyAssigned.length > 0) {
-    const names = alreadyAssigned.map((u) => u.name).join(', ');
-    return res.status(400).json({
-      error: `Developer(s) ${names} are already assigned to another project team. A developer can only work on one project.`
+  // If any selected developers are currently assigned to other teams, reallocate them cleanly
+  if (safeDevIds.length > 0) {
+    const alreadyAssigned = await User.find({
+      _id: { $in: safeDevIds },
+      team: { $ne: null }
     });
+
+    for (const dev of alreadyAssigned) {
+      if (dev.team) {
+        await Team.findByIdAndUpdate(dev.team, {
+          $pull: { members: dev._id }
+        });
+      }
+    }
   }
 
   const formattedModules = Array.isArray(modules)
@@ -169,7 +174,7 @@ router.post('/projects', requireRole('manager', 'admin'), ah(async (req, res) =>
     }
   }
 
-  const team = await Team.create({ name: teamName, leader: leaderId, members: [...new Set(developerIds.map(String))] });
+  const team = await Team.create({ name: teamName, leader: leaderId, members: safeDevIds });
   const project = await Project.create({
     name,
     description: description || '',
@@ -184,14 +189,19 @@ router.post('/projects', requireRole('manager', 'admin'), ah(async (req, res) =>
   });
   team.project = project._id;
   await team.save();
-  await User.updateMany({ _id: { $in: developerIds } }, { team: team._id });
+
+  if (safeDevIds.length > 0) {
+    await User.updateMany({ _id: { $in: safeDevIds } }, { team: team._id });
+  }
   await User.findByIdAndUpdate(leaderId, { team: team._id });
 
   const populated = await Project.findById(project._id)
     .populate('manager', 'name')
     .populate({ path: 'team', populate: { path: 'leader', select: 'name' } })
     .populate({ path: 'team', populate: { path: 'members', select: 'name' } });
+
   emitToRoles(['admin', 'manager', 'leader', 'developer'], 'project:new', { projectId: String(project._id) });
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'team:update', {});
   res.status(201).json({ project: await fullProjectDto(populated) });
 }));
 
@@ -239,6 +249,10 @@ router.patch('/projects/:id/modules/:moduleId', ah(async (req, res) => {
 
   await project.save();
 
+  if (allDone) {
+    await restoreSprintMembers(project._id);
+  }
+
   const populated = await Project.findById(project._id)
     .populate('manager', 'name')
     .populate({ path: 'team', populate: { path: 'leader', select: 'name' } })
@@ -248,11 +262,87 @@ router.patch('/projects/:id/modules/:moduleId', ah(async (req, res) => {
   res.json({ project: await fullProjectDto(populated) });
 }));
 
+// Helper to restore sprint developers and team leaders back to their original projects
+async function restoreSprintMembers(projectId) {
+  try {
+    const project = await Project.findById(projectId);
+    if (!project || !project.team) return;
+
+    const currentTeam = await Team.findById(project.team);
+    if (!currentTeam) return;
+
+    const memberIds = currentTeam.members || [];
+    if (memberIds.length > 0) {
+      const members = await User.find({ _id: { $in: memberIds } });
+      for (const member of members) {
+        if (member.previousTeam) {
+          const oldTeam = await Team.findById(member.previousTeam).populate('project');
+          if (oldTeam) {
+            // Remove from current team
+            currentTeam.members = currentTeam.members.filter((m) => String(m) !== String(member._id));
+
+            // Add back to old team
+            if (!oldTeam.members.some((m) => String(m) === String(member._id))) {
+              oldTeam.members.push(member._id);
+            }
+            await oldTeam.save();
+
+            // Update member
+            member.team = oldTeam._id;
+            member.previousTeam = null;
+            member.previousProject = null;
+            await member.save();
+
+            // Alert developer
+            await Alert.create({
+              audience: 'developer',
+              user: member._id,
+              kind: 'reminder',
+              title: 'Returned to Original Project',
+              body: `Sprint Completed: "${project.name}" has been completed and closed. You have been automatically returned to your original project (${oldTeam.project?.name || oldTeam.name}).`
+            });
+            emitToUser(String(member._id), 'alert:new', { kind: 'reminder' });
+          }
+        }
+      }
+      await currentTeam.save();
+    }
+
+    // Check if Team Leader had a previousTeam to return to
+    if (currentTeam.leader) {
+      const leader = await User.findById(currentTeam.leader);
+      if (leader && leader.previousTeam) {
+        const oldLeaderTeam = await Team.findById(leader.previousTeam).populate('project');
+        if (oldLeaderTeam) {
+          leader.team = oldLeaderTeam._id;
+          leader.previousTeam = null;
+          leader.previousProject = null;
+          await leader.save();
+
+          await Alert.create({
+            audience: 'leader',
+            user: leader._id,
+            kind: 'reminder',
+            title: 'Returned to Original Project',
+            body: `Sprint Completed: "${project.name}" has been completed and closed. You have been returned to your original project (${oldLeaderTeam.project?.name || oldLeaderTeam.name}).`
+          });
+          emitToUser(String(leader._id), 'alert:new', { kind: 'reminder' });
+        }
+      }
+    }
+
+    emitToRoles(['admin', 'manager', 'leader', 'developer'], 'team:update', {});
+    emitToRoles(['admin', 'manager', 'leader', 'developer'], 'user:update', {});
+  } catch (err) {
+    console.error('Error in restoreSprintMembers:', err);
+  }
+}
+
 // PATCH /api/projects/:id/status — Leader/Manager/Admin updates project overall status
 router.patch('/projects/:id/status', ah(async (req, res) => {
   const { status } = req.body || {};
-  if (!['ongoing', 'completed', 'hold'].includes(status)) {
-    return res.status(400).json({ error: 'Invalid project status. Must be ongoing, completed, or hold' });
+  if (!['ongoing', 'urgent', 'completed', 'hold'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid project status. Must be ongoing, urgent, completed, or hold' });
   }
 
   const project = await Project.findById(req.params.id);
@@ -274,6 +364,10 @@ router.patch('/projects/:id/status', ah(async (req, res) => {
 
   await project.save();
 
+  if (status === 'completed') {
+    await restoreSprintMembers(project._id);
+  }
+
   const populated = await Project.findById(project._id)
     .populate('manager', 'name')
     .populate({ path: 'team', populate: { path: 'leader', select: 'name' } })
@@ -293,7 +387,7 @@ router.patch('/projects/:id', requireRole('manager', 'admin'), ah(async (req, re
   if (description !== undefined) project.description = description;
   if (targetDate !== undefined) project.targetDate = targetDate ? new Date(targetDate) : null;
   if (status) {
-    if (!['ongoing', 'completed', 'hold'].includes(status)) {
+    if (!['ongoing', 'completed', 'hold', 'urgent'].includes(status)) {
       return res.status(400).json({ error: 'Invalid project status' });
     }
     project.status = status;
@@ -312,6 +406,10 @@ router.patch('/projects/:id', requireRole('manager', 'admin'), ah(async (req, re
   }
 
   await project.save();
+
+  if (status === 'completed') {
+    await restoreSprintMembers(project._id);
+  }
 
   const populated = await Project.findById(project._id)
     .populate('manager', 'name')
@@ -418,11 +516,16 @@ router.get('/projects/:id/overview', ah(async (req, res) => {
 // GET /api/directory — leaders & developers available for team building
 router.get('/directory', requireRole('manager', 'admin'), ah(async (_req, res) => {
   const users = await User.find({ role: { $in: ['leader', 'developer'] }, active: true })
-    .populate({ path: 'team', select: 'name project', populate: { path: 'project', select: 'name status' } });
+    .populate({ path: 'team', select: 'name project', populate: { path: 'project', select: 'name status' } })
+    .populate({ path: 'previousTeam', select: 'name project', populate: { path: 'project', select: 'name' } });
+
   res.json({
     users: users.map((u) => {
       const teamObj = u.team && typeof u.team === 'object' ? u.team : null;
       const projObj = teamObj && teamObj.project && typeof teamObj.project === 'object' ? teamObj.project : null;
+      const prevTeamObj = u.previousTeam && typeof u.previousTeam === 'object' ? u.previousTeam : null;
+      const prevProjObj = prevTeamObj && prevTeamObj.project && typeof prevTeamObj.project === 'object' ? prevTeamObj.project : null;
+
       return {
         id: String(u._id),
         name: u.name,
@@ -430,7 +533,10 @@ router.get('/directory', requireRole('manager', 'admin'), ah(async (_req, res) =
         initials: u.initials,
         teamName: teamObj ? teamObj.name : '',
         projectName: projObj ? projObj.name : (teamObj ? teamObj.name : ''),
-        hasProject: !!teamObj && (!projObj || projObj.status !== 'completed')
+        hasProject: !!teamObj && (!projObj || projObj.status !== 'completed'),
+        previousTeamId: prevTeamObj ? String(prevTeamObj._id) : '',
+        previousTeamName: prevTeamObj ? prevTeamObj.name : '',
+        previousProjectName: prevProjObj ? prevProjObj.name : (prevTeamObj ? prevTeamObj.name : '')
       };
     })
   });
@@ -445,14 +551,36 @@ router.get('/teams', ah(async (req, res) => {
     .populate('leader', 'name initials email')
     .populate('members', 'name initials email role')
     .populate('project', 'name');
+
+  // Find all previous developers for these teams
+  const allDevs = await User.find({ role: 'developer', active: true })
+    .populate('team', 'name')
+    .populate('previousTeam', 'name');
+
   res.json({
-    teams: teams.map((t) => ({
-      id: String(t._id),
-      name: t.name,
-      project: t.project ? t.project.name : '',
-      leader: t.leader ? { id: String(t.leader._id), name: t.leader.name, initials: t.leader.initials } : null,
-      members: (t.members || []).map((m) => ({ id: String(m._id), name: m.name, initials: m.initials, email: m.email }))
-    }))
+    teams: teams.map((t) => {
+      const teamIdStr = String(t._id);
+      const memberIdSet = new Set((t.members || []).map((m) => String(m._id)));
+
+      // Developers whose previousTeam is this team, and are currently not on this team
+      const prevDevs = allDevs
+        .filter((d) => d.previousTeam && String(d.previousTeam._id || d.previousTeam) === teamIdStr && !memberIdSet.has(String(d._id)))
+        .map((d) => ({
+          id: String(d._id),
+          name: d.name,
+          initials: d.initials,
+          currentTeamName: d.team ? d.team.name : 'Unassigned'
+        }));
+
+      return {
+        id: String(t._id),
+        name: t.name,
+        project: t.project ? t.project.name : '',
+        leader: t.leader ? { id: String(t.leader._id), name: t.leader.name, initials: t.leader.initials } : null,
+        members: (t.members || []).map((m) => ({ id: String(m._id), name: m.name, initials: m.initials, email: m.email })),
+        previousMembers: prevDevs
+      };
+    })
   });
 }));
 
@@ -497,6 +625,90 @@ router.patch('/teams/:id', requireRole('manager', 'admin'), ah(async (req, res) 
       leader: populated.leader ? { id: String(populated.leader._id), name: populated.leader.name, initials: populated.leader.initials } : null,
       members: (populated.members || []).map((m) => ({ id: String(m._id), name: m.name, initials: m.initials, email: m.email }))
     }
+  });
+}));
+
+// POST /api/teams/transfer — seamlessly transfer developer to another project team with task handover
+router.post('/teams/transfer', requireRole('manager', 'admin'), ah(async (req, res) => {
+  const { developerId, fromTeamId, toTeamId, handoverToDevId, note } = req.body || {};
+  if (!developerId || !toTeamId) {
+    return res.status(400).json({ error: 'Developer ID and target Team ID are required' });
+  }
+
+  const dev = await User.findById(developerId);
+  if (!dev || dev.role !== 'developer') {
+    return res.status(404).json({ error: 'Developer not found' });
+  }
+
+  const toTeam = await Team.findById(toTeamId).populate('project');
+  if (!toTeam) return res.status(404).json({ error: 'Target team not found' });
+
+  let fromTeam = fromTeamId ? await Team.findById(fromTeamId).populate('project') : null;
+  if (!fromTeam && dev.team) {
+    fromTeam = await Team.findById(dev.team).populate('project');
+  }
+
+  // Remove from old team
+  if (fromTeam) {
+    fromTeam.members = fromTeam.members.filter((m) => String(m) !== String(developerId));
+    await fromTeam.save();
+    dev.previousTeam = fromTeam._id;
+    dev.previousProject = fromTeam.project?._id || null;
+  }
+
+  // Add to new team
+  if (!toTeam.members.some((m) => String(m) === String(developerId))) {
+    toTeam.members.push(developerId);
+  }
+  await toTeam.save();
+
+  // Update user team
+  dev.team = toTeam._id;
+  await dev.save();
+
+  // If handover dev is selected, reassign pending tasks from previous project
+  let handedOverCount = 0;
+  if (handoverToDevId) {
+    const handoverDev = await User.findById(handoverToDevId);
+    if (handoverDev) {
+      const pendingTasks = await Task.find({
+        assignee: developerId,
+        status: { $in: ['pending', 'in_progress'] }
+      });
+      for (const t of pendingTasks) {
+        t.assignee = handoverDev._id;
+        t.note = (t.note ? t.note + ' · ' : '') + `[Handed over from ${dev.name}]`;
+        await t.save();
+        handedOverCount++;
+      }
+      if (handedOverCount > 0) {
+        emitToUser(String(handoverDev._id), 'task:assigned', {
+          title: `Handover Tasks from ${dev.name}`,
+          count: handedOverCount
+        });
+      }
+    }
+  }
+
+  // Notify the developer about project allocation
+  await Alert.create({
+    audience: 'developer',
+    user: dev._id,
+    kind: 'reminder',
+    title: 'Project Assignment Update',
+    body: `You have been allocated to ${toTeam.project?.name || toTeam.name}. ${note || 'Your future hourly check-ins will be logged under this project.'}`
+  });
+  emitToUser(String(dev._id), 'alert:new', { kind: 'reminder' });
+
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'team:update', {
+    fromTeamId: fromTeam ? String(fromTeam._id) : undefined,
+    toTeamId: String(toTeam._id)
+  });
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'task:update', {});
+
+  res.json({
+    ok: true,
+    message: `Successfully transferred ${dev.name} to ${toTeam.project?.name || toTeam.name}${handedOverCount > 0 ? ` and handed over ${handedOverCount} pending task(s).` : '.'}`
   });
 }));
 
@@ -583,19 +795,48 @@ router.post('/users', requireRole('admin'), ah(async (req, res) => {
   });
 }));
 
-// PATCH /api/users/:id — activate/deactivate/role change
+// PATCH /api/users/:id — activate/deactivate/role change / promotions
 router.patch('/users/:id', requireRole('admin'), ah(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const oldRole = user.role;
+  const newRole = req.body.role;
+
   if (typeof req.body.active === 'boolean') user.active = req.body.active;
-  if (req.body.role && ['developer', 'leader', 'manager', 'admin'].includes(req.body.role)) user.role = req.body.role;
   if (req.body.name) {
     user.name = req.body.name;
     user.initials = initialsOf(req.body.name);
   }
+
+  if (newRole && ['developer', 'leader', 'manager', 'admin'].includes(newRole) && newRole !== oldRole) {
+    user.role = newRole;
+
+    // If a Developer was promoted to Leader/Manager/Admin, remove them from team.members
+    if (oldRole === 'developer') {
+      if (user.team) {
+        user.previousTeam = user.team;
+        await Team.findByIdAndUpdate(user.team, {
+          $pull: { members: user._id }
+        });
+      }
+    }
+
+    // Notify the user about their promotion
+    await Alert.create({
+      audience: newRole === 'leader' ? 'leader' : newRole === 'manager' ? 'manager' : 'admin',
+      user: user._id,
+      kind: 'reminder',
+      title: 'Role Promotion Update',
+      body: `Congratulations! Your role has been updated from ${oldRole} to ${newRole}. Your portal and permissions have been upgraded.`
+    });
+    emitToUser(String(user._id), 'alert:new', { kind: 'reminder' });
+  }
+
   await user.save();
-  emitToRoles(['admin'], 'user:update', { id: String(user._id) });
-  res.json({ ok: true });
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'user:update', { id: String(user._id) });
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'team:update', {});
+  res.json({ ok: true, user: { id: String(user._id), role: user.role, name: user.name } });
 }));
 
 // DELETE /api/users/:id

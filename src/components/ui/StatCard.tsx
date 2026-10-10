@@ -28,7 +28,7 @@ interface StatCardProps {
   icon?: React.ReactNode;
 }
 
-export function StatCard({ label, value, hint, tone = 'grey', icon }: StatCardProps) {
+export const StatCard = React.memo(function StatCard({ label, value, hint, tone = 'grey', icon }: StatCardProps) {
   return (
     <div className="glass-card-interactive flex h-full flex-col p-5">
       <div className="flex items-start justify-between gap-3">
@@ -43,4 +43,4 @@ export function StatCard({ label, value, hint, tone = 'grey', icon }: StatCardPr
       <p className="mt-auto pt-2 text-xs font-medium text-slate-400 dark:text-[#71717A]">{hint ?? '\u00a0'}</p>
     </div>
   );
-}
+});

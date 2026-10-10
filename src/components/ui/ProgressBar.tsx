@@ -16,7 +16,7 @@ const tones = {
   purple: 'bg-purple-500'
 };
 
-export function ProgressBar({ value, progress, tone = 'blue', height = 'sm', label }: ProgressBarProps) {
+export const ProgressBar = React.memo(function ProgressBar({ value, progress, tone = 'blue', height = 'sm', label }: ProgressBarProps) {
   const numericVal = typeof value === 'number' ? value : typeof progress === 'number' ? progress : 0;
   const pct = Math.min(100, Math.max(0, numericVal));
 
@@ -35,4 +35,4 @@ export function ProgressBar({ value, progress, tone = 'blue', height = 'sm', lab
       />
     </div>
   );
-}
+});

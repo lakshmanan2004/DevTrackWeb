@@ -168,7 +168,7 @@ export function LogApprovals() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
+      <div className="flex-1 space-y-5 p-6">
         <div className="relative z-30 flex flex-wrap items-center justify-between gap-3 overflow-visible">
           <div className="shrink-0">
             <FilterPills

@@ -10,7 +10,7 @@ interface DeveloperCardProps {
   onSelect: (id: string) => void;
 }
 
-export function DeveloperCard({ developer, selected, onSelect }: DeveloperCardProps) {
+export const DeveloperCard = React.memo(function DeveloperCard({ developer, selected, onSelect }: DeveloperCardProps) {
   const pct = Math.round(developer.activeMinutes / 480 * 100);
 
   return (
@@ -31,6 +31,11 @@ export function DeveloperCard({ developer, selected, onSelect }: DeveloperCardPr
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <p className="truncate text-sm font-bold tracking-tight text-navy">{developer.name}</p>
+              {developer.leave && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                  {developer.leave.type === 'full_day' ? '🌴 Leave' : '⛅ Half-Day'}
+                </span>
+              )}
               {developer.topPerformer && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-700">
                   <StarIcon className="h-3 w-3 fill-amber-500 text-amber-500" aria-label="Top performer" />
@@ -81,4 +86,4 @@ export function DeveloperCard({ developer, selected, onSelect }: DeveloperCardPr
       </button>
     </li>
   );
-}
+});

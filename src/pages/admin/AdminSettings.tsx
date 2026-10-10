@@ -178,7 +178,7 @@ export function AdminSettings() {
     <>
       <PageHeader title="System Settings" subtitle="Applies to every team and project in DevTrack — saved to the server" />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-6">
+      <div className="flex-1 p-6">
         <div className="max-w-5xl space-y-5">
           <div className="grid gap-5 lg:grid-cols-2">
             <section className="glass-card rounded-3xl p-6 shadow-glass">

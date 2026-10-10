@@ -194,8 +194,8 @@ export function MyProjects() {
                       <Link to={`/manager/overview?projectId=${project.id}`} className="hover:underline">
                         <h2 className="text-base font-bold text-navy dark:text-white hover:text-brand transition-colors">{project.name}</h2>
                       </Link>
-                      <Badge tone={completed ? 'green' : 'blue'} dot>
-                        {completed ? 'Completed' : project.status === 'hold' ? 'On Hold' : 'Ongoing'}
+                      <Badge tone={completed ? 'green' : project.status === 'urgent' ? 'red' : project.status === 'hold' ? 'amber' : 'blue'} dot>
+                        {completed ? 'Completed' : project.status === 'urgent' ? '🚨 Urgent Sprint' : project.status === 'hold' ? 'On Hold' : 'Ongoing'}
                       </Badge>
                     </div>
                     <dl className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400">

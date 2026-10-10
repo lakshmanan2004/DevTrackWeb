@@ -164,9 +164,25 @@ export function UserProfile() {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Loading user profile…</p>
-      </div>
+      <>
+        <PageHeader
+          title="My Profile"
+          subtitle="Account details, security settings, and workspace preferences"
+          actions={
+            <button
+              type="button"
+              onClick={openWallpaperModal}
+              className="btn-glass-primary px-3.5 py-1.5 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer shadow-xs"
+            >
+              <PaletteIcon className="h-4 w-4" />
+              <span>Theme</span>
+            </button>
+          }
+        />
+        <div className="flex-1 flex items-center justify-center p-12">
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Loading user profile…</p>
+        </div>
+      </>
     );
   }
 
@@ -187,7 +203,7 @@ export function UserProfile() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
         <div className="grid gap-6 xl:grid-cols-12 items-start">
           {/* ========================================================================= */}
           {/* LEFT COLUMN: USER OVERVIEW CARD & SECURITY (5 COLUMNS)                    */}

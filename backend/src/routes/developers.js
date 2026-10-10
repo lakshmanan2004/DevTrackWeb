@@ -1,5 +1,5 @@
 const express = require('express');
-const { User, WorkLog, Commit, EodReport, Team, Project, Alert, Task } = require('../models');
+const { User, WorkLog, Commit, EodReport, Team, Project, Alert, Task, Leave } = require('../models');
 const { authRequired, attachUser, requireRole, ah } = require('../middleware/auth');
 const { scopeFor } = require('../util/scope');
 const { dayStats, developerNote } = require('../util/dto');
@@ -20,6 +20,13 @@ router.get('/', ah(async (req, res) => {
 
   const { perDev, currentSlot } = await dayStats(devs.map((d) => d._id));
 
+  // Today leaves
+  const todayLeaves = await Leave.find({
+    developer: { $in: devs.map((d) => d._id) },
+    date: today,
+    status: 'approved'
+  });
+
   // yesterday EOD presence for the note
   const yesterday = dayStr(addDays(new Date(), -1));
   const yEods = await EodReport.find({ developer: { $in: devs.map((d) => d._id) }, date: yesterday }, 'developer');
@@ -33,6 +40,21 @@ router.get('/', ah(async (req, res) => {
     const s = perDev[String(dev._id)];
     const done = s.logs.filter((l) => l.status === 'done').length;
     const isTop = false; // computed below
+    const devLeave = todayLeaves.find((l) => String(l.developer) === String(dev._id));
+
+    let missedCount = s.missed;
+    if (devLeave) {
+      if (devLeave.type === 'full_day') {
+        missedCount = 0;
+      } else if (devLeave.slots && devLeave.slots.length) {
+        const excusedSet = new Set(devLeave.slots);
+        const devLunch = dev.lunchSlot || 12;
+        const checkSlots = requiredSlots(settings, devLunch).filter((slot) => slot < currentSlot && !excusedSet.has(slot));
+        const loggedSlots = new Set(s.logs.map((l) => l.hourSlot));
+        missedCount = checkSlots.filter((slot) => !loggedSlots.has(slot)).length;
+      }
+    }
+
     return {
       raw: dev,
       stat: {
@@ -43,7 +65,7 @@ router.get('/', ah(async (req, res) => {
         activeMinutes: s.activeMinutes,
         logs: s.logs.length,
         done,
-        missed: s.missed,
+        missed: missedCount,
         commits: s.commits,
         lastSeen: dev.lastSeenAt && dayStr(dev.lastSeenAt) === today ? fmtTime(dev.lastSeenAt) : 'Not seen today',
         online: !!(dev.lastSeenAt && Date.now() - dev.lastSeenAt.getTime() < 2 * 60 * 1000),
@@ -51,6 +73,14 @@ router.get('/', ah(async (req, res) => {
         project: '',
         topPerformer: isTop,
         note: '',
+        leave: devLeave
+          ? {
+              id: String(devLeave._id),
+              type: devLeave.type,
+              reason: devLeave.reason,
+              slots: devLeave.slots
+            }
+          : null,
         eodMissingYesterday: !yEods.some((e) => String(e.developer) === String(dev._id))
       }
     };
@@ -77,19 +107,30 @@ router.get('/', ah(async (req, res) => {
     delete stat.eodMissingYesterday;
     stat.project = projectByTeam[dev.team ? String(dev.team._id || dev.team) : ''] || '';
     stat.topPerformer = top && top.id === stat.id && stat.done > 0;
-    stat.note = developerNote({
-      missed: stat.missed,
-      logsCount: stat.logs,
-      eodMissingYesterday,
-      topPerformer: stat.topPerformer,
-      changesRequested: String(dev._id) && changesRequested > 0 && stat.logs > 0 ? 0 : 0,
-      isHoliday: holidayInfo.isHoliday,
-      holidayName: holidayInfo.name
-    });
-    if (!isWork && stat.logs === 0) {
-      stat.note = holidayInfo.name || 'Organization Holiday';
-    } else if (stat.logs === 0 && stat.missed > 0) {
-      stat.note = 'No activity';
+
+    if (stat.leave) {
+      if (stat.leave.type === 'full_day') {
+        stat.note = `🌴 Full-Day Leave: ${stat.leave.reason}`;
+      } else if (stat.leave.type === 'half_day_morning') {
+        stat.note = `⛅ Half-Day (Morning): ${stat.leave.reason}`;
+      } else {
+        stat.note = `⛅ Half-Day (Afternoon): ${stat.leave.reason}`;
+      }
+    } else {
+      stat.note = developerNote({
+        missed: stat.missed,
+        logsCount: stat.logs,
+        eodMissingYesterday,
+        topPerformer: stat.topPerformer,
+        changesRequested: String(dev._id) && changesRequested > 0 && stat.logs > 0 ? 0 : 0,
+        isHoliday: holidayInfo.isHoliday,
+        holidayName: holidayInfo.name
+      });
+      if (!isWork && stat.logs === 0) {
+        stat.note = holidayInfo.name || 'Organization Holiday';
+      } else if (stat.logs === 0 && stat.missed > 0) {
+        stat.note = 'No activity';
+      }
     }
     delete stat.eodMissingYesterday;
     return stat;

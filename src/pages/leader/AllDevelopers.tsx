@@ -126,7 +126,7 @@ export function AllDevelopers() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
+      <div className="flex-1 space-y-5 p-6">
         {/* FILTER BAR WITH PROJECT & DEVELOPER DROPDOWNS */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
           <FilterPills

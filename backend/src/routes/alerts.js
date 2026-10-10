@@ -4,73 +4,56 @@ const { authRequired, attachUser, ah } = require('../middleware/auth');
 const { alertDto } = require('../util/dto');
 const { emitToUser, emitToRoles } = require('../sockets');
 
+async function alertQueryFor(user) {
+  if (!user) return { _id: null };
+  if (user.role === 'developer') {
+    return { audience: 'developer', user: user._id };
+  } else if (user.role === 'leader') {
+    const { scopeFor } = require('../util/scope');
+    const scope = await scopeFor(user);
+    return {
+      audience: 'leader',
+      $or: [
+        { user: user._id },
+        { developerId: { $in: scope.developerIds } },
+        { team: { $in: scope.teamIds } }
+      ]
+    };
+  } else if (user.role === 'manager') {
+    const { scopeFor } = require('../util/scope');
+    const scope = await scopeFor(user);
+    return {
+      audience: 'manager',
+      $or: [
+        { user: user._id },
+        { managerScope: user._id },
+        { developerId: { $in: scope.developerIds } }
+      ]
+    };
+  } else {
+    // Admin / global
+    return { audience: { $in: ['leader', 'manager'] } };
+  }
+}
+
 const router = express.Router();
 router.use(authRequired, attachUser);
 
 // GET /api/alerts — role scoped
 router.get('/', ah(async (req, res) => {
-  let query;
-  if (req.user.role === 'developer') {
-    query = { audience: 'developer', user: req.user._id };
-  } else if (req.user.role === 'leader') {
-    const { scopeFor } = require('../util/scope');
-    const scope = await scopeFor(req.user);
-    query = {
-      audience: 'leader',
-      $or: [
-        { user: req.user._id },
-        { developerId: { $in: scope.developerIds } },
-        { team: { $in: scope.teamIds } }
-      ]
-    };
-  } else if (req.user.role === 'manager') {
-    const { scopeFor } = require('../util/scope');
-    const scope = await scopeFor(req.user);
-    query = {
-      audience: 'manager',
-      $or: [
-        { user: req.user._id },
-        { managerScope: req.user._id },
-        { developerId: { $in: scope.developerIds } }
-      ]
-    };
-  } else {
-    query = { audience: { $in: ['leader', 'manager'] } };
-  }
-  const alerts = await Alert.find(query).sort({ createdAt: -1 }).limit(50);
-  res.json({ alerts: alerts.map(alertDto) });
+  const query = await alertQueryFor(req.user);
+  const alerts = await Alert.find(query).sort({ createdAt: -1 });
+  const unreadCount = alerts.filter((a) => !a.read).length;
+  res.json({
+    alerts: alerts.map(alertDto),
+    unreadCount,
+    totalCount: alerts.length
+  });
 }));
 
 // POST /api/alerts/read-all
 router.post('/read-all', ah(async (req, res) => {
-  let query;
-  if (req.user.role === 'developer') {
-    query = { audience: 'developer', user: req.user._id };
-  } else if (req.user.role === 'leader') {
-    const { scopeFor } = require('../util/scope');
-    const scope = await scopeFor(req.user);
-    query = {
-      audience: 'leader',
-      $or: [
-        { user: req.user._id },
-        { developerId: { $in: scope.developerIds } },
-        { team: { $in: scope.teamIds } }
-      ]
-    };
-  } else if (req.user.role === 'manager') {
-    const { scopeFor } = require('../util/scope');
-    const scope = await scopeFor(req.user);
-    query = {
-      audience: 'manager',
-      $or: [
-        { user: req.user._id },
-        { managerScope: req.user._id },
-        { developerId: { $in: scope.developerIds } }
-      ]
-    };
-  } else {
-    query = { audience: { $in: ['leader', 'manager'] } };
-  }
+  const query = await alertQueryFor(req.user);
   await Alert.updateMany({ ...query, read: false }, { read: true });
   emitToRoles(['leader', 'manager', 'developer', 'admin'], 'alert:update', {});
   res.json({ ok: true });
@@ -78,34 +61,7 @@ router.post('/read-all', ah(async (req, res) => {
 
 // DELETE /api/alerts/clear-all — clear all alerts for current user's role scope
 router.delete('/clear-all', ah(async (req, res) => {
-  let query;
-  if (req.user.role === 'developer') {
-    query = { audience: 'developer', user: req.user._id };
-  } else if (req.user.role === 'leader') {
-    const { scopeFor } = require('../util/scope');
-    const scope = await scopeFor(req.user);
-    query = {
-      audience: 'leader',
-      $or: [
-        { user: req.user._id },
-        { developerId: { $in: scope.developerIds } },
-        { team: { $in: scope.teamIds } }
-      ]
-    };
-  } else if (req.user.role === 'manager') {
-    const { scopeFor } = require('../util/scope');
-    const scope = await scopeFor(req.user);
-    query = {
-      audience: 'manager',
-      $or: [
-        { user: req.user._id },
-        { managerScope: req.user._id },
-        { developerId: { $in: scope.developerIds } }
-      ]
-    };
-  } else {
-    query = { audience: { $in: ['leader', 'manager'] } };
-  }
+  const query = await alertQueryFor(req.user);
   await Alert.deleteMany(query);
   emitToRoles(['leader', 'manager', 'developer', 'admin'], 'alert:update', {});
   res.json({ ok: true });
@@ -172,8 +128,10 @@ router.post('/:id/action', ah(async (req, res) => {
     await alert.save();
   }
 
-  emitToRoles(['leader', 'manager', 'admin'], 'alert:update', { id: String(alert._id) });
+  emitToRoles(['leader', 'manager', 'developer', 'admin'], 'alert:update', { id: String(alert._id) });
   res.json({ ok: true });
 }));
 
 module.exports = router;
+module.exports.alertQueryFor = alertQueryFor;
+

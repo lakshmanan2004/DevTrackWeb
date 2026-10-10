@@ -73,7 +73,7 @@ export function WeeklyReports() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-5 p-6">
+      <div className="flex-1 space-y-5 p-6">
         {!developer ? (
           <div className="glass-card rounded-3xl p-12 sm:p-16 text-center shadow-glass flex flex-col items-center justify-center space-y-4 max-w-2xl mx-auto my-8">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20">
