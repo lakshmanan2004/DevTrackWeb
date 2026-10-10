@@ -204,7 +204,7 @@ export function UserProfile() {
       />
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
-        <div className="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] items-start">
+        <div className="grid grid-cols-1 xl:grid-cols-[340px_minmax(0,1fr)] 2xl:grid-cols-[380px_minmax(0,1fr)] gap-6 items-start w-full">
           {/* ========================================================================= */}
           {/* LEFT COLUMN: USER OVERVIEW CARD & SECURITY                                */}
           {/* ========================================================================= */}
