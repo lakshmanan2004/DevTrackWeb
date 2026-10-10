@@ -83,18 +83,15 @@ html.dark body {
 .glass-surface {
   position: relative;
   transform: translateZ(0);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.74) 0%, rgba(248, 251, 255, 0.58) 50%, rgba(240, 246, 255, 0.66) 100%);
-  backdrop-filter: blur(28px) saturate(180%) brightness(1.02);
-  -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.02);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  border-bottom-color: rgba(255, 255, 255, 0.38);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.84) 0%, rgba(248, 250, 254, 0.78) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.80);
+  border-bottom-color: rgba(255, 255, 255, 0.45);
   box-shadow: 
-    0 10px 30px -4px rgba(15, 23, 42, 0.06),
-    0 2px 8px -2px rgba(15, 23, 42, 0.02),
-    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.95),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -1px 1.5px 0 rgba(0, 0, 0, 0.03),
-    inset 0 0 20px 0 rgba(255, 255, 255, 0.20);
+    0 8px 24px -4px rgba(15, 23, 42, 0.06),
+    0 2px 6px -1px rgba(15, 23, 42, 0.02),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 /* Level 3 — Elevated Frosted Glass (Primary Cards, Dashboard Widgets, Sections) */
@@ -103,19 +100,17 @@ html.dark body {
 .glass-elevated {
   position: relative;
   transform: translateZ(0);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.62) 40%, rgba(242, 248, 255, 0.72) 100%);
-  backdrop-filter: blur(30px) saturate(185%) brightness(1.02);
-  -webkit-backdrop-filter: blur(30px) saturate(185%) brightness(1.02);
-  border: 1px solid rgba(255, 255, 255, 0.80);
-  border-bottom-color: rgba(255, 255, 255, 0.42);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.88) 0%, rgba(250, 252, 255, 0.82) 45%, rgba(244, 248, 254, 0.86) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-bottom-color: rgba(255, 255, 255, 0.50);
   border-radius: 24px;
   box-shadow: 
-    0 16px 44px -8px rgba(15, 23, 42, 0.07),
-    0 4px 14px -2px rgba(15, 23, 42, 0.03),
-    inset 0 2px 1.5px 0 rgba(255, 255, 255, 1),
-    inset 1.5px 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.03),
-    inset 0 0 26px 0 rgba(255, 255, 255, 0.25);
+    0 12px 36px -6px rgba(15, 23, 42, 0.07),
+    0 3px 10px -2px rgba(15, 23, 42, 0.03),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.60);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
@@ -128,8 +123,8 @@ html.dark body {
   top: 0;
   left: 6%;
   right: 6%;
-  height: 1.5px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.85) 25%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0.85) 75%, transparent 100%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.80) 25%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0.80) 75%, transparent 100%);
   pointer-events: none;
   border-radius: 9999px;
   z-index: 1;
@@ -139,32 +134,30 @@ html.dark body {
 .glass-level-4,
 .glass-active-capsule {
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.84) 0%, rgba(240, 246, 255, 0.74) 100%);
-  backdrop-filter: blur(30px) saturate(190%) brightness(1.04);
-  -webkit-backdrop-filter: blur(30px) saturate(190%) brightness(1.04);
-  border: 1px solid rgba(255, 255, 255, 0.90);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(240, 246, 255, 0.84) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: 
     0 8px 24px -4px rgba(0, 113, 227, 0.20),
-    0 3px 8px -2px rgba(15, 23, 42, 0.06),
-    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 1),
-    inset 0 -1px 2px 0 rgba(0, 113, 227, 0.10),
-    inset 0 0 18px 0 rgba(255, 255, 255, 0.60);
+    0 2px 6px -1px rgba(15, 23, 42, 0.06),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 2px 0 rgba(0, 113, 227, 0.10);
 }
 
 /* Level 5 — Floating Frosted Glass (Modals, Dropdowns, Sheets, Popovers) */
 .glass-level-5,
 .glass-modal,
 .glass-floating {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.86) 0%, rgba(246, 250, 255, 0.76) 100%);
-  backdrop-filter: blur(36px) saturate(190%) brightness(1.03);
-  -webkit-backdrop-filter: blur(36px) saturate(190%) brightness(1.03);
-  border: 1px solid rgba(255, 255, 255, 0.88);
-  border-bottom-color: rgba(255, 255, 255, 0.50);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 251, 255, 0.86) 100%);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.90);
+  border-bottom-color: rgba(255, 255, 255, 0.55);
   box-shadow: 
     0 32px 80px -15px rgba(15, 23, 42, 0.16),
-    0 12px 30px -5px rgba(15, 23, 42, 0.05),
-    inset 0 2px 1.5px 0 rgba(255, 255, 255, 1),
-    inset 0 0 32px 0 rgba(255, 255, 255, 0.30);
+    0 10px 24px -4px rgba(15, 23, 42, 0.05),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1);
   border-radius: 28px;
 }
 
@@ -172,16 +165,15 @@ html.dark body {
 .glass-dropdown {
   position: fixed !important;
   z-index: 999999 !important;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.90) 0%, rgba(246, 250, 255, 0.82) 100%);
-  backdrop-filter: blur(36px) saturate(180%) brightness(1.02);
-  -webkit-backdrop-filter: blur(36px) saturate(180%) brightness(1.02);
-  border: 1px solid rgba(255, 255, 255, 0.90);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 251, 255, 0.88) 100%);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.92);
   border-bottom-color: rgba(255, 255, 255, 0.60);
   box-shadow: 
     0 20px 50px -8px rgba(15, 23, 42, 0.12),
     0 6px 18px -2px rgba(15, 23, 42, 0.03),
-    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 1),
-    inset 0 0 24px 0 rgba(255, 255, 255, 0.30);
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1);
   border-radius: 22px;
 }
 
@@ -201,53 +193,49 @@ html.dark body {
 /* 3. Interactive Frosted Glass Card (Micro-lift & Refraction on Hover) */
 .glass-card-interactive {
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.76) 0%, rgba(246, 250, 255, 0.62) 100%);
-  backdrop-filter: blur(28px) saturate(180%) brightness(1.02);
-  -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.02);
-  border: 1px solid rgba(255, 255, 255, 0.78);
-  border-bottom-color: rgba(255, 255, 255, 0.40);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.86) 0%, rgba(248, 251, 255, 0.80) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-bottom-color: rgba(255, 255, 255, 0.45);
   border-radius: 22px;
   box-shadow: 
-    0 10px 32px -4px rgba(15, 23, 42, 0.05),
-    0 2px 10px -2px rgba(15, 23, 42, 0.02),
-    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.95),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.03),
-    inset 0 0 20px 0 rgba(255, 255, 255, 0.22);
+    0 10px 30px -4px rgba(15, 23, 42, 0.05),
+    0 2px 8px -2px rgba(15, 23, 42, 0.02),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .glass-card-interactive:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.84) 0%, rgba(246, 250, 255, 0.70) 100%);
-  border-color: rgba(255, 255, 255, 0.90);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(250, 253, 255, 0.86) 100%);
+  border-color: rgba(255, 255, 255, 0.95);
   box-shadow: 
     0 18px 44px -6px rgba(0, 113, 227, 0.12),
-    0 4px 16px -2px rgba(15, 23, 42, 0.03),
-    inset 0 2px 1.5px 0 rgba(255, 255, 255, 1),
-    inset 0 0 26px 0 rgba(255, 255, 255, 0.35);
+    0 4px 14px -2px rgba(15, 23, 42, 0.03),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1);
 }
 
 /* 4. Frosted Liquid Glass Top Header / Navbar */
 .glass-header {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(246, 250, 255, 0.68) 100%);
-  backdrop-filter: blur(32px) saturate(185%) brightness(1.02);
-  -webkit-backdrop-filter: blur(32px) saturate(185%) brightness(1.02);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.65);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(248, 251, 255, 0.82) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.70);
   box-shadow: 
-    0 8px 32px 0 rgba(15, 23, 42, 0.04),
-    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95);
+    0 6px 24px 0 rgba(15, 23, 42, 0.04),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
   transition: none;
   overscroll-behavior: none;
 }
 
 .glass-dark {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.82) 0%, rgba(10, 15, 30, 0.76) 100%);
-  backdrop-filter: blur(30px) saturate(180%) brightness(1.04);
-  -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.04);
-  border-right: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(10, 15, 30, 0.84) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 
-    inset 1px 0 0 0 rgba(255, 255, 255, 0.10),
-    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.20);
+    inset 1px 0 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 /* 6. Apple Liquid Frosted Glass Buttons */
@@ -439,22 +427,21 @@ select.glass-input {
 .dark .glass-card,
 .dark .glass-elevated,
 .dark .glass-card-interactive {
-  background: linear-gradient(135deg, rgba(16, 20, 30, 0.74) 0%, rgba(10, 13, 22, 0.68) 100%) !important;
-  backdrop-filter: blur(32px) saturate(160%) brightness(1.02) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(160%) brightness(1.02) !important;
+  background: linear-gradient(145deg, rgba(20, 26, 38, 0.88) 0%, rgba(14, 18, 28, 0.82) 100%) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-bottom-color: rgba(255, 255, 255, 0.06) !important;
   box-shadow: 
-    0 12px 36px -4px rgba(0, 0, 0, 0.35),
-    0 4px 14px -2px rgba(0, 0, 0, 0.20),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.30) !important;
+    0 14px 40px -6px rgba(0, 0, 0, 0.45),
+    0 4px 14px -2px rgba(0, 0, 0, 0.25),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.14) !important;
 }
 
 .dark .glass-dropdown {
-  background: linear-gradient(135deg, rgba(20, 25, 36, 0.88) 0%, rgba(14, 18, 28, 0.82) 100%) !important;
-  backdrop-filter: blur(36px) saturate(160%) brightness(1.02) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(160%) brightness(1.02) !important;
+  background: linear-gradient(145deg, rgba(22, 28, 42, 0.92) 0%, rgba(16, 20, 32, 0.88) 100%) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-bottom-color: rgba(255, 255, 255, 0.08) !important;
   box-shadow: 
@@ -467,11 +454,11 @@ select.glass-input {
 .dark .glass-surface::before,
 .dark .glass-dropdown::before,
 .dark .glass-modal::before {
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.40) 25%, rgba(255, 255, 255, 0.60) 50%, rgba(255, 255, 255, 0.40) 75%, transparent 100%) !important;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.35) 25%, rgba(255, 255, 255, 0.60) 50%, rgba(255, 255, 255, 0.35) 75%, transparent 100%) !important;
 }
 
 .dark .glass-card-interactive:hover {
-  background: linear-gradient(135deg, rgba(24, 28, 40, 0.84) 0%, rgba(18, 21, 32, 0.76) 100%) !important;
+  background: linear-gradient(145deg, rgba(28, 34, 48, 0.92) 0%, rgba(18, 22, 34, 0.86) 100%) !important;
   border-color: rgba(22, 131, 255, 0.40) !important;
   box-shadow: 
     0 18px 44px -4px rgba(0, 0, 0, 0.45),
@@ -479,9 +466,9 @@ select.glass-input {
 }
 
 .dark .glass-header {
-  background: linear-gradient(180deg, rgba(16, 20, 28, 0.82) 0%, rgba(10, 13, 20, 0.74) 100%) !important;
-  backdrop-filter: blur(32px) saturate(150%) brightness(1.02) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(150%) brightness(1.02) !important;
+  background: linear-gradient(180deg, rgba(16, 20, 28, 0.90) 0%, rgba(10, 13, 20, 0.84) 100%) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.35),
@@ -491,9 +478,9 @@ select.glass-input {
 }
 
 .dark .glass-dark {
-  background: linear-gradient(180deg, rgba(15, 18, 26, 0.80) 0%, rgba(10, 12, 18, 0.74) 100%) !important;
-  backdrop-filter: blur(32px) saturate(140%) brightness(1.02) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(140%) brightness(1.02) !important;
+  background: linear-gradient(180deg, rgba(15, 18, 26, 0.88) 0%, rgba(10, 12, 18, 0.82) 100%) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.10) !important;
   box-shadow: 
     inset 1px 0 0 0 rgba(255, 255, 255, 0.06),
@@ -502,9 +489,9 @@ select.glass-input {
 
 .dark .glass-modal,
 .dark .glass-floating {
-  background: linear-gradient(135deg, rgba(18, 22, 30, 0.88) 0%, rgba(12, 15, 22, 0.82) 100%) !important;
-  backdrop-filter: blur(40px) saturate(150%) brightness(1.0) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(150%) !important;
+  background: linear-gradient(145deg, rgba(20, 25, 36, 0.92) 0%, rgba(14, 18, 26, 0.88) 100%) !important;
+  backdrop-filter: blur(32px) !important;
+  -webkit-backdrop-filter: blur(32px) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   box-shadow: 
     0 32px 85px -10px rgba(0, 0, 0, 0.65),
