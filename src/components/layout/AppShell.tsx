@@ -12,6 +12,14 @@ interface AppShellProps {
 export function AppShell({ role }: AppShellProps) {
   const { wallpaper, isWallpaperModalOpen, closeWallpaperModal } = useTheme();
   const location = useLocation();
+  const mainRef = React.useRef<HTMLElement>(null);
+
+  React.useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+      mainRef.current.scrollLeft = 0;
+    }
+  }, [location.pathname]);
 
   return (
     <div className="relative flex h-screen w-full overflow-hidden bg-transparent">
@@ -31,8 +39,11 @@ export function AppShell({ role }: AppShellProps) {
       <Sidebar role={role} />
 
       {/* MAIN CONTENT AREA WITH SMOOTH ROUTE TRANSITION */}
-      <main className="relative z-10 flex h-screen min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-transparent w-full">
-        <div key={location.pathname} className="flex min-w-0 flex-1 flex-col w-full animate-page-enter">
+      <main
+        ref={mainRef}
+        className="relative z-10 flex h-screen min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-transparent w-full max-w-full"
+      >
+        <div key={location.pathname} className="flex min-w-0 flex-1 flex-col w-full max-w-full animate-page-enter">
           <Outlet />
         </div>
       </main>

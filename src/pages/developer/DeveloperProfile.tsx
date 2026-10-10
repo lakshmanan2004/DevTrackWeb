@@ -145,9 +145,9 @@ export function DeveloperProfile() {
         }
       />
 
-      <div className="flex-1 p-5 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[360px_minmax(0,1fr)] gap-5 items-start w-full">
-          <aside className="space-y-5 w-full">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto min-w-0 max-w-full overflow-x-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[340px_minmax(0,1fr)] gap-5 items-start w-full min-w-0 max-w-full">
+          <aside className="space-y-5 w-full max-w-full min-w-0">
             <section className="glass-card rounded-3xl p-5 text-center shadow-glass">
               <Avatar initials={user?.initials || '··'} size="lg" className="mx-auto" />
               <h2 className="mt-3 text-xl font-bold text-navy dark:text-white">{user?.name}</h2>
@@ -188,7 +188,7 @@ export function DeveloperProfile() {
               <h3 className="text-sm font-bold text-navy dark:text-white">Today</h3>
               <dl className="mt-3 grid grid-cols-2 gap-3">
                 {weekStats.map((stat) => (
-                  <div key={stat.label} className="glass-surface rounded-2xl p-3">
+                  <div key={stat.label} className="rounded-2xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3 shadow-2xs">
                     <dt className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</dt>
                     <dd className="mt-0.5 text-base font-bold tabular-nums text-navy dark:text-white">{stat.value}</dd>
                   </div>
@@ -234,7 +234,7 @@ export function DeveloperProfile() {
             </section>
           </aside>
 
-          <div className="space-y-5">
+          <div className="space-y-5 w-full max-w-full min-w-0">
             <section className="glass-card rounded-3xl p-6 shadow-glass">
               <h2 className="text-sm font-bold text-navy dark:text-white">Account Settings</h2>
               <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); saveProfile(); }}>

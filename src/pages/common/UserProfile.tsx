@@ -203,12 +203,12 @@ export function UserProfile() {
         }
       />
 
-      <div className="flex-1 p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-[340px_minmax(0,1fr)] 2xl:grid-cols-[380px_minmax(0,1fr)] gap-6 items-start w-full">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] w-full mx-auto min-w-0 max-w-full overflow-x-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[340px_minmax(0,1fr)] gap-6 items-start w-full min-w-0 max-w-full">
           {/* ========================================================================= */}
           {/* LEFT COLUMN: USER OVERVIEW CARD & SECURITY                                */}
           {/* ========================================================================= */}
-          <div className="w-full space-y-6 min-w-0">
+          <div className="w-full max-w-full min-w-0 space-y-6">
             {/* USER IDENTITY CARD */}
             <div className="glass-card rounded-2xl p-6 text-center">
               <div className="flex flex-col items-center">
@@ -477,7 +477,7 @@ export function UserProfile() {
           {/* ========================================================================= */}
           {/* RIGHT COLUMN: PROFILE EDIT & ROLE-SPECIFIC WORKSPACE DETAILS              */}
           {/* ========================================================================= */}
-          <div className="w-full space-y-6 min-w-0">
+          <div className="w-full max-w-full min-w-0 space-y-6">
             {/* PROFILE EDIT FORM */}
             <div className="glass-card rounded-2xl p-6">
               <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
@@ -586,19 +586,19 @@ export function UserProfile() {
 
                 {/* STATS TILES */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="glass-surface rounded-xl p-3.5">
+                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Assigned Projects</p>
                     <p className="mt-1 text-base font-extrabold text-purple-600 dark:text-purple-400">
                       {displayProjects.length} {displayProjects.length === 1 ? 'Project' : 'Projects'}
                     </p>
                   </div>
-                  <div className="glass-surface rounded-xl p-3.5">
+                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Assigned Teams</p>
                     <p className="mt-1 text-base font-extrabold text-slate-900 dark:text-white truncate">
                       {teams.length || (user?.teamName ? 1 : 0)} {teams.length === 1 ? 'Team' : 'Teams'}
                     </p>
                   </div>
-                  <div className="glass-surface rounded-xl p-3.5">
+                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Supervised Developers</p>
                     <p className="mt-1 text-base font-extrabold text-blue-500 dark:text-blue-400">
                       {supervisedDevCount} Devs
@@ -607,7 +607,7 @@ export function UserProfile() {
                 </div>
 
                 {/* CAPABILITIES CALLOUT */}
-                <div className="rounded-2xl border border-blue-300/80 dark:border-blue-500/40 bg-blue-50/60 dark:bg-[#121d33]/90 p-4 text-xs text-blue-950 dark:text-blue-100 space-y-1 shadow-xs ring-1 ring-blue-500/15">
+                <div className="rounded-2xl border border-blue-200/80 dark:border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/40 p-4 text-xs text-blue-950 dark:text-blue-100 space-y-1 shadow-2xs">
                   <p className="font-black flex items-center gap-1.5 text-blue-950 dark:text-white">
                     <SparklesIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Team Leader Capabilities
                   </p>
@@ -629,19 +629,19 @@ export function UserProfile() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="glass-surface rounded-xl p-3.5">
+                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Managed Projects</p>
                     <p className="mt-1 text-base font-extrabold text-purple-600 dark:text-purple-400">
                       {displayProjects.length} {displayProjects.length === 1 ? 'Project' : 'Projects'}
                     </p>
                   </div>
-                  <div className="glass-surface rounded-xl p-3.5">
+                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Teams</p>
                     <p className="mt-1 text-base font-extrabold text-slate-900 dark:text-white">
                       {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
                     </p>
                   </div>
-                  <div className="glass-surface rounded-xl p-3.5">
+                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Active Developers</p>
                     <p className="mt-1 text-base font-extrabold text-blue-500 dark:text-blue-400">
                       {directory.filter((u: any) => u.role === 'developer').length || supervisedDevCount} Devs
@@ -649,7 +649,7 @@ export function UserProfile() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-purple-300/80 dark:border-purple-500/40 bg-purple-50/60 dark:bg-[#221533]/90 p-4 text-xs text-purple-950 dark:text-purple-100 space-y-1 shadow-xs ring-1 ring-purple-500/15">
+                <div className="rounded-2xl border border-purple-200/80 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-950/40 p-4 text-xs text-purple-950 dark:text-purple-100 space-y-1 shadow-2xs">
                   <p className="font-black flex items-center gap-1.5 text-purple-950 dark:text-white">
                     <LayersIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" /> Project Manager Capabilities
                   </p>
@@ -670,7 +670,7 @@ export function UserProfile() {
                   <Badge tone="red">System Owner</Badge>
                 </div>
 
-                <div className="rounded-2xl border border-rose-300/80 dark:border-rose-500/40 bg-rose-50/60 dark:bg-[#2c131a]/90 p-4 text-xs text-rose-950 dark:text-rose-100 space-y-1 shadow-xs ring-1 ring-rose-500/15">
+                <div className="rounded-2xl border border-rose-200/80 dark:border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/40 p-4 text-xs text-rose-950 dark:text-rose-100 space-y-1 shadow-2xs">
                   <p className="font-black text-rose-950 dark:text-white">Full Platform Access</p>
                   <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                     As an Administrator, you manage accounts in <strong className="text-slate-900 dark:text-white">User Management</strong>, inspect company-wide productivity metrics in <strong className="text-slate-900 dark:text-white">Employee Performance</strong>, and configure work policies in <strong className="text-slate-900 dark:text-white">Settings</strong>.
