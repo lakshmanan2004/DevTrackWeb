@@ -407,23 +407,29 @@ export function DeveloperProfile() {
               </h2>
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-hairline text-xs uppercase tracking-wide text-slate-400">
-                    <th scope="col" className="px-5 py-2.5 font-semibold">Time</th>
-                    <th scope="col" className="px-3 py-2.5 font-semibold">Task</th>
-                    <th scope="col" className="px-3 py-2.5 font-semibold">Status</th>
-                    <th scope="col" className="px-5 py-2.5 text-right font-semibold">Review</th>
+                  <tr className="border-b border-hairline text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 font-bold">
+                    <th scope="col" className="px-5 py-2.5 font-bold">Time</th>
+                    <th scope="col" className="px-3 py-2.5 font-bold">Task</th>
+                    <th scope="col" className="px-3 py-2.5 font-bold">Status</th>
+                    <th scope="col" className="px-5 py-2.5 text-right font-bold">Review</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-hairline">
                   {recentActivity.map((row: any, index: number) => (
                     <tr key={`${row.task}-${index}`} className="hover:bg-slate-500/5 transition-colors">
-                      <td className="whitespace-nowrap px-5 py-3 text-slate-500 dark:text-slate-400">{row.date}</td>
-                      <td className="px-3 py-3 font-medium text-navy dark:text-white">{row.task}</td>
+                      <td className="whitespace-nowrap px-5 py-3 text-slate-700 dark:text-slate-300 font-semibold">{row.date}</td>
+                      <td className="px-3 py-3 font-semibold text-navy dark:text-white">{row.task}</td>
                       <td className="px-3 py-3">
                         <TaskStatusBadge status={row.status} />
                       </td>
                       <td className="px-5 py-3 text-right">
-                        <span className={`text-xs font-semibold ${row.onTime ? 'text-emerald-500 dark:text-emerald-400' : 'text-amber-500 dark:text-amber-400'}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold shadow-xs ${
+                            row.onTime
+                              ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30'
+                              : 'bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/40'
+                          }`}
+                        >
                           {row.onTime ? 'Approved' : 'Pending'}
                         </span>
                       </td>

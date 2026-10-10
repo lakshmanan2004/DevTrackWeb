@@ -35,8 +35,8 @@ html,
 body,
 #root {
   height: 100%;
+  width: 100%;
   overflow: hidden;
-  scrollbar-gutter: stable;
   overscroll-behavior: none;
   overscroll-behavior-y: none;
 }
@@ -841,10 +841,62 @@ html:not(.dark) .placeholder\:text-slate-400::placeholder {
   animation: dt-live 1.6s ease-in-out infinite;
 }
 
+/* ==========================================================================
+   SMOOTH ROUTING PAGE ENTER & INTERACTION TRANSITION SYSTEM
+   ========================================================================== */
+
+@keyframes pageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: pageEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+/* Global Smooth Click & Selection Micro-Transitions */
+button,
+a,
+[role="button"],
+.clickable {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.18s ease,
+              opacity 0.18s ease;
+}
+
+button:active:not(:disabled),
+[role="button"]:active:not([aria-disabled="true"]),
+.clickable:active {
+  transform: scale(0.975);
+}
+
+/* Sidebar navigation link smooth response */
+aside nav a {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.18s ease,
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+aside nav a:active {
+  transform: scale(0.97);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dt-pulse,
   .dt-live,
-  .glass-card-interactive {
+  .glass-card-interactive,
+  .animate-page-enter {
     animation: none;
     transition: none;
   }

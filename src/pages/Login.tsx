@@ -117,6 +117,18 @@ export function Login() {
     setBusy(true);
     try {
       const loggedIn = await login(email.trim(), password, remember);
+      
+      // Enforce role selection match on segmented control
+      if (loggedIn.role !== role) {
+        const expectedTab = roleTabs.find((t) => t.id === role)?.label || role;
+        const actualRole = roleTabs.find((t) => t.id === loggedIn.role)?.label || loggedIn.role;
+        setError(
+          `Access Denied for ${expectedTab} portal. This account is registered as a "${actualRole}". Please select the "${actualRole}" tab above to sign in.`
+        );
+        await logout();
+        return;
+      }
+
       const home = roleTabs.find((t) => t.id === loggedIn.role)?.path || '/developer';
       navigate(home, { replace: true });
     } catch (err: any) {

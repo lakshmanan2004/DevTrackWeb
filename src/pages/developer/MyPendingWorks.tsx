@@ -220,12 +220,17 @@ export function MyPendingWorks() {
         {Object.keys(groupedByDate).length > 0 ? (
           Object.entries(groupedByDate).map(([dateLabel, dateItems]) => (
             <section key={dateLabel} className="space-y-3">
-              <div className="flex items-center gap-2 border-b border-hairline pb-2">
-                <CalendarIcon className="h-4 w-4 text-amber-600" />
-                <h2 className="text-sm font-extrabold text-navy uppercase tracking-wider">
-                  Pending Date: <span className="text-amber-900">{dateLabel}</span>
+              <div className="glass-surface inline-flex items-center gap-2.5 rounded-2xl px-4 py-2 border border-white/70 dark:border-white/10 shadow-glass backdrop-blur-xl">
+                <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                  <CalendarIcon className="h-4 w-4" />
+                </div>
+                <h2 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="text-slate-500 dark:text-slate-400 font-bold">Pending Date:</span>
+                  <span className="text-amber-600 dark:text-amber-400 font-extrabold">{dateLabel}</span>
                 </h2>
-                <Badge tone="amber">{dateItems.length} items</Badge>
+                <Badge tone="amber" size="sm" className="font-bold">
+                  {dateItems.length} {dateItems.length === 1 ? 'item' : 'items'}
+                </Badge>
               </div>
 
               <div className="space-y-3">
@@ -306,8 +311,8 @@ export function MyPendingWorks() {
 
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-3">
                       {item.status === 'awaiting_lead_approval' ? (
-                        <div className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/15 border border-blue-400/30 px-3 py-1.5 text-xs font-semibold text-blue-300">
-                          <ClockIcon className="h-3.5 w-3.5 text-blue-400 animate-pulse" />
+                        <div className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/15 dark:bg-blue-500/25 border border-blue-500/40 dark:border-blue-400/40 px-3 py-1.5 text-xs font-bold text-blue-800 dark:text-blue-300 shadow-xs">
+                          <ClockIcon className="h-3.5 w-3.5 text-blue-700 dark:text-blue-400 animate-pulse" />
                           <span>Submitted for Review · Awaiting Team Lead approval</span>
                         </div>
                       ) : (

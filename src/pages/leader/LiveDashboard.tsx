@@ -126,26 +126,40 @@ export function LiveDashboard() {
           ))}
         </dl>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-          <div className="space-y-3">
-            <ul className="space-y-3">
-              {visible.map((dev: any) => (
-                <DeveloperCard
-                  key={dev.id}
-                  developer={dev}
-                  selected={dev.id === selectedId}
-                  onSelect={setSelectedId}
-                />
-              ))}
-              {visible.length === 0 && (
-                <li className="glass-card rounded-3xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 shadow-glass">
-                  No developers match this filter.
-                </li>
-              )}
-            </ul>
-          </div>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] items-start">
+          <section className="glass-card rounded-3xl p-5 sm:p-6 shadow-glass flex flex-col">
+            <div className="flex items-center justify-between border-b border-hairline pb-3.5 mb-4">
+              <div>
+                <h2 className="text-sm font-bold text-navy dark:text-white">Team Developers</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Real-time status & activity
+                </p>
+              </div>
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-brand/10 text-brand dark:text-blue-300 border border-brand/20">
+                {visible.length} {visible.length === 1 ? 'Developer' : 'Developers'}
+              </span>
+            </div>
 
-          <div>
+            <div className="max-h-[calc(100vh-280px)] overflow-y-auto pr-1 space-y-3 custom-scrollbar">
+              <ul className="space-y-3">
+                {visible.map((dev: any) => (
+                  <DeveloperCard
+                    key={dev.id}
+                    developer={dev}
+                    selected={dev.id === selectedId}
+                    onSelect={setSelectedId}
+                  />
+                ))}
+                {visible.length === 0 && (
+                  <li className="rounded-2xl border border-dashed border-slate-300 dark:border-white/10 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                    No developers match this filter.
+                  </li>
+                )}
+              </ul>
+            </div>
+          </section>
+
+          <div className="sticky top-20">
             {selected ? (
               <DeveloperDetailPanel
                 developer={selected}
@@ -157,9 +171,9 @@ export function LiveDashboard() {
                 }}
               />
             ) : (
-              <div className="glass-card rounded-3xl border border-dashed border-slate-300 px-6 py-16 text-center shadow-glass">
-                <p className="text-sm font-bold text-navy">No developer selected</p>
-                <p className="mt-1 text-xs text-slate-500">
+              <div className="glass-card rounded-3xl border border-dashed border-slate-300 dark:border-white/10 px-6 py-16 text-center shadow-glass">
+                <p className="text-sm font-bold text-navy dark:text-white">No developer selected</p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Pick anyone from your team to inspect their session, logs, and live timelines.
                 </p>
               </div>
