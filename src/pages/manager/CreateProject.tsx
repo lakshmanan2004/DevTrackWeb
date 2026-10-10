@@ -111,7 +111,7 @@ export function CreateProject() {
     <>
       <PageHeader title="Create New Project" subtitle="Project details, team assignment & weighted modules" />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-6">
+      <div className="flex-1 p-6">
         <div className="max-w-4xl space-y-6">
           <section className="glass-card rounded-3xl border border-white/80 p-6 sm:p-7 shadow-glass">
             <h2 className="text-sm font-black text-navy tracking-tight">1 · Project Details</h2>

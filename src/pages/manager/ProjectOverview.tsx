@@ -133,7 +133,7 @@ export function ProjectOverview() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-6">
         <Banner tone="blue" icon={<InfoIcon className="h-4 w-4" />}>
           All project metrics and progress percentages are computed live from team leader completed modules.
         </Banner>
