@@ -162,7 +162,7 @@ ${pendingText || 'No pending tasks or blockers reported.'}
         </div>
 
         {/* EXECUTIVE DAILY SYNOPSIS */}
-        <div className="rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-md p-5 shadow-glass space-y-3.5">
+        <div className="glass-subcard rounded-2xl p-5 space-y-3.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-950 dark:text-purple-300">
               <FileTextIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
@@ -240,7 +240,7 @@ ${pendingText || 'No pending tasks or blockers reported.'}
         <div className="w-full">
           {/* SUB-CARD 1: MAIN MODULES AND FOCUS AREA */}
           {activeTab === 'modules' && (
-            <div className="flex flex-col rounded-3xl border border-indigo-200/70 dark:border-indigo-500/20 bg-indigo-50/40 dark:bg-slate-900/80 backdrop-blur-xl p-6 shadow-glass space-y-4">
+            <div className="flex flex-col rounded-3xl border border-indigo-200/70 dark:border-indigo-500/20 bg-indigo-50/40 dark:bg-slate-900/80 p-6 shadow-glass space-y-4">
               <div className="flex items-center justify-between gap-3 border-b border-indigo-100/80 dark:border-indigo-500/20 pb-3.5">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-500/20 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 shrink-0">
@@ -265,7 +265,7 @@ ${pendingText || 'No pending tasks or blockers reported.'}
                   summary.mainModulesAndFocusAreas.map((m: any, idx: number) => (
                     <div
                       key={idx}
-                      className="rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-slate-800/80 backdrop-blur-md p-4 shadow-glass space-y-2.5 hover:bg-white/95 dark:hover:bg-slate-800 transition-all"
+                      className="glass-subcard rounded-2xl p-4 space-y-2.5 hover:bg-white/80 dark:hover:bg-white/10 transition-all"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
@@ -316,7 +316,7 @@ ${pendingText || 'No pending tasks or blockers reported.'}
 
           {/* SUB-CARD 2: INPROGRESS OR PENDING WORKS */}
           {activeTab === 'pending' && (
-            <div className="flex flex-col rounded-3xl border border-amber-200/70 dark:border-amber-500/20 bg-amber-50/40 dark:bg-slate-900/80 backdrop-blur-xl p-6 shadow-glass space-y-4">
+            <div className="flex flex-col rounded-3xl border border-amber-200/70 dark:border-amber-500/20 bg-amber-50/40 dark:bg-slate-900/80 p-6 shadow-glass space-y-4">
               <div className="flex items-center justify-between gap-3 border-b border-amber-100/80 dark:border-amber-500/20 pb-3.5">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 shrink-0">
@@ -346,7 +346,7 @@ ${pendingText || 'No pending tasks or blockers reported.'}
                           ? 'border-rose-300/80 dark:border-rose-500/30 bg-rose-50/70 dark:bg-rose-950/30'
                           : p.status === 'pending_review'
                           ? 'border-amber-300/80 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/30'
-                          : 'border-white/80 dark:border-white/10 bg-white/75 dark:bg-slate-800/80 backdrop-blur-md'
+                          : 'glass-subcard'
                       }`}
                     >
                       {/* Top Header: Developer Pill + Status Badge */}

@@ -220,7 +220,7 @@ export function MyPendingWorks() {
         {Object.keys(groupedByDate).length > 0 ? (
           Object.entries(groupedByDate).map(([dateLabel, dateItems]) => (
             <section key={dateLabel} className="space-y-3">
-              <div className="glass-surface inline-flex items-center gap-2.5 rounded-2xl px-4 py-2 border border-white/70 dark:border-white/10 shadow-glass backdrop-blur-xl">
+              <div className="glass-surface inline-flex items-center gap-2.5 rounded-2xl px-4 py-2 shadow-glass">
                 <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
                   <CalendarIcon className="h-4 w-4" />
                 </div>
@@ -228,7 +228,7 @@ export function MyPendingWorks() {
                   <span className="text-slate-500 dark:text-slate-400 font-bold">Pending Date:</span>
                   <span className="text-amber-600 dark:text-amber-400 font-extrabold">{dateLabel}</span>
                 </h2>
-                <Badge tone="amber" size="sm" className="font-bold">
+                <Badge tone="amber" className="font-bold">
                   {dateItems.length} {dateItems.length === 1 ? 'item' : 'items'}
                 </Badge>
               </div>
@@ -237,7 +237,7 @@ export function MyPendingWorks() {
                 {dateItems.map((item: any) => (
                   <article
                     key={item.id}
-                    className="rounded-3xl border border-amber-300/80 dark:border-amber-500/30 bg-white/80 dark:bg-[#121a2c]/90 backdrop-blur-xl p-5 sm:p-6 shadow-glass transition-all hover:shadow-md"
+                    className="glass-card rounded-3xl border border-amber-300/80 dark:border-amber-500/30 p-5 sm:p-6 shadow-glass transition-all hover:shadow-md"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-hairline pb-3">
                       <div className="flex items-center gap-2.5">
@@ -274,7 +274,7 @@ export function MyPendingWorks() {
                       </div>
                     )}
 
-                    <div className="mt-3 rounded-2xl border border-amber-200/90 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/30 p-4 shadow-glass">
+                    <div className="mt-3 rounded-2xl border border-amber-200/90 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/30 p-4">
                       <p className="text-xs leading-relaxed text-amber-950 dark:text-amber-200">
                         <strong className="text-navy dark:text-white">Feedback / Instruction:</strong> "{item.feedbackNote}"
                       </p>
@@ -322,7 +322,7 @@ export function MyPendingWorks() {
                       <Button
                         disabled={item.status === 'awaiting_lead_approval'}
                         onClick={item.status === 'awaiting_lead_approval' ? undefined : () => openSubmissionModal(item)}
-                        className={`font-bold border-none text-white shadow-glass transition-all ${
+                        className={`font-bold border-none text-white transition-all ${
                           item.status === 'awaiting_lead_approval'
                             ? 'bg-blue-600/60 opacity-80 cursor-not-allowed shadow-none'
                             : item.status === 'changes_requested'

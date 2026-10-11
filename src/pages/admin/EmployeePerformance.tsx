@@ -289,7 +289,7 @@ export function EmployeePerformance() {
 
           {/* QUICK KPI TILES */}
           <div className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-4">
-            <div className="glass-surface rounded-2xl p-3.5">
+            <div className="glass-subcard rounded-2xl p-3.5">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 <AwardIcon className="h-3.5 w-3.5 text-brand dark:text-indigo-400" />
                 <span>Overall Score</span>
@@ -299,7 +299,7 @@ export function EmployeePerformance() {
               </p>
             </div>
 
-            <div className="glass-surface rounded-2xl p-3.5">
+            <div className="glass-subcard rounded-2xl p-3.5">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 <CalendarX2Icon className="h-3.5 w-3.5 text-amber-500" />
                 <span>Absence / Leave</span>
@@ -313,7 +313,7 @@ export function EmployeePerformance() {
               </p>
             </div>
 
-            <div className="glass-surface rounded-2xl p-3.5">
+            <div className="glass-subcard rounded-2xl p-3.5">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 <ListCheckIcon className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
                 <span>Pending Works Cleared</span>
@@ -324,7 +324,7 @@ export function EmployeePerformance() {
               </p>
             </div>
 
-            <div className="glass-surface rounded-2xl p-3.5">
+            <div className="glass-subcard rounded-2xl p-3.5">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 <CheckCircle2Icon className="h-3.5 w-3.5 text-purple-500 dark:text-purple-400" />
                 <span>Batch Audits</span>
@@ -375,7 +375,7 @@ export function EmployeePerformance() {
                       return (
                         <div key={pt.day} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
                           {/* Tooltip on Hover */}
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity glass-modal text-navy dark:text-white text-[10px] rounded-xl px-2.5 py-1.5 absolute -mt-16 pointer-events-none shadow-glass z-10 text-center border border-hairline">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/95 dark:bg-slate-800/95 text-white text-[10px] rounded-xl px-2.5 py-1.5 absolute -mt-16 pointer-events-none shadow-md z-10 text-center border border-white/20">
                             {isAbsent ? (
                               <div className="font-bold text-amber-500 dark:text-amber-300">Status: {pt.status || 'Leave'}</div>
                             ) : (
@@ -388,7 +388,7 @@ export function EmployeePerformance() {
                           </div>
 
                           {/* Bar */}
-                          <div className="w-full max-w-[48px] glass-surface rounded-t-xl flex items-end h-full overflow-hidden">
+                          <div className="w-full max-w-[48px] bg-slate-200/60 dark:bg-slate-800/60 border border-slate-300/30 dark:border-white/5 rounded-t-xl flex items-end h-full overflow-hidden">
                             <div
                               className={`w-full rounded-t-xl transition-all duration-500 shadow-sm ${
                                 isAbsent ? 'bg-amber-500/80 border-t-2 border-amber-600' : activeStyles.fill
@@ -422,7 +422,7 @@ export function EmployeePerformance() {
                       const heightPct = Math.round((wk.score / maxDailyScore) * 100);
                       return (
                         <div key={wk.week} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                          <div className="w-full max-w-[60px] glass-surface rounded-t-xl flex items-end h-full overflow-hidden">
+                          <div className="w-full max-w-[60px] bg-slate-200/60 dark:bg-slate-800/60 border border-slate-300/30 dark:border-white/5 rounded-t-xl flex items-end h-full overflow-hidden">
                             <div
                               className={`w-full rounded-t-xl transition-all duration-500 ${activeStyles.fill}`}
                               style={{ height: `${heightPct}%` }}
@@ -477,13 +477,13 @@ export function EmployeePerformance() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <div className="h-2.5 w-full glass-surface rounded-full overflow-hidden">
+                  <div className="h-2.5 w-full bg-slate-200/70 dark:bg-slate-800/80 border border-slate-300/30 dark:border-white/5 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${activeStyles.fill}`}
                       style={{ width: `${activeDev.metrics.logRate.value}%` }}
                     />
                   </div>
-                  <div className="h-1.5 w-full glass-surface rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-slate-200/50 dark:bg-slate-800/60 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full bg-slate-400/60"
                       style={{ width: `${activeDev.metrics.logRate.teamAvg}%` }}
@@ -503,13 +503,13 @@ export function EmployeePerformance() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <div className="h-2.5 w-full glass-surface rounded-full overflow-hidden">
+                  <div className="h-2.5 w-full bg-slate-200/70 dark:bg-slate-800/80 border border-slate-300/30 dark:border-white/5 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${activeStyles.fill}`}
                       style={{ width: `${activeDev.metrics.ontimeRate.value}%` }}
                     />
                   </div>
-                  <div className="h-1.5 w-full glass-surface rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-slate-200/50 dark:bg-slate-800/60 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full bg-slate-400/60"
                       style={{ width: `${activeDev.metrics.ontimeRate.teamAvg}%` }}
@@ -529,13 +529,13 @@ export function EmployeePerformance() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <div className="h-2.5 w-full glass-surface rounded-full overflow-hidden">
+                  <div className="h-2.5 w-full bg-slate-200/70 dark:bg-slate-800/80 border border-slate-300/30 dark:border-white/5 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${activeStyles.fill}`}
                       style={{ width: `${activeDev.metrics.commits.value}%` }}
                     />
                   </div>
-                  <div className="h-1.5 w-full glass-surface rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-slate-200/50 dark:bg-slate-800/60 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full bg-slate-400/60"
                       style={{ width: `${activeDev.metrics.commits.teamAvg}%` }}
@@ -555,13 +555,13 @@ export function EmployeePerformance() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <div className="h-2.5 w-full glass-surface rounded-full overflow-hidden">
+                  <div className="h-2.5 w-full bg-slate-200/70 dark:bg-slate-800/80 border border-slate-300/30 dark:border-white/5 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${activeStyles.fill}`}
                       style={{ width: `${activeDev.pendingWorks.resolutionRate}%` }}
                     />
                   </div>
-                  <div className="h-1.5 w-full glass-surface rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-slate-200/50 dark:bg-slate-800/60 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full bg-slate-400/60"
                       style={{ width: `${activeDev.pendingWorks.teamAvgResolutionRate}%` }}
@@ -592,7 +592,7 @@ export function EmployeePerformance() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <div className="h-2.5 w-full glass-surface rounded-full overflow-hidden">
+                  <div className="h-2.5 w-full bg-slate-200/70 dark:bg-slate-800/80 border border-slate-300/30 dark:border-white/5 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
                         activeDev.changeRatio.riskLevel === 'Low' ? 'bg-emerald-500' :
@@ -601,7 +601,7 @@ export function EmployeePerformance() {
                       style={{ width: `${Math.min(activeDev.changeRatio.ratio, 100)}%` }}
                     />
                   </div>
-                  <div className="h-1.5 w-full glass-surface rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-slate-200/50 dark:bg-slate-800/60 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full bg-slate-400/60"
                       style={{ width: `${activeDev.changeRatio.teamAvgRatio}%` }}
@@ -639,7 +639,7 @@ export function EmployeePerformance() {
                 {activeDev.metrics.logRate.label}
               </span>
             </div>
-            <div className="h-2 w-full glass-surface rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-slate-200/70 dark:bg-slate-800/80 border border-slate-300/30 dark:border-white/5 rounded-full overflow-hidden">
               <div className={`h-full rounded-full ${activeStyles.fill}`} style={{ width: `${activeDev.metrics.logRate.value}%` }} />
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -658,7 +658,7 @@ export function EmployeePerformance() {
                 {activeDev.metrics.ontimeRate.label}
               </span>
             </div>
-            <div className="h-2 w-full glass-surface rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-slate-200/70 dark:bg-slate-800/80 border border-slate-300/30 dark:border-white/5 rounded-full overflow-hidden">
               <div className={`h-full rounded-full ${activeStyles.fill}`} style={{ width: `${activeDev.metrics.ontimeRate.value}%` }} />
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -677,7 +677,7 @@ export function EmployeePerformance() {
                 {activeDev.metrics.commits.countText}
               </span>
             </div>
-            <div className="h-2 w-full glass-surface rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-slate-200/70 dark:bg-slate-800/80 border border-slate-300/30 dark:border-white/5 rounded-full overflow-hidden">
               <div className={`h-full rounded-full ${activeStyles.fill}`} style={{ width: `${activeDev.metrics.commits.value}%` }} />
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -696,7 +696,7 @@ export function EmployeePerformance() {
                 {activeDev.pendingWorks.resolutionRate}%
               </span>
             </div>
-            <div className="h-2 w-full glass-surface rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-slate-200/70 dark:bg-slate-800/80 border border-slate-300/30 dark:border-white/5 rounded-full overflow-hidden">
               <div className={`h-full rounded-full ${activeStyles.fill}`} style={{ width: `${activeDev.pendingWorks.resolutionRate}%` }} />
             </div>
             <p className="text-[11px] font-semibold text-navy dark:text-white">
@@ -733,7 +733,7 @@ export function EmployeePerformance() {
 
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
                 {/* Left: Big ratio number */}
-                <div className="glass-surface flex flex-col items-center justify-center rounded-2xl p-5 text-center shadow-glass">
+                <div className="glass-subcard flex flex-col items-center justify-center rounded-2xl p-5 text-center">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Review Change Ratio</span>
                   <span className={`text-4xl font-black tabular-nums ${riskTextColor}`}>{cr.ratio}%</span>
                   <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">{cr.changesRequested} changes requested / {cr.totalReviews} total reviews</span>
@@ -746,7 +746,7 @@ export function EmployeePerformance() {
                       <span className="font-semibold text-navy dark:text-white">{activeDev.name}'s Change Ratio</span>
                       <span className={`font-extrabold ${riskTextColor}`}>{cr.ratio}%</span>
                     </div>
-                    <div className="h-3 w-full glass-surface rounded-full overflow-hidden">
+                    <div className="h-3 w-full bg-slate-200/70 dark:bg-slate-800/80 border border-slate-300/30 dark:border-white/5 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full transition-all duration-500 ${riskBarColor}`} style={{ width: `${Math.min(cr.ratio, 100)}%` }} />
                     </div>
                   </div>
@@ -756,7 +756,7 @@ export function EmployeePerformance() {
                       <span className="font-semibold text-slate-500 dark:text-slate-400">Team Average</span>
                       <span className="font-bold text-slate-500 dark:text-slate-400">{cr.teamAvgRatio}%</span>
                     </div>
-                    <div className="h-2 w-full glass-surface rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-slate-200/50 dark:bg-slate-800/60 rounded-full overflow-hidden">
                       <div className="h-full rounded-full bg-slate-400/60 transition-all duration-500" style={{ width: `${cr.teamAvgRatio}%` }} />
                     </div>
                   </div>
@@ -765,7 +765,7 @@ export function EmployeePerformance() {
                 </div>
               </div>
 
-              <div className="glass-surface rounded-2xl p-3.5 text-[11px] text-slate-600 dark:text-slate-300 flex items-start gap-2">
+              <div className="glass-subcard rounded-2xl p-3.5 text-[11px] text-slate-600 dark:text-slate-300 flex items-start gap-2">
                 <InfoIcon className="h-4 w-4 shrink-0 text-slate-400 mt-0.5" />
                 <p>
                   <strong className="text-navy dark:text-white">Change Ratio</strong> = percentage of code reviews where changes were requested by reviewers ({cr.changesRequested} changes requested out of {cr.totalReviews} total reviews received).
@@ -804,8 +804,8 @@ export function EmployeePerformance() {
           </h3>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="glass-surface flex items-center gap-3 rounded-2xl p-3.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl glass-card text-blue-500 font-bold text-lg">
+            <div className="glass-subcard flex items-center gap-3 rounded-2xl p-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/60 dark:bg-slate-800/80 border border-hairline text-blue-500 font-bold text-lg">
                 📋
               </div>
               <div>
@@ -814,8 +814,8 @@ export function EmployeePerformance() {
               </div>
             </div>
 
-            <div className="glass-surface flex items-center gap-3 rounded-2xl p-3.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl glass-card text-emerald-500 font-bold text-base">
+            <div className="glass-subcard flex items-center gap-3 rounded-2xl p-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/60 dark:bg-slate-800/80 border border-hairline text-emerald-500 font-bold text-base">
                 ⏰
               </div>
               <div>
@@ -824,8 +824,8 @@ export function EmployeePerformance() {
               </div>
             </div>
 
-            <div className="glass-surface flex items-center gap-3 rounded-2xl p-3.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl glass-card text-purple-500 font-bold text-base">
+            <div className="glass-subcard flex items-center gap-3 rounded-2xl p-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/60 dark:bg-slate-800/80 border border-hairline text-purple-500 font-bold text-base">
                 💻
               </div>
               <div>
@@ -834,8 +834,8 @@ export function EmployeePerformance() {
               </div>
             </div>
 
-            <div className="glass-surface flex items-center gap-3 rounded-2xl p-3.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl glass-card text-indigo-500 font-bold text-base">
+            <div className="glass-subcard flex items-center gap-3 rounded-2xl p-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/60 dark:bg-slate-800/80 border border-hairline text-indigo-500 font-bold text-base">
                 🔄
               </div>
               <div>
@@ -845,7 +845,7 @@ export function EmployeePerformance() {
             </div>
           </div>
 
-          <div className="glass-surface rounded-2xl p-3.5 text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2">
+          <div className="glass-subcard rounded-2xl p-3.5 text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2">
             <InfoIcon className="h-4 w-4 shrink-0 text-slate-400 mt-0.5" />
             <p>
               <strong className="text-navy dark:text-white">Audit Note:</strong> Absences generate pending log entries. Delayed end-of-day batch submissions reduce the score by <span className="font-bold text-rose-500">5% per occurrence</span>. All metrics are calculated automatically — no manual content is accessible by Admin.

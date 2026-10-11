@@ -90,7 +90,7 @@ export function DeveloperCalendarWidget() {
         <div className="pt-4 space-y-3">
           {todayLogs.length === 0 && (
             isTodayHoliday ? (
-              <div className="rounded-2xl border border-purple-200/70 bg-purple-50/60 backdrop-blur-md p-5 text-center shadow-glass">
+              <div className="rounded-2xl border border-purple-200/70 bg-purple-50/70 dark:bg-purple-950/40 p-5 text-center shadow-glass">
                 <div className="text-3xl mb-1.5">🎉</div>
                 <div className="text-xs font-bold text-purple-950">
                   Organization Holiday: {todayHolidayName}
@@ -108,10 +108,10 @@ export function DeveloperCalendarWidget() {
           {todayLogs.map((log: any) => (
             <div
               key={log.id}
-              className={`flex items-start justify-between gap-3 rounded-2xl border p-3.5 transition-all duration-200 ${
+              className={`flex items-start justify-between gap-3 p-3.5 transition-all duration-200 ${
                 log.review === 'changes_requested'
-                  ? 'border-amber-300/80 bg-amber-50/60 shadow-glass'
-                  : 'border-white/80 bg-white/60 backdrop-blur-md hover:bg-white/90 hover:shadow-glass'
+                  ? 'rounded-2xl border border-amber-300/80 bg-amber-50/70 dark:bg-amber-950/40 shadow-glass'
+                  : 'glass-subcard hover:bg-white/70 hover:shadow-glass'
               }`}
             >
               <div className="min-w-0 flex-1">
@@ -278,7 +278,7 @@ export function DeveloperCalendarWidget() {
               )}
 
               {selectedDay.isHoliday || selectedDay.status === 'holiday' ? (
-                <div className="rounded-2xl border border-purple-200/80 bg-purple-50/60 backdrop-blur-md p-6 text-center shadow-glass">
+                <div className="rounded-2xl border border-purple-200/80 bg-purple-50/70 dark:bg-purple-950/40 p-6 text-center shadow-glass">
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-2xl shadow-inner">
                     🎉
                   </div>
@@ -293,10 +293,10 @@ export function DeveloperCalendarWidget() {
                 selectedDay.tasks.map((t) => (
                   <div
                     key={t.id}
-                    className={`rounded-2xl border p-3.5 ${
+                    className={`p-3.5 ${
                       t.review === 'changes_requested'
-                        ? 'border-amber-300/80 bg-amber-50/60 shadow-glass'
-                        : 'border-white/80 bg-white/60 backdrop-blur-md'
+                        ? 'rounded-2xl border border-amber-300/80 bg-amber-50/70 dark:bg-amber-950/40 shadow-glass'
+                        : 'glass-subcard'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">

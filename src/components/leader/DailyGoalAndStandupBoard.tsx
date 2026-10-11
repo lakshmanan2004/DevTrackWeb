@@ -94,12 +94,12 @@ ${blockers.length ? blockers.map((l) => `- ${l.task}: ${l.blocker || 'blocked'}`
           {subTasks.map((st) => (
             <div
               key={st.id}
-              className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-3.5 backdrop-blur-md shadow-2xs transition-all ${
+              className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-3.5 shadow-2xs transition-all ${
                 st.status === 'done'
                   ? 'border-emerald-500/30 bg-emerald-500/10'
                   : st.status === 'blocked'
                   ? 'border-rose-500/30 bg-rose-500/10'
-                  : 'glass-surface border-white/80'
+                  : 'glass-subcard border-white/80'
               }`}
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -172,7 +172,7 @@ ${blockers.length ? blockers.map((l) => `- ${l.task}: ${l.blocker || 'blocked'}`
         </div>
 
         <div className="mt-5 space-y-4">
-          <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-4 backdrop-blur-md shadow-2xs">
+          <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-4 shadow-2xs">
             <h4 className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
               <CheckCircle2Icon className="h-4 w-4 text-emerald-600" />
               1. What I accomplished today
@@ -184,7 +184,7 @@ ${blockers.length ? blockers.map((l) => `- ${l.task}: ${l.blocker || 'blocked'}`
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-blue-500/25 bg-blue-500/10 p-4 backdrop-blur-md shadow-2xs">
+          <div className="rounded-2xl border border-blue-500/25 bg-blue-500/10 p-4 shadow-2xs">
             <h4 className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-blue-800 dark:text-blue-300">
               <TargetIcon className="h-4 w-4 text-blue-600" />
               2. What I am working on next
@@ -196,7 +196,7 @@ ${blockers.length ? blockers.map((l) => `- ${l.task}: ${l.blocker || 'blocked'}`
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-rose-500/25 bg-rose-500/10 p-4 backdrop-blur-md shadow-2xs">
+          <div className="rounded-2xl border border-rose-500/25 bg-rose-500/10 p-4 shadow-2xs">
             <h4 className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rose-800 dark:text-rose-300">
               <OctagonAlertIcon className="h-4 w-4 text-rose-600" />
               3. Current Blockers &amp; Dependencies

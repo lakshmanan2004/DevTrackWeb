@@ -146,9 +146,9 @@ export function DeveloperProfile() {
       />
 
       <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto min-w-0">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
-          <aside className="w-full lg:col-span-5 xl:col-span-4 space-y-6 min-w-0">
-            <section className="glass-card rounded-3xl p-5 text-center shadow-glass">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full min-w-0">
+          <aside className="w-full xl:col-span-4 space-y-6 min-w-0">
+            <section className="glass-card rounded-3xl p-5 text-center shadow-glass overflow-hidden">
               <Avatar initials={user?.initials || '··'} size="lg" className="mx-auto" />
               <h2 className="mt-3 text-xl font-bold text-navy dark:text-white">{user?.name}</h2>
               <div className="mt-2 flex items-center justify-center gap-2">
@@ -184,11 +184,11 @@ export function DeveloperProfile() {
               </dl>
             </section>
 
-            <section className="glass-card rounded-3xl p-5 shadow-glass">
+            <section className="glass-card rounded-3xl p-5 shadow-glass overflow-hidden">
               <h3 className="text-sm font-bold text-navy dark:text-white">Today</h3>
               <dl className="mt-3 grid grid-cols-2 gap-3">
                 {weekStats.map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3 shadow-2xs">
+                  <div key={stat.label} className="glass-subcard rounded-2xl p-3">
                     <dt className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</dt>
                     <dd className="mt-0.5 text-base font-bold tabular-nums text-navy dark:text-white">{stat.value}</dd>
                   </div>
@@ -234,8 +234,8 @@ export function DeveloperProfile() {
             </section>
           </aside>
 
-          <div className="w-full lg:col-span-7 xl:col-span-8 space-y-6 min-w-0">
-            <section className="glass-card rounded-3xl p-6 shadow-glass">
+          <div className="w-full xl:col-span-8 space-y-6 min-w-0">
+            <section className="glass-card rounded-3xl p-6 shadow-glass overflow-hidden">
               <h2 className="text-sm font-bold text-navy dark:text-white">Account Settings</h2>
               <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); saveProfile(); }}>
                 <div>
@@ -449,7 +449,7 @@ export function DeveloperProfile() {
             <section className="glass-card rounded-3xl p-6 shadow-glass">
               <h2 className="text-sm font-bold text-navy dark:text-white">GitHub Integration</h2>
 
-              <div className="mt-3 flex gap-2.5 rounded-2xl border border-emerald-300 dark:border-emerald-500/40 bg-emerald-50/90 dark:bg-emerald-950/60 px-4 py-3 shadow-xs ring-1 ring-emerald-500/15 backdrop-blur-xl">
+              <div className="mt-3 flex gap-2.5 rounded-2xl border border-emerald-300 dark:border-emerald-500/40 bg-emerald-50/90 dark:bg-emerald-950/60 px-4 py-3 shadow-xs ring-1 ring-emerald-500/15">
                 <LinkIcon className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                 <p className="text-xs leading-relaxed text-emerald-950 dark:text-emerald-100 font-semibold">
                   Save your GitHub username to attach commit links to your work logs

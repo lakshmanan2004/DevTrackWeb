@@ -7,11 +7,11 @@ const variants: Record<Variant, string> = {
   primary:
     'bg-gradient-to-b from-[#1683FF] to-[#0066DB] text-white shadow-[0_4px_16px_rgba(22,131,255,0.35)] hover:from-[#3595FF] hover:to-[#1683FF] hover:shadow-[0_6px_22px_rgba(22,131,255,0.45)] hover:-translate-y-0.5 border border-white/30 dark:border-white/20 shadow-md',
   secondary:
-    'bg-white/80 hover:bg-white text-slate-800 border border-slate-200/80 hover:border-slate-300 backdrop-blur-md shadow-xs hover:shadow-md hover:-translate-y-0.5 dark:!bg-white/[0.06] dark:hover:!bg-white/[0.12] dark:!text-[#F5F5F5] dark:border-white/12 dark:hover:border-white/25 dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)]',
+    'bg-white/80 hover:bg-white text-slate-800 border border-slate-200/80 hover:border-slate-300 shadow-xs hover:shadow-md hover:-translate-y-0.5 dark:!bg-white/[0.06] dark:hover:!bg-white/[0.12] dark:!text-[#F5F5F5] dark:border-white/12 dark:hover:border-white/25 dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)]',
   ghost:
     'bg-transparent text-slate-600 hover:bg-slate-900/5 hover:text-slate-900 border border-transparent dark:text-[#A1A1AA] dark:hover:!bg-white/[0.06] dark:hover:!text-[#F5F5F5] dark:hover:border-white/10 dark:hover:-translate-y-0.5',
   outline:
-    'bg-white/50 hover:bg-white/90 text-slate-800 border border-slate-200/90 hover:border-slate-300 backdrop-blur-sm shadow-2xs hover:shadow-xs hover:-translate-y-0.5 dark:!bg-white/[0.04] dark:hover:!bg-white/[0.10] dark:text-[#F5F5F5] dark:border-white/12 dark:hover:border-white/25 dark:hover:shadow-[0_4px_16px_rgba(0,0,0,0.25)]',
+    'bg-white/50 hover:bg-white/90 text-slate-800 border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 dark:!bg-white/[0.04] dark:hover:!bg-white/[0.10] dark:text-[#F5F5F5] dark:border-white/12 dark:hover:border-white/25 dark:hover:shadow-[0_4px_16px_rgba(0,0,0,0.25)]',
   success:
     'bg-gradient-to-b from-[#34c759] to-[#28a745] text-white shadow-sm hover:from-[#3cd665] hover:to-[#2cb04b] hover:shadow-md hover:shadow-emerald-500/35 hover:-translate-y-0.5 border border-white/30 shadow-emerald-500/25',
   danger:

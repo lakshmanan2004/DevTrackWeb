@@ -166,7 +166,7 @@ export function DeveloperAlerts() {
                       Mark Seen
                     </Button>
                   ) : (
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 backdrop-blur-md">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10">
                       Seen
                     </span>
                   )}

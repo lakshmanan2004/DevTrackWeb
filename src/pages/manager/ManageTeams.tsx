@@ -95,7 +95,7 @@ export function ManageTeams() {
         )}
 
         {/* PROJECT FILTER DROPDOWN */}
-        <div className="relative z-30 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-4 shadow-glass">
+        <div className="relative z-30 flex flex-wrap items-center justify-between gap-4 glass-card rounded-2xl p-4 shadow-glass">
           <div className="flex flex-wrap items-center gap-3.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 dark:bg-brand/20 text-brand dark:text-sky-400">
               <FolderIcon className="h-5 w-5" />
@@ -138,7 +138,7 @@ export function ManageTeams() {
 
         <div className="space-y-5">
           {!selectedTeam ? (
-            <div className="rounded-3xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-12 text-center shadow-glass space-y-3">
+            <div className="glass-card rounded-3xl p-12 text-center shadow-glass space-y-3">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 dark:bg-brand/20 text-brand dark:text-sky-400">
                 <FolderIcon className="h-7 w-7" />
               </div>
@@ -149,7 +149,7 @@ export function ManageTeams() {
             </div>
           ) : (
             visible.map((team: any) => (
-              <section key={team.id} className="relative z-10 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-glass">
+              <section key={team.id} className="relative z-10 glass-card rounded-2xl shadow-glass overflow-hidden">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline dark:border-white/10 px-5 py-4">
                 <div>
                   <h2 className="text-base font-bold text-navy dark:text-white">{team.name}</h2>
@@ -268,7 +268,7 @@ export function ManageTeams() {
             </section>
           )))}
           {teams.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-12 text-center">
+            <div className="glass-card rounded-2xl border-dashed border-gray-300 dark:border-white/10 p-12 text-center">
               <p className="text-sm font-semibold text-navy dark:text-white">No teams yet</p>
               <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Teams appear here once you create projects.</p>
             </div>

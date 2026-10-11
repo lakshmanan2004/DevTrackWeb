@@ -44,7 +44,7 @@ export function Badge({ children, tone = 'grey', dot = false, className = '' }: 
   const currentTone = tones[tone] || tones.grey;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold backdrop-blur-md shadow-2xs transition-all ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold shadow-2xs transition-all ${
         currentTone.bg
       } ${className}`}
     >

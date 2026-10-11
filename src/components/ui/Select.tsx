@@ -262,7 +262,7 @@ export function Select({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search options…"
-                    className="w-full rounded-xl bg-white/60 dark:bg-white/[0.08] backdrop-blur-md pl-8 pr-7 py-1.5 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 outline-none border border-white/60 dark:border-white/10 focus:border-blue-500/60 focus:bg-white/80 dark:focus:bg-white/[0.14] transition-all"
+                    className="w-full rounded-xl bg-white/70 dark:bg-white/[0.08] pl-8 pr-7 py-1.5 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 outline-none border border-white/60 dark:border-white/10 focus:border-blue-500/60 focus:bg-white/90 dark:focus:bg-white/[0.14] transition-all"
                     onClick={(e) => e.stopPropagation()}
                   />
                   {searchQuery && (

@@ -204,13 +204,13 @@ export function UserProfile() {
       />
 
       <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto min-w-0">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full min-w-0">
           {/* ========================================================================= */}
           {/* LEFT COLUMN: USER OVERVIEW CARD & SECURITY                                */}
           {/* ========================================================================= */}
-          <div className="w-full lg:col-span-5 xl:col-span-4 space-y-6 min-w-0">
+          <div className="w-full xl:col-span-4 space-y-6 min-w-0">
             {/* USER IDENTITY CARD */}
-            <div className="glass-card rounded-2xl p-6 text-center">
+            <div className="glass-card rounded-2xl p-6 text-center overflow-hidden">
               <div className="flex flex-col items-center">
                 <div className="inline-block rounded-full ring-4 ring-white/30 dark:ring-white/10 shadow-lg">
                   <Avatar initials={user?.initials || '··'} size="lg" tone={roleTones[role]} />
@@ -412,7 +412,7 @@ export function UserProfile() {
                 <form onSubmit={changePassword} className="mt-4 space-y-3.5">
                   {passwordMessage && (
                     <div
-                      className={`rounded-xl p-3 text-xs font-semibold backdrop-blur-md ${
+                      className={`rounded-xl p-3 text-xs font-semibold ${
                         passwordMessage.error
                           ? 'bg-rose-500/10 text-rose-500 border border-rose-500/30'
                           : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30'
@@ -477,9 +477,9 @@ export function UserProfile() {
           {/* ========================================================================= */}
           {/* RIGHT COLUMN: PROFILE EDIT & ROLE-SPECIFIC WORKSPACE DETAILS              */}
           {/* ========================================================================= */}
-          <div className="w-full lg:col-span-7 xl:col-span-8 space-y-6 min-w-0">
+          <div className="w-full xl:col-span-8 space-y-6 min-w-0">
             {/* PROFILE EDIT FORM */}
-            <div className="glass-card rounded-2xl p-6">
+            <div className="glass-card rounded-2xl p-6 overflow-hidden">
               <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
                 <div className="flex items-center gap-2">
                   <UserIcon className="h-4 w-4 text-blue-500" />
@@ -542,7 +542,7 @@ export function UserProfile() {
                         onClick={() => setLunchSlot(11)}
                         className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all ${
                           lunchSlot === 11
-                            ? 'border-amber-500/50 bg-amber-500/20 text-amber-900 dark:text-amber-200 ring-2 ring-amber-500/40 shadow-sm backdrop-blur-md'
+                            ? 'border-amber-500/50 bg-amber-500/20 text-amber-900 dark:text-amber-200 ring-2 ring-amber-500/40 shadow-sm'
                             : 'glass-surface text-slate-600 dark:text-slate-300 hover:bg-white/10'
                         }`}
                       >
@@ -554,7 +554,7 @@ export function UserProfile() {
                         onClick={() => setLunchSlot(12)}
                         className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all ${
                           lunchSlot === 12
-                            ? 'border-amber-500/50 bg-amber-500/20 text-amber-900 dark:text-amber-200 ring-2 ring-amber-500/40 shadow-sm backdrop-blur-md'
+                            ? 'border-amber-500/50 bg-amber-500/20 text-amber-900 dark:text-amber-200 ring-2 ring-amber-500/40 shadow-sm'
                             : 'glass-surface text-slate-600 dark:text-slate-300 hover:bg-white/10'
                         }`}
                       >
@@ -575,7 +575,7 @@ export function UserProfile() {
 
             {/* ROLE-SPECIFIC WORKSPACE OVERVIEW */}
             {role === 'leader' && (
-              <div className="glass-card rounded-2xl p-6 space-y-5">
+              <div className="glass-card rounded-2xl p-6 space-y-5 overflow-hidden">
                 <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
                   <div className="flex items-center gap-2">
                     <RadioIcon className="h-4 w-4 text-blue-500" />
@@ -586,19 +586,19 @@ export function UserProfile() {
 
                 {/* STATS TILES */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
+                  <div className="glass-subcard rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Assigned Projects</p>
                     <p className="mt-1 text-base font-extrabold text-purple-600 dark:text-purple-400">
                       {displayProjects.length} {displayProjects.length === 1 ? 'Project' : 'Projects'}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
+                  <div className="glass-subcard rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Assigned Teams</p>
                     <p className="mt-1 text-base font-extrabold text-slate-900 dark:text-white truncate">
                       {teams.length || (user?.teamName ? 1 : 0)} {teams.length === 1 ? 'Team' : 'Teams'}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
+                  <div className="glass-subcard rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Supervised Developers</p>
                     <p className="mt-1 text-base font-extrabold text-blue-500 dark:text-blue-400">
                       {supervisedDevCount} Devs
@@ -607,7 +607,7 @@ export function UserProfile() {
                 </div>
 
                 {/* CAPABILITIES CALLOUT */}
-                <div className="rounded-2xl border border-blue-200/80 dark:border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/40 p-4 text-xs text-blue-950 dark:text-blue-100 space-y-1 shadow-2xs">
+                <div className="rounded-2xl border border-blue-200/60 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/30 p-4 text-xs text-blue-950 dark:text-blue-100 space-y-1 shadow-2xs">
                   <p className="font-black flex items-center gap-1.5 text-blue-950 dark:text-white">
                     <SparklesIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Team Leader Capabilities
                   </p>
@@ -619,7 +619,7 @@ export function UserProfile() {
             )}
 
             {role === 'manager' && (
-              <div className="glass-card rounded-2xl p-6 space-y-5">
+              <div className="glass-card rounded-2xl p-6 space-y-5 overflow-hidden">
                 <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
                   <div className="flex items-center gap-2">
                     <BriefcaseIcon className="h-4 w-4 text-purple-500" />
@@ -629,19 +629,19 @@ export function UserProfile() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
+                  <div className="glass-subcard rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Managed Projects</p>
                     <p className="mt-1 text-base font-extrabold text-purple-600 dark:text-purple-400">
                       {displayProjects.length} {displayProjects.length === 1 ? 'Project' : 'Projects'}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
+                  <div className="glass-subcard rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Teams</p>
                     <p className="mt-1 text-base font-extrabold text-slate-900 dark:text-white">
                       {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/[0.04] p-3.5 shadow-2xs">
+                  <div className="glass-subcard rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Active Developers</p>
                     <p className="mt-1 text-base font-extrabold text-blue-500 dark:text-blue-400">
                       {directory.filter((u: any) => u.role === 'developer').length || supervisedDevCount} Devs
@@ -649,7 +649,7 @@ export function UserProfile() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-purple-200/80 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-950/40 p-4 text-xs text-purple-950 dark:text-purple-100 space-y-1 shadow-2xs">
+                <div className="rounded-2xl border border-purple-200/60 dark:border-purple-500/30 bg-purple-50/40 dark:bg-purple-950/30 p-4 text-xs text-purple-950 dark:text-purple-100 space-y-1 shadow-2xs">
                   <p className="font-black flex items-center gap-1.5 text-purple-950 dark:text-white">
                     <LayersIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" /> Project Manager Capabilities
                   </p>
@@ -661,7 +661,7 @@ export function UserProfile() {
             )}
 
             {role === 'admin' && (
-              <div className="glass-card rounded-2xl p-6 space-y-5">
+              <div className="glass-card rounded-2xl p-6 space-y-5 overflow-hidden">
                 <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
                   <div className="flex items-center gap-2">
                     <ActivityIcon className="h-4 w-4 text-rose-500" />
@@ -670,7 +670,7 @@ export function UserProfile() {
                   <Badge tone="red">System Owner</Badge>
                 </div>
 
-                <div className="rounded-2xl border border-rose-200/80 dark:border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/40 p-4 text-xs text-rose-950 dark:text-rose-100 space-y-1 shadow-2xs">
+                <div className="rounded-2xl border border-rose-200/60 dark:border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/30 p-4 text-xs text-rose-950 dark:text-rose-100 space-y-1 shadow-2xs">
                   <p className="font-black text-rose-950 dark:text-white">Full Platform Access</p>
                   <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                     As an Administrator, you manage accounts in <strong className="text-slate-900 dark:text-white">User Management</strong>, inspect company-wide productivity metrics in <strong className="text-slate-900 dark:text-white">Employee Performance</strong>, and configure work policies in <strong className="text-slate-900 dark:text-white">Settings</strong>.

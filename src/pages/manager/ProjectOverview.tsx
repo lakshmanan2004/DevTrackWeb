@@ -140,7 +140,7 @@ export function ProjectOverview() {
         </Banner>
 
         {!selectedProject ? (
-          <div className="rounded-3xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl p-12 text-center shadow-glass space-y-3">
+          <div className="glass-card rounded-3xl p-12 text-center shadow-glass space-y-3">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 dark:bg-brand/20 text-brand dark:text-sky-400">
               <FolderKanbanIcon className="h-7 w-7" />
             </div>
@@ -186,7 +186,7 @@ export function ProjectOverview() {
             />
 
             <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
-          <section className="overflow-hidden rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-glass">
+          <section className="glass-card overflow-hidden rounded-2xl shadow-glass">
             <div className="border-b border-hairline dark:border-white/10 px-5 py-4 flex items-center justify-between">
               <h2 className="text-sm font-bold text-navy dark:text-white">Weekly Delivery Breakdown</h2>
             </div>
@@ -225,7 +225,7 @@ export function ProjectOverview() {
             </table>
           </section>
 
-          <section className="h-fit overflow-hidden rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-glass">
+          <section className="glass-card h-fit overflow-hidden rounded-2xl shadow-glass">
             <h2 className="border-b border-hairline dark:border-white/10 px-5 py-4 text-sm font-bold text-navy dark:text-white">
               Active Blockers — {currentBlockers.length}
             </h2>

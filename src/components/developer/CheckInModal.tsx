@@ -181,7 +181,7 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
 
         <form className="max-h-[72vh] space-y-5 overflow-y-auto p-6" onSubmit={(e) => e.preventDefault()}>
           {pendingTasks.length > 0 && (
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 backdrop-blur-md">
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5">
               <label className="mb-1.5 block text-xs font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
                 ⚡ Submit for an Assigned Lead Task? (Optional)
               </label>
@@ -302,7 +302,7 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
           </fieldset>
 
           {status === 'blocked' && (
-            <div className="rounded-2xl border border-orange-500/30 bg-orange-500/10 p-4 backdrop-blur-md">
+            <div className="rounded-2xl border border-orange-500/30 bg-orange-500/10 p-4">
               <label htmlFor="ci-blocker" className="block text-xs font-bold text-orange-950 dark:text-orange-200">
                 What is blocking you?
               </label>
@@ -345,7 +345,7 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
               onChange={handleFileChange}
             />
             {file ? (
-              <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 backdrop-blur-md">
+              <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
                 <CheckCircle2Icon className="h-5 w-5 text-emerald-600 shrink-0" aria-hidden="true" />
                 <p className="truncate text-xs font-bold text-emerald-800 dark:text-emerald-300">{file.name}</p>
                 <button

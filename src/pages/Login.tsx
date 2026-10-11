@@ -393,7 +393,7 @@ export function Login() {
             </div>
 
             {error && (
-              <div className="rounded-2xl border border-rose-200 dark:border-rose-500/30 bg-rose-50/90 dark:bg-rose-950/40 backdrop-blur-md p-3.5 text-xs font-semibold text-rose-700 dark:text-rose-300 shadow-sm animate-shake">
+              <div className="rounded-2xl border border-rose-200 dark:border-rose-500/30 bg-rose-50/90 dark:bg-rose-950/40 p-3.5 text-xs font-semibold text-rose-700 dark:text-rose-300 shadow-sm animate-shake">
                 {error}
               </div>
             )}
@@ -409,7 +409,7 @@ export function Login() {
           </form>
 
           {/* Role info card */}
-          <div className="flex items-start gap-3 rounded-2xl border border-blue-200/70 dark:border-[rgba(22,131,255,0.25)] bg-blue-50/60 dark:bg-[rgba(22,131,255,0.08)] backdrop-blur-md p-4 shadow-glass">
+          <div className="flex items-start gap-3 rounded-2xl border border-blue-200/70 dark:border-[rgba(22,131,255,0.25)] bg-blue-50/60 dark:bg-[rgba(22,131,255,0.08)] p-4 shadow-glass">
             <InfoIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand dark:text-[#5AA9FF]" aria-hidden="true" />
             <div className="text-xs">
               <p className="font-bold tracking-wide uppercase text-brand dark:text-[#5AA9FF]">

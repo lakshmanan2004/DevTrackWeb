@@ -362,7 +362,7 @@ export function DeveloperDashboard() {
                     href={activeProject.repoUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/60 dark:border-white/10 bg-white/70 dark:bg-white/[0.06] backdrop-blur-md px-3.5 text-xs font-bold text-brand dark:text-[#5AA9FF] hover:bg-white dark:hover:bg-white/10 shadow-glass transition-all"
+                    className="glass-subcard inline-flex h-9 items-center gap-1.5 px-3.5 text-xs font-bold text-brand dark:text-[#5AA9FF] hover:bg-white/80 dark:hover:bg-white/10 shadow-glass transition-all"
                   >
                     <GitBranchIcon className="h-3.5 w-3.5 text-slate-500 dark:text-[#A1A1AA]" />
                     <span>Repo</span>

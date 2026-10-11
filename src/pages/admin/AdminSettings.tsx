@@ -443,7 +443,7 @@ export function AdminSettings() {
                                   className={`flex flex-col justify-between rounded-2xl border p-3.5 shadow-glass transition-all ${
                                     isWorking
                                       ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-950 dark:text-emerald-200'
-                                      : 'glass-card'
+                                      : 'glass-subcard border-amber-500/20 bg-amber-500/5'
                                   }`}
                                 >
                                   <div>

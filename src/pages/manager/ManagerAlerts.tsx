@@ -172,7 +172,7 @@ export function ManagerAlerts() {
                         {isUnread ? (
                           <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-indigo-400 shadow-sm animate-pulse" aria-label="Unread" />
                         ) : (
-                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 backdrop-blur-md">
+                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10">
                             Seen
                           </span>
                         )}

@@ -40,7 +40,7 @@ function LogCard({ log }: { log: any }) {
   const statusMeta = (taskStatusMeta[log.status as TaskStatus] || taskStatusMeta['progress']);
   return (
     <article
-      className={`glass-card relative overflow-hidden rounded-2xl border p-4 shadow-glass transition-all duration-200 ${
+      className={`glass-subcard relative overflow-hidden rounded-2xl border p-4 transition-all duration-200 ${
         isLate
           ? 'border-amber-300/80 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20'
           : log.review === 'changes_requested'
@@ -145,7 +145,7 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
       </div>
 
       {isHoliday && logs.length === 0 ? (
-        <div className="p-8 text-center bg-purple-50/40 dark:bg-purple-950/30 backdrop-blur-md rounded-2xl border border-purple-200/80 dark:border-purple-500/30 my-5 shadow-glass">
+        <div className="p-8 text-center bg-purple-50/60 dark:bg-purple-950/40 rounded-2xl border border-purple-200/80 dark:border-purple-500/30 my-5 shadow-glass">
           <span className="text-4xl">🎉</span>
           <h3 className="mt-2 text-base font-bold text-purple-950 dark:text-purple-200">Organization Holiday: {holidayName || 'Holiday'}</h3>
           <p className="mt-1 text-xs text-purple-800 dark:text-purple-300 max-w-md mx-auto">
@@ -193,7 +193,7 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
               <div className={`min-w-0 flex-1 ${index < hours.length - 1 ? 'pb-5' : ''}`}>
                 {/* Lunch Break Display (11 AM - 12 PM or 12 PM - 1 PM) */}
                 {hour.isLunch ? (
-                  <article className="rounded-2xl border border-amber-200/80 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/30 backdrop-blur-md p-4 shadow-glass flex items-center justify-between gap-3">
+                  <article className="rounded-2xl border border-amber-200/80 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/40 p-4 shadow-glass flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-base shadow-inner">
                         🍱
@@ -218,7 +218,7 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
                   <div className="space-y-3">
                     {hasLogs ? (
                       <>
-                        <div className="rounded-2xl border border-emerald-300/80 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/30 backdrop-blur-md p-3.5 flex flex-wrap items-center justify-between gap-2 shadow-glass">
+                        <div className="rounded-2xl border border-emerald-300/80 dark:border-emerald-500/30 bg-emerald-50/80 dark:bg-emerald-950/40 p-3.5 flex flex-wrap items-center justify-between gap-2 shadow-glass">
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="relative flex h-2.5 w-2.5">
@@ -243,7 +243,7 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
                         </div>
                       </>
                     ) : (
-                      <article className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/80 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/30 backdrop-blur-md p-5 shadow-glass">
+                      <article className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/80 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/40 p-5 shadow-glass">
                         <div>
                           <div className="flex items-center gap-2">
                             <h3 className="text-sm font-bold text-amber-900 dark:text-amber-100">Current hour in progress</h3>
@@ -267,7 +267,7 @@ export function TodayTimeline({ logs, currentSlot, lunchSlot: propLunchSlot, isH
                         <LogCard key={log.id || log._id || lIdx} log={log} />
                       ))
                     ) : !hour.isLunch ? (
-                      <div className="rounded-2xl border border-rose-200/80 dark:border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/30 backdrop-blur-md p-3.5 text-xs text-rose-800 dark:text-rose-200 flex items-center justify-between shadow-2xs">
+                      <div className="rounded-2xl border border-rose-200/80 dark:border-rose-500/30 bg-rose-50/60 dark:bg-rose-950/40 p-3.5 text-xs text-rose-800 dark:text-rose-200 flex items-center justify-between shadow-2xs">
                         <span className="font-medium">Missed check-in for {hour.label} (0 logs submitted)</span>
                         <button onClick={() => onLog(hour.slot)} className="text-xs font-bold text-rose-700 dark:text-rose-300 underline hover:text-rose-900 dark:hover:text-rose-100 cursor-pointer">
                           Submit Late Log

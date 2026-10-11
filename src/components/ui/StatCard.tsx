@@ -34,7 +34,7 @@ export const StatCard = React.memo(function StatCard({ label, value, hint, tone 
       <div className="flex items-start justify-between gap-3">
         <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-[#A1A1AA]">{label}</p>
         {icon && (
-          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl backdrop-blur-md shadow-2xs ${iconTone[tone]}`}>
+          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl shadow-2xs ${iconTone[tone]}`}>
             {icon}
           </span>
         )}

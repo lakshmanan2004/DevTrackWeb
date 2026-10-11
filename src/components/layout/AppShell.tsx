@@ -26,24 +26,25 @@ export function AppShell({ role }: AppShellProps) {
       {/* SCENIC WALLPAPER BACKGROUND — Fixed & Theme-Independent Layer */}
       {wallpaper ? (
         <div
-          className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
+          className="pointer-events-none fixed inset-0 z-0 bg-slate-950 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url(${wallpaper})`
           }}
         />
       ) : (
-        <div className="pointer-events-none fixed inset-0 z-0 bg-[#E0EFFF] dark:bg-[#090d16] transition-colors duration-500" />
+        <div className="pointer-events-none fixed inset-0 z-0 bg-transparent" />
       )}
 
       {/* FLOATING FROSTED SIDEBAR */}
       <Sidebar role={role} />
 
-      {/* MAIN CONTENT AREA WITH SMOOTH ROUTE TRANSITION */}
+      {/* MAIN CONTENT AREA WITH CLEAN SCROLLING */}
       <main
         ref={mainRef}
+        style={{ scrollbarGutter: 'stable' }}
         className="relative z-10 flex h-screen min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-transparent w-full max-w-full"
       >
-        <div key={location.pathname} className="flex min-w-0 flex-1 flex-col w-full max-w-full animate-page-enter">
+        <div key={location.pathname} className="flex min-w-0 flex-1 flex-col w-full max-w-full">
           <Outlet />
         </div>
       </main>

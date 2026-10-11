@@ -383,7 +383,7 @@ export function CreateProject() {
                     return (
                       <span
                         key={id}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold backdrop-blur-md ${
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${
                           wasAssigned
                             ? 'bg-rose-500/15 border-rose-500/30 text-rose-900 dark:text-rose-200'
                             : 'bg-purple-500/15 border-purple-500/30 text-purple-800 dark:text-purple-300'

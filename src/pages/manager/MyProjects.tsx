@@ -113,7 +113,7 @@ export function MyProjects() {
                   className={`inline-flex items-center gap-2.5 rounded-2xl px-4 py-2 shadow-glass transition-all duration-200 cursor-pointer text-left border ${
                     isActive
                       ? 'btn-glass-primary !text-white border-transparent scale-[1.02] shadow-md ring-2 ring-indigo-500/30'
-                      : 'border-white/80 bg-white/70 dark:bg-slate-900/60 dark:border-white/10 backdrop-blur-md hover:bg-white/95 dark:hover:bg-slate-800'
+                      : 'glass-surface hover:bg-white/95 dark:hover:bg-slate-800'
                   }`}
                 >
                   <dt className={`text-xs font-semibold ${isActive ? 'text-white/90' : 'text-slate-500 dark:text-slate-400'}`}>

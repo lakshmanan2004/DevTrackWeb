@@ -110,7 +110,7 @@ export function WorkLogs() {
       />
 
       <div className="flex-1 space-y-5 p-6">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl px-5 py-4 shadow-glass">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 glass-card rounded-2xl px-5 py-4 shadow-glass">
           <p className="text-sm font-bold text-navy dark:text-white">{dateLabel}</p>
           {loading ? (
             <p className="text-sm text-gray-500 dark:text-slate-400">Loading logs…</p>
@@ -364,7 +364,7 @@ export function WorkLogs() {
             </article>
           );})} 
           {!loading && visible.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 p-12 text-center backdrop-blur-xl">
+            <div className="glass-card rounded-2xl border-dashed border-gray-300 dark:border-white/10 p-12 text-center">
               <p className="text-sm font-semibold text-navy dark:text-white">No logs for this date</p>
               <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Submit an hourly check-in from your dashboard.</p>
             </div>

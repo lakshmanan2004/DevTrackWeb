@@ -117,7 +117,7 @@ export function LiveDashboard() {
               className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 shadow-glass transition-all duration-200 cursor-pointer ${
                 'id' in pill && filter === pill.id
                   ? 'btn-glass-primary !text-white border-transparent'
-                  : 'border-white/80 bg-white/70 backdrop-blur-md hover:bg-white/90'
+                  : 'glass-surface hover:bg-white/90 dark:hover:bg-white/10'
               }`}
             >
               <dt className={`text-xs font-semibold ${'id' in pill && filter === pill.id ? 'text-white' : 'text-slate-500'}`}>{pill.label}</dt>

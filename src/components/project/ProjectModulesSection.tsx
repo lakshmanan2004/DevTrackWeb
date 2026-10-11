@@ -178,7 +178,7 @@ export function ProjectModulesSection({
         {/* HIGHLIGHTED ABOUT THE PROJECT & WHO IS DOING THIS PROJECT */}
         <div className="grid gap-5 md:grid-cols-2">
           {/* ABOUT THE PROJECT CARD */}
-          <div className="rounded-2xl border border-blue-200/60 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/30 backdrop-blur-md p-5 shadow-glass space-y-2.5">
+          <div className="glass-subcard p-5 space-y-2.5">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-brand dark:text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
                 <InfoIcon className="h-4 w-4 text-brand dark:text-sky-400" />
@@ -196,7 +196,7 @@ export function ProjectModulesSection({
               {project.description || 'Dedicated academic portal and product delivery platform for staff and students.'}
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-blue-200/40 dark:border-blue-500/20 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-hairline dark:border-white/10 text-[11px] font-medium text-slate-600 dark:text-slate-300">
               {project.started && <span>Started: <strong className="text-navy dark:text-white">{project.started}</strong></span>}
               {project.targetDate && <span>· Target: <strong className="text-navy dark:text-white">{project.targetDate}</strong></span>}
               {project.repoUrl && (
@@ -213,7 +213,7 @@ export function ProjectModulesSection({
           </div>
 
           {/* WHO IS DOING THIS PROJECT CARD */}
-          <div className="rounded-2xl border border-purple-200/60 dark:border-purple-500/30 bg-purple-50/40 dark:bg-purple-950/30 backdrop-blur-md p-5 shadow-glass space-y-2.5">
+          <div className="glass-subcard p-5 space-y-2.5">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-extrabold text-purple-900 dark:text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
                 <UsersIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
@@ -237,7 +237,7 @@ export function ProjectModulesSection({
               )}
             </div>
 
-            <div className="space-y-1.5 pt-1 border-t border-purple-100 dark:border-purple-500/20">
+            <div className="space-y-1.5 pt-1 border-t border-hairline dark:border-white/10">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                   Assigned Developers:
@@ -290,7 +290,7 @@ export function ProjectModulesSection({
         </div>
 
         {/* COMPLETION PROGRESS */}
-        <div className="space-y-2 rounded-2xl border border-hairline dark:border-white/10 bg-canvas/60 dark:bg-slate-900/60 p-4">
+        <div className="space-y-2 glass-subcard p-4">
           <div className="flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-slate-300">
             <span className="font-bold text-navy dark:text-white">Completion Progress</span>
             <span className="text-navy dark:text-white font-bold">{completedWeight}% of 100%</span>
@@ -304,7 +304,7 @@ export function ProjectModulesSection({
 
         {/* HIGHLIGHTED MODULE PROOF INSPECTION DROPDOWN BAR */}
         {modules.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border-2 border-brand/40 dark:border-brand/40 bg-gradient-to-r from-brand-soft/40 via-purple-50 to-brand-soft/20 dark:from-sky-950/50 dark:via-slate-900/90 dark:to-purple-950/40 p-4 shadow-glass ring-2 ring-brand/10">
+          <div className="flex flex-wrap items-center justify-between gap-4 glass-subcard p-4">
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white shadow-xs ring-2 ring-brand/20">
                 <EyeIcon className="h-5 w-5" />

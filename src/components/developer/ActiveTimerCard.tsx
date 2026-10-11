@@ -24,11 +24,11 @@ export function ActiveTimerCard({ onLog, activeMinutes, firstSeen, missed }: Act
     >
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-x-8 gap-y-6">
         <div className="flex items-center gap-4 min-w-[180px]">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 border border-brand/20 shadow-glass text-brand">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 border border-brand/20 shadow-xs text-brand">
             <ClockIcon className="h-7 w-7 animate-pulse" />
           </div>
           <div>
-            <p className="font-mono text-4xl sm:text-5xl font-extrabold tracking-tight text-navy">
+            <p className="font-mono text-4xl sm:text-5xl font-extrabold tracking-tight text-navy dark:text-white">
               {String(h).padStart(2, '0')}:{String(m).padStart(2, '0')}
             </p>
             <p className="mt-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">
@@ -38,7 +38,7 @@ export function ActiveTimerCard({ onLog, activeMinutes, firstSeen, missed }: Act
         </div>
 
         <div className="min-w-[240px] flex-1 max-w-xl">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
             <span className="tracking-wide uppercase text-[11px] text-slate-500">Workday Target Progress</span>
             <span className="tabular-nums font-mono text-brand font-bold">{pct}%</span>
           </div>
@@ -52,11 +52,11 @@ export function ActiveTimerCard({ onLog, activeMinutes, firstSeen, missed }: Act
 
         <div className="flex items-center gap-6">
           <dl className="flex items-center gap-6 text-xs">
-            <div className="rounded-2xl border border-white/80 bg-white/50 backdrop-blur-md px-4 py-2.5 shadow-glass">
+            <div className="glass-subcard px-4 py-2.5">
               <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">First Seen</dt>
-              <dd className="mt-0.5 font-mono font-bold text-navy text-sm">{firstSeen || '—'}</dd>
+              <dd className="mt-0.5 font-mono font-bold text-navy dark:text-white text-sm">{firstSeen || '—'}</dd>
             </div>
-            <div className="rounded-2xl border border-white/80 bg-white/50 backdrop-blur-md px-4 py-2.5 shadow-glass">
+            <div className="glass-subcard px-4 py-2.5">
               <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Missed Slots</dt>
               <dd className={`mt-0.5 font-mono font-bold text-sm ${missed ? 'text-rose-600' : 'text-emerald-600'}`}>
                 {missed}

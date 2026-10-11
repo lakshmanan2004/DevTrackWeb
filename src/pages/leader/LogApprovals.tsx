@@ -410,7 +410,7 @@ export function LogApprovals() {
 
                   {/* Leader Feedback Note */}
                   {log.reviewNote && (
-                    <div className={`mt-3.5 rounded-2xl border p-3.5 text-xs leading-relaxed backdrop-blur-md ${
+                    <div className={`mt-3.5 rounded-2xl border p-3.5 text-xs leading-relaxed ${
                       isApproved
                         ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-950 dark:text-emerald-200'
                         : isChangesRequested

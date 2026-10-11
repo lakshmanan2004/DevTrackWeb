@@ -152,7 +152,7 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
               <label
                 className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 transition-all ${
                   selectedStatus === 'completed'
-                    ? 'border-emerald-500/50 bg-emerald-500/15 ring-2 ring-emerald-500/30 shadow-md backdrop-blur-md'
+                    ? 'border-emerald-500/50 bg-emerald-500/15 ring-2 ring-emerald-500/30 shadow-md'
                     : 'glass-surface hover:bg-white/10'
                 }`}
               >
@@ -183,7 +183,7 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
               <label
                 className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 transition-all ${
                   selectedStatus === 'ongoing'
-                    ? 'border-blue-500/50 bg-blue-500/15 ring-2 ring-blue-500/30 shadow-md backdrop-blur-md'
+                    ? 'border-blue-500/50 bg-blue-500/15 ring-2 ring-blue-500/30 shadow-md'
                     : 'glass-surface hover:bg-white/10'
                 }`}
               >
@@ -210,7 +210,7 @@ export function CloseProjectModal({ open, project, onClose, onSuccess }: ClosePr
               <label
                 className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 transition-all ${
                   selectedStatus === 'hold'
-                    ? 'border-amber-500/50 bg-amber-500/15 ring-2 ring-amber-500/30 shadow-md backdrop-blur-md'
+                    ? 'border-amber-500/50 bg-amber-500/15 ring-2 ring-amber-500/30 shadow-md'
                     : 'glass-surface hover:bg-white/10'
                 }`}
               >

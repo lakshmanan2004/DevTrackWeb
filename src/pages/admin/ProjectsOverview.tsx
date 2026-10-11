@@ -102,7 +102,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
       </div>
 
       {/* MIDDLE: PROGRESS INDICATOR */}
-      <div className="space-y-2 rounded-2xl border border-slate-200/60 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 p-4 backdrop-blur-md">
+      <div className="space-y-2 glass-subcard rounded-2xl p-4">
         <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
           <span className="flex items-center gap-1.5">
             <LayersIcon className="h-3.5 w-3.5 text-brand" />
@@ -122,7 +122,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
       {/* BOTTOM: 2x2 METRIC GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
         {/* Leadership */}
-        <div className="space-y-1 rounded-2xl border border-slate-200/50 dark:border-white/5 bg-slate-50/60 dark:bg-white/[0.03] p-3">
+        <div className="space-y-1 glass-subcard p-3">
           <div className="flex items-center gap-1.5 font-semibold text-slate-500 dark:text-slate-400 text-[11px]">
             <UserCheckIcon className="h-3.5 w-3.5 text-blue-500 shrink-0" />
             <span>Leadership</span>
@@ -136,7 +136,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
         </div>
 
         {/* Developers */}
-        <div className="space-y-1 rounded-2xl border border-slate-200/50 dark:border-white/5 bg-slate-50/60 dark:bg-white/[0.03] p-3">
+        <div className="space-y-1 glass-subcard p-3">
           <div className="flex items-center gap-1.5 font-semibold text-slate-500 dark:text-slate-400 text-[11px]">
             <UsersIcon className="h-3.5 w-3.5 text-purple-500 shrink-0" />
             <span>Team Members ({project.developers})</span>
@@ -149,7 +149,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
         </div>
 
         {/* Started Date */}
-        <div className="space-y-1 rounded-2xl border border-slate-200/50 dark:border-white/5 bg-slate-50/60 dark:bg-white/[0.03] p-3">
+        <div className="space-y-1 glass-subcard p-3">
           <div className="flex items-center gap-1.5 font-semibold text-slate-500 dark:text-slate-400 text-[11px]">
             <CalendarIcon className="h-3.5 w-3.5 text-blue-500 shrink-0" />
             <span>Started Date</span>
@@ -160,7 +160,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
         </div>
 
         {/* Target / Completed Date */}
-        <div className="space-y-1 rounded-2xl border border-slate-200/50 dark:border-white/5 bg-slate-50/60 dark:bg-white/[0.03] p-3">
+        <div className="space-y-1 glass-subcard p-3">
           <div className="flex items-center gap-1.5 font-semibold text-slate-500 dark:text-slate-400 text-[11px]">
             <TargetIcon className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
             <span>{project.ended ? 'Completed Date' : 'Target Date'}</span>
@@ -243,7 +243,7 @@ export function ProjectsOverview() {
                   className={`inline-flex items-center gap-2 rounded-2xl px-3.5 py-1.5 shadow-glass text-xs transition-all duration-200 cursor-pointer border ${
                     isActive
                       ? 'btn-glass-primary !text-white border-transparent scale-[1.02] shadow-md ring-2 ring-indigo-500/30'
-                      : 'border-white/80 bg-white/70 dark:bg-slate-900/60 dark:border-white/10 backdrop-blur-md hover:bg-white/95 dark:hover:bg-slate-800'
+                      : 'glass-surface hover:bg-white/90 dark:hover:bg-slate-800/80'
                   }`}
                 >
                   <dt className={`font-semibold ${isActive ? 'text-white/90' : 'text-slate-500 dark:text-slate-400'}`}>
