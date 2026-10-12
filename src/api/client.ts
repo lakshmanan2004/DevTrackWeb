@@ -36,30 +36,58 @@ export function setToken(token: string | null, remember = true) {
   }
 }
 
+// In-flight GET request deduplication map to eliminate duplicate concurrent network requests
+// without retaining stale cache entries after completion.
+const inFlightRequests = new Map<string, Promise<any>>();
+
 export async function api<T = any>(
   path: string,
   options: { method?: string; body?: any } = {}
 ): Promise<T> {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: options.method || 'GET',
-    credentials: 'include',
-    headers: {
-      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    if (res.status === 401) {
-      triggerUnauthorized();
+  const method = (options.method || 'GET').toUpperCase();
+  const isGet = method === 'GET' && !options.body;
+
+  if (isGet) {
+    const existing = inFlightRequests.get(path);
+    if (existing) {
+      return existing as Promise<T>;
     }
-    const err: any = new Error(data.error || `Request failed (${res.status})`);
-    err.status = res.status;
-    throw err;
   }
-  return data as T;
+
+  const promise = (async () => {
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_BASE}${path}`, {
+        method,
+        credentials: 'include',
+        headers: {
+          ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: options.body ? JSON.stringify(options.body) : undefined
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 401) {
+          triggerUnauthorized();
+        }
+        const err: any = new Error(data.error || `Request failed (${res.status})`);
+        err.status = res.status;
+        throw err;
+      }
+      return data as T;
+    } finally {
+      if (isGet) {
+        inFlightRequests.delete(path);
+      }
+    }
+  })();
+
+  if (isGet) {
+    inFlightRequests.set(path, promise);
+  }
+
+  return promise;
 }
 
 // Multipart upload helper (screenshots).

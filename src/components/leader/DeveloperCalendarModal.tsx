@@ -195,7 +195,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
   const activeApprovedTasks = displayTasks.filter((t: any) => t.review === 'approved');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-md animate-in fade-in overflow-hidden">
+    <div className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center animate-in fade-in overflow-hidden">
       {/* Centered bounding container between sidebar/navbar end and right side of screen */}
       <div className="fixed inset-0 left-0 lg:left-64 flex items-center justify-center p-4 sm:p-6 lg:p-8 pointer-events-none">
         <div className="glass-modal relative flex flex-col w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-3xl border border-white/90 dark:border-white/15 shadow-2xl p-0 pointer-events-auto">

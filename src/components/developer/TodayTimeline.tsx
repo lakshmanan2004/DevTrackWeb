@@ -40,7 +40,7 @@ function LogCard({ log }: { log: any }) {
   const statusMeta = (taskStatusMeta[log.status as TaskStatus] || taskStatusMeta['progress']);
   return (
     <article
-      className={`glass-subcard relative overflow-hidden rounded-2xl border p-4 transition-all duration-200 ${
+      className={`glass-subcard hover-tile relative overflow-hidden rounded-2xl border p-4 transition-all duration-200 ${
         isLate
           ? 'border-amber-300/80 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20'
           : log.review === 'changes_requested'

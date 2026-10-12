@@ -41,22 +41,31 @@ export function LeaderProjects() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInspectionProjectId, setSelectedInspectionProjectId] = useState<string | null>(null);
 
-  const activeCount = projects.filter((p: any) => p.status !== 'completed' && p.status !== 'hold').length;
-  const completedCount = projects.filter((p: any) => p.status === 'completed').length;
+  const { activeCount, completedCount } = React.useMemo(() => {
+    let act = 0;
+    let comp = 0;
+    for (const p of projects) {
+      if (p.status === 'completed') comp++;
+      else if (p.status !== 'hold') act++;
+    }
+    return { activeCount: act, completedCount: comp };
+  }, [projects]);
   const totalDevs = developers.length;
 
-  const filteredProjects = projects.filter((p: any) => {
-    if (filter === 'active' && (p.status === 'completed' || p.status === 'hold')) return false;
-    if (filter === 'completed' && p.status !== 'completed') return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchName = (p.name || '').toLowerCase().includes(q);
-      const matchTeam = (p.team || p.teamName || '').toLowerCase().includes(q);
-      const matchDesc = (p.description || '').toLowerCase().includes(q);
-      return matchName || matchTeam || matchDesc;
-    }
-    return true;
-  });
+  const filteredProjects = React.useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return projects.filter((p: any) => {
+      if (filter === 'active' && (p.status === 'completed' || p.status === 'hold')) return false;
+      if (filter === 'completed' && p.status !== 'completed') return false;
+      if (q) {
+        const matchName = (p.name || '').toLowerCase().includes(q);
+        const matchTeam = (p.team || p.teamName || '').toLowerCase().includes(q);
+        const matchDesc = (p.description || '').toLowerCase().includes(q);
+        return matchName || matchTeam || matchDesc;
+      }
+      return true;
+    });
+  }, [projects, filter, searchQuery]);
 
   return (
     <>
@@ -68,7 +77,7 @@ export function LeaderProjects() {
       <div className="flex-1 space-y-6 p-6 sm:p-8">
         {/* TOP SUMMARY STATS */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="glass-card rounded-2xl p-4 shadow-glass">
+          <div className="glass-card independent-card rounded-2xl p-4 shadow-glass">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Projects</span>
               <FolderKanbanIcon className="h-4 w-4 text-brand" />
@@ -76,7 +85,7 @@ export function LeaderProjects() {
             <p className="mt-2 text-2xl font-black text-navy dark:text-white">{projects.length}</p>
           </div>
 
-          <div className="glass-card rounded-2xl p-4 shadow-glass">
+          <div className="glass-card independent-card rounded-2xl p-4 shadow-glass">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Active Delivery</span>
               <TrendingUpIcon className="h-4 w-4 text-blue-500" />
@@ -84,7 +93,7 @@ export function LeaderProjects() {
             <p className="mt-2 text-2xl font-black text-blue-600 dark:text-blue-400">{activeCount}</p>
           </div>
 
-          <div className="glass-card rounded-2xl p-4 shadow-glass">
+          <div className="glass-card independent-card rounded-2xl p-4 shadow-glass">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Completed</span>
               <CheckCircle2Icon className="h-4 w-4 text-emerald-500" />
@@ -92,7 +101,7 @@ export function LeaderProjects() {
             <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">{completedCount}</p>
           </div>
 
-          <div className="glass-card rounded-2xl p-4 shadow-glass">
+          <div className="glass-card independent-card rounded-2xl p-4 shadow-glass">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Supervised Devs</span>
               <UsersIcon className="h-4 w-4 text-purple-500" />
@@ -126,7 +135,7 @@ export function LeaderProjects() {
             return (
               <article
                 key={proj.id}
-                className={`glass-card rounded-3xl p-6 sm:p-7 shadow-glass transition-all hover:shadow-xl space-y-5 border ${
+                className={`glass-card independent-card rounded-3xl p-6 sm:p-7 space-y-5 border ${
                   isInspectOpen ? 'ring-2 ring-blue-500/30 border-blue-500/40' : ''
                 }`}
               >

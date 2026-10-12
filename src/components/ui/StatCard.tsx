@@ -17,7 +17,7 @@ const iconTone: Record<Tone, string> = {
   yellow: 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/20',
   red: 'bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/20',
   purple: 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 ring-1 ring-purple-500/20',
-  grey: 'bg-slate-500/10 dark:bg-white/[0.08] text-slate-600 dark:text-[#A1A1AA] ring-1 ring-slate-500/20 dark:ring-white/10'
+  grey: 'bg-slate-500/10 dark:bg-white/[0.08] text-slate-600 dark:text-slate-300 ring-1 ring-slate-500/20 dark:ring-white/10'
 };
 
 interface StatCardProps {
@@ -26,13 +26,21 @@ interface StatCardProps {
   hint?: string;
   tone?: Tone;
   icon?: React.ReactNode;
+  onClick?: () => void;
+  interactive?: boolean;
 }
 
-export const StatCard = React.memo(function StatCard({ label, value, hint, tone = 'grey', icon }: StatCardProps) {
+export const StatCard = React.memo(function StatCard({ label, value, hint, tone = 'grey', icon, onClick, interactive }: StatCardProps) {
+  const isClickable = Boolean(onClick || interactive);
   return (
-    <div className="glass-card-interactive flex h-full flex-col p-5">
+    <div
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      className={`${isClickable ? 'glass-card-interactive cursor-pointer' : 'glass-card independent-card'} flex h-full flex-col p-5`}
+    >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-[#A1A1AA]">{label}</p>
+        <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{label}</p>
         {icon && (
           <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl shadow-2xs ${iconTone[tone]}`}>
             {icon}
@@ -40,7 +48,7 @@ export const StatCard = React.memo(function StatCard({ label, value, hint, tone 
         )}
       </div>
       <p className={`mt-3 text-2xl font-black tracking-tight tabular-nums ${valueTone[tone]}`}>{value}</p>
-      <p className="mt-auto pt-2 text-xs font-medium text-slate-400 dark:text-[#71717A]">{hint ?? '\u00a0'}</p>
+      <p className="mt-auto pt-2 text-xs font-medium text-slate-400 dark:text-slate-400">{hint ?? '\u00a0'}</p>
     </div>
   );
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Role } from '../../types';
@@ -7,6 +7,14 @@ import { WallpaperModal } from '../theme/WallpaperModal';
 
 interface AppShellProps {
   role: Role;
+}
+
+function PageFallback() {
+  return (
+    <div className="flex flex-1 items-center justify-center p-12 min-h-[300px]">
+      <div className="h-7 w-7 rounded-full border-2 border-brand/30 border-t-brand animate-spin" />
+    </div>
+  );
 }
 
 export function AppShell({ role }: AppShellProps) {
@@ -44,8 +52,10 @@ export function AppShell({ role }: AppShellProps) {
         style={{ scrollbarGutter: 'stable' }}
         className="relative z-10 flex h-screen min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-transparent w-full max-w-full"
       >
-        <div key={location.pathname} className="flex min-w-0 flex-1 flex-col w-full max-w-full">
-          <Outlet />
+        <div key={location.pathname} className="animate-page-enter flex min-w-0 flex-1 flex-col w-full max-w-full">
+          <Suspense fallback={<PageFallback />}>
+            <Outlet />
+          </Suspense>
         </div>
       </main>
 

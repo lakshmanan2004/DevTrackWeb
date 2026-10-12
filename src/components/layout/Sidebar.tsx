@@ -188,7 +188,7 @@ export const Sidebar = React.memo(function Sidebar({ role }: SidebarProps) {
       </nav>
 
       {/* FOOTER USER PROFILE CARD */}
-      <div className="border-t border-white/10 p-3 bg-black/40 shrink-0">
+      <div className="border-t border-white/10 p-3 bg-black/20 shrink-0">
         {isCollapsed ? (
           /* COLLAPSED COMPACT PROFILE */
           <div className="flex flex-col items-center gap-3 py-1">

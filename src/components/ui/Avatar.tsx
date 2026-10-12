@@ -3,12 +3,12 @@ import React from 'react';
 type AvatarTone = 'blue' | 'purple' | 'red' | 'green' | 'grey' | 'amber';
 
 const tones: Record<AvatarTone, string> = {
-  blue: 'bg-brand-light text-white',
-  purple: 'bg-pm text-white',
-  red: 'bg-danger text-white',
-  green: 'bg-ok text-white',
-  grey: 'bg-offline text-white',
-  amber: 'bg-warn text-white'
+  blue: 'bg-blue-600 text-white shadow-xs',
+  purple: 'bg-purple-600 text-white shadow-xs',
+  red: 'bg-rose-600 text-white shadow-xs',
+  green: 'bg-emerald-600 text-white shadow-xs',
+  grey: 'bg-slate-600 text-white shadow-xs',
+  amber: 'bg-amber-700 text-white shadow-xs'
 };
 
 const sizes = {

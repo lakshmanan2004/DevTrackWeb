@@ -37,7 +37,7 @@ export function MyProjects() {
           {projects.map((proj: any) => (
             <article
               key={proj.id}
-              className="glass-card rounded-3xl p-6 shadow-glass space-y-5 transition-all hover:shadow-xl"
+              className="glass-card independent-card rounded-3xl p-6 space-y-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-hairline pb-4">
                 <div>
@@ -60,7 +60,7 @@ export function MyProjects() {
                     href={proj.repoUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold text-brand dark:text-indigo-400 hover:bg-slate-500/10 transition-colors"
+                    className="glass-subcard glass-subcard-interactive inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold text-brand dark:text-indigo-400"
                   >
                     <GitBranchIcon className="h-4 w-4 text-slate-400" />
                     <span>View Repository</span>

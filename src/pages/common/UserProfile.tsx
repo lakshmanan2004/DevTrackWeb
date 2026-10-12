@@ -234,7 +234,7 @@ export function UserProfile() {
                 {/* METADATA LIST */}
                 <div className="mt-6 border-t border-white/20 dark:border-white/10 pt-4 text-left space-y-2.5 text-xs">
                   {/* Email Address */}
-                  <div className="flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
+                  <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
                     <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
                       <MailIcon className="h-4 w-4 text-blue-500 shrink-0" />
                       <span>Email Address</span>
@@ -245,7 +245,7 @@ export function UserProfile() {
                   </div>
 
                   {/* Role Permissions */}
-                  <div className="flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
+                  <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
                     <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
                       <ShieldCheckIcon className="h-4 w-4 text-emerald-500 shrink-0" />
                       <span>Role Permissions</span>
@@ -257,7 +257,7 @@ export function UserProfile() {
 
                   {/* Assigned Projects count for Leader & Manager */}
                   {(role === 'leader' || role === 'manager') && (
-                    <div className="flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
+                    <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
                       <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
                         <FolderIcon className="h-4 w-4 text-purple-500 shrink-0" />
                         <span>Assigned Projects</span>
@@ -271,7 +271,7 @@ export function UserProfile() {
                   {role === 'developer' && (
                     <>
                       {user?.teamName && (
-                        <div className="flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
+                        <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
                           <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
                             <UsersIcon className="h-4 w-4 text-purple-500 shrink-0" />
                             <span>Assigned Team</span>
@@ -281,7 +281,7 @@ export function UserProfile() {
                       )}
 
                       {user?.projectName && (
-                        <div className="flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
+                        <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
                           <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
                             <FolderIcon className="h-4 w-4 text-blue-500 shrink-0" />
                             <span>Active Project</span>
@@ -291,7 +291,7 @@ export function UserProfile() {
                       )}
 
                       {/* Lunch Break for Developer */}
-                      <div className="flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
+                      <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-2 border-b border-white/10 dark:border-white/5">
                         <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
                           <UtensilsIcon className="h-4 w-4 text-amber-500 shrink-0" />
                           <span>Lunch Break</span>
@@ -304,7 +304,7 @@ export function UserProfile() {
                   )}
 
                   {/* GitHub Profile */}
-                  <div className="flex items-center justify-between gap-4 py-2">
+                  <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-2">
                     <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
                       <GithubIcon className="h-4 w-4 text-slate-400 shrink-0" />
                       <span>GitHub Profile</span>
@@ -326,7 +326,7 @@ export function UserProfile() {
                   </div>
 
                   {/* Wallpaper Theme Selector */}
-                  <div className="flex items-center justify-between gap-4 py-2 border-t border-white/10 dark:border-white/5">
+                  <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-2 border-t border-white/10 dark:border-white/5">
                     <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
                       <ImageIcon className="h-4 w-4 text-purple-500 shrink-0" />
                       <span>Wallpaper Theme</span>
@@ -342,7 +342,7 @@ export function UserProfile() {
                   </div>
 
                   {/* Interface Mode */}
-                  <div className="flex items-center justify-between gap-4 py-2 border-t border-white/10 dark:border-white/5">
+                  <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-2 border-t border-white/10 dark:border-white/5">
                     <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
                       <SparklesIcon className="h-4 w-4 text-amber-500 shrink-0" />
                       <span>Appearance Mode</span>
@@ -351,7 +351,7 @@ export function UserProfile() {
                   </div>
 
                   {/* Notification Alert Sound */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 py-2 border-t border-white/10 dark:border-white/5">
+                  <div className="list-row px-3 -mx-3 flex flex-wrap items-center justify-between gap-3 py-2 border-t border-white/10 dark:border-white/5">
                     <div>
                       <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium">
                         <Volume2Icon className="h-4 w-4 text-indigo-500 shrink-0" />
@@ -586,19 +586,19 @@ export function UserProfile() {
 
                 {/* STATS TILES */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="glass-subcard rounded-xl p-3.5">
+                  <div className="glass-subcard hover-tile rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Assigned Projects</p>
                     <p className="mt-1 text-base font-extrabold text-purple-600 dark:text-purple-400">
                       {displayProjects.length} {displayProjects.length === 1 ? 'Project' : 'Projects'}
                     </p>
                   </div>
-                  <div className="glass-subcard rounded-xl p-3.5">
+                  <div className="glass-subcard hover-tile rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Assigned Teams</p>
                     <p className="mt-1 text-base font-extrabold text-slate-900 dark:text-white truncate">
                       {teams.length || (user?.teamName ? 1 : 0)} {teams.length === 1 ? 'Team' : 'Teams'}
                     </p>
                   </div>
-                  <div className="glass-subcard rounded-xl p-3.5">
+                  <div className="glass-subcard hover-tile rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Supervised Developers</p>
                     <p className="mt-1 text-base font-extrabold text-blue-500 dark:text-blue-400">
                       {supervisedDevCount} Devs
@@ -607,7 +607,7 @@ export function UserProfile() {
                 </div>
 
                 {/* CAPABILITIES CALLOUT */}
-                <div className="rounded-2xl border border-blue-200/60 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/30 p-4 text-xs text-blue-950 dark:text-blue-100 space-y-1 shadow-2xs">
+                <div className="hover-tile rounded-2xl border border-blue-200/60 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/30 p-4 text-xs text-blue-950 dark:text-blue-100 space-y-1 shadow-2xs">
                   <p className="font-black flex items-center gap-1.5 text-blue-950 dark:text-white">
                     <SparklesIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Team Leader Capabilities
                   </p>
@@ -629,19 +629,19 @@ export function UserProfile() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="glass-subcard rounded-xl p-3.5">
+                  <div className="glass-subcard hover-tile rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Managed Projects</p>
                     <p className="mt-1 text-base font-extrabold text-purple-600 dark:text-purple-400">
                       {displayProjects.length} {displayProjects.length === 1 ? 'Project' : 'Projects'}
                     </p>
                   </div>
-                  <div className="glass-subcard rounded-xl p-3.5">
+                  <div className="glass-subcard hover-tile rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Teams</p>
                     <p className="mt-1 text-base font-extrabold text-slate-900 dark:text-white">
                       {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
                     </p>
                   </div>
-                  <div className="glass-subcard rounded-xl p-3.5">
+                  <div className="glass-subcard hover-tile rounded-xl p-3.5">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Active Developers</p>
                     <p className="mt-1 text-base font-extrabold text-blue-500 dark:text-blue-400">
                       {directory.filter((u: any) => u.role === 'developer').length || supervisedDevCount} Devs
@@ -649,7 +649,7 @@ export function UserProfile() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-purple-200/60 dark:border-purple-500/30 bg-purple-50/40 dark:bg-purple-950/30 p-4 text-xs text-purple-950 dark:text-purple-100 space-y-1 shadow-2xs">
+                <div className="hover-tile rounded-2xl border border-purple-200/60 dark:border-purple-500/30 bg-purple-50/40 dark:bg-purple-950/30 p-4 text-xs text-purple-950 dark:text-purple-100 space-y-1 shadow-2xs">
                   <p className="font-black flex items-center gap-1.5 text-purple-950 dark:text-white">
                     <LayersIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" /> Project Manager Capabilities
                   </p>
@@ -670,7 +670,7 @@ export function UserProfile() {
                   <Badge tone="red">System Owner</Badge>
                 </div>
 
-                <div className="rounded-2xl border border-rose-200/60 dark:border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/30 p-4 text-xs text-rose-950 dark:text-rose-100 space-y-1 shadow-2xs">
+                <div className="hover-tile rounded-2xl border border-rose-200/60 dark:border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/30 p-4 text-xs text-rose-950 dark:text-rose-100 space-y-1 shadow-2xs">
                   <p className="font-black text-rose-950 dark:text-white">Full Platform Access</p>
                   <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                     As an Administrator, you manage accounts in <strong className="text-slate-900 dark:text-white">User Management</strong>, inspect company-wide productivity metrics in <strong className="text-slate-900 dark:text-white">Employee Performance</strong>, and configure work policies in <strong className="text-slate-900 dark:text-white">Settings</strong>.

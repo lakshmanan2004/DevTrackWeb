@@ -36,20 +36,32 @@ export function UserManagement() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const visible = managedUsers.
-  filter((user: any) => {
-    if (filter === 'all') return true;
-    if (filter === 'active') return user.active;
-    if (filter === 'inactive') return !user.active;
-    return user.role === filter;
-  }).
-  filter(
-    (user: any) =>
-    user.name.toLowerCase().includes(query.toLowerCase()) ||
-    user.email.toLowerCase().includes(query.toLowerCase())
-  );
+  const roleCounts = React.useMemo(() => {
+    let dev = 0, lead = 0, mgr = 0, adm = 0, inact = 0, act = 0;
+    for (const u of managedUsers) {
+      if (u.role === 'developer') dev++;
+      else if (u.role === 'leader') lead++;
+      else if (u.role === 'manager') mgr++;
+      else if (u.role === 'admin') adm++;
+      if (u.active) act++; else inact++;
+    }
+    return { dev, lead, mgr, adm, inact, act, all: managedUsers.length };
+  }, [managedUsers]);
 
-  const roleCount = (role: string) => managedUsers.filter((u: any) => u.role === role).length;
+  const visible = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return managedUsers.filter((user: any) => {
+      if (filter === 'active' && !user.active) return false;
+      if (filter === 'inactive' && user.active) return false;
+      if (filter !== 'all' && filter !== 'active' && filter !== 'inactive' && user.role !== filter) return false;
+      if (q) {
+        const nameMatch = user.name?.toLowerCase().includes(q);
+        const emailMatch = user.email?.toLowerCase().includes(q);
+        if (!nameMatch && !emailMatch) return false;
+      }
+      return true;
+    });
+  }, [managedUsers, filter, query]);
 
   const createUser = async () => {
     setBusy(true);
@@ -112,11 +124,11 @@ export function UserManagement() {
               className="glass-input h-10 w-80 pl-10 pr-4 text-xs font-semibold text-slate-800 placeholder:text-slate-400" />
           </label>
           <p className="text-xs text-slate-500 font-medium">
-            <span className="font-bold text-navy">{roleCount('developer')} Developers</span> ·{' '}
-            <span className="font-bold text-navy">{roleCount('leader')} Leads</span> ·{' '}
-            <span className="font-bold text-navy">{roleCount('manager')} Managers</span> ·{' '}
-            <span className="font-bold text-navy">{roleCount('admin')} Admins</span> ·{' '}
-            <span className="text-amber-600 font-bold">{managedUsers.filter((u: any) => !u.active).length} Inactive</span>
+            <span className="font-bold text-navy">{roleCounts.dev} Developers</span> ·{' '}
+            <span className="font-bold text-navy">{roleCounts.lead} Leads</span> ·{' '}
+            <span className="font-bold text-navy">{roleCounts.mgr} Managers</span> ·{' '}
+            <span className="font-bold text-navy">{roleCounts.adm} Admins</span> ·{' '}
+            <span className="text-amber-600 font-bold">{roleCounts.inact} Inactive</span>
           </p>
         </div>
 
@@ -125,12 +137,12 @@ export function UserManagement() {
           value={filter}
           onChange={setFilter}
           options={[
-            { id: 'all', label: 'All Users', count: managedUsers.length },
-            { id: 'developer', label: 'Developer', count: roleCount('developer') },
-            { id: 'leader', label: 'Team Leader', count: roleCount('leader') },
-            { id: 'manager', label: 'Project Manager', count: roleCount('manager') },
-            { id: 'active', label: 'Active', count: managedUsers.filter((u: any) => u.active).length },
-            { id: 'inactive', label: 'Inactive', count: managedUsers.filter((u: any) => !u.active).length }
+            { id: 'all', label: 'All Users', count: roleCounts.all },
+            { id: 'developer', label: 'Developer', count: roleCounts.dev },
+            { id: 'leader', label: 'Team Leader', count: roleCounts.lead },
+            { id: 'manager', label: 'Project Manager', count: roleCounts.mgr },
+            { id: 'active', label: 'Active', count: roleCounts.act },
+            { id: 'inactive', label: 'Inactive', count: roleCounts.inact }
           ]}
         />
 
@@ -149,7 +161,7 @@ export function UserManagement() {
               </thead>
               <tbody className="divide-y divide-slate-200/60">
                 {visible.map((user: any) => (
-                  <tr key={user.id} className={`transition-colors hover:bg-white/40 ${user.active ? '' : 'bg-slate-50/30 opacity-75'}`}>
+                  <tr key={user.id || user._id} className={`transition-colors hover:bg-white/40 ${user.active ? '' : 'bg-slate-50/30 opacity-75'}`}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <Avatar
@@ -224,7 +236,7 @@ export function UserManagement() {
 
       {modalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md"
+          className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="add-user-title"

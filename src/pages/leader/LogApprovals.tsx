@@ -150,18 +150,17 @@ export function LogApprovals() {
             <Button
               icon={<PlusIcon className="h-4 w-4" />}
               onClick={() => setAssignTaskModalOpen(true)}
-              className="bg-brand text-white hover:bg-brand/90"
             >
               Assign New Task
             </Button>
             {counts.changes_requested > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-500/20 px-3 py-1 text-xs font-bold text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 shadow-2xs">
                 <HighlighterIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 {counts.changes_requested} targeted changes
               </span>
             )}
-            <span className="inline-flex items-center gap-2 rounded-full bg-warn px-3 py-1.5 text-xs font-bold text-white">
-              <ClockIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 dark:bg-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 shadow-2xs">
+              <ClockIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
               {counts.pending} pending
             </span>
           </div>
@@ -646,7 +645,7 @@ export function LogApprovals() {
 
       {/* Screenshot Zoom Modal */}
       {activeScreenshotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xl animate-in fade-in">
+        <div className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in">
           <div className="glass-modal relative max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl p-4 shadow-2xl border border-white/30 dark:border-white/15">
             <div className="mb-3 flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-2 text-white">
               <span className="text-sm font-semibold text-slate-900 dark:text-white">{activeScreenshotModal.title}</span>

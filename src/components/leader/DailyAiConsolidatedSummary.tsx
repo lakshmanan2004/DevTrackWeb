@@ -194,25 +194,25 @@ ${pendingText || 'No pending tasks or blockers reported.'}
           {summary && summary.totalLogs > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-slate-200/60 dark:border-white/10 text-[11px]">
               {/* Total Logs */}
-              <div className="rounded-xl bg-blue-50/70 dark:bg-blue-950/30 p-2.5 border border-blue-200/60 dark:border-blue-500/20 transition-colors">
+              <div className="hover-tile rounded-xl bg-blue-50/70 dark:bg-blue-950/30 p-2.5 border border-blue-200/60 dark:border-blue-500/20 transition-colors">
                 <span className="text-blue-700 dark:text-blue-300 block font-bold text-[11px]">Total Logs</span>
                 <strong className="text-blue-950 dark:text-blue-100 font-mono font-extrabold text-sm sm:text-base">{summary.totalLogs}</strong>
               </div>
 
               {/* Active Devs */}
-              <div className="rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 p-2.5 border border-emerald-200/60 dark:border-emerald-500/20 transition-colors">
+              <div className="hover-tile rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 p-2.5 border border-emerald-200/60 dark:border-emerald-500/20 transition-colors">
                 <span className="text-emerald-700 dark:text-emerald-300 block font-bold text-[11px]">Active Devs</span>
                 <strong className="text-emerald-950 dark:text-emerald-100 font-mono font-extrabold text-sm sm:text-base">{summary.totalDevs}</strong>
               </div>
 
               {/* Code Commits */}
-              <div className="rounded-xl bg-purple-50/70 dark:bg-purple-950/30 p-2.5 border border-purple-200/60 dark:border-purple-500/20 transition-colors">
+              <div className="hover-tile rounded-xl bg-purple-50/70 dark:bg-purple-950/30 p-2.5 border border-purple-200/60 dark:border-purple-500/20 transition-colors">
                 <span className="text-purple-700 dark:text-purple-300 block font-bold text-[11px]">Code Commits</span>
                 <strong className="text-purple-950 dark:text-purple-100 font-mono font-extrabold text-sm sm:text-base">{summary.totalCommits || 0}</strong>
               </div>
 
               {/* Active Modules */}
-              <div className="rounded-xl bg-amber-50/70 dark:bg-amber-950/30 p-2.5 border border-amber-200/60 dark:border-amber-500/20 transition-colors">
+              <div className="hover-tile rounded-xl bg-amber-50/70 dark:bg-amber-950/30 p-2.5 border border-amber-200/60 dark:border-amber-500/20 transition-colors">
                 <span className="text-amber-700 dark:text-amber-300 block font-bold text-[11px]">Active Modules</span>
                 <strong className="text-amber-950 dark:text-amber-100 font-mono font-extrabold text-sm sm:text-base">{summary.mainModulesAndFocusAreas?.length || 0}</strong>
               </div>
@@ -240,7 +240,7 @@ ${pendingText || 'No pending tasks or blockers reported.'}
         <div className="w-full">
           {/* SUB-CARD 1: MAIN MODULES AND FOCUS AREA */}
           {activeTab === 'modules' && (
-            <div className="flex flex-col rounded-3xl border border-indigo-200/70 dark:border-indigo-500/20 bg-indigo-50/40 dark:bg-slate-900/80 p-6 shadow-glass space-y-4">
+            <div className="hover-tile flex flex-col rounded-3xl border border-indigo-200/70 dark:border-indigo-500/20 bg-indigo-50/40 dark:bg-slate-900/80 p-6 shadow-glass space-y-4">
               <div className="flex items-center justify-between gap-3 border-b border-indigo-100/80 dark:border-indigo-500/20 pb-3.5">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-500/20 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 shrink-0">
@@ -316,7 +316,7 @@ ${pendingText || 'No pending tasks or blockers reported.'}
 
           {/* SUB-CARD 2: INPROGRESS OR PENDING WORKS */}
           {activeTab === 'pending' && (
-            <div className="flex flex-col rounded-3xl border border-amber-200/70 dark:border-amber-500/20 bg-amber-50/40 dark:bg-slate-900/80 p-6 shadow-glass space-y-4">
+            <div className="hover-tile flex flex-col rounded-3xl border border-amber-200/70 dark:border-amber-500/20 bg-amber-50/40 dark:bg-slate-900/80 p-6 shadow-glass space-y-4">
               <div className="flex items-center justify-between gap-3 border-b border-amber-100/80 dark:border-amber-500/20 pb-3.5">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 shrink-0">

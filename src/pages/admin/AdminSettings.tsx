@@ -440,7 +440,7 @@ export function AdminSettings() {
                               cards.push(
                                 <div
                                   key={dateStr}
-                                  className={`flex flex-col justify-between rounded-2xl border p-3.5 shadow-glass transition-all ${
+                                  className={`hover-tile flex flex-col justify-between rounded-2xl border p-3.5 shadow-glass transition-all ${
                                     isWorking
                                       ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-950 dark:text-emerald-200'
                                       : 'glass-subcard border-amber-500/20 bg-amber-500/5'

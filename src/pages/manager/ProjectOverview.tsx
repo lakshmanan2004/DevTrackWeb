@@ -123,7 +123,7 @@ export function ProjectOverview() {
               <Button
                 size="sm"
                 variant={selectedProject.status === 'completed' ? 'secondary' : 'primary'}
-                className={selectedProject.status === 'completed' ? '' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}
+                className={selectedProject.status === 'completed' ? '' : '!bg-emerald-700 hover:!bg-emerald-800 text-white shadow-sm'}
                 onClick={() => setCloseModalOpen(true)}
                 icon={selectedProject.status === 'completed' ? <TrophyIcon className="h-4 w-4 text-emerald-600" /> : <CheckCircle2Icon className="h-4 w-4" />}
               >

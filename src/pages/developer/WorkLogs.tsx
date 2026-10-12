@@ -374,8 +374,8 @@ export function WorkLogs() {
 
       {/* Screenshot Zoom Modal */}
       {activeScreenshotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-md animate-in fade-in">
-          <div className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-gray-900 p-4 shadow-2xl">
+        <div className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="glass-modal relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl p-4 shadow-2xl">
             <div className="mb-3 flex items-center justify-between border-b border-gray-800 pb-2 text-white">
               <span className="text-sm font-semibold">{activeScreenshotModal.title}</span>
               <button

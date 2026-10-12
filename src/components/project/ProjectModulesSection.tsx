@@ -178,7 +178,7 @@ export function ProjectModulesSection({
         {/* HIGHLIGHTED ABOUT THE PROJECT & WHO IS DOING THIS PROJECT */}
         <div className="grid gap-5 md:grid-cols-2">
           {/* ABOUT THE PROJECT CARD */}
-          <div className="glass-subcard p-5 space-y-2.5">
+          <div className="glass-subcard hover-tile p-5 space-y-2.5">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-brand dark:text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
                 <InfoIcon className="h-4 w-4 text-brand dark:text-sky-400" />
@@ -213,7 +213,7 @@ export function ProjectModulesSection({
           </div>
 
           {/* WHO IS DOING THIS PROJECT CARD */}
-          <div className="glass-subcard p-5 space-y-2.5">
+          <div className="glass-subcard hover-tile p-5 space-y-2.5">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-extrabold text-purple-900 dark:text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
                 <UsersIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
@@ -267,10 +267,10 @@ export function ProjectModulesSection({
                             team: project.team
                           })
                         }
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 dark:border-purple-500/40 bg-white dark:bg-slate-800/90 px-2.5 py-1 text-xs font-bold text-navy dark:text-slate-100 shadow-xs hover:border-brand hover:bg-brand-soft/40 dark:hover:bg-slate-700 hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+                        className="glass-subcard glass-subcard-interactive inline-flex items-center gap-1.5 rounded-lg border border-purple-300 dark:border-purple-500/40 px-2.5 py-1 text-xs font-bold text-navy dark:text-slate-100 shadow-xs cursor-pointer group"
                         title={`Click to view ${devName}'s monthly task & activity calendar`}
                       >
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-[10px] font-extrabold text-white group-hover:ring-2 group-hover:ring-brand/40 transition-all">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-extrabold text-white shadow-2xs group-hover:ring-2 group-hover:ring-blue-400/40 transition-all">
                           {devInitial}
                         </span>
                         <span className="group-hover:text-brand dark:group-hover:text-sky-300 group-hover:underline">{devName}</span>
@@ -290,7 +290,7 @@ export function ProjectModulesSection({
         </div>
 
         {/* COMPLETION PROGRESS */}
-        <div className="space-y-2 glass-subcard p-4">
+        <div className="space-y-2 glass-subcard hover-tile p-4">
           <div className="flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-slate-300">
             <span className="font-bold text-navy dark:text-white">Completion Progress</span>
             <span className="text-navy dark:text-white font-bold">{completedWeight}% of 100%</span>
@@ -304,7 +304,7 @@ export function ProjectModulesSection({
 
         {/* HIGHLIGHTED MODULE PROOF INSPECTION DROPDOWN BAR */}
         {modules.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-4 glass-subcard p-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 glass-subcard hover-tile p-4">
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white shadow-xs ring-2 ring-brand/20">
                 <EyeIcon className="h-5 w-5" />
@@ -469,7 +469,7 @@ export function ProjectModulesSection({
                                 disabled={isBusy || logsCount === 0}
                                 onClick={() => updateStatus(m.id, 'completed')}
                                 icon={<ShieldCheckIcon className="h-3.5 w-3.5" />}
-                                className={logsCount === 0 ? 'opacity-50 cursor-not-allowed bg-gray-400 dark:bg-slate-700 border-gray-400 dark:border-slate-700 hover:bg-gray-400' : ''}
+                                className={logsCount === 0 ? 'cursor-not-allowed !bg-slate-200/80 dark:!bg-slate-800/80 !text-slate-700 dark:!text-slate-300 !border-slate-300 dark:!border-white/15' : ''}
                               >
                                 {isBusy ? 'Updating...' : 'Mark Completed'}
                               </Button>
@@ -615,8 +615,8 @@ export function ProjectModulesSection({
 
       {/* FULL SCREENSHOT EXPAND MODAL */}
       {activeScreenshot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-md animate-in fade-in">
-          <div className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-gray-900 p-4 shadow-2xl">
+        <div className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="glass-modal relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl p-4 shadow-2xl">
             <div className="mb-3 flex items-center justify-between border-b border-gray-800 pb-2 text-white">
               <span className="text-sm font-semibold">{activeScreenshot.title}</span>
               <button

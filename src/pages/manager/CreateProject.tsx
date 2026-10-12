@@ -195,11 +195,11 @@ export function CreateProject() {
                     return (
                       <label
                         key={option.id}
-                        className={`flex flex-col gap-1 rounded-2xl border p-3.5 text-xs transition-all cursor-pointer ${
+                        className={`hover-tile flex flex-col gap-1 rounded-2xl border p-3.5 text-xs transition-all cursor-pointer ${
                           isSelected
                             ? option.id === 'urgent'
                               ? 'border-rose-500/80 bg-rose-500/15 text-rose-900 dark:text-rose-200 ring-2 ring-rose-500/30 shadow-md'
-                              : 'border-brand bg-brand-soft/70 text-navy dark:text-white ring-2 ring-brand/30 shadow-md'
+                              : 'border-brand bg-brand-soft/70 dark:bg-blue-600/20 text-navy dark:text-white ring-2 ring-brand/30 shadow-md'
                             : 'border-hairline dark:border-white/10 bg-white/60 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:bg-white/90 dark:hover:bg-slate-800'
                         }`}
                       >
@@ -224,7 +224,7 @@ export function CreateProject() {
                           />
                           <span className="font-bold text-sm">{option.label}</span>
                         </div>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 pl-6 leading-tight">
+                        <p className={`text-[11px] pl-6 leading-tight ${isSelected ? (option.id === 'urgent' ? 'text-rose-900 dark:text-rose-200' : 'text-blue-900 dark:text-blue-200') : 'text-slate-500 dark:text-slate-400'}`}>
                           {option.sub}
                         </p>
                       </label>

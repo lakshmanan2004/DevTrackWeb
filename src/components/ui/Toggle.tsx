@@ -10,7 +10,7 @@ interface ToggleProps {
 
 export function Toggle({ checked, onChange, label, description, disabled = false }: ToggleProps) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3">
+    <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-3">
       <div className="min-w-0 flex-1">
         <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white leading-snug">
           {label}

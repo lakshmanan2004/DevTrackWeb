@@ -1,0 +1,13 @@
+const res = await fetch('http://localhost:5000/api/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: 'admin@college.edu', password: 'devtrack@2026' })
+});
+const data = await res.json();
+
+const usersRes = await fetch('http://localhost:5000/api/org/users', {
+  headers: { Authorization: `Bearer ${data.token}` }
+});
+const usersData = await usersRes.json();
+console.log('Available users:');
+(usersData.users || usersData).forEach(u => console.log(`- ${u.role}: ${u.email} (${u.name})`));

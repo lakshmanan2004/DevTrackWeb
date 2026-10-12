@@ -70,7 +70,9 @@ export function LeaderAlerts() {
   const { user, refresh: refreshAuth } = useAuth();
   const navigate = useNavigate();
   const { data, refetch } = useAlerts();
-  const leaderAlerts: LeaderAlert[] = (data?.alerts || []).filter((a: any) => a.category);
+  const leaderAlerts: LeaderAlert[] = React.useMemo(() => {
+    return (data?.alerts || []).filter((a: any) => a.category);
+  }, [data?.alerts]);
   const [filter, setFilter] = useState('all');
   const [toastMessage, setToastMessage] = useState('');
 
@@ -79,13 +81,17 @@ export function LeaderAlerts() {
     setTimeout(() => setToastMessage(''), 3000);
   };
 
-  const unread = leaderAlerts.filter((a: LeaderAlert) => a.unread).length;
+  const unread = React.useMemo(() => {
+    return leaderAlerts.filter((a: LeaderAlert) => a.unread).length;
+  }, [leaderAlerts]);
 
-  const visible = leaderAlerts.filter((alert: LeaderAlert) => {
-    if (filter === 'all') return true;
-    if (filter === 'unread') return alert.unread;
-    return alert.category === filter;
-  });
+  const visible = React.useMemo(() => {
+    return leaderAlerts.filter((alert: LeaderAlert) => {
+      if (filter === 'all') return true;
+      if (filter === 'unread') return alert.unread;
+      return alert.category === filter;
+    });
+  }, [leaderAlerts, filter]);
 
   const act = async (alert: LeaderAlert, action: string) => {
     try {
@@ -178,8 +184,8 @@ export function LeaderAlerts() {
                 Clear All
               </Button>
             )}
-            <span className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm">
-              <BellIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="inline-flex items-center gap-2 rounded-full bg-rose-50 dark:bg-rose-500/20 px-3 py-1.5 text-xs font-bold text-rose-900 dark:text-rose-200 border border-rose-300 dark:border-rose-500/30 shadow-2xs">
+              <BellIcon className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" aria-hidden="true" />
               {unread} unread
             </span>
           </div>
@@ -226,7 +232,7 @@ export function LeaderAlerts() {
             return (
               <li
                 key={alert.id}
-                className={`glass-card rounded-3xl p-5 shadow-glass transition-all hover:shadow-xl ${accentBorder}`}
+                className={`glass-card-interactive rounded-3xl p-5 ${accentBorder}`}
               >
                 <div className="flex flex-wrap items-start gap-4">
                   <span

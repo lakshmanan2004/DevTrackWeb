@@ -58,12 +58,12 @@ export function LiveDashboard() {
   if (!selectedId && visible.length > 0) setSelectedId(visible[0].id);
 
   const pills = [
-    { id: 'all', label: 'All Developers', value: developers.length, tone: 'text-navy' },
-    { id: 'on-track', label: 'On Track', value: developers.filter((d: any) => d.missed === 0).length, tone: 'text-green-600' },
-    { id: 'missed', label: 'Missed Logs', value: developers.filter((d: any) => d.missed > 0).length, tone: 'text-danger' },
-    { id: 'commits', label: 'Commits Today', value: developers.filter((d: any) => d.commits > 0).length, tone: 'text-navy' },
-    { label: 'Alerts', value: unreadAlerts, tone: 'text-danger' },
-    { label: 'Logs Today', value: logsToday, tone: 'text-navy' },
+    { id: 'all', label: 'All Developers', value: developers.length, tone: 'text-navy dark:text-white' },
+    { id: 'on-track', label: 'On Track', value: developers.filter((d: any) => d.missed === 0).length, tone: 'text-emerald-600 dark:text-emerald-400' },
+    { id: 'missed', label: 'Missed Logs', value: developers.filter((d: any) => d.missed > 0).length, tone: 'text-rose-600 dark:text-rose-400' },
+    { id: 'commits', label: 'Commits Today', value: developers.filter((d: any) => d.commits > 0).length, tone: 'text-navy dark:text-white' },
+    { label: 'Alerts', value: unreadAlerts, tone: 'text-rose-600 dark:text-rose-400' },
+    { label: 'Logs Today', value: logsToday, tone: 'text-navy dark:text-white' },
   ];
 
   const connected = useSocketConnected();
@@ -110,20 +110,28 @@ export function LiveDashboard() {
         />
 
         <dl className="flex flex-wrap gap-2.5">
-          {pills.map((pill) => (
-            <div
-              key={pill.label}
-              onClick={() => 'id' in pill ? setFilter(pill.id as typeof filter) : undefined}
-              className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 shadow-glass transition-all duration-200 cursor-pointer ${
-                'id' in pill && filter === pill.id
-                  ? 'btn-glass-primary !text-white border-transparent'
-                  : 'glass-surface hover:bg-white/90 dark:hover:bg-white/10'
-              }`}
-            >
-              <dt className={`text-xs font-semibold ${'id' in pill && filter === pill.id ? 'text-white' : 'text-slate-500'}`}>{pill.label}</dt>
-              <dd className={`text-sm font-bold tabular-nums ${'id' in pill && filter === pill.id ? 'text-white' : pill.tone}`}>{pill.value}</dd>
-            </div>
-          ))}
+          {pills.map((pill) => {
+            const isClickable = 'id' in pill;
+            const isSelected = isClickable && filter === pill.id;
+            return (
+              <div
+                key={pill.label}
+                onClick={() => isClickable ? setFilter(pill.id as typeof filter) : undefined}
+                role={isClickable ? 'button' : undefined}
+                tabIndex={isClickable ? 0 : undefined}
+                className={`glass-pill rounded-2xl px-4 py-2 ${
+                  isClickable ? 'cursor-pointer' : '!cursor-default'
+                } ${
+                  isSelected
+                    ? 'glass-pill-active !text-white'
+                    : ''
+                }`}
+              >
+                <dt className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-slate-700 dark:text-slate-200'}`}>{pill.label}</dt>
+                <dd className={`text-sm font-bold tabular-nums ${isSelected ? 'text-white' : pill.tone}`}>{pill.value}</dd>
+              </div>
+            );
+          })}
         </dl>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)] items-start">

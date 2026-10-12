@@ -52,11 +52,11 @@ export function ActiveTimerCard({ onLog, activeMinutes, firstSeen, missed }: Act
 
         <div className="flex items-center gap-6">
           <dl className="flex items-center gap-6 text-xs">
-            <div className="glass-subcard px-4 py-2.5">
+            <div className="glass-subcard hover-tile px-4 py-2.5">
               <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">First Seen</dt>
               <dd className="mt-0.5 font-mono font-bold text-navy dark:text-white text-sm">{firstSeen || '—'}</dd>
             </div>
-            <div className="glass-subcard px-4 py-2.5">
+            <div className="glass-subcard hover-tile px-4 py-2.5">
               <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Missed Slots</dt>
               <dd className={`mt-0.5 font-mono font-bold text-sm ${missed ? 'text-rose-600' : 'text-emerald-600'}`}>
                 {missed}

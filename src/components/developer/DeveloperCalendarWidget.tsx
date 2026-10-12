@@ -58,14 +58,14 @@ export function DeveloperCalendarWidget() {
   const firstDow = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay();
 
   const dayCellStyles: Record<string, string> = {
-    approved: 'bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 ring-2 ring-emerald-400/30',
-    pending: 'bg-amber-500 text-white shadow-sm hover:bg-amber-600 ring-2 ring-amber-400/40',
-    absent: 'bg-rose-500 text-white shadow-sm hover:bg-rose-600',
-    leave: 'bg-amber-500 text-white shadow-sm hover:bg-amber-600 ring-2 ring-amber-400/40',
-    half_day: 'bg-indigo-500 text-white shadow-sm hover:bg-indigo-600 ring-2 ring-indigo-400/40',
+    approved: 'bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 ring-2 ring-emerald-400/30',
+    pending: 'bg-amber-400 text-slate-950 font-black shadow-sm hover:bg-amber-300 ring-2 ring-amber-400/40',
+    absent: 'bg-rose-600 text-white shadow-sm hover:bg-rose-500',
+    leave: 'bg-amber-400 text-slate-950 font-black shadow-sm hover:bg-amber-300 ring-2 ring-amber-400/40',
+    half_day: 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 ring-2 ring-indigo-400/40',
     holiday: 'bg-purple-600 text-white shadow-sm hover:bg-purple-700 ring-2 ring-purple-400/40',
-    off: 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:border dark:border-white/10',
-    weekend: 'bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-900/80 dark:text-slate-500 dark:border-white/10'
+    off: 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:border dark:border-white/10',
+    weekend: 'bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-900/80 dark:text-slate-400 dark:border-white/10'
   };
 
   return (
@@ -111,7 +111,7 @@ export function DeveloperCalendarWidget() {
               className={`flex items-start justify-between gap-3 p-3.5 transition-all duration-200 ${
                 log.review === 'changes_requested'
                   ? 'rounded-2xl border border-amber-300/80 bg-amber-50/70 dark:bg-amber-950/40 shadow-glass'
-                  : 'glass-subcard hover:bg-white/70 hover:shadow-glass'
+                  : 'glass-subcard hover-tile hover:bg-white/70 hover:shadow-glass'
               }`}
             >
               <div className="min-w-0 flex-1">
@@ -172,14 +172,14 @@ export function DeveloperCalendarWidget() {
             </div>
           </div>
 
-          <span className="flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-xs font-bold text-amber-700 shadow-2xs">
+          <span className="flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-xs font-bold text-amber-800 dark:text-amber-300 shadow-2xs">
             <ClockIcon className="h-3.5 w-3.5" />
             {pendingCount} Pending
           </span>
         </div>
 
         <div className="mt-4">
-          <div className="grid grid-cols-7 text-center text-[11px] font-bold uppercase tracking-wider text-slate-400 pb-2">
+          <div className="grid grid-cols-7 text-center text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-300 pb-2">
             <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
           </div>
 
@@ -190,7 +190,7 @@ export function DeveloperCalendarWidget() {
                 key={day.dateStr}
                 onClick={() => setSelectedDay(day)}
                 title={`${day.fullLabel} — ${(day.isHoliday ? 'HOLIDAY (' + (day.holidayName || 'Holiday') + ')' : day.status).toUpperCase()} (${day.tasksCount} tasks)`}
-                className={`flex h-9 w-full items-center justify-center rounded-xl text-xs font-extrabold transition-colors duration-150 hover:brightness-110 active:opacity-90 cursor-pointer shadow-glass ${
+                className={`glass-subcard-interactive flex h-9 w-full items-center justify-center rounded-xl text-xs font-extrabold cursor-pointer shadow-glass ${
                   dayCellStyles[day.status]
                 }`}
               >
@@ -200,35 +200,35 @@ export function DeveloperCalendarWidget() {
           </div>
         </div>
 
-        <div className="mt-5 border-t border-slate-200/60 pt-3.5">
+        <div className="mt-5 border-t border-slate-200/60 dark:border-white/10 pt-3.5">
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-300/40" />
-              <span className="font-semibold text-slate-700">All Approved / Done</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">All Approved / Done</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-amber-300/40" />
-              <span className="font-bold text-amber-800">Pending Feedback</span>
+              <span className="font-bold text-amber-800 dark:text-amber-300">Pending Feedback</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-rose-300/40" />
-              <span className="font-semibold text-slate-700">Absent / Missing</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">Absent / Missing</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-purple-600 ring-2 ring-purple-300/40" />
-              <span className="font-bold text-purple-800">🎉 Holiday</span>
+              <span className="font-bold text-purple-800 dark:text-purple-300">🎉 Holiday</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-slate-300 ring-1 ring-slate-400/30" />
-              <span className="font-semibold text-slate-500">Off / Weekend</span>
+              <span className="font-semibold text-slate-500 dark:text-slate-400">Off / Weekend</span>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 border-t border-slate-200/60 pt-3 text-right">
+        <div className="mt-4 border-t border-slate-200/60 dark:border-white/10 pt-3 text-right">
           <Link
             to="/developer/pending"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline"
           >
             View All Pending Works <ArrowRightIcon className="h-3.5 w-3.5" />
           </Link>
@@ -237,7 +237,7 @@ export function DeveloperCalendarWidget() {
 
       {/* DATE DETAILS MODAL */}
       {selectedDay && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-md animate-in fade-in overflow-hidden">
+        <div className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center animate-in fade-in overflow-hidden">
           <div className="fixed inset-0 left-0 lg:left-64 flex items-center justify-center p-4 sm:p-6 pointer-events-none">
             <div className="glass-modal relative w-full max-w-xl rounded-3xl p-6 shadow-glass-modal pointer-events-auto">
             <div className="flex items-center justify-between border-b border-slate-200/60 pb-4">

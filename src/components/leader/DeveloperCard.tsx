@@ -19,10 +19,10 @@ export const DeveloperCard = React.memo(function DeveloperCard({ developer, sele
         type="button"
         onClick={() => onSelect(developer.id)}
         aria-pressed={selected}
-        className={`w-full text-left rounded-2xl p-4 transition-all duration-200 cursor-pointer ${
+        className={`glass-subcard glass-subcard-interactive w-full text-left rounded-2xl p-4 ${
           selected
-            ? 'glass-card border-brand/50 ring-2 ring-brand/40 shadow-glass-hover bg-brand/10 dark:bg-brand/20 translate-x-0.5'
-            : 'bg-white/60 dark:bg-white/5 border border-hairline hover:bg-white/90 dark:hover:bg-white/10 hover:shadow-glass hover:translate-x-0.5'
+            ? 'border-brand/50 ring-2 ring-brand/40 shadow-glass-hover bg-brand/10 dark:bg-brand/20'
+            : ''
         }`}
       >
         <div className="flex items-center gap-3.5">

@@ -29,11 +29,12 @@ const statusMeta = {
   hold: { label: 'On Hold', tone: 'yellow', dot: 'bg-amber-500' }
 } as const;
 
-function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () => void }) {
+const ProjectCard = React.memo(function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () => void }) {
   const meta = (statusMeta as any)[project.status] || statusMeta.ongoing;
   const isCompleted = project.status === 'completed';
 
-  const handleDelete = async () => {
+  const handleDelete = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (
       !window.confirm(
         `Are you sure you want to permanently delete project "${project.name}"?\n\nThis will dissolve the team and free up all assigned developers.`
@@ -50,7 +51,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
   };
 
   return (
-    <div className="glass-card flex flex-col justify-between rounded-3xl p-6 shadow-glass hover:shadow-xl transition-all duration-200 space-y-5">
+    <div className="glass-card independent-card flex flex-col justify-between rounded-3xl p-6 space-y-5">
       {/* TOP: TITLE, STATUS BADGES & DELETE ACTION */}
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
@@ -102,7 +103,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
       </div>
 
       {/* MIDDLE: PROGRESS INDICATOR */}
-      <div className="space-y-2 glass-subcard rounded-2xl p-4">
+      <div className="space-y-2 glass-subcard hover-tile rounded-2xl p-4">
         <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
           <span className="flex items-center gap-1.5">
             <LayersIcon className="h-3.5 w-3.5 text-brand" />
@@ -122,7 +123,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
       {/* BOTTOM: 2x2 METRIC GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
         {/* Leadership */}
-        <div className="space-y-1 glass-subcard p-3">
+        <div className="space-y-1 glass-subcard hover-tile p-3">
           <div className="flex items-center gap-1.5 font-semibold text-slate-500 dark:text-slate-400 text-[11px]">
             <UserCheckIcon className="h-3.5 w-3.5 text-blue-500 shrink-0" />
             <span>Leadership</span>
@@ -136,7 +137,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
         </div>
 
         {/* Developers */}
-        <div className="space-y-1 glass-subcard p-3">
+        <div className="space-y-1 glass-subcard hover-tile p-3">
           <div className="flex items-center gap-1.5 font-semibold text-slate-500 dark:text-slate-400 text-[11px]">
             <UsersIcon className="h-3.5 w-3.5 text-purple-500 shrink-0" />
             <span>Team Members ({project.developers})</span>
@@ -149,7 +150,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
         </div>
 
         {/* Started Date */}
-        <div className="space-y-1 glass-subcard p-3">
+        <div className="space-y-1 glass-subcard hover-tile p-3">
           <div className="flex items-center gap-1.5 font-semibold text-slate-500 dark:text-slate-400 text-[11px]">
             <CalendarIcon className="h-3.5 w-3.5 text-blue-500 shrink-0" />
             <span>Started Date</span>
@@ -160,7 +161,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
         </div>
 
         {/* Target / Completed Date */}
-        <div className="space-y-1 glass-subcard p-3">
+        <div className="space-y-1 glass-subcard hover-tile p-3">
           <div className="flex items-center gap-1.5 font-semibold text-slate-500 dark:text-slate-400 text-[11px]">
             <TargetIcon className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
             <span>{project.ended ? 'Completed Date' : 'Target Date'}</span>
@@ -172,7 +173,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete?: () =>
       </div>
     </div>
   );
-}
+});
 
 export function ProjectsOverview() {
   const { data, refetch } = useProjects('all');
@@ -180,26 +181,41 @@ export function ProjectsOverview() {
   const [filterTab, setFilterTab] = useState<string>('all');
   const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
 
-  const ongoing = projects.filter((project) => project.status === 'ongoing');
-  const completed = projects.filter((project) => project.status === 'completed');
-  const hold = projects.filter((project) => project.status === 'hold');
+  const { ongoing, completed, hold, uniqueTeamsCount } = React.useMemo(() => {
+    const ong: Project[] = [];
+    const comp: Project[] = [];
+    const hld: Project[] = [];
+    const teamsSet = new Set<string>();
 
-  const uniqueTeamsCount = new Set(
-    projects
-      .map((p) => (p.team && typeof p.team === 'string' && p.team.trim() ? p.team.trim() : (p.teamId && p.teamId !== '[object Object]' ? p.teamId : '')))
-      .filter(Boolean)
-  ).size;
+    for (const project of projects) {
+      if (project.status === 'ongoing') ong.push(project);
+      else if (project.status === 'completed') comp.push(project);
+      else if (project.status === 'hold') hld.push(project);
 
-  const summaryPills = [
+      const t = (project.team && typeof project.team === 'string' && project.team.trim()
+        ? project.team.trim()
+        : (project.teamId && project.teamId !== '[object Object]' ? project.teamId : ''));
+      if (t) teamsSet.add(t);
+    }
+
+    return {
+      ongoing: ong,
+      completed: comp,
+      hold: hld,
+      uniqueTeamsCount: teamsSet.size
+    };
+  }, [projects]);
+
+  const summaryPills = React.useMemo(() => [
     { id: 'all', label: 'All Projects', value: projects.length, tone: 'text-navy dark:text-white' },
     { id: 'ongoing', label: 'Ongoing', value: ongoing.length, tone: 'text-blue-500 dark:text-blue-400' },
     { id: 'completed', label: 'Completed', value: completed.length, tone: 'text-emerald-500 dark:text-emerald-400' },
     { id: 'hold', label: 'On Hold', value: hold.length, tone: 'text-amber-500 dark:text-amber-400' },
     { id: 'teams', label: 'Total Teams', value: uniqueTeamsCount, tone: 'text-purple-500 dark:text-purple-400' }
-  ];
+  ], [projects.length, ongoing.length, completed.length, hold.length, uniqueTeamsCount]);
 
-  const filteredProjects =
-    filterTab === 'ongoing'
+  const filteredProjects = React.useMemo(() => {
+    return filterTab === 'ongoing'
       ? ongoing
       : filterTab === 'completed'
       ? completed
@@ -208,10 +224,13 @@ export function ProjectsOverview() {
       : filterTab === 'teams'
       ? projects.filter((p) => p.teamId || p.team)
       : projects;
+  }, [filterTab, ongoing, completed, hold, projects]);
 
-  const displayedProjects = selectedProjectId === 'all'
-    ? filteredProjects
-    : filteredProjects.filter((p) => p.id === selectedProjectId);
+  const displayedProjects = React.useMemo(() => {
+    return selectedProjectId === 'all'
+      ? filteredProjects
+      : filteredProjects.filter((p) => p.id === selectedProjectId);
+  }, [filteredProjects, selectedProjectId]);
 
   const filterLabel = filterTab === 'ongoing' ? 'Ongoing ' : filterTab === 'completed' ? 'Completed ' : filterTab === 'hold' ? 'On Hold ' : filterTab === 'teams' ? 'Team ' : '';
 
@@ -240,13 +259,13 @@ export function ProjectsOverview() {
                     setFilterTab(pill.id);
                     setSelectedProjectId('all');
                   }}
-                  className={`inline-flex items-center gap-2 rounded-2xl px-3.5 py-1.5 shadow-glass text-xs transition-all duration-200 cursor-pointer border ${
+                  className={`glass-pill rounded-2xl px-3.5 py-1.5 text-xs transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? 'btn-glass-primary !text-white border-transparent scale-[1.02] shadow-md ring-2 ring-indigo-500/30'
-                      : 'glass-surface hover:bg-white/90 dark:hover:bg-slate-800/80'
+                      ? 'glass-pill-active !text-white'
+                      : ''
                   }`}
                 >
-                  <dt className={`font-semibold ${isActive ? 'text-white/90' : 'text-slate-500 dark:text-slate-400'}`}>
+                  <dt className={`font-semibold ${isActive ? 'text-white' : 'text-slate-700 dark:text-slate-200'}`}>
                     {pill.label}
                   </dt>
                   <dd className={`font-bold tabular-nums ${isActive ? '!text-white' : pill.tone}`}>

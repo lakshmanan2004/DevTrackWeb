@@ -264,7 +264,7 @@ export function AdminHolidayCalendar({
         {/* CALENDAR GRID (7 COLS) */}
         <div className="lg:col-span-7 glass-card rounded-3xl p-5 shadow-glass space-y-3">
           {/* Day Headers */}
-          <div className="grid grid-cols-7 text-center text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 pb-1">
+          <div className="grid grid-cols-7 text-center text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-300 pb-1">
             <span>Sun</span>
             <span>Mon</span>
             <span>Tue</span>
@@ -287,18 +287,18 @@ export function AdminHolidayCalendar({
 
               if (cell.isWorkingOverride) {
                 cellStyle =
-                  'bg-emerald-600 text-white border-transparent ring-2 ring-emerald-400/40 shadow-sm hover:bg-emerald-500';
+                  'bg-emerald-600 dark:bg-emerald-600 text-white border-transparent ring-2 ring-emerald-400/40 shadow-sm hover:bg-emerald-500';
               } else if (cell.isHoliday) {
                 if (cell.holidayType === 'third_sat') {
                   cellStyle =
-                    'bg-amber-500 text-white border-transparent ring-2 ring-amber-400/40 shadow-sm hover:bg-amber-600';
+                    'bg-amber-400 dark:bg-amber-400 text-slate-950 font-black border-transparent ring-2 ring-amber-400/40 shadow-sm hover:bg-amber-300';
                 } else {
                   cellStyle =
-                    'bg-purple-600 text-white border-transparent ring-2 ring-purple-400/40 shadow-sm hover:bg-purple-500';
+                    'bg-purple-600 dark:bg-purple-600 text-white border-transparent ring-2 ring-purple-400/40 shadow-sm hover:bg-purple-500';
                 }
               } else if (cell.isWeekend) {
                 cellStyle =
-                  'bg-slate-100/70 dark:bg-slate-900/60 text-slate-400 dark:text-slate-500 border border-slate-200/40 dark:border-white/5';
+                  'bg-slate-100/70 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 border border-slate-200/40 dark:border-white/5';
               }
 
               const isSelected = cell.isSelected;
@@ -409,7 +409,7 @@ export function AdminHolidayCalendar({
           {/* Current Status Info Box */}
           {selectedCell && (
             <div
-              className={`rounded-2xl border p-4 text-xs space-y-1.5 ${
+              className={`hover-tile rounded-2xl border p-4 text-xs space-y-1.5 ${
                 selectedCell.isWorkingOverride
                   ? 'border-emerald-300/80 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-950 dark:text-emerald-100'
                   : selectedCell.isHoliday

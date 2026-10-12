@@ -335,7 +335,7 @@ export function DeveloperDashboard() {
 
         {/* 4. INVOLVED PROJECT CARD */}
         {activeProject ? (
-          <section className="glass-surface rounded-3xl p-5 sm:p-6 shadow-glass space-y-3">
+          <section className="glass-surface independent-card rounded-3xl p-5 sm:p-6 shadow-glass space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-4 min-w-0">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/10 dark:bg-[rgba(22,131,255,0.16)] border border-brand/20 dark:border-[rgba(22,131,255,0.35)] text-brand dark:text-[#5AA9FF] shadow-glass shrink-0">
@@ -574,6 +574,7 @@ export function DeveloperDashboard() {
 
           <Link to="/developer/pending" className="block">
             <StatCard
+              interactive
               label="Pending Tasks / Resubmit"
               value={String(pendingRevisionsCount)}
               hint={pendingRevisionsCount > 0 ? 'Action required by TL' : 'All clear'}

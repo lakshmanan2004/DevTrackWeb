@@ -55,7 +55,7 @@ export function NotificationSoundModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/65 p-4 sm:p-6 backdrop-blur-xl animate-in fade-in"
+      className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in"
       role="dialog"
       aria-modal="true"
     >

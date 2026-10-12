@@ -125,9 +125,9 @@ export function ApplyLeaveModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-md animate-fade-in">
+    <div className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
       <div
-        className="relative w-full max-w-xl rounded-3xl p-6 sm:p-8 text-navy dark:text-white shadow-2xl border border-white/20 dark:border-white/10 bg-white/90 dark:bg-[#0c1322]/90 backdrop-blur-2xl transition-all"
+        className="glass-modal relative w-full max-w-xl rounded-3xl p-6 sm:p-8 text-navy dark:text-white shadow-2xl border border-white/30 dark:border-white/15 transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -198,7 +198,7 @@ export function ApplyLeaveModal({
               <button
                 type="button"
                 onClick={() => setLeaveType('half_day_morning')}
-                className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
+                className={`hover-tile p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
                   leaveType === 'half_day_morning'
                     ? 'border-brand bg-brand/10 dark:bg-brand/20 shadow-md ring-2 ring-brand/30'
                     : 'border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-[#141d30]/50 hover:bg-slate-100 dark:hover:bg-[#141d30]'
@@ -224,7 +224,7 @@ export function ApplyLeaveModal({
               <button
                 type="button"
                 onClick={() => setLeaveType('half_day_afternoon')}
-                className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
+                className={`hover-tile p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
                   leaveType === 'half_day_afternoon'
                     ? 'border-brand bg-brand/10 dark:bg-brand/20 shadow-md ring-2 ring-brand/30'
                     : 'border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-[#141d30]/50 hover:bg-slate-100 dark:hover:bg-[#141d30]'
@@ -250,7 +250,7 @@ export function ApplyLeaveModal({
               <button
                 type="button"
                 onClick={() => setLeaveType('full_day')}
-                className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
+                className={`hover-tile p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all ${
                   leaveType === 'full_day'
                     ? 'border-brand bg-brand/10 dark:bg-brand/20 shadow-md ring-2 ring-brand/30'
                     : 'border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-[#141d30]/50 hover:bg-slate-100 dark:hover:bg-[#141d30]'

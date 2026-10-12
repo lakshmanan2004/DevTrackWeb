@@ -25,16 +25,19 @@ export function AllDevelopers() {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [targetDevId, setTargetDevId] = useState<string | undefined>();
 
-  const counts = {
-    all: developers.length,
-    online: developers.filter((dev: any) => dev.online).length,
-    missed: developers.filter((dev: any) => dev.missed > 0).length,
-    top: developers.filter((dev: any) => dev.topPerformer || (dev.activeMinutes >= 240 && dev.missed === 0))
-      .length
-  };
+  const counts = React.useMemo(() => {
+    let online = 0, missed = 0, top = 0;
+    for (const dev of developers) {
+      if (dev.online) online++;
+      if (dev.missed > 0) missed++;
+      if (dev.topPerformer || (dev.activeMinutes >= 240 && dev.missed === 0)) top++;
+    }
+    return { all: developers.length, online, missed, top };
+  }, [developers]);
 
-  const visible = developers
-    .filter((dev: any) => {
+  const visible = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return developers.filter((dev: any) => {
       if (selectedProjectId !== 'all') {
         const p = projects.find((proj: any) => proj.id === selectedProjectId);
         const matchProj =
@@ -45,25 +48,24 @@ export function AllDevelopers() {
       }
       if (selectedDevId !== 'all') {
         const dId = String(dev.id || dev._id || '');
-        if (dId !== selectedDevId && dev.name.toLowerCase() !== selectedDevId.toLowerCase()) {
+        if (dId !== selectedDevId && dev.name?.toLowerCase() !== selectedDevId.toLowerCase()) {
           return false;
         }
       }
-      if (filter === 'online') return dev.online;
-      if (filter === 'missed') return dev.missed > 0;
-      if (filter === 'top') return dev.topPerformer || (dev.activeMinutes >= 240 && dev.missed === 0);
+      if (filter === 'online' && !dev.online) return false;
+      if (filter === 'missed' && !(dev.missed > 0)) return false;
+      if (filter === 'top' && !(dev.topPerformer || (dev.activeMinutes >= 240 && dev.missed === 0))) return false;
+      if (q) {
+        return (
+          dev.name?.toLowerCase().includes(q) ||
+          dev.email?.toLowerCase().includes(q) ||
+          dev.team?.toLowerCase().includes(q) ||
+          dev.project?.toLowerCase().includes(q)
+        );
+      }
       return true;
-    })
-    .filter((dev: any) => {
-      if (!query.trim()) return true;
-      const q = query.toLowerCase();
-      return (
-        dev.name?.toLowerCase().includes(q) ||
-        dev.email?.toLowerCase().includes(q) ||
-        dev.team?.toLowerCase().includes(q) ||
-        dev.project?.toLowerCase().includes(q)
-      );
     });
+  }, [developers, projects, selectedProjectId, selectedDevId, filter, query]);
 
   const handleOpenAssign = (devId?: string) => {
     setTargetDevId(devId || (selectedDevId !== 'all' ? selectedDevId : undefined));

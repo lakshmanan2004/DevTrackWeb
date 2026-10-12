@@ -53,12 +53,17 @@ export function useLive<T = any>(
     };
   }, []);
 
+  const dataRef = useRef(data);
+  dataRef.current = data;
+
   useEffect(() => {
     if (!path) {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (dataRef.current === null) {
+      setLoading(true);
+    }
     refetch();
   }, [path, refetch]);
 

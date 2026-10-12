@@ -24,7 +24,7 @@ const tones: Record<BadgeTone, { bg: string; dot: string }> = {
     dot: 'bg-rose-600 ring-2 ring-red-400/40'
   },
   grey: {
-    bg: 'bg-slate-100/90 dark:bg-white/[0.07] text-slate-800 dark:text-[#A1A1AA] border-slate-300 dark:border-white/10 shadow-xs ring-1 ring-slate-200 dark:ring-white/5',
+    bg: 'bg-slate-100/90 dark:bg-white/[0.07] text-slate-800 dark:text-slate-200 border-slate-300 dark:border-white/15 shadow-xs ring-1 ring-slate-200 dark:ring-white/10',
     dot: 'bg-slate-500 ring-2 ring-slate-400/40'
   },
   purple: {

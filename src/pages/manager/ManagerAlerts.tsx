@@ -23,16 +23,20 @@ export function ManagerAlerts() {
   const { refresh: refreshAuth } = useAuth();
   const { data, refetch } = useAlerts();
   const { data: dir } = useLive<{ users: any[] }>('/api/directory', [], 0);
-  const devOptions = (dir?.users || [])
-    .filter((u: any) => u.role === 'developer')
-    .map((u: any) => ({ id: u.id, name: u.name, team: u.teamName, project: '' }));
+  const devOptions = React.useMemo(() => {
+    return (dir?.users || [])
+      .filter((u: any) => u.role === 'developer')
+      .map((u: any) => ({ id: u.id, name: u.name, team: u.teamName, project: '' }));
+  }, [dir?.users]);
   const alerts = data?.alerts || [];
   const [filter, setFilter] = useState('all');
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [targetDevId, setTargetDevId] = useState<string | undefined>();
   const [toastMessage, setToastMessage] = useState('');
 
-  const unreadCount = alerts.filter((a: any) => a.unread).length;
+  const unreadCount = React.useMemo(() => {
+    return alerts.filter((a: any) => a.unread).length;
+  }, [alerts]);
 
   const handleDismiss = async (id: string) => {
     await api(`/api/alerts/${id}/action`, { method: 'POST', body: { action: 'Mark Seen' } });
@@ -74,11 +78,11 @@ export function ManagerAlerts() {
     refreshAuth();
   };
 
-  const filteredAlerts = filter === 'all'
-    ? alerts
-    : filter === 'idle'
-    ? alerts.filter((a: any) => a.category === 'Idle')
-    : alerts.filter((a: any) => a.category === 'Missed Check-in');
+  const filteredAlerts = React.useMemo(() => {
+    if (filter === 'idle') return alerts.filter((a: any) => a.category === 'Idle');
+    if (filter === 'missed') return alerts.filter((a: any) => a.category === 'Missed Check-in');
+    return alerts;
+  }, [alerts, filter]);
 
   return (
     <>
@@ -107,8 +111,8 @@ export function ManagerAlerts() {
                 Clear All
               </Button>
             )}
-            <span className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm">
-              <BellIcon className="h-3.5 w-3.5" />
+            <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 dark:bg-amber-500/20 px-3.5 py-1.5 text-xs font-bold text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 shadow-2xs">
+              <BellIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
               {unreadCount} Active Alerts
             </span>
           </div>
@@ -156,7 +160,7 @@ export function ManagerAlerts() {
             return (
               <div
                 key={alert.id}
-                className={`glass-card rounded-3xl p-5 shadow-glass transition-all hover:shadow-xl ${accentBorder}`}
+                className={`glass-card-interactive rounded-3xl p-5 ${accentBorder}`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex items-center gap-3">

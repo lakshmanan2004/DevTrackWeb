@@ -189,7 +189,7 @@ export function ManageTeams() {
                 </h3>
                 <ul className="mt-2.5 divide-y divide-gray-100 dark:divide-white/10 rounded-xl border border-hairline dark:border-white/10">
                   {team.members.map((member: any) => (
-                    <li key={member.id} className="flex items-center gap-3 px-4 py-3">
+                    <li key={member.id} className="list-row flex items-center gap-3 px-4 py-3">
                       <Avatar initials={member.initials} size="sm" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-navy dark:text-white">{member.name}</p>

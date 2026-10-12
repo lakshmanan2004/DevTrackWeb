@@ -141,7 +141,7 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
                 { label: 'Commits', value: String(detail?.developer?.commits ?? developer.commits), tone: 'text-navy dark:text-white font-bold' },
                 { label: 'Active', value: detail?.activeTimeLabel || '—', tone: 'text-navy dark:text-white font-bold' }
               ].map((stat) => (
-                <div key={stat.label} className="glass-surface rounded-2xl border border-white/60 dark:border-white/10 p-3 text-center shadow-2xs">
+                <div key={stat.label} className="glass-surface hover-tile rounded-2xl border border-white/60 dark:border-white/10 p-3 text-center shadow-2xs">
                   <dt className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-slate-400">{stat.label}</dt>
                   <dd className={`mt-1 text-sm tabular-nums ${stat.tone}`}>{stat.value}</dd>
                 </div>

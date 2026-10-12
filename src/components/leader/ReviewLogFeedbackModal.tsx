@@ -92,14 +92,14 @@ export function ReviewLogFeedbackModal({
 
   const modalNode = (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-md animate-in fade-in"
+      className="glass-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto p-4 animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="review-modal-title"
     >
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white dark:bg-slate-900 shadow-2xl border border-hairline dark:border-white/10 animate-in zoom-in-95 duration-150">
+      <div className="glass-modal w-full max-w-xl overflow-hidden rounded-3xl shadow-2xl border border-white/40 dark:border-white/15 animate-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-hairline dark:border-white/10 bg-canvas dark:bg-slate-950/70 px-6 py-4">
+        <div className="flex items-start justify-between border-b border-white/20 dark:border-white/10 px-6 py-4">
           <div>
             <div className="flex items-center gap-2">
               <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${
@@ -228,7 +228,7 @@ export function ReviewLogFeedbackModal({
         </div>
 
         {/* Modal Action Buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-hairline dark:border-white/10 bg-canvas dark:bg-slate-950/70 px-6 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/20 dark:border-white/10 px-6 py-4">
           <Button variant="secondary" size="md" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
@@ -271,8 +271,8 @@ export function ReviewLogFeedbackModal({
 
       {/* Screenshot Zoom Popup Modal with High Z-Index */}
       {previewScreenshot && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-navy/85 p-4 backdrop-blur-md animate-in fade-in">
-          <div className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-gray-900 p-4 shadow-2xl border border-white/10 animate-in zoom-in-95">
+        <div className="glass-modal-backdrop fixed inset-0 z-[10000] flex items-center justify-center p-4 animate-in fade-in">
+          <div className="glass-modal relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl p-4 shadow-2xl border border-white/20 animate-in zoom-in-95">
             <div className="mb-3 flex items-center justify-between border-b border-gray-800 pb-2 text-white">
               <span className="text-sm font-semibold">{previewScreenshot.title}</span>
               <button

@@ -8,7 +8,12 @@ interface PageHeaderProps {
   showThemeToggle?: boolean;
 }
 
-export function PageHeader({ title, subtitle, actions, showThemeToggle = false }: PageHeaderProps) {
+export const PageHeader = React.memo(function PageHeader({
+  title,
+  subtitle,
+  actions,
+  showThemeToggle = false
+}: PageHeaderProps) {
   return (
     <header
       style={{
@@ -40,4 +45,4 @@ export function PageHeader({ title, subtitle, actions, showThemeToggle = false }
       </div>
     </header>
   );
-}
+});

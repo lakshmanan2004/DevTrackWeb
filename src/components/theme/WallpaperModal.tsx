@@ -14,7 +14,7 @@ export function WallpaperModal({ isOpen, onClose }: WallpaperModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/65 p-4 sm:p-6 backdrop-blur-xl animate-in fade-in"
+      className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="wallpaper-modal-title"
@@ -54,7 +54,7 @@ export function WallpaperModal({ isOpen, onClose }: WallpaperModalProps) {
               <div
                 key={item.id}
                 onClick={() => setWallpaper(item.file)}
-                className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer text-left hover:-translate-y-1 ${
+                className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-200 cursor-pointer text-left hover:-translate-y-0.5 active:scale-[0.99] ${
                   isSelected
                     ? 'border-blue-500 ring-2 ring-blue-500/60 shadow-xl shadow-blue-500/20 bg-white/70 dark:bg-slate-900/80 scale-[1.01]'
                     : 'border-white/30 dark:border-white/10 bg-white/45 dark:bg-slate-900/50 hover:border-white/60 hover:bg-white/70 dark:hover:bg-slate-900/70 shadow-sm hover:shadow-md'

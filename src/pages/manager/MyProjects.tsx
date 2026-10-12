@@ -110,13 +110,13 @@ export function MyProjects() {
                     setFilter(item.id);
                     setSelectedProjectId('all');
                   }}
-                  className={`inline-flex items-center gap-2.5 rounded-2xl px-4 py-2 shadow-glass transition-all duration-200 cursor-pointer text-left border ${
+                  className={`glass-pill rounded-2xl px-4 py-2 text-left cursor-pointer ${
                     isActive
-                      ? 'btn-glass-primary !text-white border-transparent scale-[1.02] shadow-md ring-2 ring-indigo-500/30'
-                      : 'glass-surface hover:bg-white/95 dark:hover:bg-slate-800'
+                      ? 'glass-pill-active !text-white'
+                      : ''
                   }`}
                 >
-                  <dt className={`text-xs font-semibold ${isActive ? 'text-white/90' : 'text-slate-500 dark:text-slate-400'}`}>
+                  <dt className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-slate-700 dark:text-slate-200'}`}>
                     {item.label}
                   </dt>
                   <dd className={`text-sm font-bold tabular-nums ${isActive ? '!text-white' : item.tone}`}>
@@ -186,7 +186,7 @@ export function MyProjects() {
             return (
               <li
                 key={project.id}
-                className="glass-card rounded-3xl p-6 shadow-glass transition-all hover:shadow-xl space-y-4"
+                className="glass-card independent-card rounded-3xl p-6 space-y-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>

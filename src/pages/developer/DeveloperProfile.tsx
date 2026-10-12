@@ -148,7 +148,7 @@ export function DeveloperProfile() {
       <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto min-w-0">
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full min-w-0">
           <aside className="w-full xl:col-span-4 space-y-6 min-w-0">
-            <section className="glass-card rounded-3xl p-5 text-center shadow-glass overflow-hidden">
+            <section className="glass-card rounded-3xl p-5 text-center shadow-glass">
               <Avatar initials={user?.initials || '··'} size="lg" className="mx-auto" />
               <h2 className="mt-3 text-xl font-bold text-navy dark:text-white">{user?.name}</h2>
               <div className="mt-2 flex items-center justify-center gap-2">
@@ -173,7 +173,7 @@ export function DeveloperProfile() {
                 { icon: <ShieldCheckIcon className="h-4 w-4 text-emerald-500" />, label: 'Team Leader', value: user?.leaderName || '' },
                 { icon: <UtensilsIcon className="h-4 w-4 text-amber-500" />, label: 'Lunch Break', value: (user?.lunchSlot || lunchSlot) === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM' }].
                 map((row) =>
-                <div key={row.label} className="flex items-center gap-2.5">
+                  <div key={row.label} className="list-row px-3 -mx-3 flex items-center gap-2.5 py-1">
                     <span className="text-gray-400 dark:text-slate-500" aria-hidden="true">
                       {row.icon}
                     </span>
@@ -184,11 +184,11 @@ export function DeveloperProfile() {
               </dl>
             </section>
 
-            <section className="glass-card rounded-3xl p-5 shadow-glass overflow-hidden">
+            <section className="glass-card rounded-3xl p-5 shadow-glass">
               <h3 className="text-sm font-bold text-navy dark:text-white">Today</h3>
               <dl className="mt-3 grid grid-cols-2 gap-3">
                 {weekStats.map((stat) => (
-                  <div key={stat.label} className="glass-subcard rounded-2xl p-3">
+                  <div key={stat.label} className="glass-subcard hover-tile rounded-2xl p-3">
                     <dt className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</dt>
                     <dd className="mt-0.5 text-base font-bold tabular-nums text-navy dark:text-white">{stat.value}</dd>
                   </div>
@@ -235,7 +235,7 @@ export function DeveloperProfile() {
           </aside>
 
           <div className="w-full xl:col-span-8 space-y-6 min-w-0">
-            <section className="glass-card rounded-3xl p-6 shadow-glass overflow-hidden">
+            <section className="glass-card rounded-3xl p-6 shadow-glass">
               <h2 className="text-sm font-bold text-navy dark:text-white">Account Settings</h2>
               <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); saveProfile(); }}>
                 <div>
@@ -325,7 +325,7 @@ export function DeveloperProfile() {
                   </label>
                   
                   {/* Wallpaper Theme */}
-                  <div className="glass-surface flex items-center justify-between rounded-2xl p-3.5">
+                  <div className="list-row px-3 -mx-3 glass-surface flex items-center justify-between rounded-2xl p-3.5">
                     <div>
                       <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                         <ImageIcon className="h-3.5 w-3.5 text-purple-500" />
@@ -344,7 +344,7 @@ export function DeveloperProfile() {
                   </div>
 
                   {/* Appearance Mode */}
-                  <div className="glass-surface flex items-center justify-between rounded-2xl p-3.5">
+                  <div className="list-row px-3 -mx-3 glass-surface flex items-center justify-between rounded-2xl p-3.5">
                     <div>
                       <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                         <SparklesIcon className="h-3.5 w-3.5 text-amber-500" />
@@ -356,7 +356,7 @@ export function DeveloperProfile() {
                   </div>
 
                   {/* Notification Alert Sound */}
-                  <div className="glass-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl p-3.5">
+                  <div className="list-row px-3 -mx-3 glass-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl p-3.5">
                     <div>
                       <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                         <Volume2Icon className="h-3.5 w-3.5 text-indigo-500" />
@@ -401,7 +401,7 @@ export function DeveloperProfile() {
               </form>
             </section>
 
-            <section className="glass-card rounded-3xl p-6 shadow-glass overflow-hidden">
+            <section className="glass-card rounded-3xl p-6 shadow-glass">
               <h2 className="border-b border-hairline pb-3 text-sm font-bold text-navy dark:text-white">
                 Recent Activity
               </h2>

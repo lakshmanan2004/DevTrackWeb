@@ -132,24 +132,35 @@ export function Select({
     }
   }, []);
 
+  // Throttled scroll & resize position update to prevent forced synchronous layouts
+  const rafId = useRef<number | null>(null);
+  const handleScrollOrResize = useCallback(() => {
+    if (rafId.current) cancelAnimationFrame(rafId.current);
+    rafId.current = requestAnimationFrame(() => {
+      updatePosition();
+    });
+  }, [updatePosition]);
+
   // Event listeners for open state
   useEffect(() => {
     if (isOpen) {
       updatePosition();
       document.addEventListener('mousedown', handleClickOutside);
-      window.addEventListener('scroll', updatePosition, true);
-      window.addEventListener('resize', updatePosition);
+      window.addEventListener('scroll', handleScrollOrResize, { passive: true, capture: true });
+      window.addEventListener('resize', handleScrollOrResize, { passive: true });
     } else {
       document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
     };
-  }, [isOpen, handleClickOutside, updatePosition]);
+  }, [isOpen, handleClickOutside, handleScrollOrResize, updatePosition]);
 
   // Filtered options based on search query
   const filteredOptions = useMemo(() => {
@@ -234,11 +245,13 @@ export function Select({
           </span>
         </div>
 
-        <ChevronDownIcon
-          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-blue-500' : ''
-          }`}
-        />
+        <span className="flex items-center justify-center h-6 w-6 rounded-lg bg-white/60 dark:bg-white/10 shrink-0 text-slate-500 dark:text-slate-300 border border-white/40 dark:border-white/10 shadow-2xs">
+          <ChevronDownIcon
+            className={`h-3.5 w-3.5 transition-transform duration-200 ${
+              isOpen ? 'rotate-180 text-blue-500' : ''
+            }`}
+          />
+        </span>
       </button>
 
       {/* PORTALED LIQUID FROSTED GLASS DROPDOWN POPUP MENU */}

@@ -121,7 +121,7 @@ export function DeveloperAlerts() {
             return (
               <li
                 key={alert.id}
-                className={`glass-card flex flex-wrap items-center justify-between gap-5 rounded-3xl p-5 shadow-glass transition-all hover:shadow-xl ${
+                className={`glass-card-interactive flex flex-wrap items-center justify-between gap-5 rounded-3xl p-5 ${
                   meta.accentBorder
                 }`}
               >

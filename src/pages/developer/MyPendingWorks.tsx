@@ -191,8 +191,8 @@ export function MyPendingWorks() {
         title="My Pending Works"
         subtitle="All pending tasks, in-progress logs & resubmissions assigned by Team Lead / PM, grouped by date"
         actions={
-          <span className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm">
-            <ClockIcon className="h-4 w-4" />
+          <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 dark:bg-amber-500/20 px-3.5 py-1.5 text-xs font-bold text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 shadow-2xs">
+            <ClockIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             {items.length} Works Pending
           </span>
         }
@@ -237,7 +237,7 @@ export function MyPendingWorks() {
                 {dateItems.map((item: any) => (
                   <article
                     key={item.id}
-                    className="glass-card rounded-3xl border border-amber-300/80 dark:border-amber-500/30 p-5 sm:p-6 shadow-glass transition-all hover:shadow-md"
+                    className="glass-card rounded-3xl border border-amber-300/80 dark:border-amber-500/30 p-5 sm:p-6"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-hairline pb-3">
                       <div className="flex items-center gap-2.5">
@@ -292,7 +292,7 @@ export function MyPendingWorks() {
                                 title: item.screenshotName || 'Attached Screenshot'
                               })
                             }
-                            className="group relative inline-block overflow-hidden rounded-xl border border-hairline bg-gray-900 cursor-pointer shadow-md"
+                            className="glass-subcard-interactive group relative inline-block overflow-hidden rounded-xl border border-hairline bg-gray-900 cursor-pointer shadow-md"
                           >
                             <img
                               src={fileUrl(item.screenshotUrl)}
@@ -354,7 +354,7 @@ export function MyPendingWorks() {
 
       {/* FULL WORK LOG SUBMISSION MODAL */}
       {resubmitModalItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md animate-in fade-in">
+        <div className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in">
           <div className="glass-modal relative w-full max-w-lg rounded-3xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div className="flex items-center justify-between border-b border-hairline pb-4">
               <div>
@@ -556,7 +556,7 @@ export function MyPendingWorks() {
 
       {/* Screenshot Expand Modal */}
       {activeScreenshotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xl animate-in fade-in">
+        <div className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in">
           <div className="glass-modal relative max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl p-4 shadow-2xl">
             <div className="mb-3 flex items-center justify-between border-b border-hairline pb-2 text-white">
               <span className="text-sm font-semibold text-navy dark:text-white">{activeScreenshotModal.title}</span>

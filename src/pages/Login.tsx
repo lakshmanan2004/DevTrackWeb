@@ -245,7 +245,7 @@ export function Login() {
             {liveStats.map((stat) => (
               <div
                 key={stat.label}
-                className="group relative rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl p-4 shadow-[0_8px_24px_rgba(37,99,235,0.08)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_12px_32px_rgba(37,99,235,0.14)] hover:border-blue-300/60 dark:hover:border-[rgba(22,131,255,0.35)] cursor-default"
+                className="hover-tile group relative rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl p-4 shadow-glass cursor-default"
               >
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white dark:via-white/20 to-transparent" />
                 <dd className="text-2xl sm:text-3xl font-black tabular-nums text-slate-900 dark:text-[#F5F5F5] tracking-tight group-hover:text-blue-600 dark:group-hover:text-[#5AA9FF] transition-colors">
@@ -409,7 +409,7 @@ export function Login() {
           </form>
 
           {/* Role info card */}
-          <div className="flex items-start gap-3 rounded-2xl border border-blue-200/70 dark:border-[rgba(22,131,255,0.25)] bg-blue-50/60 dark:bg-[rgba(22,131,255,0.08)] p-4 shadow-glass">
+          <div className="hover-tile flex items-start gap-3 rounded-2xl border border-blue-200/70 dark:border-[rgba(22,131,255,0.25)] bg-blue-50/60 dark:bg-[rgba(22,131,255,0.08)] p-4 shadow-glass">
             <InfoIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand dark:text-[#5AA9FF]" aria-hidden="true" />
             <div className="text-xs">
               <p className="font-bold tracking-wide uppercase text-brand dark:text-[#5AA9FF]">
