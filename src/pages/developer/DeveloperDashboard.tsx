@@ -27,10 +27,12 @@ import { TodayTimeline } from '../../components/developer/TodayTimeline';
 import { CheckInModal } from '../../components/developer/CheckInModal';
 import { CheckInAlertModal } from '../../components/developer/CheckInAlertModal';
 import { ApplyLeaveModal } from '../../components/developer/ApplyLeaveModal';
+import { NewScheduleAnnouncementModal } from '../../components/developer/NewScheduleAnnouncementModal';
 import { DeveloperCalendarWidget } from '../../components/developer/DeveloperCalendarWidget';
 import { useAuth } from '../../context/AuthContext';
 import { useMyLogs, useProjects, usePendingWorks, useLeaves } from '../../hooks/useLive';
 import { playAlertSound, showWindowsNotification } from '../../utils/audioAlerts';
+import { getCurrentBlockStatus, isLogForBlock } from '../../utils/workBlocks';
 
 function fmtDuration(min: number) {
   const h = Math.floor(min / 60);
@@ -50,7 +52,11 @@ export function DeveloperDashboard() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+  const [announcementOpen, setAnnouncementOpen] = useState(() => {
+    return localStorage.getItem('devtrack_schedule_v2_seen') !== 'true';
+  });
   const [modalTargetSlot, setModalTargetSlot] = useState<number | undefined>(undefined);
+
   const handleOpenLog = (slot?: number) => {
     setModalTargetSlot(slot);
     setModalOpen(true);
@@ -83,16 +89,19 @@ export function DeveloperDashboard() {
   const pendingItems = pendingData?.items || [];
   const pendingRevisionsCount = pendingItems.length;
 
+  const devLunchSlot = user?.lunchSlot ?? 12;
   const now = new Date();
-  const currentHour = now.getHours();
-  const isBeforeWork = currentHour < 8;
-  const isAfterWork = currentHour >= 17;
+  const blockStatus = getCurrentBlockStatus(now, devLunchSlot);
+  const isBeforeWork = blockStatus.isBeforeWork;
+  const isAfterWork = blockStatus.isAfterWork;
   const isOutsideWorkHours = isBeforeWork || isAfterWork;
-  const currentMinute = now.getMinutes();
-  const minutesLeft = Math.max(0, 60 - currentMinute);
-  const currentSlot = stats?.currentSlot ?? (isBeforeWork ? 8 : isAfterWork ? 16 : currentHour);
-  const hasLoggedCurrentSlot = logs.some((log: any) => log.hourSlot === currentSlot);
-  const currentSlotLabel = `${currentSlot > 12 ? currentSlot - 12 : currentSlot} ${currentSlot >= 12 ? 'PM' : 'AM'}`;
+  const isLunchSlot = blockStatus.isLunch;
+  const minutesLeft = blockStatus.minutesLeftInBlock;
+  const currentSlot = stats?.currentSlot ?? blockStatus.currentSlot;
+  const hasLoggedCurrentSlot = logs.some((log: any) => isLogForBlock(log, currentSlot, devLunchSlot));
+  const currentSlotLabel = `${blockStatus.activeBlock.shortLabel} (${blockStatus.activeBlock.label})`;
+  const lunchSlotLabel = blockStatus.lunchLabel;
+  const lunchEndLabel = devLunchSlot === 11 ? '12:00 PM' : '1:00 PM';
 
   const triggerTestAlert = async () => {
     playAlertSound('pop', true);
@@ -125,11 +134,6 @@ export function DeveloperDashboard() {
     });
   };
 
-  const devLunchSlot = user?.lunchSlot ?? 12;
-  const isLunchSlot = !isOutsideWorkHours && currentSlot === devLunchSlot;
-  const lunchSlotLabel = devLunchSlot === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM';
-  const lunchEndLabel = devLunchSlot === 11 ? '12:00 PM' : '1:00 PM';
-
   const isHoliday = !!(data as any)?.isHoliday || !!stats?.isHoliday;
   const holidayName = (data as any)?.holiday?.name || stats?.holidayName || 'Holiday';
 
@@ -144,11 +148,12 @@ export function DeveloperDashboard() {
 
     const checkMilestoneAlerts = () => {
       const d = new Date();
-      const h = d.getHours();
-      
-      if (h < 8 || h >= 17) return;
-      const slot = h;
-      if (slot === devLunchSlot) return;
+      const status = getCurrentBlockStatus(d, devLunchSlot);
+
+      // Do not alert before 8 AM, after 5 PM, or during lunch break
+      if (status.isBeforeWork || status.isAfterWork || status.isLunch) return;
+
+      const slot = status.currentSlot;
 
       // Suppress alert if developer has an approved leave/half-day covering this slot
       if (todayLeave) {
@@ -156,13 +161,12 @@ export function DeveloperDashboard() {
         if (todayLeave.slots && todayLeave.slots.includes(slot)) return;
       }
 
-      const min = d.getMinutes();
-      const remainingMins = 60 - min;
-      const unlogged = !logs.some((log: any) => log.hourSlot === slot);
+      const remainingMins = status.minutesLeftInBlock;
+      const unlogged = !logs.some((log: any) => isLogForBlock(log, slot, devLunchSlot));
 
       if (!unlogged) return;
 
-      const slotLabel = `${slot > 12 ? slot - 12 : slot} ${slot >= 12 ? 'PM' : 'AM'}`;
+      const slotLabel = `${status.activeBlock.shortLabel} (${status.activeBlock.label})`;
       const todayKey = d.toISOString().slice(0, 10);
 
       const triggerMilestone = (
@@ -173,7 +177,7 @@ export function DeveloperDashboard() {
         body: string,
         minsForModal: number
       ) => {
-        const storageKey = `devtrack_alert_${todayKey}_slot${slot}_${milestoneKey}`;
+        const storageKey = `devtrack_alert_${todayKey}_block${slot}_${milestoneKey}`;
         if (sessionStorage.getItem(storageKey)) {
           return;
         }
@@ -191,7 +195,7 @@ export function DeveloperDashboard() {
           'pop',
           'pop',
           'DevTrack Reminder: 20 Minutes Left!',
-          `You have 20 minutes remaining to submit your work log for the ${slotLabel} slot.`,
+          `You have 20 minutes remaining to submit your work log for ${slotLabel}.`,
           20
         );
       } else if (remainingMins === 10) {
@@ -200,7 +204,7 @@ export function DeveloperDashboard() {
           'warning',
           'notification',
           'DevTrack Warning: 10 Minutes Left!',
-          `Only 10 minutes remaining! Submit your work log for the ${slotLabel} slot.`,
+          `Only 10 minutes remaining! Submit your work log for ${slotLabel}.`,
           10
         );
       } else if (remainingMins === 5) {
@@ -217,8 +221,8 @@ export function DeveloperDashboard() {
           'deadline',
           'late',
           'urgent',
-          'DevTrack DEADLINE: Hour Slot Closing Now!',
-          `Final minute for ${slotLabel} slot! Submit your work log before the slot closes.`,
+          'DevTrack DEADLINE: Work Block Closing Now!',
+          `Final minute for ${slotLabel}! Submit your work log before the slot closes.`,
           remainingMins
         );
       }
@@ -229,6 +233,7 @@ export function DeveloperDashboard() {
     return () => clearInterval(checkTimer);
   }, [logs, devLunchSlot, isHoliday, user?.role, todayLeave]);
 
+
   const firstName = user?.name?.split(' ')[0] || 'there';
   const greetingTime = now.getHours() < 12 ? 'Good morning' : now.getHours() < 17 ? 'Good afternoon' : 'Good evening';
   const formattedDate = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
@@ -238,7 +243,11 @@ export function DeveloperDashboard() {
       {/* 1. FIXED TOP NAVBAR */}
       <PageHeader
         title="My Dashboard"
-        subtitle="Track hourly productivity, active tasks, and daily work log submissions in real time"
+        subtitle={
+          devLunchSlot === 12
+            ? "Track 4 equal 2-hour work blocks, active tasks, and daily work log submissions in real time"
+            : "Track 3 balanced work blocks, active tasks, and daily work log submissions in real time"
+        }
         actions={
           <div className="flex items-center gap-2.5">
             <Button
@@ -260,6 +269,7 @@ export function DeveloperDashboard() {
             <HeaderClock />
           </div>
         }
+
       />
 
       {/* 2. SCROLLABLE DASHBOARD CONTENT */}
@@ -486,17 +496,17 @@ export function DeveloperDashboard() {
                   {isLunchSlot
                     ? `Lunch Break (${lunchSlotLabel}) — ${minutesLeft}m remaining`
                     : hasLoggedCurrentSlot
-                    ? `✓ Work Log Submitted for ${currentSlotLabel} Slot (${minutesLeft}m remaining in this slot)`
-                    : minutesLeft <= 5
-                    ? `URGENT: Only ${minutesLeft} minutes left to log ${currentSlotLabel} slot!`
-                    : `Current Slot in Progress (${currentSlotLabel}) — ${minutesLeft}m remaining`}
+                    ? `✓ Work Log Submitted for ${blockStatus.activeBlock.displayTitle} (${minutesLeft}m remaining)`
+                    : minutesLeft <= 15
+                    ? `⚠️ Block Closing Soon: Only ${minutesLeft}m left to log ${blockStatus.activeBlock.shortLabel}!`
+                    : `Current Block in Progress: ${blockStatus.activeBlock.displayTitle} — ${minutesLeft}m remaining`}
                 </h3>
                 <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">
                   {isLunchSlot
                     ? `Lunch break in progress. Automated check-in reminders resume at ${lunchEndLabel}.`
                     : hasLoggedCurrentSlot
-                    ? 'Your hourly submission is logged. Audio pop reminders will alert you for the next slot.'
-                    : 'Submit your work log before the hour ends to maintain 100% on-time check-in record.'}
+                    ? `Your work log is recorded for this ${blockStatus.activeBlock.durationHours}h block. Next block begins after ${blockStatus.activeBlock.deadlineStr}.`
+                    : `Submit your work log for this ${blockStatus.activeBlock.durationHours}h block before ${blockStatus.activeBlock.deadlineStr} to maintain 100% on-time record.`}
                 </p>
               </div>
             </div>
@@ -607,6 +617,7 @@ export function DeveloperDashboard() {
       <CheckInModal
         open={modalOpen}
         targetSlot={modalTargetSlot}
+        lunchSlot={devLunchSlot}
         onClose={() => {
           setModalOpen(false);
           setModalTargetSlot(undefined);
@@ -632,6 +643,12 @@ export function DeveloperDashboard() {
           refetchLogs();
         }}
       />
+      <NewScheduleAnnouncementModal
+        open={announcementOpen}
+        onClose={() => setAnnouncementOpen(false)}
+        lunchSlot={devLunchSlot}
+      />
     </>
   );
 }
+

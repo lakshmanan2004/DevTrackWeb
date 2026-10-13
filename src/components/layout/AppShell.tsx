@@ -49,7 +49,6 @@ export function AppShell({ role }: AppShellProps) {
       {/* MAIN CONTENT AREA WITH CLEAN SCROLLING */}
       <main
         ref={mainRef}
-        style={{ scrollbarGutter: 'stable' }}
         className="relative z-10 flex h-screen min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-transparent w-full max-w-full"
       >
         <div key={location.pathname} className="animate-page-enter flex min-w-0 flex-1 flex-col w-full max-w-full">

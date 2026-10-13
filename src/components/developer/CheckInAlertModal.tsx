@@ -31,7 +31,7 @@ export function CheckInAlertModal({
       aria-modal="true"
     >
       <div
-        className={`glass-modal relative w-full max-w-xl sm:max-w-2xl overflow-hidden rounded-3xl p-6 sm:p-8 shadow-2xl border-2 transition-all ${
+        className={`glass-modal relative w-full max-w-xl sm:max-w-2xl max-h-[min(92vh,620px)] overflow-y-auto rounded-3xl p-6 sm:p-8 shadow-2xl border-2 transition-all my-auto ${
           isUrgent
             ? 'border-rose-500/80 shadow-[0_0_35px_rgba(244,63,94,0.25)]'
             : isTest
@@ -104,7 +104,7 @@ export function CheckInAlertModal({
           <p className="text-sm sm:text-base leading-relaxed font-medium text-slate-700 dark:text-slate-200">
             {isTest
               ? 'This is a live pop-up message alert with system audio pop sound and Windows desktop notification support.'
-              : `You have not submitted your work log for the ${slotLabel} slot yet. Submit before the hour ends to keep your on-time record.`}
+              : `You have not submitted your work log for the ${slotLabel} slot yet. Submit before the slot deadline to keep your on-time record.`}
           </p>
 
           {!isTest && (

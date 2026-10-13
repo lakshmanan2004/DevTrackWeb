@@ -34,8 +34,8 @@
   --glass-interactive-hover-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.65) 0%, rgba(250, 253, 255, 0.50) 100%);
   --glass-interactive-hover-shadow: 0 18px 42px -10px rgba(15, 23, 42, 0.12), 0 6px 16px -4px rgba(15, 23, 42, 0.05), inset 0 1.5px 1.5px 0 #FFFFFF;
 
-  --glass-header-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(246, 250, 255, 0.40) 100%);
-  --glass-header-border: rgba(255, 255, 255, 0.75);
+  --glass-header-bg: linear-gradient(180deg, rgba(26, 25, 31, 0.76) 0%, rgba(18, 17, 23, 0.68) 100%);
+  --glass-header-border: rgba(255, 255, 255, 0.12);
 
   --color-ambient-1: rgba(0, 113, 227, 0.08);
   --color-ambient-2: rgba(175, 82, 222, 0.07);
@@ -69,8 +69,8 @@
   --glass-interactive-hover-border: rgba(255, 255, 255, 0.22);
   --glass-interactive-hover-shadow: 0 22px 52px -10px rgba(0, 0, 0, 0.72), 0 8px 22px -4px rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.22);
 
-  --glass-header-bg: linear-gradient(180deg, rgba(16, 22, 34, 0.55) 0%, rgba(12, 16, 26, 0.40) 100%);
-  --glass-header-border: rgba(255, 255, 255, 0.14);
+  --glass-header-bg: linear-gradient(180deg, rgba(22, 21, 27, 0.74) 0%, rgba(14, 13, 19, 0.64) 100%);
+  --glass-header-border: rgba(255, 255, 255, 0.10);
 
   --color-ambient-1: rgba(22, 131, 255, 0.12);
   --color-ambient-2: rgba(22, 131, 255, 0.06);
@@ -547,15 +547,16 @@ a > .glass-subcard:focus-visible,
   position: relative;
 }
 
-/* 4. Frosted Liquid Glass Top Header / Navbar */
+/* 4. Universal Dark Frosted Liquid Glass Top Header / Navbar */
 .glass-header {
   background: var(--glass-header-bg);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
   border-bottom: 1px solid var(--glass-header-border);
   box-shadow: 
-    0 4px 20px 0 rgba(15, 23, 42, 0.06),
-    inset 0 1px 1px 0 #FFFFFF;
+    0 4px 20px -2px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.04);
   transition: none;
   overscroll-behavior: none;
 }
@@ -1005,6 +1006,15 @@ select.glass-input {
   .dark a > .glass-card:hover,
   .dark .glass-card[role="button"]:hover {
     transform: translateY(-2px);
+  }
+
+  .dark .glass-card-interactive:hover::after,
+  .dark .card-interactive:hover::after,
+  .dark .clickable-card:hover::after,
+  .dark button.glass-card:hover::after,
+  .dark a.glass-card:hover::after,
+  .dark a > .glass-card:hover::after,
+  .dark .glass-card[role="button"]:hover::after {
     border-color: rgba(255, 255, 255, 0.25) !important;
     border-bottom-color: rgba(255, 255, 255, 0.14) !important;
     box-shadow: 
@@ -1029,14 +1039,15 @@ select.glass-input {
 }
 
 .dark .glass-header {
-  background: var(--glass-header-bg) !important;
-  backdrop-filter: blur(24px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-  border-bottom: 1px solid var(--glass-header-border) !important;
+  background: var(--glass-header-bg);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border-bottom: 1px solid var(--glass-header-border);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.40),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.14) !important;
-  transition: none !important;
+    0 4px 20px -2px rgba(0, 0, 0, 0.40),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.04);
+  transition: none;
   overscroll-behavior: none;
 }
 
@@ -1491,6 +1502,16 @@ html:not(.dark) .placeholder\:text-slate-400::placeholder {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+/* Main Right-Side Content Scroll Container: Invisible scrollbar with full-width usability */
+main {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+main::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
 ::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.35);
   border-radius: 9999px;
@@ -1613,29 +1634,7 @@ aside nav a:active {
   }
 }
 
-/* ==========================================================================
-   HEADER: stronger frosted blur (more fog / refraction)
-   ========================================================================== */
-.glass-header {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(246, 250, 255, 0.40) 100%);
-  backdrop-filter: blur(40px) saturate(190%) brightness(1.04);
-  -webkit-backdrop-filter: blur(40px) saturate(190%) brightness(1.04);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow:
-    0 8px 32px -4px rgba(15, 23, 42, 0.10),
-    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 1px 0 rgba(255, 255, 255, 0.35);
-}
 
-.dark .glass-header {
-  background: linear-gradient(180deg, rgba(16, 22, 34, 0.55) 0%, rgba(12, 16, 26, 0.40) 100%) !important;
-  backdrop-filter: blur(40px) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(170%) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.45),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.16) !important;
-}
 
 /* ==========================================================================
    HOVER SYSTEM v3: leaf cards only, containers never react
@@ -1662,42 +1661,54 @@ aside nav a:active {
   .glass-card-interactive:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile):hover {
     transform: none !important;
     cursor: default;
-    border-color: var(--glass-card-border) !important;
-    border-bottom-color: var(--glass-card-border-bottom) !important;
-    box-shadow: var(--glass-card-shadow) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
   }
 
-  /* 2. LEAF CARDS & TILES: gentle floating lift + soft diffused shadow + neutral crystal sheen (NO blue borders) */
-  .glass-card:not(.project-container-card):not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile, .glass-hover-card)):hover,
-  .glass-card-interactive:not(.project-container-card):not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile, .glass-hover-card)):hover,
+  /* 2. LEAF TILES & SUBCARDS: gentle floating lift + soft diffused shadow + neutral crystal sheen (NO inset banding) */
   .glass-subcard:hover,
   .glass-inner-tile:hover,
   .hover-tile:hover,
   .glass-hover-card:hover {
-    transform: translateY(-2.5px) !important;
+    transform: translateY(-2px) !important;
     border-color: rgba(255, 255, 255, 0.88) !important;
     border-bottom-color: rgba(255, 255, 255, 0.58) !important;
     box-shadow:
       0 12px 28px -4px rgba(15, 23, 42, 0.09),
       0 4px 10px -2px rgba(15, 23, 42, 0.03),
-      inset 0 1px 1.5px 0 #FFFFFF,
-      inset 0 0 24px 0 rgba(255, 255, 255, 0.12) !important;
+      inset 0 1px 1.5px 0 #FFFFFF !important;
   }
 
-  .dark .glass-card:not(.project-container-card):not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile, .glass-hover-card)):hover,
-  .dark .glass-card-interactive:not(.project-container-card):not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile, .glass-hover-card)):hover,
   .dark .glass-subcard:hover,
   .dark .glass-inner-tile:hover,
   .dark .hover-tile:hover,
   .dark .glass-hover-card:hover {
-    transform: translateY(-2.5px) !important;
+    transform: translateY(-2px) !important;
     border-color: rgba(255, 255, 255, 0.20) !important;
     border-bottom-color: rgba(255, 255, 255, 0.10) !important;
     box-shadow:
       0 14px 32px -4px rgba(0, 0, 0, 0.48),
       0 4px 10px -2px rgba(0, 0, 0, 0.26),
-      inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.16),
-      inset 0 0 24px 0 rgba(255, 255, 255, 0.04) !important;
+      inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.16) !important;
+  }
+
+  /* 3. STATIC & LEAF GLASS CARDS: container remains stable, border sheen transitions safely on ::after */
+  .glass-card:hover {
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+
+  .glass-card:not(.independent-card):not(.hover-card):not(.glass-card-interactive):not(.card-interactive):not(.clickable-card):not([role="button"]):not(a):not(button):hover {
+    transform: none !important;
+    cursor: default;
+  }
+
+  .glass-card:not(.project-container-card):not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile, .glass-hover-card)):hover::after {
+    border-color: rgba(255, 255, 255, 0.85);
+  }
+
+  .dark .glass-card:not(.project-container-card):not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile, .glass-hover-card)):hover::after {
+    border-color: rgba(255, 255, 255, 0.20) !important;
   }
 
   /* 3. Buttons inside cards */

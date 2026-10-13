@@ -51,6 +51,12 @@ export const WALLPAPERS: WallpaperOption[] = [
     name: 'Sun Set',
     subtitle: 'Golden hour sunset vibes & ocean horizon',
     file: '/SunSet.jpg'
+  },
+  {
+    id: 'mountain',
+    name: 'Mountain',
+    subtitle: 'Alpine summits & verdant green ridges',
+    file: '/Mountain.jpg'
   }
 ];
 

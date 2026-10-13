@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangleIcon,
   ArrowRightIcon,
@@ -14,6 +14,7 @@ import { TaskStatus } from '../../types';
 import { taskStatusMeta } from '../ui/TaskStatusBadge';
 import { useLive } from '../../hooks/useLive';
 import { apiUpload } from '../../api/client';
+import { getWorkBlocks, getCurrentBlockStatus } from '../../utils/workBlocks';
 
 const MIN_WORDS = 30;
 const statusOrder: TaskStatus[] = ['todo', 'progress', 'done', 'blocked'];
@@ -23,13 +24,23 @@ interface CheckInModalProps {
   onClose: () => void;
   onSubmitted?: () => void;
   targetSlot?: number;
+  lunchSlot?: number;
 }
 
-export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckInModalProps) {
+export function CheckInModal({ open, onClose, onSubmitted, targetSlot, lunchSlot = 12 }: CheckInModalProps) {
   const { data: projectData } = useLive<{ projects: any[] }>(open ? '/api/projects?scope=mine' : null, [], 0);
   const projects = projectData?.projects || [];
   const { data: taskData } = useLive<{ tasks: any[] }>(open ? '/api/tasks' : null, [], 0);
   const pendingTasks = (taskData?.tasks || []).filter((t: any) => t.status !== 'completed');
+
+  const currentStatus = getCurrentBlockStatus(new Date(), lunchSlot);
+  const blocks = getWorkBlocks(lunchSlot);
+  const effectiveSlot = targetSlot !== undefined ? targetSlot : currentStatus.currentSlot;
+  const blockInfo = blocks.find((b) => b.slot === effectiveSlot) || blocks[0];
+
+  const maxMinutes = blockInfo?.maxMinutes ?? 120;
+  const defaultMinutes = blockInfo?.defaultMinutes ?? 100;
+
 
   const [projectId, setProjectId] = useState('');
   const [selectedTaskId, setSelectedTaskId] = useState('');
@@ -37,7 +48,8 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<TaskStatus>('progress');
   const [blocker, setBlocker] = useState('');
-  const [minutes, setMinutes] = useState(45);
+  const [minutes, setMinutes] = useState(defaultMinutes);
+
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState('');
   const [commitUrl, setCommitUrl] = useState('');
@@ -59,6 +71,10 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
 
   if (!open) return null;
 
+  useEffect(() => {
+    setMinutes(defaultMinutes);
+  }, [defaultMinutes]);
+
   const reset = () => {
     setProjectId('');
     setSelectedTaskId('');
@@ -66,13 +82,14 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
     setDescription('');
     setStatus('progress');
     setBlocker('');
-    setMinutes(45);
+    setMinutes(defaultMinutes);
     setFile(null);
     setFileError('');
     if (fileInputRef.current) fileInputRef.current.value = '';
     setCommitUrl('');
     setError('');
   };
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
@@ -153,21 +170,27 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
       aria-modal="true"
       aria-labelledby="checkin-title"
     >
-      <div className="glass-modal w-full max-w-[560px] overflow-hidden p-0 shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200/60 px-6 py-5">
+      <div className="glass-modal w-full max-w-[560px] max-h-[min(92vh,780px)] flex flex-col my-auto overflow-hidden p-0 rounded-3xl shadow-2xl">
+        <div className="shrink-0 rounded-t-3xl flex items-start justify-between gap-4 border-b border-slate-200/60 px-6 py-5">
           <div className="flex items-center gap-3.5">
             <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand/10 border border-brand/20 text-brand shadow-glass">
               <TimerIcon className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 id="checkin-title" className="text-base font-black text-navy tracking-tight">
-                Hourly Check-in
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 id="checkin-title" className="text-base font-black text-navy tracking-tight">
+                  Work Block Check-in
+                </h2>
+                <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-[10px] font-bold">
+                  {blockInfo.shortLabel}
+                </span>
+              </div>
               <p className="mt-0.5 text-xs text-slate-500 font-medium">
                 {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} ·
-                {' '}{targetSlot !== undefined ? `${targetSlot > 12 ? targetSlot - 12 : targetSlot} ${targetSlot >= 12 ? 'PM' : 'AM'} slot` : 'current hour slot'}
+                {' '}{blockInfo.label} (Max {blockInfo.maxMinutes} mins)
               </p>
             </div>
+
           </div>
           <button
             type="button"
@@ -179,7 +202,8 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
           </button>
         </div>
 
-        <form className="max-h-[72vh] space-y-5 overflow-y-auto p-6" onSubmit={(e) => e.preventDefault()}>
+        <form className="flex-1 overflow-y-auto min-h-0 space-y-5 p-6" onSubmit={(e) => e.preventDefault()}>
+
           {pendingTasks.length > 0 && (
             <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5">
               <label className="mb-1.5 block text-xs font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
@@ -318,19 +342,29 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
           )}
 
           <div>
-            <label htmlFor="ci-minutes" className="mb-1.5 block text-xs font-bold text-navy">
-              Active minutes this hour
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="ci-minutes" className="block text-xs font-bold text-navy">
+                Active minutes for this block
+              </label>
+              <span className="text-[11px] font-bold text-brand tabular-nums font-mono">
+                {minutes} / {maxMinutes} mins ({Math.floor(minutes / 60)}h {minutes % 60}m)
+              </span>
+            </div>
             <input
               id="ci-minutes"
               type="range"
-              min={0}
-              max={60}
+              min={15}
+              max={maxMinutes}
+              step={5}
               value={minutes}
               onChange={(event) => setMinutes(Number(event.target.value))}
               className="w-full accent-blue-600"
             />
-            <p className="mt-1 text-xs font-bold tabular-nums text-slate-500">{minutes} minutes</p>
+            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400 font-medium">
+              <span>Min: 15m</span>
+              <span>Default: {defaultMinutes}m</span>
+              <span>Max: {maxMinutes}m ({blockInfo.durationHours}h)</span>
+            </div>
           </div>
 
           <div>
@@ -405,6 +439,21 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
             <p className="mt-1 text-[11px] text-slate-400 font-medium">Linked as proof for coding tasks</p>
           </div>
 
+          {/* Effort Verification Guideline Banner */}
+          <div className="rounded-2xl border border-blue-200/80 dark:border-blue-500/20 bg-blue-50/60 dark:bg-blue-950/30 p-3.5 text-xs text-blue-900 dark:text-blue-200 shadow-glass">
+            <div className="flex items-start gap-2.5">
+              <span className="text-base shrink-0 mt-0.5">💡</span>
+              <div className="space-y-0.5">
+                <span className="font-bold block text-blue-950 dark:text-white text-xs">
+                  Effort Verification Guideline ({blockInfo.durationHours}h block):
+                </span>
+                <p className="text-[11px] text-blue-800 dark:text-blue-300 font-normal leading-relaxed">
+                  If you submit only 1 commit or non-coding tasks (debugging, architecture, research), detail your work steps in the description above so your Team Lead can verify and approve your hours.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {error && (
             <p className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-xs font-bold text-rose-600">
               {error}
@@ -412,7 +461,8 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot }: CheckIn
           )}
         </form>
 
-        <div className="flex items-center justify-between gap-3 border-t border-slate-200/60 p-5 bg-slate-50/40">
+        <div className="shrink-0 rounded-b-3xl flex items-center justify-between gap-3 border-t border-slate-200/60 p-5 bg-slate-50/40">
+
           <p className="text-[11px] text-slate-400 font-medium">
             <span className="text-red-500">*</span> required fields
           </p>

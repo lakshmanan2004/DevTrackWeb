@@ -210,7 +210,7 @@ export function UserProfile() {
           {/* ========================================================================= */}
           <div className="w-full xl:col-span-4 space-y-6 min-w-0">
             {/* USER IDENTITY CARD */}
-            <div className="glass-card rounded-2xl p-6 text-center overflow-hidden">
+            <div className="glass-card rounded-2xl p-6 text-center">
               <div className="flex flex-col items-center">
                 <div className="inline-block rounded-full ring-4 ring-white/30 dark:ring-white/10 shadow-lg">
                   <Avatar initials={user?.initials || '··'} size="lg" tone={roleTones[role]} />
@@ -479,7 +479,7 @@ export function UserProfile() {
           {/* ========================================================================= */}
           <div className="w-full xl:col-span-8 space-y-6 min-w-0">
             {/* PROFILE EDIT FORM */}
-            <div className="glass-card rounded-2xl p-6 overflow-hidden">
+            <div className="glass-card rounded-2xl p-6">
               <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
                 <div className="flex items-center gap-2">
                   <UserIcon className="h-4 w-4 text-blue-500" />
@@ -575,7 +575,7 @@ export function UserProfile() {
 
             {/* ROLE-SPECIFIC WORKSPACE OVERVIEW */}
             {role === 'leader' && (
-              <div className="glass-card rounded-2xl p-6 space-y-5 overflow-hidden">
+              <div className="glass-card rounded-2xl p-6 space-y-5">
                 <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
                   <div className="flex items-center gap-2">
                     <RadioIcon className="h-4 w-4 text-blue-500" />
@@ -619,7 +619,7 @@ export function UserProfile() {
             )}
 
             {role === 'manager' && (
-              <div className="glass-card rounded-2xl p-6 space-y-5 overflow-hidden">
+              <div className="glass-card rounded-2xl p-6 space-y-5">
                 <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
                   <div className="flex items-center gap-2">
                     <BriefcaseIcon className="h-4 w-4 text-purple-500" />
@@ -661,7 +661,7 @@ export function UserProfile() {
             )}
 
             {role === 'admin' && (
-              <div className="glass-card rounded-2xl p-6 space-y-5 overflow-hidden">
+              <div className="glass-card rounded-2xl p-6 space-y-5">
                 <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3">
                   <div className="flex items-center gap-2">
                     <ActivityIcon className="h-4 w-4 text-rose-500" />
