@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SearchIcon, PlusIcon, UsersIcon, UserCheckIcon, FolderKanbanIcon } from 'lucide-react';
+import { PlusIcon, UsersIcon, UserCheckIcon, FolderKanbanIcon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
 import { ProgressBar } from '../../components/ui/ProgressBar';
@@ -21,7 +21,6 @@ export function AllDevelopers() {
   const [filter, setFilter] = useState('all');
   const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
   const [selectedDevId, setSelectedDevId] = useState<string>('all');
-  const [query, setQuery] = useState('');
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [targetDevId, setTargetDevId] = useState<string | undefined>();
 
@@ -36,7 +35,6 @@ export function AllDevelopers() {
   }, [developers]);
 
   const visible = React.useMemo(() => {
-    const q = query.trim().toLowerCase();
     return developers.filter((dev: any) => {
       if (selectedProjectId !== 'all') {
         const p = projects.find((proj: any) => proj.id === selectedProjectId);
@@ -55,17 +53,9 @@ export function AllDevelopers() {
       if (filter === 'online' && !dev.online) return false;
       if (filter === 'missed' && !(dev.missed > 0)) return false;
       if (filter === 'top' && !(dev.topPerformer || (dev.activeMinutes >= 240 && dev.missed === 0))) return false;
-      if (q) {
-        return (
-          dev.name?.toLowerCase().includes(q) ||
-          dev.email?.toLowerCase().includes(q) ||
-          dev.team?.toLowerCase().includes(q) ||
-          dev.project?.toLowerCase().includes(q)
-        );
-      }
       return true;
     });
-  }, [developers, projects, selectedProjectId, selectedDevId, filter, query]);
+  }, [developers, projects, selectedProjectId, selectedDevId, filter]);
 
   const handleOpenAssign = (devId?: string) => {
     setTargetDevId(devId || (selectedDevId !== 'all' ? selectedDevId : undefined));
@@ -78,53 +68,14 @@ export function AllDevelopers() {
         title="All Developers"
         subtitle="Developer directory, performance indicators, module assignments, and task delegation"
         actions={
-          <div className="flex flex-wrap items-center gap-2.5">
-            <div className="w-48 sm:w-56">
-              <Select
-                size="sm"
-                fullWidth
-                align="right"
-                value={selectedDevId}
-                onChange={(val) => setSelectedDevId(val)}
-                icon={<UsersIcon className="h-3.5 w-3.5 text-slate-400" />}
-                placeholder={`All Developers (${developers.length})`}
-                options={[
-                  { value: 'all', label: `All Developers (${developers.length})` },
-                  ...developers.map((dev: any) => ({
-                    value: String(dev.id || dev._id),
-                    label: dev.name,
-                    description: dev.email ? `${dev.email}` : undefined,
-                    badge: dev.online ? 'Online' : undefined,
-                    tone: (dev.online ? 'green' : undefined) as any
-                  }))
-                ]}
-                searchable
-              />
-            </div>
-
-            <label className="relative">
-              <SearchIcon
-                className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
-                aria-hidden="true"
-              />
-              <span className="sr-only">Search developers</span>
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search developer..."
-                className="glass-input h-9 w-36 sm:w-48 rounded-xl pl-8 pr-3 text-xs font-medium text-navy dark:text-white placeholder:text-slate-400 focus:outline-none"
-              />
-            </label>
-
-            <Button
-              size="sm"
-              icon={<PlusIcon className="h-4 w-4" />}
-              onClick={() => handleOpenAssign()}
-              className="btn-glass-primary !from-indigo-600 !to-violet-600 text-white font-bold border-none"
-            >
-              Assign Task
-            </Button>
-          </div>
+          <Button
+            size="sm"
+            icon={<PlusIcon className="h-4 w-4" />}
+            onClick={() => handleOpenAssign()}
+            className="btn-glass-primary !from-indigo-600 !to-violet-600 text-white font-bold border-none"
+          >
+            Assign Task
+          </Button>
         }
       />
 
@@ -213,12 +164,12 @@ export function AllDevelopers() {
                       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         No team developers match the current search or filter selection.
                       </p>
-                      {(selectedDevId !== 'all' || query || filter !== 'all') && (
+                      {(selectedDevId !== 'all' || selectedProjectId !== 'all' || filter !== 'all') && (
                         <button
                           type="button"
                           onClick={() => {
                             setSelectedDevId('all');
-                            setQuery('');
+                            setSelectedProjectId('all');
                             setFilter('all');
                           }}
                           className="mt-3 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"

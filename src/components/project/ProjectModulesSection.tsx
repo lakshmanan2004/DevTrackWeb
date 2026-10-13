@@ -54,16 +54,16 @@ export function ProjectModulesSection({
   if (!project) {
     return (
       <section className="glass-card relative rounded-3xl p-6 sm:p-7 shadow-glass space-y-4 animate-in fade-in">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 dark:border-white/10 pb-5">
           <div className="flex items-center gap-3.5">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white shadow-glass">
               <LayersIcon className="h-6 w-6 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-base font-bold tracking-tight text-navy">
+              <h2 className="text-base font-bold tracking-tight text-navy dark:text-white">
                 Select a Project to Inspect Modules & Delivery Progress
               </h2>
-              <p className="text-xs font-medium text-slate-500 mt-0.5">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                 Pick a project from the dropdown to inspect developer submissions by module.
               </p>
             </div>
@@ -89,7 +89,7 @@ export function ProjectModulesSection({
           )}
         </div>
 
-        <div className="py-8 text-center text-xs font-medium text-slate-400">
+        <div className="py-8 text-center text-xs font-medium text-slate-400 dark:text-slate-400">
           Please select a project from the dropdown above to inspect its delivery progress, module milestones, and developer submissions.
         </div>
       </section>

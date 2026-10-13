@@ -37,7 +37,7 @@ export function MyProjects() {
           {projects.map((proj: any) => (
             <article
               key={proj.id}
-              className="glass-card independent-card rounded-3xl p-6 space-y-5"
+              className="glass-card project-container-card rounded-3xl p-6 space-y-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-hairline pb-4">
                 <div>
@@ -70,7 +70,7 @@ export function MyProjects() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="glass-surface rounded-2xl p-3.5">
+                <div className="glass-surface glass-hover-card rounded-2xl p-3.5">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                     <UserIcon className="h-3.5 w-3.5 text-brand dark:text-indigo-400" />
                     <span>Project Manager</span>
@@ -78,7 +78,7 @@ export function MyProjects() {
                   <p className="mt-1 text-sm font-bold text-navy dark:text-white">{proj.manager || 'Unassigned'}</p>
                 </div>
 
-                <div className="glass-surface rounded-2xl p-3.5">
+                <div className="glass-surface glass-hover-card rounded-2xl p-3.5">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                     <UsersIcon className="h-3.5 w-3.5 text-brand dark:text-indigo-400" />
                     <span>Team Lead</span>
@@ -86,7 +86,7 @@ export function MyProjects() {
                   <p className="mt-1 text-sm font-bold text-navy dark:text-white">{proj.leader || 'Unassigned'}</p>
                 </div>
 
-                <div className="glass-surface rounded-2xl p-3.5">
+                <div className="glass-surface glass-hover-card rounded-2xl p-3.5">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                     <CalendarIcon className="h-3.5 w-3.5 text-brand dark:text-indigo-400" />
                     <span>Timeline</span>
@@ -96,7 +96,7 @@ export function MyProjects() {
                   </p>
                 </div>
 
-                <div className="glass-surface rounded-2xl p-3.5">
+                <div className="glass-surface glass-hover-card rounded-2xl p-3.5">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                     <UsersIcon className="h-3.5 w-3.5 text-brand dark:text-indigo-400" />
                     <span>Team ({proj.team || 'Team'})</span>

@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDownIcon, CheckIcon, SearchIcon, XIcon } from 'lucide-react';
 
 export interface SelectOption {
@@ -44,123 +43,48 @@ export function Select({
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [openUpwards, setOpenUpwards] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
 
   const selectedOption = options.find((opt) => String(opt.value) === String(value));
 
-  // Compute fixed floating position anchored precisely to the button
-  const updatePosition = useCallback(() => {
-    const el = buttonRef.current || dropdownRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    if (rect.width === 0 && rect.height === 0) return;
-
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    // Only open upwards if space below is too cramped (< 160px) and above has more room
-    const openUpwards = spaceBelow < 160 && spaceAbove > spaceBelow;
-
-    // Minimum & calculated menu width
-    let targetWidth: number;
-    if (minMenuWidth) {
-      targetWidth = parseFloat(minMenuWidth) || rect.width;
-    } else if (fullWidth) {
-      targetWidth = rect.width;
-    } else {
-      targetWidth = Math.max(rect.width, 220);
+  // Determine whether to open upwards based on button position
+  useEffect(() => {
+    if (isOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setOpenUpwards(spaceBelow < 220 && spaceAbove > spaceBelow);
     }
-    targetWidth = Math.min(targetWidth, window.innerWidth - 24);
-
-    const isRightAligned =
-      align === 'right' ||
-      (align === 'left' && rect.left + targetWidth > window.innerWidth - 16);
-
-    const style: React.CSSProperties = {
-      position: 'fixed',
-      zIndex: 999999,
-      width: `${targetWidth}px`,
-      maxWidth: 'calc(100vw - 24px)',
-    };
-
-    if (isRightAligned) {
-      const rightVal = Math.max(12, window.innerWidth - rect.right);
-      style.right = `${rightVal}px`;
-      style.left = 'auto';
-    } else {
-      const leftVal = Math.max(12, Math.min(rect.left, window.innerWidth - targetWidth - 12));
-      style.left = `${leftVal}px`;
-      style.right = 'auto';
-    }
-
-    if (openUpwards) {
-      style.bottom = `${Math.round(window.innerHeight - rect.top + 4)}px`;
-      style.top = 'auto';
-      style.maxHeight = `${Math.max(140, Math.min(300, spaceAbove - 16))}px`;
-      style.transformOrigin = isRightAligned ? 'bottom right' : 'bottom left';
-    } else {
-      style.top = `${Math.round(rect.bottom + 4)}px`;
-      style.bottom = 'auto';
-      style.maxHeight = `${Math.max(140, Math.min(300, spaceBelow - 16))}px`;
-      style.transformOrigin = isRightAligned ? 'top right' : 'top left';
-    }
-
-    setMenuStyle(style);
-  }, [align, fullWidth, minMenuWidth]);
+  }, [isOpen]);
 
   // Auto focus search input when opened
   useEffect(() => {
     if (isOpen) {
       setSearchQuery('');
-      updatePosition();
       if (searchable || options.length > 6) {
         setTimeout(() => searchInputRef.current?.focus(), 50);
       }
     }
-  }, [isOpen, searchable, options.length, updatePosition]);
+  }, [isOpen, searchable, options.length]);
 
   // Close on outside click
-  const handleClickOutside = useCallback((e: MouseEvent) => {
-    const target = e.target as Node;
-    const isInsideTrigger = dropdownRef.current && dropdownRef.current.contains(target);
-    const isInsideMenu = menuRef.current && menuRef.current.contains(target);
-    if (!isInsideTrigger && !isInsideMenu) {
-      setIsOpen(false);
-    }
-  }, []);
-
-  // Throttled scroll & resize position update to prevent forced synchronous layouts
-  const rafId = useRef<number | null>(null);
-  const handleScrollOrResize = useCallback(() => {
-    if (rafId.current) cancelAnimationFrame(rafId.current);
-    rafId.current = requestAnimationFrame(() => {
-      updatePosition();
-    });
-  }, [updatePosition]);
-
-  // Event listeners for open state
   useEffect(() => {
-    if (isOpen) {
-      updatePosition();
-      document.addEventListener('mousedown', handleClickOutside);
-      window.addEventListener('scroll', handleScrollOrResize, { passive: true, capture: true });
-      window.addEventListener('resize', handleScrollOrResize, { passive: true });
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', handleScrollOrResize, true);
-      window.removeEventListener('resize', handleScrollOrResize);
-      if (rafId.current) cancelAnimationFrame(rafId.current);
-    }
+    if (!isOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', handleScrollOrResize, true);
-      window.removeEventListener('resize', handleScrollOrResize);
-      if (rafId.current) cancelAnimationFrame(rafId.current);
     };
-  }, [isOpen, handleClickOutside, handleScrollOrResize, updatePosition]);
+  }, [isOpen]);
 
   // Filtered options based on search query
   const filteredOptions = useMemo(() => {
@@ -254,114 +178,124 @@ export function Select({
         </span>
       </button>
 
-      {/* PORTALED LIQUID FROSTED GLASS DROPDOWN POPUP MENU */}
-      {isOpen &&
-        typeof document !== 'undefined' &&
-        createPortal(
-          <div
-            ref={menuRef}
-            role="listbox"
-            style={menuStyle}
-            className="glass-dropdown overflow-hidden p-1.5 animate-in fade-in zoom-in-95 duration-150"
-          >
-            {/* SEARCH INPUT BAR */}
-            {showSearch && (
-              <div className="p-1 pb-1.5 border-b border-white/40 dark:border-white/10 mb-1">
-                <div className="relative flex items-center">
-                  <SearchIcon className="absolute left-2.5 h-3.5 w-3.5 text-slate-400" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search options…"
-                    className="w-full rounded-xl bg-white/70 dark:bg-white/[0.08] pl-8 pr-7 py-1.5 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 outline-none border border-white/60 dark:border-white/10 focus:border-blue-500/60 focus:bg-white/90 dark:focus:bg-white/[0.14] transition-all"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSearchQuery('');
-                        searchInputRef.current?.focus();
-                      }}
-                      className="absolute right-2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
-                    >
-                      <XIcon className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                </div>
+      {/* SOLIDLY ANCHORED DROPDOWN POPUP MENU */}
+      {isOpen && (
+        <div
+          ref={menuRef}
+          role="listbox"
+          style={{
+            minWidth: minMenuWidth || (fullWidth ? '100%' : '220px'),
+            maxWidth: 'calc(100vw - 24px)',
+          }}
+          className={`glass-dropdown absolute ${openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'} ${
+            align === 'right' ? 'right-0' : 'left-0'
+          } z-[100] ${fullWidth ? 'w-full' : 'w-auto'} overflow-hidden p-1.5 animate-in fade-in duration-150`}
+        >
+          {/* SEARCH INPUT BAR */}
+          {showSearch && (
+            <div className="p-1.5 pb-2 border-b border-slate-200 dark:border-slate-800 mb-1">
+              <div className="relative flex items-center">
+                <SearchIcon className="absolute left-2.5 h-3.5 w-3.5 text-slate-400" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search options…"
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-900 pl-8 pr-7 py-1.5 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none border border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSearchQuery('');
+                      searchInputRef.current?.focus();
+                    }}
+                    className="absolute right-2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                  >
+                    <XIcon className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* SCROLLABLE OPTIONS LIST */}
-            <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-0.5">
-              {filteredOptions.length === 0 ? (
-                <div className="px-4 py-4 text-center text-xs font-medium text-slate-400 italic">
-                  {searchQuery ? `No options matching "${searchQuery}"` : 'No options available'}
-                </div>
-              ) : (
-                filteredOptions.map((option) => {
-                  const isSelected = String(option.value) === String(value);
-                  return (
-                    <div
-                      key={String(option.value)}
-                      role="option"
-                      aria-selected={isSelected}
-                      onClick={() => {
-                        onChange(option.value);
-                        setIsOpen(false);
-                      }}
-                      className={`group flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-xs transition-all duration-150 cursor-pointer select-none border ${
-                        isSelected
-                          ? 'bg-gradient-to-r from-blue-500/15 via-blue-500/10 to-indigo-500/15 dark:from-blue-500/25 dark:to-indigo-500/25 text-blue-700 dark:text-blue-300 font-bold border-blue-500/40 shadow-xs'
-                          : 'border-transparent text-slate-800 dark:text-slate-200 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-indigo-500/10 hover:border-blue-400/40 dark:hover:bg-white/[0.08] dark:hover:border-white/15 hover:shadow-xs active:scale-[0.99] font-medium'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        {option.tone && (
-                          <span className={`h-2 w-2 rounded-full shrink-0 ${toneDots[option.tone] || 'bg-slate-400'}`} />
-                        )}
-                        {option.icon && (
-                          <span
-                            className={`shrink-0 transition-transform duration-150 group-hover:scale-110 ${
-                              isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 group-hover:text-blue-500 dark:group-hover:text-sky-300'
-                            }`}
-                          >
-                            {option.icon}
-                          </span>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className={`truncate leading-snug transition-colors duration-150 ${isSelected ? 'font-bold text-blue-700 dark:text-blue-300' : 'text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-300 font-semibold'}`}>
-                            {option.label}
+          {/* SCROLLABLE OPTIONS LIST */}
+          <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-1 p-0.5">
+            {filteredOptions.length === 0 ? (
+              <div className="px-4 py-4 text-center text-xs font-medium text-slate-400 italic">
+                {searchQuery ? `No options matching "${searchQuery}"` : 'No options available'}
+              </div>
+            ) : (
+              filteredOptions.map((option) => {
+                const isSelected = String(option.value) === String(value);
+                return (
+                  <div
+                    key={String(option.value)}
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                    }}
+                    className={`group flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-xs transition-colors duration-150 cursor-pointer select-none ${
+                      isSelected
+                        ? 'bg-blue-600 text-white font-bold shadow-xs'
+                        : 'text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/90 font-medium'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      {option.tone && (
+                        <span className={`h-2 w-2 rounded-full shrink-0 ${toneDots[option.tone] || 'bg-slate-400'}`} />
+                      )}
+                      {option.icon && (
+                        <span
+                          className={`shrink-0 transition-transform duration-150 group-hover:scale-110 ${
+                            isSelected ? 'text-white' : 'text-slate-400 group-hover:text-blue-500 dark:group-hover:text-sky-300'
+                          }`}
+                        >
+                          {option.icon}
+                        </span>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className={`truncate leading-snug transition-colors duration-150 ${
+                          isSelected ? 'font-bold text-white' : 'text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-300 font-semibold'
+                        }`}>
+                          {option.label}
+                        </p>
+                        {option.description && (
+                          <p className={`text-[10px] font-normal truncate mt-0.5 ${
+                            isSelected ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'
+                          }`}>
+                            {option.description}
                           </p>
-                          {option.description && (
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal truncate mt-0.5 group-hover:text-slate-600 dark:group-hover:text-slate-300">
-                              {option.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        {option.badge && (
-                          <span className="rounded-lg bg-white/70 dark:bg-white/[0.08] group-hover:bg-white/90 group-hover:border-blue-300/50 dark:group-hover:bg-white/[0.12] px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:text-slate-200 border border-white/60 dark:border-white/10 shadow-2xs transition-all">
-                            {option.badge}
-                          </span>
-                        )}
-                        {isSelected && (
-                          <CheckIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 animate-in zoom-in-75 duration-150" />
                         )}
                       </div>
                     </div>
-                  );
-                })
-              )}
-            </div>
-          </div>,
-          document.body
-        )}
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {option.badge && (
+                        <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold border transition-colors ${
+                          isSelected
+                            ? 'bg-blue-700 text-white border-blue-500'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                        }`}>
+                          {option.badge}
+                        </span>
+                      )}
+                      {isSelected && (
+                        <CheckIcon className="h-4 w-4 text-white shrink-0 animate-in zoom-in-75 duration-150" />
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

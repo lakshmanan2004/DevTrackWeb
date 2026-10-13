@@ -83,7 +83,7 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
   };
 
   return (
-    <section className="glass-card sticky top-6 rounded-3xl border border-white/80 dark:border-white/10 p-0 shadow-glass overflow-hidden">
+    <section className="glass-card rounded-3xl border border-white/80 dark:border-white/10 p-0 shadow-glass overflow-hidden">
       <div className="flex items-start justify-between gap-3 border-b border-slate-200/60 dark:border-white/10 px-6 py-5">
         <div className="flex items-center gap-3.5">
           <span className="relative">

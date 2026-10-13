@@ -140,11 +140,15 @@ ${pendingText || 'No pending tasks or blockers reported.'}
                   await refetch();
                   setTimeout(() => setIsRefreshing(false), 600);
                 }}
-                className="btn-glass-secondary inline-flex items-center gap-2 h-9 px-4 text-xs font-bold whitespace-nowrap shadow-glass cursor-pointer rounded-full shrink-0"
+                className="btn-glass-secondary group inline-flex items-center gap-2 h-9 px-4 text-xs font-bold whitespace-nowrap shadow-glass cursor-pointer rounded-full shrink-0 transition-all"
                 title="Refresh AI analysis"
               >
-                <RefreshCwIcon className={`h-3.5 w-3.5 shrink-0 ${isRefreshing || loading ? 'animate-spin text-purple-600 dark:text-purple-400' : 'text-slate-500 dark:text-slate-400'}`} />
-                <span>Refresh</span>
+                <RefreshCwIcon className={`h-3.5 w-3.5 shrink-0 transition-colors ${
+                  isRefreshing || loading
+                    ? 'animate-spin text-purple-600 dark:text-purple-400'
+                    : 'text-purple-600 dark:text-purple-400 group-hover:text-purple-700 dark:group-hover:text-purple-300'
+                }`} />
+                <span className="text-slate-800 dark:text-slate-100 font-bold">Refresh</span>
               </button>
 
               {/* Copy Report */}
@@ -152,10 +156,11 @@ ${pendingText || 'No pending tasks or blockers reported.'}
                 type="button"
                 onClick={handleCopyReport}
                 disabled={!summary || summary.totalLogs === 0}
-                className="btn-glass-primary inline-flex items-center gap-2 h-9 px-5 text-xs font-bold whitespace-nowrap shadow-glass disabled:opacity-50 cursor-pointer rounded-full shrink-0"
+                className="btn-glass-primary !text-white inline-flex items-center gap-2 h-9 px-5 text-xs font-bold whitespace-nowrap shadow-glass disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer rounded-full shrink-0 transition-all"
+                title={summary && summary.totalLogs > 0 ? 'Copy summary to clipboard' : 'No executive summary available to copy'}
               >
-                <CopyIcon className="h-3.5 w-3.5 shrink-0" />
-                <span>{copied ? 'Copied ✓' : 'Copy Summary'}</span>
+                <CopyIcon className="h-3.5 w-3.5 shrink-0 text-white" />
+                <span className="text-white font-bold">{copied ? 'Copied ✓' : 'Copy Summary'}</span>
               </button>
             </div>
           </div>

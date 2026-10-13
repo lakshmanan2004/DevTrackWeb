@@ -135,7 +135,7 @@ export function LeaderProjects() {
             return (
               <article
                 key={proj.id}
-                className={`glass-card independent-card rounded-3xl p-6 sm:p-7 space-y-5 border ${
+                className={`glass-card project-container-card rounded-3xl p-6 sm:p-7 space-y-5 border ${
                   isInspectOpen ? 'ring-2 ring-blue-500/30 border-blue-500/40' : ''
                 }`}
               >
@@ -179,7 +179,7 @@ export function LeaderProjects() {
 
                 {/* Info Metadata Grid */}
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="glass-surface rounded-2xl p-3.5">
+                  <div className="glass-surface glass-hover-card rounded-2xl p-3.5">
                     <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                       <UsersIcon className="h-3.5 w-3.5 text-purple-500" />
                       <span>Supervised Team</span>
@@ -189,7 +189,7 @@ export function LeaderProjects() {
                     </p>
                   </div>
 
-                  <div className="glass-surface rounded-2xl p-3.5">
+                  <div className="glass-surface glass-hover-card rounded-2xl p-3.5">
                     <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                       <CalendarIcon className="h-3.5 w-3.5 text-amber-500" />
                       <span>Target Timeline</span>
@@ -199,7 +199,7 @@ export function LeaderProjects() {
                     </p>
                   </div>
 
-                  <div className="glass-surface rounded-2xl p-3.5">
+                  <div className="glass-surface glass-hover-card rounded-2xl p-3.5">
                     <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                       <LayersIcon className="h-3.5 w-3.5 text-emerald-500" />
                       <span>Milestone Modules</span>

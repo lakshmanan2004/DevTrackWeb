@@ -155,18 +155,18 @@ ${blockers.length ? blockers.map((l) => `- ${l.task}: ${l.blocker || 'blocked'}`
                 setIsRegenerating(true);
                 setTimeout(() => setIsRegenerating(false), 600);
               }}
-              className="btn-glass-secondary h-9 px-3 text-xs font-bold cursor-pointer"
+              className="btn-glass-secondary group h-9 px-3 text-xs font-bold cursor-pointer inline-flex items-center gap-1.5 transition-all"
             >
-              <RefreshCwIcon className={`h-3.5 w-3.5 ${isRegenerating ? 'animate-spin' : ''}`} />
-              Regenerate
+              <RefreshCwIcon className={`h-3.5 w-3.5 shrink-0 transition-colors ${isRegenerating ? 'animate-spin text-purple-600 dark:text-purple-400' : 'text-purple-600 dark:text-purple-400 group-hover:text-purple-700 dark:group-hover:text-purple-300'}`} />
+              <span className="text-slate-800 dark:text-slate-100 font-bold">Regenerate</span>
             </button>
             <button
               type="button"
               onClick={handleCopyStandup}
-              className="btn-glass-primary h-9 px-3 text-xs font-bold !bg-purple-600 hover:!bg-purple-700 cursor-pointer shadow-purple-500/30"
+              className="btn-glass-primary !text-white h-9 px-3 text-xs font-bold !bg-purple-600 hover:!bg-purple-700 cursor-pointer shadow-purple-500/30 inline-flex items-center gap-1.5 transition-all"
             >
-              <CopyIcon className="h-3.5 w-3.5" />
-              {copied ? 'Copied!' : 'Copy Standup'}
+              <CopyIcon className="h-3.5 w-3.5 shrink-0 text-white" />
+              <span className="text-white font-bold">{copied ? 'Copied!' : 'Copy Standup'}</span>
             </button>
           </div>
         </div>

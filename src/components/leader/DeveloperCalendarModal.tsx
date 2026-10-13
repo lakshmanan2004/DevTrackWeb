@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   CalendarIcon,
   XIcon,
@@ -194,13 +195,19 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
   const activePendingTasks = displayTasks.filter((t: any) => t.review !== 'approved' || t.status !== 'done' || t.isPendingWorkSubmission);
   const activeApprovedTasks = displayTasks.filter((t: any) => t.review === 'approved');
 
-  return (
-    <div className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center animate-in fade-in overflow-hidden">
+  const modalNode = (
+    <div
+      className="glass-modal-backdrop fixed inset-0 z-[99999] overflow-y-auto animate-in fade-in"
+      onClick={onClose}
+    >
       {/* Centered bounding container between sidebar/navbar end and right side of screen */}
-      <div className="fixed inset-0 left-0 lg:left-64 flex items-center justify-center p-4 sm:p-6 lg:p-8 pointer-events-none">
-        <div className="glass-modal relative flex flex-col w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-3xl border border-white/90 dark:border-white/15 shadow-2xl p-0 pointer-events-auto">
+      <div className="fixed inset-0 left-0 lg:left-64 flex items-center justify-center p-3 sm:p-5 lg:p-6 overflow-y-auto pointer-events-none">
+        <div
+          className="glass-modal relative my-auto flex flex-col w-full max-w-5xl max-h-[calc(100vh-2rem)] overflow-hidden rounded-3xl border border-white/90 dark:border-white/15 shadow-2xl p-0 pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* MODAL HEADER */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/60 dark:border-white/10 bg-gradient-to-r from-blue-500/10 via-purple-500/5 to-white/40 dark:from-blue-500/15 dark:via-purple-500/10 dark:to-transparent px-6 py-5">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/60 dark:border-white/10 bg-gradient-to-r from-blue-500/10 via-purple-500/5 to-white/40 dark:from-blue-500/15 dark:via-purple-500/10 dark:to-transparent px-5 sm:px-6 py-4 shrink-0">
           <div className="flex items-center gap-3.5">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-black text-white shadow-md ring-2 ring-white/30">
               {developer.initials || developer.name.slice(0, 2).toUpperCase()}
@@ -261,22 +268,22 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
         </div>
 
         {/* MODAL BODY */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* MONTH STATS OVERVIEW CARDS */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 custom-scrollbar">
+          {/* MONTH STATS OVERVIEW CARDS WITH SMOOTH LIQUID GLASS HOVER EFFECTS */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="glass-surface rounded-2xl border border-white/80 dark:border-white/10 p-4 space-y-1 shadow-2xs">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Month</span>
+            <div className="glass-surface hover-tile rounded-2xl border border-white/80 dark:border-white/10 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-glass hover:border-white/95 dark:hover:border-white/30 hover:bg-white/20 dark:hover:bg-white/10 active:scale-[0.99] active:translate-y-0 select-none">
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Month</span>
               <p className="text-sm font-black text-navy dark:text-white">{monthLabel}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-500/15 p-4 space-y-1 shadow-2xs">
+            <div className="hover-tile rounded-2xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-glass hover:border-emerald-500/60 dark:hover:border-emerald-400/40 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 active:scale-[0.99] active:translate-y-0 select-none">
               <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">Submitted Tasks</span>
               <p className="text-sm font-black text-emerald-950 dark:text-emerald-100">{totalTasksInMonth} Logs</p>
             </div>
-            <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 dark:bg-rose-500/15 p-4 space-y-1 shadow-2xs">
+            <div className="hover-tile rounded-2xl border border-rose-500/30 bg-rose-500/10 dark:bg-rose-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-glass hover:border-rose-500/60 dark:hover:border-rose-400/40 hover:bg-rose-500/20 dark:hover:bg-rose-500/25 active:scale-[0.99] active:translate-y-0 select-none">
               <span className="text-[10px] font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wider">Non-Submitted Slots</span>
               <p className="text-sm font-black text-rose-950 dark:text-rose-100">{totalMissedSlotsInMonth} Missed</p>
             </div>
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 p-4 space-y-1 shadow-2xs">
+            <div className="hover-tile rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-glass hover:border-amber-500/60 dark:hover:border-amber-400/40 hover:bg-amber-500/20 dark:hover:bg-amber-500/25 active:scale-[0.99] active:translate-y-0 select-none">
               <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">Pending / Flagged Days</span>
               <p className="text-sm font-black text-amber-950 dark:text-amber-100">{pendingDaysCount} Days</p>
             </div>
@@ -694,7 +701,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="flex items-center justify-between border-t border-slate-200/60 dark:border-white/10 px-6 py-4 glass-surface bg-white/40 dark:bg-white/[0.02]">
+        <div className="flex items-center justify-between border-t border-slate-200/60 dark:border-white/10 px-5 sm:px-6 py-3.5 glass-surface bg-white/40 dark:bg-white/[0.02] shrink-0">
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             Developer: <strong className="text-navy dark:text-white">{developer.name}</strong> ({developer.email || 'developer'})
           </p>
@@ -722,4 +729,6 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
       )}
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalNode, document.body) : modalNode;
 }

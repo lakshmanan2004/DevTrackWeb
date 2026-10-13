@@ -186,7 +186,7 @@ export function MyProjects() {
             return (
               <li
                 key={project.id}
-                className="glass-card independent-card rounded-3xl p-6 space-y-4"
+                className="glass-card project-container-card rounded-3xl p-6 space-y-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -282,7 +282,7 @@ export function MyProjects() {
                       { label: 'Active Devs', value: project.activeDevs, tone: 'text-emerald-500 dark:text-emerald-400' },
                       { label: 'In Progress', value: project.inProgress, tone: 'text-brand dark:text-indigo-400' }
                     ].map((stat) => (
-                      <div key={stat.label} className="glass-surface rounded-2xl p-3">
+                      <div key={stat.label} className="glass-surface glass-hover-card rounded-2xl p-3">
                         <dd className={`text-xl font-bold tabular-nums ${stat.tone}`}>{stat.value}</dd>
                         <dt className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{stat.label}</dt>
                       </div>

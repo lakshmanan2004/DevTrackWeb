@@ -148,8 +148,8 @@ export function LiveDashboard() {
               </span>
             </div>
 
-            <div className="max-h-[calc(100vh-280px)] overflow-y-auto pr-1 space-y-3 custom-scrollbar">
-              <ul className="space-y-3">
+            <div className="max-h-[calc(100vh-280px)] overflow-y-auto p-2 space-y-3 custom-scrollbar">
+              <ul className="space-y-3 p-0.5">
                 {visible.map((dev: any) => (
                   <DeveloperCard
                     key={dev.id}

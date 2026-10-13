@@ -37,7 +37,7 @@ export const StatCard = React.memo(function StatCard({ label, value, hint, tone 
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={`${isClickable ? 'glass-card-interactive cursor-pointer' : 'glass-card independent-card'} flex h-full flex-col p-5`}
+      className={`${isClickable ? 'glass-card-interactive cursor-pointer' : 'glass-card independent-card'} glass-hover-card flex h-full flex-col p-5`}
     >
       <div className="flex items-start justify-between gap-3">
         <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{label}</p>

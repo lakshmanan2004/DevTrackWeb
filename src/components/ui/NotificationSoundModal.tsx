@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Volume2Icon,
   PlayIcon,
@@ -53,15 +54,19 @@ export function NotificationSoundModal({
     }, 600);
   };
 
-  return (
+  const modalNode = (
     <div
-      className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in"
+      className="glass-modal-backdrop fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto p-4 sm:p-6 animate-in fade-in"
       role="dialog"
       aria-modal="true"
+      onClick={onClose}
     >
-      <div className="glass-modal relative w-full max-w-xl overflow-hidden rounded-3xl p-6 sm:p-7 shadow-2xl border border-white/40 dark:border-white/10 transition-all">
+      <div
+        className="glass-modal relative w-full max-w-xl my-auto max-h-[calc(100vh-2rem)] overflow-hidden rounded-3xl p-5 sm:p-7 shadow-2xl border border-white/40 dark:border-white/10 transition-all flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-4">
+        <div className="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-4 shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-inner">
               <MusicIcon className="h-5 w-5" />
@@ -90,7 +95,7 @@ export function NotificationSoundModal({
         </div>
 
         {/* List of 10 sounds */}
-        <div className="mt-4 max-h-[60vh] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+        <div className="mt-4 max-h-[50vh] sm:max-h-[55vh] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
           {NOTIFICATION_SOUNDS.map((sound) => {
             const isSelected = activeSoundId === sound.id;
             const isCurrentlyPlaying = playingId === sound.id;
@@ -167,7 +172,7 @@ export function NotificationSoundModal({
         </div>
 
         {/* Footer */}
-        <div className="mt-5 flex items-center justify-between border-t border-slate-200/50 dark:border-white/10 pt-4">
+        <div className="mt-5 flex items-center justify-between border-t border-slate-200/50 dark:border-white/10 pt-4 shrink-0">
           <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
             <Volume2Icon className="h-3.5 w-3.5 text-slate-400" />
             <span>Sound saved automatically across all device sessions</span>
@@ -184,4 +189,6 @@ export function NotificationSoundModal({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalNode, document.body) : modalNode;
 }

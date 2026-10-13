@@ -14,12 +14,12 @@ export const DeveloperCard = React.memo(function DeveloperCard({ developer, sele
   const pct = Math.round(developer.activeMinutes / 480 * 100);
 
   return (
-    <li>
+    <li className="list-none">
       <button
         type="button"
         onClick={() => onSelect(developer.id)}
         aria-pressed={selected}
-        className={`glass-subcard glass-subcard-interactive w-full text-left rounded-2xl p-4 ${
+        className={`glass-subcard glass-subcard-interactive w-full text-left rounded-2xl p-4 transition-all duration-200 ${
           selected
             ? 'border-brand/50 ring-2 ring-brand/40 shadow-glass-hover bg-brand/10 dark:bg-brand/20'
             : ''
