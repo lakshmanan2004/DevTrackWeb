@@ -10,7 +10,8 @@ import {
   EyeIcon,
   FileTextIcon,
   XIcon,
-  PalmtreeIcon
+  PalmtreeIcon,
+  PlusIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { FilterPills } from '../../components/ui/FilterPills';
@@ -18,6 +19,7 @@ import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { TaskStatusBadge } from '../../components/ui/TaskStatusBadge';
 import { Button } from '../../components/ui/Button';
 import { ApplyLeaveModal } from '../../components/developer/ApplyLeaveModal';
+import { CheckInModal } from '../../components/developer/CheckInModal';
 import { useMyLogs, useLeaves } from '../../hooks/useLive';
 import { fileUrl } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
@@ -36,6 +38,7 @@ export function WorkLogs() {
   const todayLogs = data?.logs || [];
   const stats = data?.stats;
 
+  const [modalOpen, setModalOpen] = useState(false);
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
   const { data: leaveData, refetch: refetchLeaves } = useLeaves(date === 'all' ? undefined : date);
   const currentDayLeave = leaveData?.leaves?.find((l: any) => l.date === date);
@@ -72,6 +75,13 @@ export function WorkLogs() {
         subtitle={user?.leaderName ? `Only you and ${user.leaderName} can see these logs` : 'Only you and your Team Leader can see these logs'}
         actions={
           <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => setModalOpen(true)}
+              icon={<PlusIcon className="h-3.5 w-3.5" />}
+            >
+              Log Work Now
+            </Button>
             <Button
               size="sm"
               variant="secondary"
@@ -366,7 +376,12 @@ export function WorkLogs() {
           {!loading && visible.length === 0 && (
             <div className="glass-card rounded-2xl border-dashed border-gray-300 dark:border-white/10 p-12 text-center">
               <p className="text-sm font-semibold text-navy dark:text-white">No logs for this date</p>
-              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Submit an hourly check-in from your dashboard.</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Submit an hourly check-in from your dashboard or click below.</p>
+              <div className="mt-4 flex justify-center">
+                <Button size="sm" onClick={() => setModalOpen(true)} icon={<PlusIcon className="h-4 w-4" />}>
+                  Log Work Now
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -404,6 +419,14 @@ export function WorkLogs() {
           refetchLeaves();
           refetchLogs();
         }}
+      />
+
+      {/* Work Block Check-in Modal */}
+      <CheckInModal
+        open={modalOpen}
+        lunchSlot={user?.lunchSlot ?? 12}
+        onClose={() => setModalOpen(false)}
+        onSubmitted={() => refetchLogs()}
       />
     </>
   );
