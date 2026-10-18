@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json({ limit: '2mb' }));
@@ -38,6 +39,18 @@ app.use('/api/leaves', require('./routes/leaves'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api', require('./routes/org'));
 app.use('/api', require('./routes/reports'));
+
+// Production SPA static file serving (resolves 404 on direct URL navigation & refresh)
+const distPath = path.join(__dirname, '..', '..', 'dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
 

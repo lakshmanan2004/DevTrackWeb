@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   AlarmClockIcon,
   CheckCircle2Icon,
@@ -40,8 +40,14 @@ function fmtDuration(min: number) {
   return `${h}h ${String(m).padStart(2, '0')}m`;
 }
 
-export function DeveloperDashboard() {
+interface DeveloperDashboardProps {
+  initialOpenSubmit?: boolean;
+}
+
+export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashboardProps) {
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { data, refetch: refetchLogs } = useMyLogs();
   const { data: projectData } = useProjects('mine');
   const { data: pendingData } = usePendingWorks();
@@ -50,12 +56,19 @@ export function DeveloperDashboard() {
   const { data: leaveData, refetch: refetchLeaves } = useLeaves(todayStr);
   const todayLeave = leaveData?.leaves?.find((l: any) => l.date === todayStr);
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const isSubmitRequested = initialOpenSubmit || location.pathname === '/developer/submit' || location.search.includes('submit=true');
+  const [modalOpen, setModalOpen] = useState(isSubmitRequested);
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
   const [announcementOpen, setAnnouncementOpen] = useState(() => {
     return localStorage.getItem('devtrack_schedule_v2_seen') !== 'true';
   });
   const [modalTargetSlot, setModalTargetSlot] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (initialOpenSubmit || location.pathname === '/developer/submit' || location.search.includes('submit=true')) {
+      setModalOpen(true);
+    }
+  }, [initialOpenSubmit, location.pathname, location.search]);
 
   const handleOpenLog = (slot?: number) => {
     setModalTargetSlot(slot);
@@ -75,7 +88,6 @@ export function DeveloperDashboard() {
   });
 
   const lastAlertRef = useRef<{ slot: number; level: string } | null>(null);
-  const navigate = useNavigate();
 
   const logs = data?.logs || [];
   const stats = data?.stats;
@@ -621,6 +633,15 @@ export function DeveloperDashboard() {
         onClose={() => {
           setModalOpen(false);
           setModalTargetSlot(undefined);
+          if (location.pathname === '/developer/submit') {
+            navigate('/developer', { replace: true });
+          }
+        }}
+        onSubmitted={() => {
+          refetchLogs();
+          if (location.pathname === '/developer/submit') {
+            navigate('/developer/logs', { replace: true });
+          }
         }}
       />
       <CheckInAlertModal

@@ -79,6 +79,7 @@ export function App() {
 
             <Route element={<Protected role="developer"><AppShell role="developer" /></Protected>}>
               <Route path="/developer" element={<DeveloperDashboard />} />
+              <Route path="/developer/submit" element={<DeveloperDashboard initialOpenSubmit />} />
               <Route path="/developer/projects" element={<DeveloperMyProjects />} />
               <Route path="/developer/pending" element={<MyPendingWorks />} />
               <Route path="/developer/logs" element={<WorkLogs />} />
