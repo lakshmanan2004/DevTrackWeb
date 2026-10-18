@@ -169,8 +169,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsub1 = onSocketEvent('alert:new', (payload: any) => {
       debouncedRefresh();
       if (isDevWorkHours()) {
-        playAlertSound('urgent');
-        showWindowsNotification('DevTrack Alert', payload?.title || 'New alert received');
+        const title = payload?.title || 'DevTrack Alert';
+        const body = payload?.body || (payload?.category ? `${payload.category}${payload.who ? ` (${payload.who})` : ''}` : 'New alert received');
+        showWindowsNotification(title, body);
       }
     });
     const unsub2 = onSocketEvent('task:assigned', (payload: any) => {

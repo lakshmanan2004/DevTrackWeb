@@ -201,34 +201,34 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
         setAlertModalState({ open: true, level, slotLabel, minsLeft: minsForModal });
       };
 
-      if (remainingMins === 20) {
+      if (remainingMins <= 20 && remainingMins > 10) {
         triggerMilestone(
           '20m',
           'pop',
           'pop',
           'DevTrack Reminder: 20 Minutes Left!',
-          `You have 20 minutes remaining to submit your work log for ${slotLabel}.`,
-          20
+          `You have ${remainingMins} minutes remaining to submit your work log for ${slotLabel}.`,
+          remainingMins
         );
-      } else if (remainingMins === 10) {
+      } else if (remainingMins <= 10 && remainingMins > 5) {
         triggerMilestone(
           '10m',
           'warning',
           'notification',
           'DevTrack Warning: 10 Minutes Left!',
-          `Only 10 minutes remaining! Submit your work log for ${slotLabel}.`,
-          10
+          `Only ${remainingMins} minutes remaining! Submit your work log for ${slotLabel}.`,
+          remainingMins
         );
-      } else if (remainingMins === 5) {
+      } else if (remainingMins <= 5 && remainingMins > 1) {
         triggerMilestone(
           '5m',
           'urgent',
           'urgent',
           'DevTrack URGENT: 5 Minutes Left!',
-          `Deadline approaching! Only 5 minutes left to submit your ${slotLabel} check-in!`,
-          5
+          `Deadline approaching! Only ${remainingMins} minutes left to submit your ${slotLabel} check-in!`,
+          remainingMins
         );
-      } else if (remainingMins <= 1) {
+      } else if (remainingMins <= 1 && remainingMins >= 0) {
         triggerMilestone(
           'deadline',
           'late',
@@ -456,7 +456,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
                   Office Hours Begin at 8:00 AM ({minutesLeft}m remaining)
                 </h3>
                 <p className="text-xs font-medium text-blue-800 dark:text-blue-300 mt-0.5">
-                  Mandatory hourly check-ins run from 8:00 AM to 5:00 PM. Automated audio pop reminders activate at the 8:00 AM slot.
+                  Work block check-ins run from 8:00 AM to 5:00 PM. Automated reminders activate 15 minutes before each block closes.
                 </p>
               </div>
             </div>

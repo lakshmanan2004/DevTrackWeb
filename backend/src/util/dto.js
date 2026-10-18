@@ -1,10 +1,12 @@
 const { dayStr, fromDayStr, fmtTime, fmtDuration, hourLabel, fmtDateMDY, fmtDateLong, slotForNow, requiredSlots, isWorkday, getHolidayInfo, makeTaskTitle } = require('./time');
+const { isLogLate, blockLabel, getWorkBlocks, isAnyLogForBlock } = require('./workBlocks');
 const { Setting } = require('../models');
 
 // ---- shared builders ----------------------------------------------------
 
 function workLogDto(log, extra = {}) {
-  const isLate = !!(log.isLate || (log.submittedAt && (new Date(log.submittedAt).getHours() >= 17 || new Date(log.submittedAt) > new Date(new Date(log.submittedAt).setHours(log.hourSlot + 1, 0, 0, 0)))));
+  const devLunchSlot = (log.developer && typeof log.developer === 'object' && log.developer.lunchSlot) || extra.lunchSlot || 12;
+  const isLate = !!(log.isLate || isLogLate(log, devLunchSlot));
   let devId = extra.developerId || '';
   if (log.developer) {
     if (typeof log.developer === 'object' && log.developer._id) {
@@ -38,7 +40,7 @@ function workLogDto(log, extra = {}) {
     initials: extra.initials || '',
     date: log.date,
     hourSlot: log.hourSlot,
-    hourLabel: hourLabel(log.hourSlot),
+    hourLabel: blockLabel(log.hourSlot, devLunchSlot),
     task: resolvedTask,
     status: log.status,
     description: log.description,
@@ -170,12 +172,13 @@ async function dayStats(developerIds, date = dayStr()) {
   for (const id of ids) {
     const info = perDev[id];
     const devLunchSlot = (userMap[id] && userMap[id].lunchSlot) ? userMap[id].lunchSlot : 12;
-    const devRequired = requiredSlots(settings, devLunchSlot);
-    const loggedSlots = new Set(info.logs.map((l) => l.hourSlot));
-    const elapsed = devRequired.filter((s) => s < currentSlot);
-    const missed = isWork ? elapsed.filter((s) => !loggedSlots.has(s)).length : 0;
+    const blocks = getWorkBlocks(devLunchSlot);
+    const nowObj = date === dayStr() ? new Date() : fromDayStr(date);
+    const timeFloat = date === dayStr() ? (nowObj.getHours() + nowObj.getMinutes() / 60) : 17.0;
+    const elapsedBlocks = blocks.filter((b) => timeFloat >= (b.endHour + 0.24));
+    const missed = isWork ? elapsedBlocks.filter((b) => !isAnyLogForBlock(info.logs, b.slot, devLunchSlot)).length : 0;
     const hoursCovered = info.logs.length;
-    const slotsSoFar = isWork ? (elapsed.length || 0) : 0;
+    const slotsSoFar = isWork ? (elapsedBlocks.length || 0) : 0;
     result[id] = {
       logs: info.logs,
       commits: info.commits,

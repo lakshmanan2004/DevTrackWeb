@@ -7,6 +7,7 @@ const { authRequired, attachUser, requireRole, ah } = require('../middleware/aut
 const { workLogDto, dayStats } = require('../util/dto');
 const { scopeFor } = require('../util/scope');
 const { dayStr, fromDayStr, slotForNow, hourLabel, fmtTime, fmtDateMDY, fmtDateLong, requiredSlots, fmtDuration, isWorkday, getHolidayInfo, initialsOf, makeTaskTitle } = require('../util/time');
+const { currentBlockSlot, isLogLate, blockLabel } = require('../util/workBlocks');
 const { emitToRoles, emitToUser } = require('../sockets');
 
 const router = express.Router();
@@ -192,7 +193,8 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
   }
 
   const date = dayStr();
-  const hourSlot = req.body.hourSlot ? Number(req.body.hourSlot) : slotForNow(settings);
+  const devLunchSlot = req.user.lunchSlot || 12;
+  const hourSlot = req.body.hourSlot ? Number(req.body.hourSlot) : currentBlockSlot(devLunchSlot, new Date());
 
   const attachment = await saveUpload(req.file);
 
@@ -209,9 +211,7 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
   }
 
   const now = new Date();
-  const slotEnd = new Date(now);
-  slotEnd.setHours(hourSlot + 1, 0, 0, 0);
-  const isLate = now.getHours() >= 17 || now > slotEnd;
+  const isLate = isLogLate({ hourSlot, submittedAt: now }, devLunchSlot);
 
   const isPendingWork = req.body.isPendingWork === 'true' || !!req.body.originalPendingDate || (linkedTaskObj && dayStr(linkedTaskObj.createdAt) !== date);
   const origPendingDate = req.body.originalPendingDate || (linkedTaskObj ? dayStr(linkedTaskObj.createdAt) : date);

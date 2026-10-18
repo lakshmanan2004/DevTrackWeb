@@ -376,7 +376,7 @@ export function WorkLogs() {
           {!loading && visible.length === 0 && (
             <div className="glass-card rounded-2xl border-dashed border-gray-300 dark:border-white/10 p-12 text-center">
               <p className="text-sm font-semibold text-navy dark:text-white">No logs for this date</p>
-              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Submit an hourly check-in from your dashboard or click below.</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Submit a work block check-in from your dashboard or click below.</p>
               <div className="mt-4 flex justify-center">
                 <Button size="sm" onClick={() => setModalOpen(true)} icon={<PlusIcon className="h-4 w-4" />}>
                   Log Work Now

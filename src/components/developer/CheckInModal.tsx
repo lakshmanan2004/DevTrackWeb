@@ -143,7 +143,7 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot, lunchSlot
     try {
       const fd = new FormData();
       fd.append('projectId', effectiveProjectId);
-      if (targetSlot !== undefined) fd.append('hourSlot', String(targetSlot));
+      fd.append('hourSlot', String(effectiveSlot));
       if (selectedTaskId) fd.append('taskId', selectedTaskId);
       if (activeModuleName) fd.append('moduleName', activeModuleName);
       fd.append('description', description);

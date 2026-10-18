@@ -4,6 +4,7 @@ const { authRequired, attachUser, requireRole, ah } = require('../middleware/aut
 const { scopeFor } = require('../util/scope');
 const { dayStats, developerNote } = require('../util/dto');
 const { dayStr, fmtTime, hourLabel, fmtDuration, requiredSlots, slotForNow, addDays, isWorkday, getHolidayInfo } = require('../util/time');
+const { getWorkBlocks, isAnyLogForBlock } = require('../util/workBlocks');
 const { Setting } = require('../models');
 
 const router = express.Router();
@@ -49,9 +50,10 @@ router.get('/', ah(async (req, res) => {
       } else if (devLeave.slots && devLeave.slots.length) {
         const excusedSet = new Set(devLeave.slots);
         const devLunch = dev.lunchSlot || 12;
-        const checkSlots = requiredSlots(settings, devLunch).filter((slot) => slot < currentSlot && !excusedSet.has(slot));
-        const loggedSlots = new Set(s.logs.map((l) => l.hourSlot));
-        missedCount = checkSlots.filter((slot) => !loggedSlots.has(slot)).length;
+        const blocks = getWorkBlocks(devLunch);
+        const timeFloat = new Date().getHours() + new Date().getMinutes() / 60;
+        const elapsedBlocks = blocks.filter((b) => timeFloat >= (b.endHour + 0.24) && !excusedSet.has(b.slot));
+        missedCount = elapsedBlocks.filter((b) => !isAnyLogForBlock(s.logs, b.slot, devLunch)).length;
       }
     }
 

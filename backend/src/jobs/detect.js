@@ -4,6 +4,8 @@ const { WorkLog, EodReport, Alert, User, Team, Project, Setting, Leave } = requi
 const { dayStr, hourLabel, fmtTime, fmtDateMDY, slotForNow, requiredSlots, isWorkday } = require('../util/time');
 const { emitToRoles, emitToUser } = require('../sockets');
 
+const { getWorkBlocks, getLunchBreak, isAnyLogForBlock, blockLabel } = require('../util/workBlocks');
+
 async function activeDevelopers() {
   return User.find({ role: 'developer', active: true }).populate('team');
 }
@@ -12,13 +14,13 @@ async function createLeaderAlert(payload) {
   const exists = payload.dedupeKey ? await Alert.findOne({ dedupeKey: payload.dedupeKey }) : null;
   if (exists) return null;
   const alert = await Alert.create({ ...payload, audience: 'leader', read: false });
-  emitToRoles(['leader'], 'alert:new', { category: alert.category, who: alert.who });
+  emitToRoles(['leader'], 'alert:new', { category: alert.category, who: alert.who, title: alert.title, body: alert.body });
   return alert;
 }
 
 async function createDevAlert(user, payload) {
   const alert = await Alert.create({ ...payload, audience: 'developer', user: user._id, read: false });
-  emitToUser(String(user._id), 'alert:new', { kind: alert.kind });
+  emitToUser(String(user._id), 'alert:new', { kind: alert.kind, title: alert.title, body: alert.body });
   return alert;
 }
 
@@ -38,113 +40,131 @@ async function createManagerAlert(dev, payload) {
     project: project ? project._id : undefined,
     read: false
   });
-  emitToRoles(['manager'], 'alert:new', { category: alert.category, who: alert.who });
+  emitToRoles(['manager'], 'alert:new', { category: alert.category, who: alert.who, title: alert.title, body: alert.body });
   return alert;
 }
 
-// Check-in reminder: 15 minutes before each slot closes (H:45)
+// Check-in reminder: 15 minutes before active work block closes
 async function reminderCheck() {
   const now = new Date();
-  if (now.getHours() >= 17) return;
+  const timeFloat = now.getHours() + now.getMinutes() / 60;
+  if (timeFloat < 8.0 || timeFloat >= 17.0) return;
   const settings = await Setting.get();
   if (!isWorkday(now, settings)) return;
-  const slot = slotForNow(settings);
   const devs = await activeDevelopers();
   const date = dayStr(now);
+
   for (const dev of devs) {
     const devLunchSlot = dev.lunchSlot || 12;
-    if (slot === devLunchSlot) continue; // Lunch break: no reminders or alerts
-    
+    const lunch = getLunchBreak(devLunchSlot);
+    if (timeFloat >= lunch.startHour && timeFloat < lunch.endHour) continue; // Lunch break: no reminders
+
+    const blocks = getWorkBlocks(devLunchSlot);
+    const activeBlock = blocks.find((b) => timeFloat >= b.startHour && timeFloat < b.endHour);
+    if (!activeBlock) continue;
+
     // Check if developer is on leave for this slot
     const leave = await Leave.findOne({ developer: dev._id, date, status: 'approved' });
-    if (leave && (leave.type === 'full_day' || (leave.slots && leave.slots.includes(slot)))) {
+    if (leave && (leave.type === 'full_day' || (leave.slots && leave.slots.includes(activeBlock.slot)))) {
       continue; // Excused: on leave / half-day
     }
 
-    const has = await WorkLog.findOne({ developer: dev._id, date, hourSlot: slot });
-    if (!has) {
-      const dedupeKey = `reminder:${dev._id}:${date}:${slot}`;
-      if (!(await Alert.findOne({ dedupeKey }))) {
-        await Alert.create({
-          dedupeKey,
-          audience: 'developer', user: dev._id, kind: 'reminder', read: false,
-          title: 'Check-in Reminder',
-          body: `${hourLabel(slot)} log due in 15 minutes — submit before ${hourLabel(slot)} closes.`
-        });
-        emitToUser(String(dev._id), 'alert:new', { kind: 'reminder' });
+    const minutesLeft = Math.round((activeBlock.endHour - timeFloat) * 60);
+    // Send reminder when 15 minutes or less remain in block
+    if (minutesLeft <= 15 && minutesLeft > 0) {
+      const devLogs = await WorkLog.find({ developer: dev._id, date });
+      const has = isAnyLogForBlock(devLogs, activeBlock.slot, devLunchSlot);
+      if (!has) {
+        const dedupeKey = `reminder:${dev._id}:${date}:block${activeBlock.slot}`;
+        if (!(await Alert.findOne({ dedupeKey }))) {
+          const blockTitle = `${activeBlock.shortLabel} (${activeBlock.label})`;
+          const alert = await Alert.create({
+            dedupeKey,
+            audience: 'developer',
+            user: dev._id,
+            kind: 'reminder',
+            read: false,
+            title: 'Check-in Reminder',
+            body: `${blockTitle} log due in ${minutesLeft} minutes — submit before ${activeBlock.deadlineStr}.`
+          });
+          emitToUser(String(dev._id), 'alert:new', {
+            kind: 'reminder',
+            title: alert.title,
+            body: alert.body
+          });
+        }
       }
     }
   }
 }
 
-// Missed log detection: at :00 of the next hour, flag the previous slot
+// Missed log detection: flags closed work blocks after grace period (15m past block end)
 async function missedLogCheck() {
   const now = new Date();
-  if (now.getHours() >= 17) return; // Skip after 5 PM
+  const timeFloat = now.getHours() + now.getMinutes() / 60;
+  if (timeFloat < 8.0) return;
   const settings = await Setting.get();
   if (!isWorkday(now, settings)) return;
 
   const date = dayStr(now);
-  const currentSlot = slotForNow(settings);
-
   const devs = await activeDevelopers();
+
   for (const dev of devs) {
     const devLunchSlot = dev.lunchSlot || 12;
-    let checkSlots = requiredSlots(settings, devLunchSlot).filter((s) => s < currentSlot);
-    if (!checkSlots.length) continue;
+    const blocks = getWorkBlocks(devLunchSlot);
+    const team = dev.team;
+    if (!team) continue;
 
     // Check for approved leave/half-day on this date
     const leave = await Leave.findOne({ developer: dev._id, date, status: 'approved' });
-    if (leave) {
-      if (leave.type === 'full_day') continue; // Entire day is excused
-      const excusedSlots = new Set(leave.slots || []);
-      checkSlots = checkSlots.filter((s) => !excusedSlots.has(s));
-      if (!checkSlots.length) continue;
+    if (leave && leave.type === 'full_day') continue; // Entire day is excused
+    const excusedSlots = new Set(leave && leave.slots ? leave.slots : []);
+
+    const devLogs = await WorkLog.find({ developer: dev._id, date });
+
+    // Block is closed and past grace period (15 minutes after deadline)
+    const closedBlocks = blocks.filter(
+      (b) => timeFloat >= (b.endHour + 0.24) && !excusedSlots.has(b.slot)
+    );
+
+    for (const block of closedBlocks) {
+      const has = isAnyLogForBlock(devLogs, block.slot, devLunchSlot);
+      if (!has) {
+        const dedupeKey = `missed:${dev._id}:${date}:block${block.slot}`;
+        if (await Alert.findOne({ dedupeKey })) continue;
+
+        const project = team.project ? await Project.findById(team.project) : null;
+        const blockLabelStr = `${block.shortLabel} (${block.label})`;
+
+        await createLeaderAlert({
+          dedupeKey,
+          team: team._id,
+          project: project ? project._id : undefined,
+          developerId: dev._id,
+          severity: 'critical',
+          category: 'Missed Log',
+          who: dev.name,
+          title: `${dev.name} — Missed Check-in`,
+          body: `${blockLabelStr} check-in not submitted (deadline was ${block.deadlineStr})`,
+          meta: `${fmtTime(now)} · ${project ? project.name : 'Project'} · ${team.name}`,
+          detection: `Automated detection found no WorkLog for ${dev.name} for ${blockLabelStr}. Alert pushed via Socket.IO.`,
+          actions: [`View ${dev.name.split(' ')[0]}`, 'Send Reminder', 'Mark Seen']
+        });
+
+        await createManagerAlert(dev, {
+          dedupeKey: `idle-missed:${dev._id}:${date}:block${block.slot}`,
+          developerId: dev._id,
+          category: 'Missed Check-in',
+          severity: 'high',
+          who: dev.name,
+          idleTime: `Block ${block.slot} empty`,
+          lastActive: dev.lastSeenAt && dayStr(dev.lastSeenAt) === date ? fmtTime(dev.lastSeenAt) : 'Not active today',
+          title: `${dev.name} — Missed Check-in`,
+          body: `${blockLabelStr} check-in missed (deadline was ${block.deadlineStr}).`,
+          detection: 'Automated work block detection of empty check-in slots.'
+        });
+      }
     }
-
-    const justEnded = checkSlots[checkSlots.length - 1];
-
-    const team = dev.team;
-    if (!team) continue;
-    const logs = await WorkLog.find({ developer: dev._id, date });
-    const loggedSlots = new Set(logs.map((l) => l.hourSlot));
-    const missing = checkSlots.filter((s) => !loggedSlots.has(s));
-    if (!missing.includes(justEnded)) continue;
-
-    const project = team.project ? await Project.findById(team.project) : null;
-    const emptyList = missing.slice(-3).map((s) => hourLabel(s)).join(', ');
-
-    await createLeaderAlert({
-      dedupeKey: `missed:${dev._id}:${date}:${justEnded}`,
-      team: team._id,
-      project: project ? project._id : undefined,
-      developerId: dev._id,
-      severity: 'critical',
-      category: 'Missed Log',
-      who: dev.name,
-      title: missing.length > 1 ? `${dev.name} — ${missing.length} logs missing` : `${dev.name} — Missed Check-in`,
-      body: missing.length > 1
-        ? `${emptyList} slots all empty`
-        : `${hourLabel(justEnded)} log not submitted`,
-      meta: `${fmtTime(now)} · ${project ? project.name : 'Project'} · ${team.name}`,
-      detection: `Cron job at ${fmtTime(now)} found no WorkLog for ${dev.name} hourSlot:${justEnded}. Alert pushed via Socket.IO.`,
-      actions: [`View ${dev.name.split(' ')[0]}`, 'Send Reminder', 'Mark Seen']
-    });
-
-    await createManagerAlert(dev, {
-      dedupeKey: `idle-missed:${dev._id}:${date}:${justEnded}`,
-      developerId: dev._id,
-      category: 'Missed Check-in',
-      severity: 'high',
-      who: dev.name,
-      idleTime: `${missing.length} slots empty`,
-      lastActive: dev.lastSeenAt && dayStr(dev.lastSeenAt) === date ? fmtTime(dev.lastSeenAt) : 'Not active today',
-      title: `${dev.name} — Missed Check-in`,
-      body: missing.length > 1
-        ? `${missing.length} consecutive check-in slots missed. No logs submitted today.`
-        : `${hourLabel(justEnded)} check-in missed.`,
-      detection: 'Automated hourly detection of empty check-in slots.'
-    });
   }
 }
 
@@ -239,11 +259,14 @@ async function idleCheck() {
 function start() {
   const settings = Setting.get();
   void settings;
-  cron.schedule('45 8-16 * * *', () => reminderCheck().catch((e) => console.error('[cron]', e)));
-  cron.schedule('0 9-17 * * *', () => missedLogCheck().catch((e) => console.error('[cron]', e)));
-  cron.schedule('35 16 * * *', () => eodMissingCheck().catch((e) => console.error('[cron]', e)));
-  cron.schedule('*/10 8-17 * * *', () => idleCheck().catch((e) => console.error('[cron]', e)));
-  console.log('[cron] Detection jobs scheduled (reminders, missed logs, EOD, idle)');
+  // Check reminders and missed block logs every 5 minutes during workday (8:00 AM - 5:30 PM)
+  cron.schedule('*/5 8-17 * * *', () => {
+    reminderCheck().catch((e) => console.error('[cron reminder]', e));
+    missedLogCheck().catch((e) => console.error('[cron missed]', e));
+  });
+  cron.schedule('35 16 * * *', () => eodMissingCheck().catch((e) => console.error('[cron eod]', e)));
+  cron.schedule('*/10 8-17 * * *', () => idleCheck().catch((e) => console.error('[cron idle]', e)));
+  console.log('[cron] Detection jobs scheduled (work block reminders, missed logs, EOD, idle)');
 }
 
 module.exports = { start, reminderCheck, missedLogCheck, eodMissingCheck, idleCheck };
