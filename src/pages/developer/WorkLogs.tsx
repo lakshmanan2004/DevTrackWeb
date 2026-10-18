@@ -40,7 +40,6 @@ export function WorkLogs() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
-  const [checkInModalOpen, setCheckInModalOpen] = useState(false);
   const { data: leaveData, refetch: refetchLeaves } = useLeaves(date === 'all' ? undefined : date);
   const currentDayLeave = leaveData?.leaves?.find((l: any) => l.date === date);
 
@@ -78,17 +77,10 @@ export function WorkLogs() {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-<<<<<<< HEAD
-              onClick={() => setCheckInModalOpen(true)}
-              icon={<PlusIcon className="h-3.5 w-3.5" />}
-            >
-              + Submit Work Log
-=======
               onClick={() => setModalOpen(true)}
               icon={<PlusIcon className="h-3.5 w-3.5" />}
             >
               Log Work Now
->>>>>>> 8ff7aaa4689cce805efb22bbbcacbe779c758bf9
             </Button>
             <Button
               size="sm"
@@ -384,17 +376,10 @@ export function WorkLogs() {
           {!loading && visible.length === 0 && (
             <div className="glass-card rounded-2xl border-dashed border-gray-300 dark:border-white/10 p-12 text-center">
               <p className="text-sm font-semibold text-navy dark:text-white">No logs for this date</p>
-<<<<<<< HEAD
-              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Ready to record your progress? Submit your work block check-in.</p>
-              <div className="mt-4 flex justify-center">
-                <Button size="sm" onClick={() => setCheckInModalOpen(true)} icon={<PlusIcon className="h-3.5 w-3.5" />}>
-                  + Submit Work Log
-=======
               <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Submit an hourly check-in from your dashboard or click below.</p>
               <div className="mt-4 flex justify-center">
                 <Button size="sm" onClick={() => setModalOpen(true)} icon={<PlusIcon className="h-4 w-4" />}>
                   Log Work Now
->>>>>>> 8ff7aaa4689cce805efb22bbbcacbe779c758bf9
                 </Button>
               </div>
             </div>
@@ -424,14 +409,12 @@ export function WorkLogs() {
         </div>
       )}
 
-      {/* Work Log Check-in Modal */}
+      {/* Work Block Check-in Modal */}
       <CheckInModal
-        open={checkInModalOpen}
-        onClose={() => setCheckInModalOpen(false)}
+        open={modalOpen}
         lunchSlot={user?.lunchSlot ?? 12}
-        onSubmitted={() => {
-          refetchLogs();
-        }}
+        onClose={() => setModalOpen(false)}
+        onSubmitted={() => refetchLogs()}
       />
 
       {/* Leave Application Modal */}
@@ -444,14 +427,6 @@ export function WorkLogs() {
           refetchLeaves();
           refetchLogs();
         }}
-      />
-
-      {/* Work Block Check-in Modal */}
-      <CheckInModal
-        open={modalOpen}
-        lunchSlot={user?.lunchSlot ?? 12}
-        onClose={() => setModalOpen(false)}
-        onSubmitted={() => refetchLogs()}
       />
     </>
   );
