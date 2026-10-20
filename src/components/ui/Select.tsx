@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDownIcon, CheckIcon, SearchIcon, XIcon } from 'lucide-react';
 
 export interface SelectOption {
@@ -43,7 +44,8 @@ export function Select({
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [openUpwards, setOpenUpwards] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
+  
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -51,15 +53,140 @@ export function Select({
 
   const selectedOption = options.find((opt) => String(opt.value) === String(value));
 
-  // Determine whether to open upwards based on button position
-  useEffect(() => {
-    if (isOpen && dropdownRef.current) {
-      const rect = dropdownRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      setOpenUpwards(spaceBelow < 220 && spaceAbove > spaceBelow);
+  // Compute anchored coordinates directly relative to the trigger button
+  const updatePosition = useCallback(() => {
+    if (!buttonRef.current) return;
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+
+    // If trigger button is completely scrolled off screen, close to avoid hanging
+    if (buttonRect.bottom < 0 || buttonRect.top > window.innerHeight) {
+      setIsOpen(false);
+      return;
     }
-  }, [isOpen]);
+
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+    const dropdownEstimatedHeight = 280;
+    const shouldOpenUpwards = spaceBelow < dropdownEstimatedHeight && spaceAbove > spaceBelow;
+
+    let width = fullWidth ? buttonRect.width : Math.max(buttonRect.width, 220);
+    if (minMenuWidth) {
+      const parsed = parseInt(minMenuWidth, 10);
+      if (!isNaN(parsed)) {
+        width = Math.max(width, parsed);
+      }
+    }
+    width = Math.min(width, window.innerWidth - 24);
+
+    let left = buttonRect.left;
+    if (align === 'right') {
+      left = buttonRect.right - width;
+    }
+
+    // Clamp horizontally to stay within viewport
+    if (left + width > window.innerWidth - 12) {
+      left = Math.max(12, window.innerWidth - 12 - width);
+    }
+    if (left < 12) {
+      left = 12;
+    }
+
+    const maxHeight = shouldOpenUpwards
+      ? Math.min(320, spaceAbove - 16)
+      : Math.min(320, spaceBelow - 16);
+
+    const style: React.CSSProperties = {
+      position: 'fixed',
+      left: `${Math.round(left)}px`,
+      width: `${Math.round(width)}px`,
+      zIndex: 100001,
+      maxHeight: `${Math.max(160, Math.round(maxHeight))}px`,
+    };
+
+    if (shouldOpenUpwards) {
+      style.bottom = `${Math.round(window.innerHeight - buttonRect.top + 6)}px`;
+      style.top = 'auto';
+    } else {
+      style.top = `${Math.round(buttonRect.bottom + 6)}px`;
+      style.bottom = 'auto';
+    }
+
+    // Direct DOM sync for zero-lag tracking on fast scroll
+    if (menuRef.current) {
+      menuRef.current.style.left = style.left as string;
+      menuRef.current.style.width = style.width as string;
+      menuRef.current.style.maxHeight = style.maxHeight as string;
+      if (shouldOpenUpwards) {
+        menuRef.current.style.bottom = style.bottom as string;
+        menuRef.current.style.top = 'auto';
+      } else {
+        menuRef.current.style.top = style.top as string;
+        menuRef.current.style.bottom = 'auto';
+      }
+    }
+
+    setMenuStyle(style);
+  }, [fullWidth, minMenuWidth, align]);
+
+  const handleToggle = () => {
+    if (disabled) return;
+    if (!isOpen) {
+      updatePosition();
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  };
+
+  // Immediate positioning before initial paint
+  useLayoutEffect(() => {
+    if (isOpen) {
+      updatePosition();
+    }
+  }, [isOpen, updatePosition]);
+
+  // Window scroll, resize, escape, outside click listeners
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleScroll = (e: Event) => {
+      // Don't reposition if scrolling inside the dropdown list itself
+      if (menuRef.current && menuRef.current.contains(e.target as Node)) {
+        return;
+      }
+      updatePosition();
+    };
+
+    const handleResize = () => {
+      updatePosition();
+    };
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (buttonRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      setIsOpen(false);
+    };
+
+    const handleKeyDownDoc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDownDoc);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDownDoc);
+    };
+  }, [isOpen, updatePosition]);
 
   // Auto focus search input when opened
   useEffect(() => {
@@ -70,21 +197,6 @@ export function Select({
       }
     }
   }, [isOpen, searchable, options.length]);
-
-  // Close on outside click
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
 
   // Filtered options based on search query
   const filteredOptions = useMemo(() => {
@@ -98,13 +210,14 @@ export function Select({
     });
   }, [options, searchQuery]);
 
-  // Keyboard navigation
+  // Keyboard navigation on button
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (disabled) return;
     if (e.key === 'Escape') {
       setIsOpen(false);
     } else if (e.key === 'ArrowDown' && !isOpen) {
       e.preventDefault();
+      updatePosition();
       setIsOpen(true);
     }
   };
@@ -142,7 +255,7 @@ export function Select({
         ref={buttonRef}
         type="button"
         disabled={disabled}
-        onClick={() => !disabled && setIsOpen((prev) => !prev)}
+        onClick={handleToggle}
         onKeyDown={handleKeyDown}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -178,22 +291,17 @@ export function Select({
         </span>
       </button>
 
-      {/* SOLIDLY ANCHORED DROPDOWN POPUP MENU */}
-      {isOpen && (
+      {/* SOLIDLY ANCHORED DROPDOWN POPUP MENU (PORTALED ABOVE ALL STACKING CONTEXTS) */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
         <div
           ref={menuRef}
           role="listbox"
-          style={{
-            minWidth: minMenuWidth || (fullWidth ? '100%' : '220px'),
-            maxWidth: 'calc(100vw - 24px)',
-          }}
-          className={`glass-dropdown absolute ${openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'} ${
-            align === 'right' ? 'right-0' : 'left-0'
-          } z-[100] ${fullWidth ? 'w-full' : 'w-auto'} overflow-hidden p-1.5 animate-in fade-in duration-150`}
+          style={menuStyle}
+          className="glass-dropdown overflow-hidden p-1.5 animate-in fade-in duration-150 flex flex-col"
         >
           {/* SEARCH INPUT BAR */}
           {showSearch && (
-            <div className="p-1.5 pb-2 border-b border-slate-200 dark:border-slate-800 mb-1">
+            <div className="p-1.5 pb-2 border-b border-slate-200 dark:border-slate-800 mb-1 shrink-0">
               <div className="relative flex items-center">
                 <SearchIcon className="absolute left-2.5 h-3.5 w-3.5 text-slate-400" />
                 <input
@@ -201,6 +309,13 @@ export function Select({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      e.stopPropagation();
+                      setIsOpen(false);
+                      buttonRef.current?.focus();
+                    }
+                  }}
                   placeholder="Search options…"
                   className="w-full rounded-xl bg-slate-50 dark:bg-slate-900 pl-8 pr-7 py-1.5 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none border border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
                   onClick={(e) => e.stopPropagation()}
@@ -213,7 +328,7 @@ export function Select({
                       setSearchQuery('');
                       searchInputRef.current?.focus();
                     }}
-                    className="absolute right-2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                    className="absolute right-2 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
                   >
                     <XIcon className="h-3.5 w-3.5" />
                   </button>
@@ -223,7 +338,7 @@ export function Select({
           )}
 
           {/* SCROLLABLE OPTIONS LIST */}
-          <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-1 p-0.5">
+          <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1 p-0.5 min-h-0">
             {filteredOptions.length === 0 ? (
               <div className="px-4 py-4 text-center text-xs font-medium text-slate-400 italic">
                 {searchQuery ? `No options matching "${searchQuery}"` : 'No options available'}
@@ -294,7 +409,8 @@ export function Select({
               })
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
