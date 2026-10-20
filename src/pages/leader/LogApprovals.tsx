@@ -272,7 +272,7 @@ export function LogApprovals() {
             return (
               <li
                 key={log.id}
-                className={`glass-card rounded-2xl transition-all overflow-hidden ${
+                className={`glass-card independent-card hover-tile rounded-2xl transition-all overflow-hidden ${
                   isApproved
                     ? 'border-emerald-500/30'
                     : isChangesRequested

@@ -385,17 +385,22 @@ a > .glass-card::after,
 }
 
 @media (hover: hover) and (pointer: fine) {
-  /* Container cards never react to hover */
-  .glass-card:hover,
-  .glass-elevated:hover {
+  /* Container cards (wrappers with inner cards/tiles) never react to hover */
+  .project-container-card:hover,
+  section.glass-card:hover,
+  .glass-card-container:hover,
+  .glass-elevated:hover,
+  .glass-card:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile, .independent-card, article, li, table):hover {
     transform: none !important;
     cursor: default;
     border-color: transparent !important;
     box-shadow: none !important;
   }
 
-  .glass-card:hover::after,
-  .glass-elevated:hover::after {
+  .project-container-card:hover::after,
+  section.glass-card:hover::after,
+  .glass-elevated:hover::after,
+  .glass-card:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile, .independent-card, article, li, table):hover::after {
     border-color: var(--glass-card-border) !important;
     border-bottom-color: var(--glass-card-border-bottom) !important;
     box-shadow: var(--glass-card-shadow) !important;
@@ -408,28 +413,29 @@ a > .glass-card::after,
     box-shadow: var(--glass-card-shadow) !important;
   }
 
-  /* Standalone interactive cards: shadow + blue border glow only, zero transform */
-  .glass-card-interactive:hover,
+  /* Standalone independent interactive cards: smooth lift with soft diffused shadow */
+  .glass-card-interactive:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover,
   .card-interactive:hover,
   .clickable-card:hover,
   button.glass-card:hover,
   a.glass-card:hover,
   a > .glass-card:hover,
   .glass-card[role="button"]:hover {
-    transform: none !important;
+    transform: translateY(-2.5px);
   }
 
-  .glass-card-interactive:hover::after,
+  .glass-card-interactive:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover::after,
   .card-interactive:hover::after,
   .clickable-card:hover::after,
   button.glass-card:hover::after,
   a.glass-card:hover::after,
   a > .glass-card:hover::after,
   .glass-card[role="button"]:hover::after {
-    border-color: rgba(0, 113, 227, 0.40) !important;
+    border-color: var(--glass-card-border) !important;
+    border-bottom-color: var(--glass-card-border-bottom) !important;
     box-shadow: 
-      0 18px 42px -6px rgba(15, 23, 42, 0.10),
-      0 0 16px 1px rgba(0, 113, 227, 0.10),
+      0 20px 44px -8px rgba(15, 23, 42, 0.12),
+      0 6px 16px -2px rgba(15, 23, 42, 0.04),
       inset 0 1.5px 1.5px 0 #FFFFFF !important;
   }
 }
@@ -495,12 +501,13 @@ a > .glass-subcard,
   .glass-elevated .glass-card-interactive:hover,
   .glass-modal .glass-card-interactive:hover,
   .glass-card-interactive .glass-card-interactive:hover {
-    transform: none !important;
-    border-color: rgba(0, 113, 227, 0.40) !important;
-    border-bottom-color: rgba(0, 113, 227, 0.40) !important;
+    transform: translateY(-2px);
+    border-color: var(--glass-subcard-border) !important;
+    border-bottom-color: var(--glass-subcard-border-bottom) !important;
     box-shadow: 
-      0 10px 24px -4px rgba(0, 113, 227, 0.12),
-      0 2px 8px -2px rgba(15, 23, 42, 0.04) !important;
+      0 8px 20px -3px rgba(15, 23, 42, 0.08),
+      0 2px 6px -1px rgba(15, 23, 42, 0.03),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.95) !important;
   }
 
   .dark .glass-subcard-interactive:hover,
@@ -513,12 +520,13 @@ a > .glass-subcard,
   .dark .glass-elevated .glass-card-interactive:hover,
   .dark .glass-modal .glass-card-interactive:hover,
   .dark .glass-card-interactive .glass-card-interactive:hover {
-    transform: none !important;
-    border-color: rgba(59, 130, 246, 0.50) !important;
-    border-bottom-color: rgba(59, 130, 246, 0.50) !important;
+    transform: translateY(-2px);
+    border-color: var(--glass-subcard-border) !important;
+    border-bottom-color: var(--glass-subcard-border-bottom) !important;
     box-shadow: 
-      0 12px 28px -4px rgba(0, 0, 0, 0.50),
-      0 0 16px 1px rgba(59, 130, 246, 0.18) !important;
+      0 10px 24px -4px rgba(0, 0, 0, 0.50),
+      0 3px 10px -2px rgba(0, 0, 0, 0.30),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.10) !important;
   }
 }
 
@@ -1005,29 +1013,31 @@ select.glass-input {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .dark .glass-card-interactive:hover,
+  .dark .glass-card-interactive:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover,
   .dark .card-interactive:hover,
   .dark .clickable-card:hover,
   .dark button.glass-card:hover,
   .dark a.glass-card:hover,
   .dark a > .glass-card:hover,
-  .dark .glass-card[role="button"]:hover {
-    transform: none !important;
+  .dark .glass-card[role="button"]:hover,
+  .dark .independent-card:not(:has(.glass-subcard, .hover-tile)):hover {
+    transform: translateY(-2.5px);
   }
 
-  .dark .glass-card-interactive:hover::after,
+  .dark .glass-card-interactive:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover::after,
   .dark .card-interactive:hover::after,
   .dark .clickable-card:hover::after,
   .dark button.glass-card:hover::after,
   .dark a.glass-card:hover::after,
   .dark a > .glass-card:hover::after,
-  .dark .glass-card[role="button"]:hover::after {
-    border-color: rgba(59, 130, 246, 0.45) !important;
-    border-bottom-color: rgba(59, 130, 246, 0.30) !important;
+  .dark .glass-card[role="button"]:hover::after,
+  .dark .independent-card:not(:has(.glass-subcard, .hover-tile)):hover::after {
+    border-color: var(--glass-card-border) !important;
+    border-bottom-color: var(--glass-card-border-bottom) !important;
     box-shadow: 
-      0 20px 48px -4px rgba(0, 0, 0, 0.55),
-      0 0 18px 1px rgba(59, 130, 246, 0.15),
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.14) !important;
+      0 22px 50px -10px rgba(0, 0, 0, 0.65),
+      0 8px 20px -3px rgba(0, 0, 0, 0.40),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.16) !important;
   }
 }
 
@@ -1644,122 +1654,205 @@ aside nav a:active {
 
 
 /* ==========================================================================
-   UNIFIED HOVER SYSTEM: Zero-Translation Composite Safety
-   - Container cards never react to hover (no transform, no border change, no damage rect)
-   - Leaf cards & nested tiles get soft shadow + blue border glow only
-   - Zero transform: translateY across cards/tiles completely prevents Chromium backdrop-filter banding
-   - Card's original background and frosted diffusion remain 100% stable
+   UNIFIED HOVER SYSTEM: Polished Liquid Glass Smooth Hover-Lift Effects
+   - Independent cards & tiles lift smoothly (-2px / -2.5px) with natural easing (220ms)
+   - Soft, diffused elevation shadows preserve Liquid Glass luster (no blue/neon glow)
+   - Large container wrappers & page sections remain stationary (transform: none)
+   - Hovering nested cards animates only the target card independently
+   - Preserves original glass colors, borders, opacity, and backdrop diffusion
    ========================================================================== */
 
-/* Smooth transitions for shadow & border only (no transform transition on cards) */
+/* Base transitions for lift and elevation across cards, subcards, and tiles */
 .glass-card,
 .glass-card-interactive,
+.independent-card,
+.glass-hover-card,
 .glass-subcard,
+.glass-subcard-interactive,
 .glass-inner-tile,
+.glass-inner-tile-interactive,
 .hover-tile,
-.glass-hover-card {
-  transition: box-shadow 0.20s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.20s cubic-bezier(0.16, 1, 0.3, 1);
+.timeline-hover-card {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  /* 1. CONTAINERS: completely static, never react to hover or child hover */
+  /* 1. CONTAINERS & WRAPPERS: strictly stationary, never lift or shift layout */
   .project-container-card:hover,
-  .glass-card:hover,
+  section.glass-card:hover,
+  .glass-card-container:hover,
   .glass-elevated:hover,
-  .glass-card:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile):hover,
-  .glass-elevated:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile):hover,
-  .glass-card-interactive:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile):hover {
+  .glass-card:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-subcard-interactive, .glass-inner-tile, .hover-tile, .independent-card, article, li, table):hover,
+  .glass-elevated:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-subcard-interactive, .glass-inner-tile, .hover-tile, .independent-card, article, li, table):hover {
     transform: none !important;
     cursor: default;
     border-color: transparent !important;
     box-shadow: none !important;
   }
 
-  .glass-card:hover::after,
-  .glass-elevated:hover::after {
+  .project-container-card:hover::after,
+  section.glass-card:hover::after,
+  .glass-card-container:hover::after,
+  .glass-elevated:hover::after,
+  .glass-card:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-subcard-interactive, .glass-inner-tile, .hover-tile, .independent-card, article, li, table):hover::after,
+  .glass-elevated:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-subcard-interactive, .glass-inner-tile, .hover-tile, .independent-card, article, li, table):hover::after {
     border-color: var(--glass-card-border) !important;
     border-bottom-color: var(--glass-card-border-bottom) !important;
     box-shadow: var(--glass-card-shadow) !important;
-  }
-
-  .dark .glass-card:hover::after,
-  .dark .glass-elevated:hover::after {
-    border-color: var(--glass-card-border) !important;
-    border-bottom-color: var(--glass-card-border-bottom) !important;
-    box-shadow: var(--glass-card-shadow) !important;
-  }
-
-  /* 2. LEAF TILES & SUBCARDS: zero transform, soft shadow elevation + blue border glow */
-  .glass-subcard:hover,
-  .glass-inner-tile:hover,
-  .hover-tile:hover,
-  .glass-hover-card:hover,
-  .glass-card-interactive:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover {
     transform: none !important;
-    border-color: rgba(0, 113, 227, 0.40) !important;
-    border-bottom-color: rgba(0, 113, 227, 0.40) !important;
-    box-shadow:
-      0 10px 24px -4px rgba(0, 113, 227, 0.12),
-      0 2px 8px -2px rgba(15, 23, 42, 0.04) !important;
+  }
+
+  .dark .project-container-card:hover::after,
+  .dark section.glass-card:hover::after,
+  .dark .glass-card-container:hover::after,
+  .dark .glass-elevated:hover::after,
+  .dark .glass-card:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-subcard-interactive, .glass-inner-tile, .hover-tile, .independent-card, article, li, table):hover::after,
+  .dark .glass-elevated:has(.glass-hover-card, .glass-card, .glass-card-interactive, .glass-subcard, .glass-subcard-interactive, .glass-inner-tile, .hover-tile, .independent-card, article, li, table):hover::after {
+    border-color: var(--glass-card-border) !important;
+    border-bottom-color: var(--glass-card-border-bottom) !important;
+    box-shadow: var(--glass-card-shadow) !important;
+    transform: none !important;
+  }
+
+  /* 2. INDEPENDENT CARDS: lift -2.5px with soft diffused elevated shadow */
+  .independent-card:not(:has(.hover-tile, .glass-subcard)):hover,
+  .glass-hover-card.independent-card:hover,
+  .glass-card-interactive:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover {
+    transform: translateY(-2.5px) !important;
+  }
+
+  .independent-card:not(:has(.hover-tile, .glass-subcard)):hover::after,
+  .glass-hover-card.independent-card:hover::after,
+  .glass-card-interactive:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover::after {
+    border-color: var(--glass-card-border) !important;
+    border-bottom-color: var(--glass-card-border-bottom) !important;
+    box-shadow: 
+      0 20px 44px -8px rgba(15, 23, 42, 0.12),
+      0 6px 16px -2px rgba(15, 23, 42, 0.04),
+      inset 0 1.5px 1.5px 0 #FFFFFF !important;
+  }
+
+  .dark .independent-card:not(:has(.hover-tile, .glass-subcard)):hover,
+  .dark .glass-hover-card.independent-card:hover,
+  .dark .glass-card-interactive:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover {
+    transform: translateY(-2.5px) !important;
+  }
+
+  .dark .independent-card:not(:has(.hover-tile, .glass-subcard)):hover::after,
+  .dark .glass-hover-card.independent-card:hover::after,
+  .dark .glass-card-interactive:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover::after {
+    border-color: var(--glass-card-border) !important;
+    border-bottom-color: var(--glass-card-border-bottom) !important;
+    box-shadow: 
+      0 22px 50px -10px rgba(0, 0, 0, 0.65),
+      0 8px 20px -3px rgba(0, 0, 0, 0.40),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.16) !important;
+  }
+
+  /* 3. NESTED SUBCARDS, INFORMATION TILES & TIMELINE CARDS: lift -2px */
+  .glass-subcard:hover,
+  .glass-subcard-interactive:hover,
+  .glass-inner-tile:hover,
+  .glass-inner-tile-interactive:hover,
+  .hover-tile:hover,
+  .timeline-hover-card:hover,
+  .glass-surface.glass-hover-card:hover,
+  .glass-card .glass-surface.glass-hover-card:hover {
+    transform: translateY(-2px) !important;
+    border-color: var(--glass-subcard-border) !important;
+    border-bottom-color: var(--glass-subcard-border-bottom) !important;
+    box-shadow: 
+      0 8px 22px -3px rgba(15, 23, 42, 0.08),
+      0 2px 8px -1px rgba(15, 23, 42, 0.03),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.95) !important;
   }
 
   .dark .glass-subcard:hover,
+  .dark .glass-subcard-interactive:hover,
   .dark .glass-inner-tile:hover,
+  .dark .glass-inner-tile-interactive:hover,
   .dark .hover-tile:hover,
-  .dark .glass-hover-card:hover,
-  .dark .glass-card-interactive:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover {
-    transform: none !important;
-    border-color: rgba(59, 130, 246, 0.50) !important;
-    border-bottom-color: rgba(59, 130, 246, 0.50) !important;
-    box-shadow:
-      0 12px 28px -4px rgba(0, 0, 0, 0.50),
-      0 0 16px 1px rgba(59, 130, 246, 0.18) !important;
+  .dark .timeline-hover-card:hover,
+  .dark .glass-surface.glass-hover-card:hover,
+  .dark .glass-card .glass-surface.glass-hover-card:hover {
+    transform: translateY(-2px) !important;
+    border-color: var(--glass-subcard-border) !important;
+    border-bottom-color: var(--glass-subcard-border-bottom) !important;
+    box-shadow: 
+      0 10px 26px -4px rgba(0, 0, 0, 0.50),
+      0 3px 10px -2px rgba(0, 0, 0, 0.30),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.10) !important;
   }
 
-  /* 3. Buttons inside cards */
+  /* 4. Restrained button hover feedback inside cards */
   .glass-card .btn-glass-secondary:hover,
   .glass-elevated .btn-glass-secondary:hover {
-    transform: none !important;
-    border-color: rgba(0, 113, 227, 0.40) !important;
-    box-shadow:
-      0 8px 18px -4px rgba(0, 113, 227, 0.15),
-      0 2px 6px -2px rgba(15, 23, 42, 0.04) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 
+      0 6px 18px 0 rgba(15, 23, 42, 0.08),
+      inset 0 1.5px 1px 0 #FFFFFF !important;
   }
 
   .dark .glass-card .btn-glass-secondary:hover,
   .dark .glass-elevated .btn-glass-secondary:hover {
-    transform: none !important;
-    border-color: rgba(59, 130, 246, 0.50) !important;
-    box-shadow:
-      0 8px 20px -4px rgba(0, 0, 0, 0.45),
-      0 0 12px 1px rgba(59, 130, 246, 0.15) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 
+      0 8px 20px 0 rgba(0, 0, 0, 0.45),
+      inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.22) !important;
   }
 
-  /* 4. Cursor behavior */
-  .glass-hover-card:not(.cursor-pointer):not([role="button"]):not(a):not(button) {
+  /* 5. Cursor behavior: preserve intentional non-clickability */
+  .independent-card:not(.cursor-pointer):not([role="button"]):not(a):not(button),
+  .glass-hover-card:not(.cursor-pointer):not([role="button"]):not(a):not(button),
+  .hover-tile:not(.cursor-pointer):not([role="button"]):not(a):not(button) {
     cursor: default;
   }
+
   .glass-hover-card.cursor-pointer,
   .glass-hover-card[role="button"],
   a > .glass-hover-card,
-  a.glass-hover-card {
+  a.glass-hover-card,
+  .hover-tile.cursor-pointer,
+  .hover-tile[role="button"],
+  a > .hover-tile,
+  a.hover-tile,
+  .glass-subcard-interactive,
+  .glass-card-interactive {
     cursor: pointer;
   }
 }
 
-/* Press feedback (scale feedback without translateY) */
-.glass-subcard:active,
-.glass-inner-tile:active,
-.hover-tile:active {
-  transform: scale(0.99) !important;
-  transition-duration: 0.10s;
+/* Tactile press feedback on interactive cards & tiles */
+.glass-subcard:active:not(:has(button:active)):not(:has(a:active)),
+.glass-inner-tile:active:not(:has(button:active)):not(:has(a:active)),
+.hover-tile:active:not(:has(button:active)):not(:has(a:active)),
+.independent-card:active:not(:has(button:active)):not(:has(a:active)) {
+  transform: scale(0.99) translateY(0) !important;
+  transition-duration: 0.12s;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .independent-card,
+  .independent-card:hover,
   .glass-hover-card,
-  .glass-hover-card:hover {
-    transform: none !important;
+  .glass-hover-card:hover,
+  .glass-card-interactive,
+  .glass-card-interactive:hover,
+  .glass-subcard,
+  .glass-subcard:hover,
+  .glass-subcard-interactive,
+  .glass-subcard-interactive:hover,
+  .glass-inner-tile,
+  .glass-inner-tile:hover,
+  .hover-tile,
+  .hover-tile:hover,
+  .timeline-hover-card,
+  .timeline-hover-card:hover {
+    animation: none !important;
     transition: none !important;
+    transform: none !important;
+    will-change: auto !important;
   }
 }

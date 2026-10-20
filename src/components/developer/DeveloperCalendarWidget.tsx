@@ -110,7 +110,7 @@ export function DeveloperCalendarWidget() {
               key={log.id}
               className={`flex items-start justify-between gap-3 p-3.5 transition-all duration-200 ${
                 log.review === 'changes_requested'
-                  ? 'rounded-2xl border border-amber-300/80 bg-amber-50/70 dark:bg-amber-950/40 shadow-glass'
+                  ? 'glass-subcard hover-tile rounded-2xl border border-amber-300/80 bg-amber-50/70 dark:bg-amber-950/40 shadow-glass'
                   : 'glass-subcard hover-tile hover:bg-white/70 hover:shadow-glass'
               }`}
             >

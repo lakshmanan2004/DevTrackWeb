@@ -219,15 +219,19 @@ export function TodayTimeline({
           {!isHoliday && (
             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-bold shadow-2xs ${
               status.isBeforeWork
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                ? 'bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300'
                 : status.isLunch
-                ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-500/40'
+                ? 'bg-amber-100/80 dark:bg-amber-950/50 border border-amber-300/80 dark:border-amber-500/30 text-amber-900 dark:text-amber-200'
                 : status.isAfterWork
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                : 'bg-brand/10 text-brand dark:text-blue-300 border border-brand/20 dark:border-blue-500/30'
+                ? 'bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300'
+                : 'bg-blue-100/80 dark:bg-blue-950/50 border border-blue-300/80 dark:border-blue-500/30 text-blue-900 dark:text-blue-200'
             }`}>
               <span className={`h-2 w-2 rounded-full ${
-                status.isBeforeWork || status.isAfterWork ? 'bg-slate-400' : status.isLunch ? 'bg-amber-500 animate-pulse' : 'bg-brand animate-ping'
+                status.isBeforeWork || status.isAfterWork
+                  ? 'bg-slate-400'
+                  : status.isLunch
+                  ? 'bg-amber-500 animate-pulse'
+                  : 'bg-blue-600 dark:bg-blue-400 animate-pulse'
               }`} />
               <span>
                 {status.isBeforeWork
@@ -380,7 +384,7 @@ export function TodayTimeline({
                   {isLunch ? (
                     isCurrent ? (
                       /* Active Lunch Break */
-                      <article className="rounded-2xl border-2 border-amber-400/80 dark:border-amber-500/50 bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-white dark:from-amber-950/50 dark:via-slate-900/60 dark:to-slate-900/80 p-5 shadow-glass">
+                      <article className="hover-tile rounded-2xl border-2 border-amber-400/80 dark:border-amber-500/50 bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-white dark:from-amber-950/50 dark:via-slate-900/60 dark:to-slate-900/80 p-5 shadow-glass">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-900/70 text-amber-900 dark:text-amber-100 text-xl shadow-inner">
@@ -407,7 +411,7 @@ export function TodayTimeline({
                       </article>
                     ) : isPast ? (
                       /* Past Lunch Break */
-                      <div className="rounded-2xl border border-slate-200/70 dark:border-white/10 bg-slate-50/50 dark:bg-slate-900/40 p-3.5 flex items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-400">
+                      <div className="hover-tile rounded-2xl border border-slate-200/70 dark:border-white/10 bg-slate-50/50 dark:bg-slate-900/40 p-3.5 flex items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-400">
                         <div className="flex items-center gap-2.5">
                           <span className="text-base">🍱</span>
                           <span className="font-semibold text-slate-700 dark:text-slate-300">
@@ -421,7 +425,7 @@ export function TodayTimeline({
                       </div>
                     ) : (
                       /* Upcoming Lunch Break */
-                      <article className="rounded-2xl border border-dashed border-amber-200/80 dark:border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/20 p-4 transition-all">
+                      <article className="hover-tile rounded-2xl border border-dashed border-amber-200/80 dark:border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/20 p-4 transition-all">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex items-center gap-2.5">
                             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100/70 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-sm">
@@ -486,7 +490,7 @@ export function TodayTimeline({
                         </>
                       ) : (
                         /* Active block awaiting check-in */
-                        <article className="rounded-2xl border-2 border-brand/50 dark:border-blue-500/50 bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-white/90 dark:from-blue-950/40 dark:via-slate-900/60 dark:to-slate-900/80 p-5 shadow-glass">
+                        <article className="hover-tile rounded-2xl border-2 border-brand/50 dark:border-blue-500/50 bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-white/90 dark:from-blue-950/40 dark:via-slate-900/60 dark:to-slate-900/80 p-5 shadow-glass">
                           <div className="flex flex-wrap items-start justify-between gap-4">
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
@@ -552,7 +556,7 @@ export function TodayTimeline({
                         </>
                       ) : (
                         /* Missed Check-in Alert */
-                        <article className="rounded-2xl border-2 border-rose-300 dark:border-rose-500/40 bg-rose-50/70 dark:bg-rose-950/40 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 shadow-glass">
+                        <article className="hover-tile rounded-2xl border-2 border-rose-300 dark:border-rose-500/40 bg-rose-50/70 dark:bg-rose-950/40 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 shadow-glass">
                           <div className="flex items-start gap-3">
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-200">
                               <AlertTriangleIcon className="h-5 w-5" />
@@ -586,7 +590,7 @@ export function TodayTimeline({
 
                   {/* ==================== 4. UPCOMING WORK BLOCK ==================== */}
                   {!isLunch && isUpcoming ? (
-                    <article className="rounded-2xl border border-dashed border-slate-200/90 dark:border-white/10 bg-slate-50/40 dark:bg-slate-900/30 p-4 transition-all hover:bg-slate-50/80 dark:hover:bg-slate-900/50">
+                    <article className="hover-tile rounded-2xl border border-dashed border-slate-200/90 dark:border-white/10 bg-slate-50/40 dark:bg-slate-900/30 p-4 transition-all hover:bg-slate-50/80 dark:hover:bg-slate-900/50">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-3">
                           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500">

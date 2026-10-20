@@ -237,7 +237,7 @@ export function MyPendingWorks() {
                 {dateItems.map((item: any) => (
                   <article
                     key={item.id}
-                    className="glass-card rounded-3xl border border-amber-300/80 dark:border-amber-500/30 p-5 sm:p-6"
+                    className="glass-card independent-card hover-tile rounded-3xl border border-amber-300/80 dark:border-amber-500/30 p-5 sm:p-6"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-hairline pb-3">
                       <div className="flex items-center gap-2.5">
