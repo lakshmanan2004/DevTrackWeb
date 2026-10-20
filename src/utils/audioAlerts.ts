@@ -102,9 +102,25 @@ function getOrCreateAudioContext(): AudioContext | null {
 // User-gesture audio unlocker
 if (typeof window !== 'undefined') {
   const unlockAudio = () => {
-    const ctx = getOrCreateAudioContext();
-    if (ctx && ctx.state === 'suspended') {
-      ctx.resume().catch(() => {});
+    try {
+      const ctx = getOrCreateAudioContext();
+      if (ctx) {
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(() => {
+            if (ctx.state === 'running') {
+              window.removeEventListener('click', unlockAudio);
+              window.removeEventListener('keydown', unlockAudio);
+              window.removeEventListener('touchstart', unlockAudio);
+            }
+          }).catch(() => {});
+        } else if (ctx.state === 'running') {
+          window.removeEventListener('click', unlockAudio);
+          window.removeEventListener('keydown', unlockAudio);
+          window.removeEventListener('touchstart', unlockAudio);
+        }
+      }
+    } catch {
+      // ignore browser autoplay restrictions
     }
   };
   window.addEventListener('click', unlockAudio, { passive: true });
@@ -120,7 +136,7 @@ export async function playMelodiousSound(soundId?: string, isUrgentVariation = f
 
   try {
     if (ctx.state === 'suspended') {
-      await ctx.resume();
+      await ctx.resume().catch(() => {});
     }
   } catch {
     // continue

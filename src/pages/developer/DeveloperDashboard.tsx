@@ -109,7 +109,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
   const isOutsideWorkHours = isBeforeWork || isAfterWork;
   const isLunchSlot = blockStatus.isLunch;
   const minutesLeft = blockStatus.minutesLeftInBlock;
-  const currentSlot = stats?.currentSlot ?? blockStatus.currentSlot;
+  const currentSlot = blockStatus.currentSlot;
   const hasLoggedCurrentSlot = logs.some((log: any) => isLogForBlock(log, currentSlot, devLunchSlot));
   const currentSlotLabel = `${blockStatus.activeBlock.shortLabel} (${blockStatus.activeBlock.label})`;
   const lunchSlotLabel = blockStatus.lunchLabel;

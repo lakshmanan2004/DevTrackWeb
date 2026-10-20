@@ -69,11 +69,13 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot, lunchSlot
   const wordsOk = wordCount >= MIN_WORDS;
   const canSubmit = wordsOk && !!file && !fileError && effectiveProjectId !== '' && !busy;
 
-  if (!open) return null;
-
   useEffect(() => {
-    setMinutes(defaultMinutes);
-  }, [defaultMinutes]);
+    if (open) {
+      setMinutes(defaultMinutes);
+    }
+  }, [open, defaultMinutes]);
+
+  if (!open) return null;
 
   const reset = () => {
     setProjectId('');
