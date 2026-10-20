@@ -416,37 +416,27 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
         {/* 5. DEDICATED WORK STATUS & ALERT SECTION */}
         {isHoliday ? (
           <div className="glass-surface rounded-2xl border border-purple-300/60 dark:border-purple-500/30 bg-purple-50/40 dark:bg-purple-950/20 p-5 shadow-glass">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-500/15 text-2xl">
-                  🎉
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-purple-950 dark:text-purple-200">
-                      Organization Holiday: {holidayName}
-                    </h3>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs">
-                      ✨ Holiday Active
-                    </span>
-                  </div>
-                  <p className="mt-0.5 text-xs font-medium text-purple-800 dark:text-purple-300">
-                    Today is marked as an organization holiday. No mandatory check-ins, active timers, or work logs are required today.
-                  </p>
-                </div>
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-500/15 text-2xl">
+                🎉
               </div>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => handleOpenLog()}
-                className="bg-white/80 dark:bg-slate-800 text-purple-900 dark:text-purple-200 border-purple-200 dark:border-purple-500/30"
-              >
-                Optional Check-in
-              </Button>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-purple-950 dark:text-purple-200">
+                    Organization Holiday: {holidayName}
+                  </h3>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-purple-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs">
+                    ✨ Holiday Active
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs font-medium text-purple-800 dark:text-purple-300">
+                  Today is marked as an organization holiday. No mandatory check-ins, active timers, or work logs are required today.
+                </p>
+              </div>
             </div>
           </div>
         ) : isBeforeWork ? (
-          <div className="glass-surface rounded-2xl border border-blue-300/60 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/20 p-4 sm:p-5 shadow-glass flex flex-wrap items-center justify-between gap-4">
+          <div className="glass-surface rounded-2xl border border-blue-300/60 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/20 p-4 sm:p-5 shadow-glass">
             <div className="flex items-center gap-3.5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400">
                 <AlarmClockIcon className="h-5 w-5" />
@@ -460,12 +450,9 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
                 </p>
               </div>
             </div>
-            <Button size="sm" onClick={() => handleOpenLog()}>
-              + Early Check-in
-            </Button>
           </div>
         ) : isAfterWork ? (
-          <div className="glass-surface rounded-2xl border border-emerald-300/60 dark:border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 sm:p-5 shadow-glass flex flex-wrap items-center justify-between gap-4">
+          <div className="glass-surface rounded-2xl border border-emerald-300/60 dark:border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 sm:p-5 shadow-glass">
             <div className="flex items-center gap-3.5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2Icon className="h-5 w-5" />
@@ -479,12 +466,9 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
                 </p>
               </div>
             </div>
-            <Button size="sm" variant="secondary" onClick={() => handleOpenLog()}>
-              + Add Log
-            </Button>
           </div>
         ) : (
-          <div className={`glass-surface rounded-2xl border p-4 sm:p-5 shadow-glass flex flex-wrap items-center justify-between gap-4 ${
+          <div className={`glass-surface rounded-2xl border p-4 sm:p-5 shadow-glass flex items-center justify-between gap-4 ${
             isLunchSlot
               ? 'border-amber-300/60 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20'
               : hasLoggedCurrentSlot
@@ -522,12 +506,12 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
                 </p>
               </div>
             </div>
-            <Button
-              size="sm"
-              onClick={() => handleOpenLog(isLunchSlot ? undefined : currentSlot)}
-            >
-              {hasLoggedCurrentSlot || isLunchSlot ? '+ Add Log' : 'Log Now'}
-            </Button>
+            {hasLoggedCurrentSlot && (
+              <span className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                <CheckCircle2Icon className="h-3.5 w-3.5" />
+                <span>Submitted</span>
+              </span>
+            )}
           </div>
         )}
 
@@ -608,7 +592,6 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
 
         {/* 8. ACTIVE SESSION TIMER */}
         <ActiveTimerCard
-          onLog={handleOpenLog}
           activeMinutes={stats?.activeMinutes ?? 0}
           firstSeen={stats?.firstSeen ?? null}
           missed={stats?.missed ?? 0}

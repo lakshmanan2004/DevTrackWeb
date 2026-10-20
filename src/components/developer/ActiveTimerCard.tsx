@@ -1,10 +1,9 @@
 import React from 'react';
-import { PlayIcon, ClockIcon } from 'lucide-react';
-import { Button } from '../ui/Button';
+import { ClockIcon } from 'lucide-react';
 import { ProgressBar } from '../ui/ProgressBar';
 
 interface ActiveTimerCardProps {
-  onLog: () => void;
+  onLog?: () => void;
   activeMinutes: number;
   firstSeen: string | null;
   missed: number;
@@ -12,7 +11,7 @@ interface ActiveTimerCardProps {
 
 const WORKDAY_MINUTES = 480;
 
-export function ActiveTimerCard({ onLog, activeMinutes, firstSeen, missed }: ActiveTimerCardProps) {
+export function ActiveTimerCard({ activeMinutes, firstSeen, missed }: ActiveTimerCardProps) {
   const pct = Math.min(100, Math.round((activeMinutes / WORKDAY_MINUTES) * 100));
   const h = Math.floor(activeMinutes / 60);
   const m = activeMinutes % 60;
@@ -50,8 +49,8 @@ export function ActiveTimerCard({ onLog, activeMinutes, firstSeen, missed }: Act
           </p>
         </div>
 
-        <div className="flex items-center gap-6">
-          <dl className="flex items-center gap-6 text-xs">
+        <div className="flex items-center gap-4 sm:gap-6">
+          <dl className="flex items-center gap-4 sm:gap-6 text-xs">
             <div className="glass-subcard hover-tile px-4 py-2.5">
               <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">First Seen</dt>
               <dd className="mt-0.5 font-mono font-bold text-navy dark:text-white text-sm">{firstSeen || '—'}</dd>
@@ -63,13 +62,8 @@ export function ActiveTimerCard({ onLog, activeMinutes, firstSeen, missed }: Act
               </dd>
             </div>
           </dl>
-
-          <Button size="lg" onClick={onLog} icon={<PlayIcon className="h-4 w-4 fill-current" />}>
-            Log Work Now
-          </Button>
         </div>
       </div>
     </section>
   );
 }
-
