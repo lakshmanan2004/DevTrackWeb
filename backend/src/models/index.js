@@ -146,7 +146,7 @@ const TaskSchema = new Schema({
 const AlertSchema = new Schema({
   // prevents duplicate cron alerts, e.g. missed:{devId}:{date}:{slot}
   dedupeKey: { type: String, index: { unique: true, sparse: true } },
-  audience: { type: String, enum: ['developer', 'leader', 'manager'], required: true },
+  audience: { type: String, enum: ['developer', 'leader', 'manager', 'admin'], required: true },
   user: { type: Types.ObjectId, ref: 'User' }, // recipient for audience=developer
   team: { type: Types.ObjectId, ref: 'Team' }, // scoping for leader audience
   project: { type: Types.ObjectId, ref: 'Project' },

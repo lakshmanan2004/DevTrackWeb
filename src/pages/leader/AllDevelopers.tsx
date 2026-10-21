@@ -34,16 +34,43 @@ export function AllDevelopers() {
     return { all: developers.length, online, missed, top };
   }, [developers]);
 
-  const visible = React.useMemo(() => {
-    return developers.filter((dev: any) => {
-      if (selectedProjectId !== 'all') {
-        const p = projects.find((proj: any) => proj.id === selectedProjectId);
-        const matchProj =
-          dev.projectId === selectedProjectId ||
-          (p && dev.project && dev.project.toLowerCase() === p.name?.toLowerCase()) ||
-          (p && dev.team && dev.team.toLowerCase() === (p.team || p.teamName || '').toLowerCase());
-        if (!matchProj) return false;
+  // Check if a developer belongs to the specified project
+  const isDevInProject = React.useCallback(
+    (dev: any, projId: string) => {
+      if (projId === 'all') return true;
+      const p = projects.find((proj: any) => proj.id === projId);
+      return (
+        dev.projectId === projId ||
+        (p && dev.project && dev.project.toLowerCase() === p.name?.toLowerCase()) ||
+        (p && dev.team && dev.team.toLowerCase() === (p.team || p.teamName || '').toLowerCase()) ||
+        (p && dev.teamId && (dev.teamId === p.teamId || dev.teamId === p.team))
+      );
+    },
+    [projects]
+  );
+
+  // List of developers filtered by the selected project
+  const projectFilteredDevelopers = React.useMemo(() => {
+    if (selectedProjectId === 'all') return developers;
+    return developers.filter((dev: any) => isDevInProject(dev, selectedProjectId));
+  }, [developers, selectedProjectId, isDevInProject]);
+
+  // When selected project changes, reset developer selection if they don't belong to the new project
+  React.useEffect(() => {
+    if (selectedDevId !== 'all') {
+      const stillPresent = projectFilteredDevelopers.some(
+        (dev: any) =>
+          String(dev.id || dev._id) === selectedDevId ||
+          dev.name?.toLowerCase() === selectedDevId.toLowerCase()
+      );
+      if (!stillPresent) {
+        setSelectedDevId('all');
       }
+    }
+  }, [projectFilteredDevelopers, selectedDevId]);
+
+  const visible = React.useMemo(() => {
+    return projectFilteredDevelopers.filter((dev: any) => {
       if (selectedDevId !== 'all') {
         const dId = String(dev.id || dev._id || '');
         if (dId !== selectedDevId && dev.name?.toLowerCase() !== selectedDevId.toLowerCase()) {
@@ -55,7 +82,7 @@ export function AllDevelopers() {
       if (filter === 'top' && !(dev.topPerformer || (dev.activeMinutes >= 240 && dev.missed === 0))) return false;
       return true;
     });
-  }, [developers, projects, selectedProjectId, selectedDevId, filter]);
+  }, [projectFilteredDevelopers, selectedDevId, filter]);
 
   const handleOpenAssign = (devId?: string) => {
     setTargetDevId(devId || (selectedDevId !== 'all' ? selectedDevId : undefined));
@@ -117,7 +144,7 @@ export function AllDevelopers() {
             </div>
 
             {/* DEVELOPER DROPDOWN FILTER */}
-            <div className="w-48 sm:w-56">
+            <div className="w-52 sm:w-60">
               <Select
                 size="sm"
                 fullWidth
@@ -126,8 +153,14 @@ export function AllDevelopers() {
                 icon={<UsersIcon className="h-3.5 w-3.5 text-slate-400" />}
                 placeholder="Filter by Developer"
                 options={[
-                  { value: 'all', label: `All Developers (${developers.length})` },
-                  ...developers.map((dev: any) => ({
+                  {
+                    value: 'all',
+                    label:
+                      selectedProjectId === 'all'
+                        ? `All Developers (${developers.length})`
+                        : `All in Project (${projectFilteredDevelopers.length})`
+                  },
+                  ...projectFilteredDevelopers.map((dev: any) => ({
                     value: String(dev.id || dev._id),
                     label: dev.name,
                     badge: dev.online ? 'Online' : undefined,

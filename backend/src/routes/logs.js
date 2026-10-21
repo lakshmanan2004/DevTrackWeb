@@ -7,7 +7,7 @@ const { authRequired, attachUser, requireRole, ah } = require('../middleware/aut
 const { workLogDto, dayStats } = require('../util/dto');
 const { scopeFor } = require('../util/scope');
 const { dayStr, fromDayStr, slotForNow, hourLabel, fmtTime, fmtDateMDY, fmtDateLong, requiredSlots, fmtDuration, isWorkday, getHolidayInfo, initialsOf, makeTaskTitle } = require('../util/time');
-const { currentBlockSlot, isLogLate, blockLabel } = require('../util/workBlocks');
+const { currentBlockSlot, isLogLate, blockLabel, getWorkBlocks, isLogForBlock, isAnyLogForBlock } = require('../util/workBlocks');
 const { emitToRoles, emitToUser } = require('../sockets');
 
 const router = express.Router();
@@ -454,7 +454,7 @@ router.get('/calendar', ah(async (req, res) => {
     status: 'approved'
   });
 
-  const required = requiredSlots(settings, devLunchSlot);
+  const blocks = getWorkBlocks(devLunchSlot);
   const days = [];
   for (let dnum = 1; dnum <= daysInMonth; dnum++) {
     const ds = `${y}-${String(m).padStart(2, '0')}-${String(dnum).padStart(2, '0')}`;
@@ -464,7 +464,6 @@ router.get('/calendar', ah(async (req, res) => {
     const eod = eods.find((e) => e.date === ds);
     const dayLeave = leaves.find((l) => l.date === ds);
 
-    const loggedSlots = new Set(dayLogs.map((l) => l.hourSlot));
     const isWork = isWorkday(date, settings);
     const holidayInfo = getHolidayInfo(date, settings);
     const missedSlots = [];
@@ -472,25 +471,30 @@ router.get('/calendar', ah(async (req, res) => {
     if (isWork && ds >= joinedStr && ds <= todayStr) {
       const now = new Date();
       const isToday = ds === todayStr;
-      const currentHour = now.getHours();
+      const nowTimeFloat = isToday ? (now.getHours() + now.getMinutes() / 60) : 24.0;
 
-      for (const slot of required) {
-        if (isToday && slot > currentHour) continue;
-        if (dayLeave && (dayLeave.type === 'full_day' || (dayLeave.slots && dayLeave.slots.includes(slot)))) {
-          continue; // Excused: on leave / half-day
+      for (const b of blocks) {
+        // If today, only consider blocks that have elapsed
+        if (isToday && nowTimeFloat < (b.endHour + 0.24)) continue;
+
+        // Excused: full-day or half-day leave
+        if (dayLeave) {
+          if (dayLeave.type === 'full_day') continue;
+          if (dayLeave.type === 'half_day_morning' && b.startHour < 13) continue;
+          if (dayLeave.type === 'half_day_afternoon' && b.startHour >= 12) continue;
+          if (dayLeave.slots && (dayLeave.slots.includes(b.slot) || (devLunchSlot === 11 ? (b.slot === 1 && [8, 9, 10].some((s) => dayLeave.slots.includes(s))) : (b.slot === 1 && [8, 9].some((s) => dayLeave.slots.includes(s)))))) {
+            continue;
+          }
         }
-        if (!loggedSlots.has(slot)) {
-          const startH = slot % 12 === 0 ? 12 : slot % 12;
-          const startAp = slot >= 12 ? 'PM' : 'AM';
-          const endSlot = slot + 1;
-          const endH = endSlot % 12 === 0 ? 12 : endSlot % 12;
-          const endAp = endSlot >= 12 ? 'PM' : 'AM';
+
+        if (!isAnyLogForBlock(dayLogs, b.slot, devLunchSlot)) {
           missedSlots.push({
-            slot,
-            hourLabel: hourLabel(slot),
-            timeRange: `${startH}:00 ${startAp} – ${endH}:00 ${endAp}`,
+            slot: b.slot,
+            hourLabel: b.shortLabel,
+            timeRange: b.label,
+            title: b.displayTitle,
             status: 'Not Submitted',
-            reason: 'Check-in was required but no work log was submitted for this slot.'
+            reason: `Check-in was required for ${b.displayTitle} (${b.label}) before ${b.deadlineStr}, but no work log was submitted.`
           });
         }
       }
@@ -508,7 +512,7 @@ router.get('/calendar', ah(async (req, res) => {
       description: l.description,
       status: l.status,
       review: l.review,
-      hourLabel: hourLabel(l.hourSlot),
+      hourLabel: blockLabel(l.hourSlot, devLunchSlot),
       activeMinutes: l.activeMinutes || 0,
       isPendingWorkSubmission: !!l.isPendingWorkSubmission,
       originalPendingDate: l.originalPendingDate || '',
@@ -532,7 +536,7 @@ router.get('/calendar', ah(async (req, res) => {
       description: l.description,
       status: l.status,
       review: l.review,
-      hourLabel: hourLabel(l.hourSlot),
+      hourLabel: blockLabel(l.hourSlot, devLunchSlot),
       activeMinutes: l.activeMinutes || 0,
       wordCount: l.wordCount || 0,
       attachmentUrl: l.attachmentUrl || '',
@@ -748,7 +752,7 @@ router.get('/team-calendar', ah(async (req, res) => {
   });
 
   const settings = await Setting.get();
-  const totalRequiredSlots = requiredSlots(settings).length;
+  const totalRequiredSlots = 4;
 
   const now = new Date();
   const todayStr = dayStr(now);
@@ -801,12 +805,24 @@ router.get('/team-calendar', ah(async (req, res) => {
     // Group logs by developer
     for (const dev of developers) {
       const devLunchSlot = dev.lunchSlot || 12;
-      const devReqSlots = requiredSlots(settings, devLunchSlot);
+      const blocks = getWorkBlocks(devLunchSlot);
       const devLeave = allMonthLeaves.find((l) => String(l.developer) === String(dev._id) && l.date === dStr);
-      const excusedSlots = new Set(devLeave ? (devLeave.type === 'full_day' ? devReqSlots : devLeave.slots || []) : []);
 
-      const dayApplicableSlots = (isToday ? devReqSlots.filter((s) => s <= currentSlot) : devReqSlots).filter((s) => !excusedSlots.has(s));
-      const dayRequiredCount = dayApplicableSlots.length;
+      const nowTimeFloat = isToday ? (now.getHours() + now.getMinutes() / 60) : 24.0;
+      const applicableBlocks = isToday ? blocks.filter((b) => nowTimeFloat >= (b.endHour + 0.24)) : blocks;
+
+      const unexcusedBlocks = applicableBlocks.filter((b) => {
+        if (!devLeave) return true;
+        if (devLeave.type === 'full_day') return false;
+        if (devLeave.type === 'half_day_morning' && b.startHour < 13) return false;
+        if (devLeave.type === 'half_day_afternoon' && b.startHour >= 12) return false;
+        if (dayLeave && dayLeave.slots && (dayLeave.slots.includes(b.slot) || (devLunchSlot === 11 ? (b.slot === 1 && [8, 9, 10].some((s) => dayLeave.slots.includes(s))) : (b.slot === 1 && [8, 9].some((s) => dayLeave.slots.includes(s)))))) {
+          return false;
+        }
+        return true;
+      });
+
+      const dayRequiredCount = unexcusedBlocks.length;
 
       // Only evaluate check-ins from the date the developer was created
       const devCreatedDate = dev.joinedAt || (dev._id && dev._id.getTimestamp ? dev._id.getTimestamp() : null);
@@ -820,22 +836,21 @@ router.get('/team-calendar', ah(async (req, res) => {
         return devId === String(dev._id) || (l.developer && l.developer.name && l.developer.name.toLowerCase() === dev.name.toLowerCase());
       });
       const submittedCount = devLogs.length;
-      const submittedSlots = devLogs.map((l) => l.hourSlot);
-      const missedSlotsNums = dayApplicableSlots.filter((s) => !submittedSlots.includes(s));
-      const missedSlotsLabels = missedSlotsNums.map((s) => hourLabel(s));
+      const missedBlocks = unexcusedBlocks.filter((b) => !isAnyLogForBlock(devLogs, b.slot, devLunchSlot));
+      const missedSlotsLabels = missedBlocks.map((b) => b.shortLabel);
       const activeMin = devLogs.reduce((acc, l) => acc + (l.activeMinutes || 0), 0);
 
       if ((isPast || isToday) && isWork) {
         if (devLeave && devLeave.type === 'full_day') {
           // Dev is on Full-day leave, not missing
-        } else if (dayRequiredCount > 0 && (submittedCount < dayRequiredCount || missedSlotsNums.length > 0)) {
+        } else if (dayRequiredCount > 0 && (submittedCount < dayRequiredCount || missedBlocks.length > 0)) {
           unsubmittedDevelopers.push({
             developerId: String(dev._id),
             developerName: dev.name,
             initials: dev.initials || initialsOf(dev.name),
             email: dev.email,
             jobTitle: dev.jobTitle || 'Developer',
-            missedCount: missedSlotsNums.length,
+            missedCount: missedBlocks.length,
             missedSlots: missedSlotsLabels,
             submittedCount,
             totalRequired: dayRequiredCount,

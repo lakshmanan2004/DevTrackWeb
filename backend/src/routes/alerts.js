@@ -32,7 +32,13 @@ async function alertQueryFor(user) {
     };
   } else {
     // Admin / global
-    return { audience: { $in: ['leader', 'manager'] } };
+    return {
+      $or: [
+        { audience: 'admin' },
+        { user: user._id },
+        { audience: { $in: ['leader', 'manager'] } }
+      ]
+    };
   }
 }
 

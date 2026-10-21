@@ -28,6 +28,8 @@ export interface Developer {
   note: string;
   team: string;
   project: string;
+  teamId?: string;
+  projectId?: string;
   topPerformer?: boolean;
   lunchSlot?: number;
   leave?: { id?: string; type: string; reason: string; slots?: number[] } | null;

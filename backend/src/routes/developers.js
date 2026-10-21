@@ -99,15 +99,22 @@ router.get('/', ah(async (req, res) => {
   const teamIds = scope.teamIds;
   const projects = await Project.find({ team: { $in: teamIds } }, 'name team status');
   const projectByTeam = {};
+  const projectIdByTeam = {};
   for (const p of projects) {
     const key = String(p.team);
-    if (!projectByTeam[key] || p.status === 'ongoing') projectByTeam[key] = p.name;
+    if (!projectByTeam[key] || p.status === 'ongoing') {
+      projectByTeam[key] = p.name;
+      projectIdByTeam[key] = String(p._id);
+    }
   }
 
   const result = list.map(({ raw: dev, stat }) => {
     const eodMissingYesterday = stat.eodMissingYesterday;
     delete stat.eodMissingYesterday;
-    stat.project = projectByTeam[dev.team ? String(dev.team._id || dev.team) : ''] || '';
+    const teamKey = dev.team ? String(dev.team._id || dev.team) : '';
+    stat.teamId = teamKey;
+    stat.project = projectByTeam[teamKey] || '';
+    stat.projectId = projectIdByTeam[teamKey] || '';
     stat.topPerformer = top && top.id === stat.id && stat.done > 0;
 
     if (stat.leave) {

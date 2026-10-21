@@ -218,7 +218,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                 <Badge tone="blue">Developer Calendar</Badge>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                Inspect non-submitted check-in slots &amp; pending tasks per date
+                Inspect work block check-in submissions &amp; pending tasks per date
               </p>
             </div>
           </div>
@@ -280,7 +280,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
               <p className="text-sm font-black text-emerald-950 dark:text-emerald-100">{totalTasksInMonth} Logs</p>
             </div>
             <div className="hover-tile rounded-2xl border border-rose-500/30 bg-rose-500/10 dark:bg-rose-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-glass hover:border-rose-500/60 dark:hover:border-rose-400/40 hover:bg-rose-500/20 dark:hover:bg-rose-500/25 active:scale-[0.99] active:translate-y-0 select-none">
-              <span className="text-[10px] font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wider">Non-Submitted Slots</span>
+              <span className="text-[10px] font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wider">Non-Submitted Blocks</span>
               <p className="text-sm font-black text-rose-950 dark:text-rose-100">{totalMissedSlotsInMonth} Missed</p>
             </div>
             <div className="hover-tile rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-glass hover:border-amber-500/60 dark:hover:border-amber-400/40 hover:bg-amber-500/20 dark:hover:bg-amber-500/25 active:scale-[0.99] active:translate-y-0 select-none">
@@ -516,7 +516,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                                 </p>
                                 <p className="text-[11px] text-slate-400">
                                   {dayDetailTab === 'all'
-                                    ? 'Hourly check-in logs submitted by the developer will appear here.'
+                                    ? 'Work block check-ins submitted by the developer will appear here.'
                                     : 'All logs have been reviewed.'}
                                 </p>
                               </div>
@@ -640,7 +640,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                             <OctagonAlertIcon className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0" />
                             <span>
                               {activeMissedSlots.length > 0
-                                ? `${activeMissedSlots.length} Check-in Slot(s) Not Submitted on `
+                                ? `${activeMissedSlots.length} Work Block(s) Not Submitted on `
                                 : '0 Missed Check-ins on '}
                               <span className="whitespace-nowrap font-black">{selectedDay.dateStr}</span>
                             </span>
@@ -660,7 +660,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
                                     <span className="rounded-lg bg-rose-500/15 text-rose-800 dark:text-rose-300 px-2.5 py-0.5 text-xs font-black border border-rose-500/30">
-                                      {ms.hourLabel} Slot
+                                      {ms.hourLabel.includes('Block') || ms.hourLabel.includes('Sprint') ? ms.hourLabel : `${ms.hourLabel} Block`}
                                     </span>
                                     <span className="text-xs font-bold text-navy dark:text-white">{ms.timeRange}</span>
                                   </div>
@@ -669,7 +669,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                                   </span>
                                 </div>
                                 <p className="text-[11px] text-slate-500 dark:text-slate-400 pl-1 font-medium">
-                                  {ms.reason || 'Check-in was required but no hourly work log was submitted for this slot.'}
+                                  {ms.reason || 'Check-in was required but no work log was submitted for this block.'}
                                 </p>
                               </div>
                             ))}
@@ -679,7 +679,7 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                             <CheckCircle2Icon className="h-7 w-7 text-emerald-600 dark:text-emerald-400 mx-auto" />
                             <p className="text-xs font-bold text-navy dark:text-white">All Required Check-ins Submitted</p>
                             <p className="text-[11px] text-slate-400">
-                              {developer.name} completed all required hourly check-in slots for this working day.
+                              {developer.name} completed all required work block check-ins for this working day.
                             </p>
                           </div>
                         )}

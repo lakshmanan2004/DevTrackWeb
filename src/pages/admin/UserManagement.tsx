@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusIcon, SearchIcon, XIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, XIcon, CheckCircle2Icon, AlertCircleIcon, Loader2Icon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
@@ -35,6 +35,15 @@ export function UserManagement() {
   const [newRole, setNewRole] = useState<Role>('developer');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast((curr) => (curr?.message === message ? null : curr));
+    }, 4000);
+  };
 
   const roleCounts = React.useMemo(() => {
     let dev = 0, lead = 0, mgr = 0, adm = 0, inact = 0, act = 0;
@@ -75,6 +84,7 @@ export function UserManagement() {
       setNewName('');
       setNewEmail('');
       setNewRole('developer');
+      showToast('User created successfully!', 'success');
       refetch();
     } catch (err: any) {
       setError(err.message);
@@ -84,18 +94,41 @@ export function UserManagement() {
   };
 
   const toggleActive = async (user: any) => {
-    await api(`/api/users/${user.id}`, { method: 'PATCH', body: { active: !user.active } });
-    refetch();
+    const targetId = user.id || user._id;
+    try {
+      await api(`/api/users/${targetId}`, { method: 'PATCH', body: { active: !user.active } });
+      showToast(`${user.name} has been ${!user.active ? 'activated' : 'deactivated'}.`, 'success');
+      refetch();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update user status.', 'error');
+    }
   };
 
   const changeRole = async (user: any, role: Role) => {
-    await api(`/api/users/${user.id}`, { method: 'PATCH', body: { role } });
-    refetch();
+    if (user.role === role) return;
+    const targetId = user.id || user._id;
+    setUpdatingId(targetId);
+    try {
+      await api(`/api/users/${targetId}`, { method: 'PATCH', body: { role } });
+      showToast(`Role updated for ${user.name} to ${roleLabels[role] || role}.`, 'success');
+      refetch();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update user role.', 'error');
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const deleteUser = async (user: any) => {
-    await api(`/api/users/${user.id}`, { method: 'DELETE' });
-    refetch();
+    if (!window.confirm(`Are you sure you want to delete ${user.name}? This cannot be undone.`)) return;
+    const targetId = user.id || user._id;
+    try {
+      await api(`/api/users/${targetId}`, { method: 'DELETE' });
+      showToast(`${user.name} deleted successfully.`, 'success');
+      refetch();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to delete user.', 'error');
+    }
   };
 
   return (
@@ -111,6 +144,30 @@ export function UserManagement() {
 
 
       <div className="flex-1 space-y-6 p-6">
+        {toast && (
+          <div
+            className={`flex items-center justify-between gap-3 rounded-2xl p-4 text-xs font-bold shadow-md transition-all animate-in fade-in slide-in-from-top-2 ${
+              toast.type === 'error'
+                ? 'bg-rose-50 text-rose-800 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-200 dark:border-rose-900/40'
+                : 'bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-200 dark:border-emerald-900/40'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              {toast.type === 'error' ? (
+                <AlertCircleIcon className="h-4 w-4 text-rose-500 shrink-0" />
+              ) : (
+                <CheckCircle2Icon className="h-4 w-4 text-emerald-500 shrink-0" />
+              )}
+              <span>{toast.message}</span>
+            </div>
+            <button
+              onClick={() => setToast(null)}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+            >
+              <XIcon className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <label className="relative">
             <SearchIcon
@@ -174,10 +231,11 @@ export function UserManagement() {
                     </td>
                     <td className="px-4 py-4 text-slate-600 font-medium">{user.email}</td>
                     <td className="px-4 py-4">
-                      <div className="w-40">
+                      <div className="w-40 relative">
                         <Select
                           size="sm"
                           fullWidth
+                          disabled={updatingId === (user.id || user._id)}
                           value={user.role}
                           onChange={(val) => changeRole(user, val as Role)}
                           options={Object.keys(roleLabels).map((r) => ({
@@ -185,6 +243,11 @@ export function UserManagement() {
                             label: roleLabels[r]
                           }))}
                         />
+                        {updatingId === (user.id || user._id) && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 rounded-xl backdrop-blur-2xs">
+                            <Loader2Icon className="h-4 w-4 animate-spin text-blue-600" />
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-4">

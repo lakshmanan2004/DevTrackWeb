@@ -825,6 +825,7 @@ router.patch('/users/:id', requireRole('admin'), ah(async (req, res) => {
         await Team.findByIdAndUpdate(user.team, {
           $pull: { members: user._id }
         });
+        user.team = null;
       }
     } else if (newRole === 'developer') {
       // If returning to developer role, re-attach to previous team or current team members
@@ -846,17 +847,27 @@ router.patch('/users/:id', requireRole('admin'), ah(async (req, res) => {
           { $pull: { members: user._id } }
         );
       }
+    } else {
+      // Transition between leader, manager, admin
+      if ((newRole === 'manager' || newRole === 'admin') && user.team && !user.previousTeam) {
+        user.previousTeam = user.team;
+        user.team = null;
+      }
     }
 
     // Notify the user about their role change
-    await Alert.create({
-      audience: newRole,
-      user: user._id,
-      kind: 'reminder',
-      title: 'Role Update',
-      body: `Your role has been updated from ${oldRole} to ${newRole}. Your permissions and portal features have been configured.`
-    });
-    emitToUser(String(user._id), 'alert:new', { kind: 'reminder' });
+    try {
+      await Alert.create({
+        audience: newRole,
+        user: user._id,
+        kind: 'reminder',
+        title: 'Role Update',
+        body: `Your role has been updated from ${oldRole} to ${newRole}. Your permissions and portal features have been configured.`
+      });
+      emitToUser(String(user._id), 'alert:new', { kind: 'reminder' });
+    } catch (alertErr) {
+      console.warn('[PATCH /api/users/:id] Non-critical role change alert failed:', alertErr.message);
+    }
   }
 
   await user.save();
