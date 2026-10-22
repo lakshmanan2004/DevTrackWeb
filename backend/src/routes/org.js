@@ -814,6 +814,12 @@ router.patch('/users/:id', requireRole('admin'), ah(async (req, res) => {
     user.name = req.body.name;
     user.initials = initialsOf(req.body.name);
   }
+  if (req.body.password) {
+    if (String(req.body.password).length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+    user.passwordHash = await bcrypt.hash(String(req.body.password), 10);
+  }
 
   if (newRole && ['developer', 'leader', 'manager', 'admin'].includes(newRole) && newRole !== oldRole) {
     user.role = newRole;
@@ -874,6 +880,19 @@ router.patch('/users/:id', requireRole('admin'), ah(async (req, res) => {
   emitToRoles(['admin', 'manager', 'leader', 'developer'], 'user:update', { id: String(user._id) });
   emitToRoles(['admin', 'manager', 'leader', 'developer'], 'team:update', {});
   res.json({ ok: true, user: { id: String(user._id), role: user.role, name: user.name } });
+}));
+
+// POST /api/users/:id/reset-password — Admin resets a user's password
+router.post('/users/:id/reset-password', requireRole('admin'), ah(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  const { newPassword } = req.body || {};
+  if (!newPassword || String(newPassword).length < 6) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters' });
+  }
+  user.passwordHash = await bcrypt.hash(String(newPassword), 10);
+  await user.save();
+  res.json({ ok: true, message: `Password successfully reset for ${user.name}` });
 }));
 
 // DELETE /api/users/:id

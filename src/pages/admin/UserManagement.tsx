@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { PlusIcon, SearchIcon, XIcon, CheckCircle2Icon, AlertCircleIcon, Loader2Icon } from 'lucide-react';
+import {
+  PlusIcon,
+  SearchIcon,
+  XIcon,
+  CheckCircle2Icon,
+  AlertCircleIcon,
+  Loader2Icon,
+  KeyIcon,
+  RefreshCwIcon,
+  CopyIcon,
+  CheckIcon
+} from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
@@ -37,6 +48,49 @@ export function UserManagement() {
   const [busy, setBusy] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Reset Password Modal State
+  const [resetModalUser, setResetModalUser] = useState<any | null>(null);
+  const [resetPasswordVal, setResetPasswordVal] = useState('devtrack@2026');
+  const [resetBusy, setResetBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const generateRandomPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let res = 'DevTrack#';
+    for (let i = 0; i < 4; i++) {
+      res += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setResetPasswordVal(res);
+  };
+
+  const copyPassword = () => {
+    navigator.clipboard?.writeText(resetPasswordVal);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetModalUser) return;
+    if (resetPasswordVal.length < 6) {
+      showToast('Password must be at least 6 characters.', 'error');
+      return;
+    }
+    const targetId = resetModalUser.id || resetModalUser._id;
+    setResetBusy(true);
+    try {
+      await api(`/api/users/${targetId}/reset-password`, {
+        method: 'POST',
+        body: { newPassword: resetPasswordVal }
+      });
+      showToast(`Password successfully reset for ${resetModalUser.name} to: ${resetPasswordVal}`, 'success');
+      setResetModalUser(null);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to reset password.', 'error');
+    } finally {
+      setResetBusy(false);
+    }
+  };
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -265,7 +319,21 @@ export function UserManagement() {
                     </td>
                     <td className="whitespace-nowrap px-4 py-4 text-slate-500 font-medium">{user.joined}</td>
                     <td className="px-6 py-4 text-right">
-                      <div className="inline-flex gap-2">
+                      <div className="inline-flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setResetModalUser(user);
+                            setResetPasswordVal('devtrack@2026');
+                            setCopied(false);
+                          }}
+                          icon={<KeyIcon className="h-3.5 w-3.5 text-amber-500" />}
+                          title="Reset User Password"
+                          className="hover:bg-amber-500/10 text-slate-600 dark:text-slate-300"
+                        >
+                          Reset Pass
+                        </Button>
                         {user.active ? (
                           <Button size="sm" variant="danger" onClick={() => toggleActive(user)}>
                             Deactivate
@@ -383,6 +451,113 @@ export function UserManagement() {
                 {busy ? 'Creating…' : 'Create Account'}
               </Button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {resetModalUser && (
+        <div
+          className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reset-pass-title"
+        >
+          <div className="glass-modal w-full max-w-md p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+                  <KeyIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 id="reset-pass-title" className="text-base font-black text-navy dark:text-white">
+                    Reset User Password
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Set a temporary password for {resetModalUser.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setResetModalUser(null)}
+                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <XIcon className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-200/60 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] p-3 text-xs space-y-1">
+                <div className="flex justify-between text-slate-500 dark:text-slate-400 font-medium">
+                  <span>User:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{resetModalUser.name}</span>
+                </div>
+                <div className="flex justify-between text-slate-500 dark:text-slate-400 font-medium">
+                  <span>Email:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{resetModalUser.email}</span>
+                </div>
+                <div className="flex justify-between text-slate-500 dark:text-slate-400 font-medium">
+                  <span>Role:</span>
+                  <span className="font-bold text-blue-600 dark:text-sky-400 uppercase tracking-wider text-[10px]">
+                    {resetModalUser.role}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label htmlFor="temp-pass-input" className="text-xs font-bold text-navy dark:text-white">
+                    New Temporary Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={generateRandomPassword}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-sky-400 hover:underline cursor-pointer"
+                  >
+                    <RefreshCwIcon className="h-3 w-3" /> Generate Random
+                  </button>
+                </div>
+                <div className="relative flex items-center">
+                  <input
+                    id="temp-pass-input"
+                    type="text"
+                    value={resetPasswordVal}
+                    onChange={(e) => setResetPasswordVal(e.target.value)}
+                    placeholder="Minimum 6 characters"
+                    className="glass-input h-10 w-full pl-3 pr-20 text-xs font-mono font-bold text-navy dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={copyPassword}
+                    className="absolute right-1.5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 flex items-center gap-1 cursor-pointer"
+                  >
+                    {copied ? <CheckIcon className="h-3 w-3 text-emerald-500" /> : <CopyIcon className="h-3 w-3" />}
+                    <span>{copied ? 'Copied' : 'Copy'}</span>
+                  </button>
+                </div>
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  Provide this password to the user. They can change it in their Profile once signed in.
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="ghost"
+                  fullWidth
+                  onClick={() => setResetModalUser(null)}
+                  disabled={resetBusy}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  fullWidth
+                  onClick={handleResetPassword}
+                  disabled={resetBusy || resetPasswordVal.length < 6}
+                >
+                  {resetBusy ? 'Saving…' : 'Save & Reset Password'}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -6,6 +6,7 @@ import { SplashScreen } from './components/ui/SplashScreen';
 import { Role } from './types';
 
 // Lazy-loaded route components for lightning-fast initial load & isolated code bundles
+const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
 const Login = lazy(() => import('./pages/Login').then((m) => ({ default: m.Login })));
 const DeveloperDashboard = lazy(() => import('./pages/developer/DeveloperDashboard').then((m) => ({ default: m.DeveloperDashboard })));
 const WorkLogs = lazy(() => import('./pages/developer/WorkLogs').then((m) => ({ default: m.WorkLogs })));
@@ -75,7 +76,8 @@ export function App() {
       <BrowserRouter>
         <Suspense fallback={<PageFallback />}>
           <Routes>
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
 
             <Route element={<Protected role="developer"><AppShell role="developer" /></Protected>}>
               <Route path="/developer" element={<DeveloperDashboard />} />
