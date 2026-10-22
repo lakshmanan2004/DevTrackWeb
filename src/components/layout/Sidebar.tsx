@@ -55,7 +55,7 @@ export const Sidebar = React.memo(function Sidebar({ role }: SidebarProps) {
 
   return (
     <aside
-      className={`relative glass-dark flex h-screen shrink-0 flex-col text-[#F5F5F5] select-none z-40 transition-all duration-300 ease-in-out ${
+      className={`relative glass-dark flex h-full shrink-0 flex-col text-[#F5F5F5] select-none z-40 transition-all duration-300 ease-in-out overscroll-none ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
@@ -107,7 +107,7 @@ export const Sidebar = React.memo(function Sidebar({ role }: SidebarProps) {
 
       {/* NAVIGATION LINKS */}
       <nav
-        className={`flex-1 space-y-1.5 py-4 overflow-y-auto overflow-x-hidden ${
+        className={`flex-1 space-y-1.5 py-4 overflow-y-auto overflow-x-hidden overscroll-none ${
           isCollapsed ? 'px-2' : 'px-3'
         }`}
         aria-label="Primary"

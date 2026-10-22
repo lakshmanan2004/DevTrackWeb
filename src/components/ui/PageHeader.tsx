@@ -22,6 +22,7 @@ export const PageHeader = React.memo(function PageHeader({
         zIndex: 40,
         height: '68px',
         minHeight: '68px',
+        maxHeight: '68px',
         width: '100%',
         boxSizing: 'border-box',
         flexShrink: 0

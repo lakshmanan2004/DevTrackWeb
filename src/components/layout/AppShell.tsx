@@ -30,7 +30,7 @@ export function AppShell({ role }: AppShellProps) {
   }, [location.pathname]);
 
   return (
-    <div className="relative flex h-screen w-full overflow-hidden bg-transparent">
+    <div className="fixed inset-0 flex h-full w-full overflow-hidden bg-transparent">
       {/* SCENIC WALLPAPER BACKGROUND — Fixed & Theme-Independent Layer */}
       {wallpaper ? (
         <div
@@ -49,7 +49,7 @@ export function AppShell({ role }: AppShellProps) {
       {/* MAIN CONTENT AREA WITH CLEAN SCROLLING */}
       <main
         ref={mainRef}
-        className="relative z-10 flex h-screen min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-transparent w-full max-w-full"
+        className="relative z-10 flex h-full min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-transparent w-full max-w-full overscroll-none"
       >
         <div key={location.pathname} className="animate-page-enter flex min-w-0 flex-1 flex-col w-full max-w-full">
           <Suspense fallback={<PageFallback />}>

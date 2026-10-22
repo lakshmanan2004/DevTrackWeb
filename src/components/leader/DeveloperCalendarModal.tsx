@@ -271,19 +271,19 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 custom-scrollbar">
           {/* MONTH STATS OVERVIEW CARDS WITH SMOOTH LIQUID GLASS HOVER EFFECTS */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="glass-surface hover-tile rounded-2xl border border-white/80 dark:border-white/10 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-glass hover:border-white/95 dark:hover:border-white/30 hover:bg-white/20 dark:hover:bg-white/10 active:scale-[0.99] active:translate-y-0 select-none">
+            <div className="glass-surface hover-tile rounded-2xl border border-white/80 dark:border-white/10 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:shadow-glass hover:border-white/95 dark:hover:border-white/30 hover:bg-white/20 dark:hover:bg-white/10 select-none">
               <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Month</span>
               <p className="text-sm font-black text-navy dark:text-white">{monthLabel}</p>
             </div>
-            <div className="hover-tile rounded-2xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-glass hover:border-emerald-500/60 dark:hover:border-emerald-400/40 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 active:scale-[0.99] active:translate-y-0 select-none">
+            <div className="hover-tile rounded-2xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:shadow-glass hover:border-emerald-500/60 dark:hover:border-emerald-400/40 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/25 select-none">
               <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">Submitted Tasks</span>
               <p className="text-sm font-black text-emerald-950 dark:text-emerald-100">{totalTasksInMonth} Logs</p>
             </div>
-            <div className="hover-tile rounded-2xl border border-rose-500/30 bg-rose-500/10 dark:bg-rose-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-glass hover:border-rose-500/60 dark:hover:border-rose-400/40 hover:bg-rose-500/20 dark:hover:bg-rose-500/25 active:scale-[0.99] active:translate-y-0 select-none">
+            <div className="hover-tile rounded-2xl border border-rose-500/30 bg-rose-500/10 dark:bg-rose-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:shadow-glass hover:border-rose-500/60 dark:hover:border-rose-400/40 hover:bg-rose-500/20 dark:hover:bg-rose-500/25 select-none">
               <span className="text-[10px] font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wider">Non-Submitted Blocks</span>
               <p className="text-sm font-black text-rose-950 dark:text-rose-100">{totalMissedSlotsInMonth} Missed</p>
             </div>
-            <div className="hover-tile rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-glass hover:border-amber-500/60 dark:hover:border-amber-400/40 hover:bg-amber-500/20 dark:hover:bg-amber-500/25 active:scale-[0.99] active:translate-y-0 select-none">
+            <div className="hover-tile rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 p-4 space-y-1 shadow-2xs transition-all duration-200 cursor-pointer hover:shadow-glass hover:border-amber-500/60 dark:hover:border-amber-400/40 hover:bg-amber-500/20 dark:hover:bg-amber-500/25 select-none">
               <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">Pending / Flagged Days</span>
               <p className="text-sm font-black text-amber-950 dark:text-amber-100">{pendingDaysCount} Days</p>
             </div>
@@ -337,9 +337,9 @@ export function DeveloperCalendarModal({ isOpen, onClose, developer }: Developer
                             }
                           }}
                           title={`${day.fullLabel} — ${day.status.toUpperCase()} (${day.tasksCount} logs, ${day.missedCount || 0} non-submitted)`}
-                          className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-extrabold transition-all duration-150 transform hover:scale-105 cursor-pointer relative ${
+                          className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-extrabold transition-all duration-150 cursor-pointer relative ${
                             dayCellStyles[day.status]
-                          } ${isSelected ? 'ring-4 ring-brand dark:ring-blue-400 shadow-lg scale-105 z-10' : ''}`}
+                          } ${isSelected ? 'ring-4 ring-brand dark:ring-blue-400 shadow-lg z-10' : ''}`}
                         >
                           <span>{day.dateNum}</span>
                         </button>

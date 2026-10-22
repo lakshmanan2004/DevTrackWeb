@@ -313,12 +313,12 @@ export function AdminHolidayCalendar({
                   title={`${cell.dateStr} ${
                     cell.holidayLabel ? `— ${cell.holidayLabel}` : ''
                   }`}
-                  className={`relative flex flex-col h-11 sm:h-12 w-full items-center justify-center rounded-2xl text-xs font-bold transition-all duration-150 transform cursor-pointer select-none shadow-2xs ${
+                  className={`relative flex flex-col h-11 sm:h-12 w-full items-center justify-center rounded-2xl text-xs font-bold transition-all duration-150 cursor-pointer select-none shadow-2xs ${
                     cellStyle
                   } ${
                     isSelected
-                      ? 'scale-105 ring-4 ring-brand/60 z-10 !shadow-lg'
-                      : 'hover:scale-[1.03]'
+                      ? 'ring-4 ring-brand/60 z-10 !shadow-lg'
+                      : ''
                   }`}
                 >
                   <span className="text-xs sm:text-sm font-black">

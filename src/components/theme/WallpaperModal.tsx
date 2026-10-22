@@ -54,9 +54,9 @@ export function WallpaperModal({ isOpen, onClose }: WallpaperModalProps) {
               <div
                 key={item.id}
                 onClick={() => setWallpaper(item.file)}
-                className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-200 cursor-pointer text-left hover:-translate-y-0.5 active:scale-[0.99] ${
+                className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-200 cursor-pointer text-left ${
                   isSelected
-                    ? 'border-blue-500 ring-2 ring-blue-500/60 shadow-xl shadow-blue-500/20 bg-white/70 dark:bg-slate-900/80 scale-[1.01]'
+                    ? 'border-blue-500 ring-2 ring-blue-500/60 shadow-xl shadow-blue-500/20 bg-white/70 dark:bg-slate-900/80'
                     : 'border-white/30 dark:border-white/10 bg-white/45 dark:bg-slate-900/50 hover:border-white/60 hover:bg-white/70 dark:hover:bg-slate-900/70 shadow-sm hover:shadow-md'
                 }`}
               >
@@ -67,7 +67,7 @@ export function WallpaperModal({ isOpen, onClose }: WallpaperModalProps) {
                       <img
                         src={item.file}
                         alt={item.name}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="h-full w-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-60" />
                     </>

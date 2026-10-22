@@ -226,7 +226,7 @@ export function LandingPage() {
   const activeRole = roleDetails[activeRoleTab];
 
   return (
-    <div className="relative min-h-screen w-full bg-[#E0EFFF] dark:bg-[#07090e] text-slate-900 dark:text-[#F5F5F5] selection:bg-brand/20 selection:text-brand transition-colors duration-500">
+    <div className="fixed inset-0 h-full w-full overflow-y-auto overflow-x-hidden overscroll-y-contain bg-[#E0EFFF] dark:bg-[#07090e] text-slate-900 dark:text-[#F5F5F5] selection:bg-brand/20 selection:text-brand transition-colors duration-500">
       {/* Background Fluid Ambient Glowing Blobs */}
       <div className="pointer-events-none fixed -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-400/20 via-sky-300/15 to-transparent blur-[140px] dark:from-[#1683FF]/15 dark:via-transparent z-0" />
       <div className="pointer-events-none fixed top-1/3 right-0 w-[650px] h-[650px] rounded-full bg-radial from-indigo-300/15 via-purple-300/10 to-transparent blur-[150px] dark:from-[#1683FF]/08 dark:via-transparent z-0" />
@@ -235,17 +235,15 @@ export function LandingPage() {
       {/* LANDING PAGE FIXED TOP STICKY HEADER — 68px HEIGHT MATCHING BACKGROUND */}
       <header
         style={{
-          position: 'fixed',
+          position: 'sticky',
           top: 0,
-          left: 0,
-          right: 0,
           zIndex: 50,
           height: '68px',
           minHeight: '68px',
           width: '100%',
           boxSizing: 'border-box'
         }}
-        className="fixed top-0 left-0 right-0 z-50 flex h-[68px] w-full shrink-0 items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6 select-none bg-[#E0EFFF]/85 dark:bg-[#07090e]/85 backdrop-blur-2xl border-b border-blue-200/50 dark:border-white/10 shadow-xs dark:shadow-glass transition-colors duration-300"
+        className="sticky top-0 z-50 flex h-[68px] w-full shrink-0 items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6 select-none bg-[#E0EFFF]/85 dark:bg-[#07090e]/85 backdrop-blur-2xl border-b border-blue-200/50 dark:border-white/10 shadow-xs dark:shadow-glass transition-colors duration-300"
       >
         {/* Left Side: Brand Logo & App Title */}
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -331,7 +329,7 @@ export function LandingPage() {
       </header>
 
       {/* HERO SECTION WITH EMBEDDED LIQUID GLASS LOGIN CARD */}
-      <section id="overview" className="relative z-10 pt-24 sm:pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section id="overview" className="relative z-10 pt-10 sm:pt-14 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           
           {/* Left Column (Brand Narrative & Live Metrics) */}
