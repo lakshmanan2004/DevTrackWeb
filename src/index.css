@@ -1900,4 +1900,90 @@ aside nav a:active {
       inset 0 1px 1px 0 rgba(255,255,255,0.16) !important;
   }
 }
+
+/* ==========================================================================
+   DARK MODE OVERLAY FIX: mirror the light-mode band fix for dark
+   ========================================================================== */
+
+/* Kill hover transform on dark mode glass elements (mirrors TRY A) */
+.dark .glass-card:hover,
+.dark .glass-elevated:hover,
+.dark .glass-card-interactive:hover,
+.dark .glass-subcard:hover,
+.dark .glass-inner-tile:hover,
+.dark .hover-tile:hover,
+.dark .glass-card:active,
+.dark .glass-elevated:active,
+.dark .glass-card-interactive:active,
+.dark .glass-subcard:active,
+.dark .glass-inner-tile:active,
+.dark .hover-tile:active {
+  transform: none !important;
+}
+
+/* Dark mode ::after layer (mirrors TRY B for dark) */
+.dark .glass-card,
+.dark .glass-elevated,
+.dark .glass-card-interactive {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  isolation: isolate;
+}
+
+.dark .glass-card::after,
+.dark .glass-elevated::after,
+.dark .glass-card-interactive::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(var(--glass-card-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-card-blur)) saturate(160%);
+  pointer-events: none;
+}
+
+/* Nested cards in dark: no double blur layer */
+.dark .glass-card .glass-card::after,
+.dark .glass-card .glass-elevated::after,
+.dark .glass-card .glass-card-interactive::after,
+.dark .glass-elevated .glass-card::after,
+.dark .glass-card-interactive .glass-card::after,
+.dark .glass-modal .glass-card::after {
+  display: none !important;
+}
+
+/* Nested cards in dark: keep subcard background since parent bg is now transparent */
+.dark .glass-card .glass-card,
+.dark .glass-elevated .glass-card,
+.dark .glass-card-interactive .glass-card,
+.dark .glass-modal .glass-card {
+  background: var(--glass-subcard-bg) !important;
+}
+
+/* Dark mode hover glow: container cards never react, leaf cards glow */
+@media (hover: hover) and (pointer: fine) {
+  .dark .glass-card:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile):hover,
+  .dark .glass-elevated:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile):hover,
+  .dark .glass-card-interactive:has(.glass-card, .glass-subcard, .glass-inner-tile, .hover-tile):hover {
+    cursor: default;
+    border-color: var(--glass-card-border) !important;
+    box-shadow: var(--glass-card-shadow) !important;
+  }
+
+  .dark .glass-card:not(:has(.glass-card, .glass-card-interactive, .glass-subcard, .glass-inner-tile, .hover-tile)):hover,
+  .dark .glass-card-interactive:not(:has(.glass-card, .glass-subcard, .glass-inner-tile, .hover-tile)):hover,
+  .dark .glass-subcard:hover,
+  .dark .glass-inner-tile:hover,
+  .dark .hover-tile:hover {
+    border-color: rgba(22, 131, 255, 0.65) !important;
+    box-shadow:
+      0 24px 48px -12px rgba(0, 0, 0, 0.70),
+      0 0 28px rgba(22, 131, 255, 0.30),
+      0 0 0 1px rgba(22, 131, 255, 0.25),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.16) !important;
+  }
+}
 
