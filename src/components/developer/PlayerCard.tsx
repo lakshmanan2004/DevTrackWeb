@@ -34,7 +34,7 @@ export const PlayerCard = React.memo(function PlayerCard() {
               <h3 className="text-base sm:text-lg font-bold text-slate-950 dark:text-[#F5F5F5] tracking-tight">
                 Engineering Flight Deck
               </h3>
-              <span className="rounded-full bg-brand/10 dark:bg-[rgba(22,131,255,0.16)] px-2.5 py-0.5 text-[11px] font-extrabold text-brand dark:text-[#5AA9FF] border border-brand/20 dark:border-[rgba(22,131,255,0.35)] shadow-2xs">
+              <span className="inline-flex items-center rounded-full bg-blue-500/15 dark:bg-blue-500/25 px-2.5 py-0.5 text-[11px] font-black tracking-wide text-blue-700 dark:text-blue-200 border border-blue-500/30 dark:border-blue-400/50 shadow-xs ring-1 ring-blue-500/15 dark:ring-blue-400/30">
                 Level {level} Engineer
               </span>
             </div>

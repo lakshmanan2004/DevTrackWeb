@@ -4,7 +4,7 @@ export type BadgeTone = 'blue' | 'green' | 'yellow' | 'amber' | 'red' | 'grey' |
 
 const tones: Record<BadgeTone, { bg: string; dot: string }> = {
   blue: {
-    bg: 'bg-blue-50/90 dark:bg-[rgba(22,131,255,0.16)] text-blue-950 dark:text-[#5AA9FF] border-blue-300 dark:border-[rgba(22,131,255,0.35)] shadow-xs ring-1 ring-blue-500/15',
+    bg: 'bg-blue-50/90 dark:bg-blue-500/20 text-blue-900 dark:text-blue-200 border-blue-300 dark:border-blue-400/40 shadow-xs ring-1 ring-blue-500/15 dark:ring-blue-400/25',
     dot: 'bg-blue-600 ring-2 ring-blue-400/40'
   },
   green: {
