@@ -26,7 +26,14 @@ const UserSchema = new Schema({
   jobTitle: { type: String, default: 'Developer' },
   lunchSlot: { type: Number, enum: [11, 12], default: 12 },
   joinedAt: { type: Date, default: Date.now },
-  lastSeenAt: { type: Date, default: null }
+  lastSeenAt: { type: Date, default: null },
+  unlockedBadges: [
+    {
+      id: { type: String, required: true },
+      unlockedAt: { type: Date, default: Date.now },
+      ack: { type: Boolean, default: false }
+    }
+  ]
 });
 
 const TeamSchema = new Schema({
@@ -169,6 +176,12 @@ const AlertSchema = new Schema({
 });
 
 const SettingSchema = new Schema({
+  companyName: { type: String, default: 'DevTrack Workspace' },
+  logoUrl: { type: String, default: '' },
+  brandTagline: { type: String, default: 'Pro' },
+  supportEmail: { type: String, default: 'admin@devtrack.io' },
+  shiftSchedule: { type: String, enum: ['standard_9_6', 'early_8_5', 'flexible'], default: 'standard_9_6' },
+  requireProofAttachment: { type: Boolean, default: false },
   workStartHour: { type: Number, default: 8 },
   workEndHour: { type: Number, default: 16 },
   workEndMinute: { type: Number, default: 30 },

@@ -14,7 +14,8 @@ import {
   ImageIcon,
   SparklesIcon,
   Volume2Icon,
-  PlayIcon
+  PlayIcon,
+  ZapIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
@@ -27,6 +28,7 @@ import { useLive } from '../../hooks/useLive';
 import { api } from '../../api/client';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { useTheme } from '../../context/ThemeContext';
+import { formatLogTitle } from '../../utils/logTitle';
 import { NotificationSoundModal } from '../../components/ui/NotificationSoundModal';
 import {
   getSavedNotificationSound,
@@ -36,7 +38,7 @@ import {
 
 export function DeveloperProfile() {
   const { user, refresh } = useAuth();
-  const { openWallpaperModal } = useTheme();
+  const { openWallpaperModal, isLiteMode, toggleLiteMode } = useTheme();
   const { data: logData } = useLive<any>('/api/logs', ['log:new'], 30000);
   const [name, setName] = useState(user?.name || '');
   const [github, setGithub] = useState(user?.github || '');
@@ -157,31 +159,34 @@ export function DeveloperProfile() {
                 <button
                   type="button"
                   onClick={openWallpaperModal}
-                  className="glass-surface inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-blue-500 dark:text-blue-400 hover:bg-white/10 transition-all cursor-pointer shadow-xs"
+                  className="glass-surface inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-blue-500 dark:text-blue-400 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer shadow-xs"
                 >
                   <PaletteIcon className="h-3.5 w-3.5" />
                   <span>Theme</span>
                 </button>
               </div>
 
-              <dl className="mt-5 space-y-2.5 text-left text-sm">
+              <div className="mt-6 border-t border-slate-200/80 dark:border-white/10 pt-4 text-left space-y-2 text-xs">
                 {[
-                { icon: <MailIcon className="h-4 w-4 text-blue-500" />, label: 'Email', value: user?.email || '' },
-                { icon: <UsersIcon className="h-4 w-4 text-purple-500" />, label: 'Team', value: user?.teamName || '' },
-                { icon: <GithubIcon className="h-4 w-4 text-slate-400" />, label: 'GitHub', value: user?.github || 'not linked' },
-                { icon: <FolderIcon className="h-4 w-4 text-blue-500" />, label: 'Project', value: user?.projectName || '' },
-                { icon: <ShieldCheckIcon className="h-4 w-4 text-emerald-500" />, label: 'Team Leader', value: user?.leaderName || '' },
-                { icon: <UtensilsIcon className="h-4 w-4 text-amber-500" />, label: 'Lunch Break', value: (user?.lunchSlot || lunchSlot) === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM' }].
-                map((row) =>
-                  <div key={row.label} className="list-row px-3 -mx-3 flex items-center gap-2.5 py-1">
-                    <span className="text-gray-400 dark:text-slate-500" aria-hidden="true">
+                  { icon: <MailIcon className="h-4 w-4 text-blue-500 shrink-0" />, label: 'Email Address', value: user?.email || '—' },
+                  { icon: <ShieldCheckIcon className="h-4 w-4 text-emerald-500 shrink-0" />, label: 'Role Permissions', value: 'Developer' },
+                  { icon: <UsersIcon className="h-4 w-4 text-purple-500 shrink-0" />, label: 'Assigned Team', value: user?.teamName || '—' },
+                  { icon: <FolderIcon className="h-4 w-4 text-blue-500 shrink-0" />, label: 'Active Project', value: user?.projectName || '—' },
+                  { icon: <ShieldCheckIcon className="h-4 w-4 text-teal-500 shrink-0" />, label: 'Team Leader', value: user?.leaderName || '—' },
+                  { icon: <GithubIcon className="h-4 w-4 text-slate-400 shrink-0" />, label: 'GitHub Profile', value: user?.github ? `@${user.github}` : 'Not linked' },
+                  { icon: <UtensilsIcon className="h-4 w-4 text-amber-500 shrink-0" />, label: 'Lunch Break', value: (user?.lunchSlot || lunchSlot) === 11 ? '11:00 AM – 12:00 PM' : '12:00 PM – 1:00 PM' }
+                ].map((row) => (
+                  <div key={row.label} className="list-row px-3 -mx-3 flex items-center justify-between gap-3 py-2 border-b border-slate-200/50 dark:border-white/5 last:border-b-0">
+                    <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400 shrink-0 font-medium">
                       {row.icon}
+                      <span>{row.label}</span>
                     </span>
-                    <dt className="sr-only">{row.label}</dt>
-                    <dd className="truncate text-gray-600 dark:text-slate-300 font-medium">{row.value}</dd>
+                    <span className="font-semibold text-slate-900 dark:text-white truncate text-right pl-2">
+                      {row.value}
+                    </span>
                   </div>
-                )}
-              </dl>
+                ))}
+              </div>
             </section>
 
             <section className="glass-card rounded-3xl p-5 shadow-glass">
@@ -257,7 +262,7 @@ export function DeveloperProfile() {
                     id="p-email"
                     disabled
                     value={user?.email || ''}
-                    className="glass-input opacity-70 h-10 w-full px-3 text-sm text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                    className="glass-input h-10 w-full px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/60 dark:bg-white/[0.04] cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -268,7 +273,7 @@ export function DeveloperProfile() {
                     id="p-team"
                     disabled
                     value={user?.teamName || ''}
-                    className="glass-input opacity-70 h-10 w-full px-3 text-sm text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                    className="glass-input h-10 w-full px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-100/60 dark:bg-white/[0.04] cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -294,10 +299,10 @@ export function DeveloperProfile() {
                     <button
                       type="button"
                       onClick={() => setLunchSlot(11)}
-                      className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer ${
                         lunchSlot === 11
                           ? 'border-amber-400 bg-amber-500/20 text-amber-900 dark:text-amber-200 ring-2 ring-amber-400/40 shadow-sm'
-                          : 'glass-surface text-slate-600 dark:text-slate-300 hover:bg-slate-500/10'
+                          : 'glass-surface text-slate-600 dark:text-slate-300'
                       }`}
                     >
                       <span>🍱</span>
@@ -306,10 +311,10 @@ export function DeveloperProfile() {
                     <button
                       type="button"
                       onClick={() => setLunchSlot(12)}
-                      className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer ${
                         lunchSlot === 12
                           ? 'border-amber-400 bg-amber-500/20 text-amber-900 dark:text-amber-200 ring-2 ring-amber-400/40 shadow-sm'
-                          : 'glass-surface text-slate-600 dark:text-slate-300 hover:bg-slate-500/10'
+                          : 'glass-surface text-slate-600 dark:text-slate-300'
                       }`}
                     >
                       <span>🍱</span>
@@ -336,7 +341,7 @@ export function DeveloperProfile() {
                     <button
                       type="button"
                       onClick={openWallpaperModal}
-                      className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold text-blue-500 dark:text-blue-400 hover:bg-white/10 transition-colors cursor-pointer shadow-sm"
+                      className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold text-blue-500 dark:text-blue-400 hover:-translate-y-0.5 active:translate-y-0 transition-transform cursor-pointer shadow-sm"
                     >
                       <PaletteIcon className="h-3.5 w-3.5" />
                       <span>Choose Wallpaper</span>
@@ -355,6 +360,33 @@ export function DeveloperProfile() {
                     <ThemeToggle variant="pill" />
                   </div>
 
+                  {/* Lite Mode Toggle */}
+                  <div className="list-row px-3 -mx-3 glass-surface flex items-center justify-between rounded-2xl p-3.5">
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <ZapIcon className="h-3.5 w-3.5 text-emerald-500" />
+                        Lite Mode
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">Disables blur, starfield, and heavy animations for maximum 60fps</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={toggleLiteMode}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        isLiteMode ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'
+                      }`}
+                      role="switch"
+                      aria-checked={isLiteMode}
+                      title={isLiteMode ? 'Disable Lite Mode' : 'Enable Lite Mode'}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                          isLiteMode ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
                   {/* Notification Alert Sound */}
                   <div className="list-row px-3 -mx-3 glass-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl p-3.5">
                     <div>
@@ -370,7 +402,7 @@ export function DeveloperProfile() {
                       <button
                         type="button"
                         onClick={() => playMelodiousSound(selectedSoundId)}
-                        className="glass-surface inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-white/10 transition-colors cursor-pointer shadow-sm"
+                        className="glass-surface inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:-translate-y-0.5 active:translate-y-0 transition-transform cursor-pointer shadow-sm"
                         title="Preview sound"
                       >
                         <PlayIcon className="h-3 w-3 fill-current text-amber-500" />
@@ -379,7 +411,7 @@ export function DeveloperProfile() {
                       <button
                         type="button"
                         onClick={() => setIsSoundModalOpen(true)}
-                        className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold text-indigo-500 dark:text-indigo-400 hover:bg-white/10 transition-colors cursor-pointer shadow-sm"
+                        className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold text-indigo-500 dark:text-indigo-400 hover:-translate-y-0.5 active:translate-y-0 transition-transform cursor-pointer shadow-sm"
                       >
                         <Volume2Icon className="h-3.5 w-3.5" />
                         <span>Choose Sound</span>
@@ -405,6 +437,7 @@ export function DeveloperProfile() {
               <h2 className="border-b border-hairline pb-3 text-sm font-bold text-navy dark:text-white">
                 Recent Activity
               </h2>
+              <div className="overflow-x-auto relative z-10 w-full">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-hairline text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 font-bold">
@@ -416,9 +449,9 @@ export function DeveloperProfile() {
                 </thead>
                 <tbody className="divide-y divide-hairline">
                   {recentActivity.map((row: any, index: number) => (
-                    <tr key={`${row.task}-${index}`} className="hover:bg-slate-500/5 transition-colors">
+                    <tr key={`${row.task}-${index}`} className="transition-colors">
                       <td className="whitespace-nowrap px-5 py-3 text-slate-700 dark:text-slate-300 font-semibold">{row.date}</td>
-                      <td className="px-3 py-3 font-semibold text-navy dark:text-white">{row.task}</td>
+                      <td className="px-3 py-3 font-semibold text-navy dark:text-white break-words">{formatLogTitle(row.task, row.description)}</td>
                       <td className="px-3 py-3">
                         <TaskStatusBadge status={row.status} />
                       </td>
@@ -444,6 +477,7 @@ export function DeveloperProfile() {
                   )}
                 </tbody>
               </table>
+              </div>
             </section>
 
             <section className="glass-card rounded-3xl p-6 shadow-glass">

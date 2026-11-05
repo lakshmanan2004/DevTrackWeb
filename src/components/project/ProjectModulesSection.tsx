@@ -23,6 +23,7 @@ import { Project, ProjectModule, ModuleSubmittedLog } from '../../types';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { ProgressBar } from '../ui/ProgressBar';
+import { formatLogTitle } from '../../utils/logTitle';
 import { Select } from '../ui/Select';
 import { DeveloperCalendarModal } from '../leader/DeveloperCalendarModal';
 import { api, fileUrl } from '../../api/client';
@@ -527,8 +528,8 @@ export function ProjectModulesSection({
 
                               <div className="mt-2 space-y-2">
                                 {log.task && (
-                                  <p className="text-xs font-bold text-navy dark:text-white">
-                                    Task: <span className="text-brand dark:text-sky-400">{log.task}</span>
+                                  <p className="text-xs font-bold text-navy dark:text-white break-words">
+                                    Task: <span className="text-brand dark:text-sky-400">{formatLogTitle(log.task, log.description)}</span>
                                   </p>
                                 )}
                                 <p className="text-xs text-navy dark:text-slate-200 leading-relaxed bg-slate-50 dark:bg-slate-900/90 p-2.5 rounded-lg border border-hairline dark:border-white/10">

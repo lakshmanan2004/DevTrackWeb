@@ -24,10 +24,10 @@ import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 
 const severityAccentBorder: Record<string, string> = {
-  critical: 'border-l-4 border-l-rose-500',
-  warning: 'border-l-4 border-l-amber-500',
-  flag: 'border-l-4 border-l-orange-500',
-  eod: 'border-l-4 border-l-blue-500',
+  critical: 'glass-rose border-l-4 !border-l-rose-500',
+  warning: 'glass-amber border-l-4 !border-l-amber-500',
+  flag: 'glass-amber border-l-4 !border-l-orange-500',
+  eod: 'glass-blue border-l-4 !border-l-blue-500',
   seen: 'border-l-4 border-l-slate-400/40 dark:border-l-slate-600/40'
 };
 

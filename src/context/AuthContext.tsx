@@ -23,12 +23,23 @@ export interface Badges {
   pendingWorks: number;
 }
 
+export interface OrgBrandingSettings {
+  companyName?: string;
+  logoUrl?: string;
+  brandTagline?: string;
+  supportEmail?: string;
+  workStartHour?: number;
+  workEndHour?: number;
+  minWords?: number;
+  eodDeadline?: string;
+}
+
 interface MeResponse {
   user: AuthUser;
   badges: Badges;
   serverDate: string;
   currentSlot: number;
-  settings: { workStartHour: number; workEndHour: number; minWords: number; eodDeadline: string };
+  settings: OrgBrandingSettings;
 }
 
 interface AuthContextValue {
@@ -65,6 +76,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refresh = useCallback(async () => {
     if (!getToken()) {
       setUser(null);
+      api<OrgBrandingSettings>('/api/settings/public').then((pub) => {
+        setSettings((prev) => ({ ...(prev || {}), ...pub }));
+      }).catch(() => {});
       setLoading(false);
       return;
     }
@@ -123,6 +137,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (err.status === 401 || err.message?.includes('401')) {
         setToken(null);
         setUser(null);
+      api<OrgBrandingSettings>('/api/settings/public').then((pub) => {
+        setSettings((prev) => ({ ...(prev || {}), ...pub }));
+      }).catch(() => {});
         disconnectSocket();
       }
     } finally {
@@ -142,6 +159,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsub = onUnauthorized(() => {
       setToken(null);
       setUser(null);
+      api<OrgBrandingSettings>('/api/settings/public').then((pub) => {
+        setSettings((prev) => ({ ...(prev || {}), ...pub }));
+      }).catch(() => {});
       disconnectSocket();
     });
     return () => {
@@ -204,6 +224,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsub7 = onSocketEvent('log:review', () => {
       debouncedRefresh();
     });
+    const unsub9 = onSocketEvent('setting:update', (payload: any) => {
+      debouncedRefresh();
+      if (payload) {
+        setSettings((prev) => ({
+          ...(prev || {}),
+          ...(payload.companyName !== undefined ? { companyName: payload.companyName } : {}),
+          ...(payload.logoUrl !== undefined ? { logoUrl: payload.logoUrl } : {}),
+          ...(payload.brandTagline !== undefined ? { brandTagline: payload.brandTagline } : {}),
+          ...(payload.supportEmail !== undefined ? { supportEmail: payload.supportEmail } : {})
+        }));
+      }
+    });
     const unsub8 = onSocketEvent('alert:update', () => {
       debouncedRefresh();
     });
@@ -217,6 +249,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       unsub6();
       unsub7();
       unsub8();
+      unsub9();
     };
   }, [user, debouncedRefresh]);
 
@@ -257,6 +290,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(null);
       disconnectSocket();
       setUser(null);
+      api<OrgBrandingSettings>('/api/settings/public').then((pub) => {
+        setSettings((prev) => ({ ...(prev || {}), ...pub }));
+      }).catch(() => {});
     }
   }, []);
 

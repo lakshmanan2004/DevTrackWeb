@@ -20,6 +20,7 @@ import { Button } from '../../components/ui/Button';
 import { Select } from '../../components/ui/Select';
 import { usePendingWorks, useProjects } from '../../hooks/useLive';
 import { api, apiUpload, fileUrl } from '../../api/client';
+import { formatLogTitle } from '../../utils/logTitle';
 
 export function MyPendingWorks() {
   const { data, refetch } = usePendingWorks();
@@ -237,7 +238,7 @@ export function MyPendingWorks() {
                 {dateItems.map((item: any) => (
                   <article
                     key={item.id}
-                    className="glass-card independent-card hover-tile rounded-3xl border border-amber-300/80 dark:border-amber-500/30 p-5 sm:p-6"
+                    className="glass-card glass-amber independent-card hover-tile rounded-3xl border p-5 sm:p-6"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-hairline pb-3">
                       <div className="flex items-center gap-2.5">
@@ -245,7 +246,9 @@ export function MyPendingWorks() {
                           <ZapIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                           {item.hourLabel}
                         </span>
-                        <h3 className="text-sm font-bold text-navy dark:text-white">{item.taskTitle}</h3>
+                        <h3 className="text-sm font-bold text-navy dark:text-white break-words">
+                          {formatLogTitle(item.taskTitle, item.description || item.feedbackNote)}
+                        </h3>
                       </div>
                       <div className="flex items-center gap-2">
                         {item.status === 'awaiting_lead_approval' ? (
@@ -312,7 +315,7 @@ export function MyPendingWorks() {
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-3">
                       {item.status === 'awaiting_lead_approval' ? (
                         <div className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/15 dark:bg-blue-500/25 border border-blue-500/40 dark:border-blue-400/40 px-3 py-1.5 text-xs font-bold text-blue-800 dark:text-blue-300 shadow-xs">
-                          <ClockIcon className="h-3.5 w-3.5 text-blue-700 dark:text-blue-400 animate-pulse" />
+                          <ClockIcon className="h-3.5 w-3.5 text-blue-700 dark:text-blue-400" />
                           <span>Submitted for Review · Awaiting Team Lead approval</span>
                         </div>
                       ) : (
@@ -366,7 +369,9 @@ export function MyPendingWorks() {
                     ? 'Resubmit Work Log'
                     : 'Submit Full Work Log for Assigned Task'}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{resubmitModalItem.taskTitle} · Assigned by {resubmitModalItem.assignedBy}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {formatLogTitle(resubmitModalItem.taskTitle, resubmitModalItem.description || resubmitModalItem.feedbackNote)} · Assigned by {resubmitModalItem.assignedBy}
+                </p>
               </div>
               <button onClick={() => setResubmitModalItem(null)} className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-500/10 hover:text-white transition-all">
                 <XIcon className="h-5 w-5" />

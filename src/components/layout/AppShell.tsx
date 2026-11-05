@@ -1,9 +1,14 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Role } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
 import { WallpaperModal } from '../theme/WallpaperModal';
+import { StarfieldBackground } from '../space/StarfieldBackground';
+import { AchievementToast } from '../developer/AchievementToast';
+
+// Lazy-load Command Palette (cmdk) so it doesn't inflate initial bundle size
+const CommandPalette = lazy(() => import('../common/CommandPalette'));
 
 interface AppShellProps {
   role: Role;
@@ -31,7 +36,7 @@ export function AppShell({ role }: AppShellProps) {
 
   return (
     <div className="fixed inset-0 flex h-full w-full overflow-hidden bg-transparent">
-      {/* SCENIC WALLPAPER BACKGROUND — Fixed & Theme-Independent Layer */}
+      {/* SCENIC WALLPAPER OR MISSION STARFIELD BACKGROUND */}
       {wallpaper ? (
         <div
           className="pointer-events-none fixed inset-0 z-0 bg-slate-950 bg-cover bg-center bg-no-repeat"
@@ -40,7 +45,7 @@ export function AppShell({ role }: AppShellProps) {
           }}
         />
       ) : (
-        <div className="pointer-events-none fixed inset-0 z-0 bg-transparent" />
+        <StarfieldBackground />
       )}
 
       {/* FLOATING FROSTED SIDEBAR */}
@@ -50,6 +55,7 @@ export function AppShell({ role }: AppShellProps) {
       <main
         ref={mainRef}
         className="relative z-10 flex h-full min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-transparent w-full max-w-full overscroll-none"
+        style={{ scrollbarGutter: 'stable' }}
       >
         <div key={location.pathname} className="animate-page-enter flex min-w-0 flex-1 flex-col w-full max-w-full">
           <Suspense fallback={<PageFallback />}>
@@ -60,6 +66,14 @@ export function AppShell({ role }: AppShellProps) {
 
       {/* WALLPAPER THEME MODAL */}
       <WallpaperModal isOpen={isWallpaperModalOpen} onClose={closeWallpaperModal} />
+
+      {/* GAMIFICATION ACHIEVEMENT NOTIFICATIONS (Developer Workspace) */}
+      {role === 'developer' && <AchievementToast />}
+
+      {/* GLOBAL CTRL+K COMMAND PALETTE (Lazy Loaded, Keyboard-first) */}
+      <Suspense fallback={null}>
+        <CommandPalette />
+      </Suspense>
     </div>
   );
 }

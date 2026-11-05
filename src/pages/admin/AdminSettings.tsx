@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldCheckIcon, CalendarIcon, PlusIcon, Trash2Icon, ListIcon } from 'lucide-react';
+import { ShieldCheckIcon, CalendarIcon, PlusIcon, Trash2Icon, ListIcon, Building2Icon, UploadCloudIcon, ImageIcon, SparklesIcon, CheckCircle2Icon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { Toggle } from '../../components/ui/Toggle';
@@ -14,6 +14,14 @@ const dayIndex: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 
 
 export function AdminSettings() {
   const { data, refetch } = useLive<{ settings: any }>('/api/settings', ['setting:update'], 0);
+  const [companyName, setCompanyName] = useState('DevTrack Workspace');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [brandTagline, setBrandTagline] = useState('Pro');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [supportEmail, setSupportEmail] = useState('admin@devtrack.io');
+  const [shiftSchedule, setShiftSchedule] = useState<'standard_9_6' | 'early_8_5' | 'flexible'>('standard_9_6');
+  const [requireProof, setRequireProof] = useState(false);
   const [workingDays, setWorkingDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [startHour, setStartHour] = useState(8);
   const [endHour, setEndHour] = useState(16);
@@ -49,6 +57,12 @@ export function AdminSettings() {
   useEffect(() => {
     const s = data?.settings;
     if (s) {
+      if (s.companyName) setCompanyName(s.companyName);
+      if (s.logoUrl !== undefined) setLogoUrl(s.logoUrl);
+      if (s.brandTagline) setBrandTagline(s.brandTagline);
+      if (s.supportEmail) setSupportEmail(s.supportEmail);
+      if (s.shiftSchedule) setShiftSchedule(s.shiftSchedule);
+      if (s.requireProofAttachment !== undefined) setRequireProof(s.requireProofAttachment);
       setWorkingDays(s.workDays || [1, 2, 3, 4, 5]);
       setStartHour(s.workStartHour || 8);
       setEndHour(s.workEndHour || 16);
@@ -69,10 +83,37 @@ export function AdminSettings() {
     );
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api<{ url: string }>('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      if (res?.url) {
+        setLogoUrl(res.url);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to upload logo image');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
   const save = async () => {
     await api('/api/settings', {
       method: 'PUT',
       body: {
+        companyName,
+        logoUrl,
+        brandTagline,
+        supportEmail,
+        shiftSchedule,
+        requireProofAttachment: requireProof,
         workStartHour: startHour,
         workEndHour: endHour,
         workDays: workingDays,
@@ -181,6 +222,198 @@ export function AdminSettings() {
       <div className="flex-1 p-6">
         <div className="max-w-5xl space-y-5">
           <div className="grid gap-5 lg:grid-cols-2">
+            {/* Organization & Workspace Profile */}
+            <section className="glass-card rounded-3xl p-6 shadow-glass lg:col-span-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/50 dark:border-white/5 pb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-sky-400">
+                      <Building2Icon className="h-4 w-4" />
+                    </span>
+                    <h2 className="text-sm font-bold text-navy dark:text-white">Organization &amp; Workspace Branding</h2>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Configure your corporate workspace identity, support contact, and engineering shift policy.
+                  </p>
+                </div>
+                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  Commercial SaaS Ready
+                </span>
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <div className="sm:col-span-2">
+                  <label htmlFor="company-name" className="mb-1.5 block text-xs font-bold text-navy dark:text-white">
+                    Company / Organization Name (Shown as App Title)
+                  </label>
+                  <input
+                    id="company-name"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="e.g. Acme Corporation"
+                    className="glass-input h-10 w-full px-3.5 text-xs font-semibold text-navy dark:text-white placeholder:text-slate-400"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Appears across the sidebar, auth screens, client PDFs, and browser tab.
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="brand-tagline" className="mb-1.5 block text-xs font-bold text-navy dark:text-white">
+                    Brand Tagline / Badge
+                  </label>
+                  <input
+                    id="brand-tagline"
+                    value={brandTagline}
+                    onChange={(e) => setBrandTagline(e.target.value)}
+                    placeholder="e.g. Pro, Internal, Suite"
+                    className="glass-input h-10 w-full px-3.5 text-xs font-semibold text-navy dark:text-white placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="support-email" className="mb-1.5 block text-xs font-bold text-navy dark:text-white">
+                    Workspace Admin / Support Email
+                  </label>
+                  <input
+                    id="support-email"
+                    type="email"
+                    value={supportEmail}
+                    onChange={(e) => setSupportEmail(e.target.value)}
+                    placeholder="admin@yourcompany.com"
+                    className="glass-input h-10 w-full px-3.5 text-xs font-semibold text-navy dark:text-white placeholder:text-slate-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold text-navy dark:text-white">
+                    Company Logo &amp; Identity
+                  </label>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleLogoUpload}
+                    accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                    className="hidden"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={uploadingLogo}
+                      onClick={() => fileInputRef.current?.click()}
+                      icon={<UploadCloudIcon className="h-4 w-4 text-blue-600 dark:text-sky-400" />}
+                      className="text-xs"
+                    >
+                      {uploadingLogo ? 'Uploading…' : logoUrl ? 'Change Logo' : 'Upload Corporate Logo'}
+                    </Button>
+
+                    {logoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setLogoUrl('')}
+                        className="rounded-xl border border-rose-300 dark:border-rose-900/50 bg-rose-50/50 dark:bg-rose-950/30 px-2.5 py-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-100 transition-colors cursor-pointer"
+                        title="Reset to default logo"
+                      >
+                        Reset Logo
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Recommended: Transparent PNG or SVG (square or 1:1 ratio, max 5MB).
+                  </p>
+                </div>
+              </div>
+
+              {/* LIVE BRANDING PREVIEW BANNER */}
+              <div className="mt-5 rounded-2xl border border-hairline dark:border-white/10 bg-gradient-to-r from-slate-900/90 via-slate-900/95 to-slate-950 p-4 text-white shadow-inner">
+                <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <SparklesIcon className="h-3.5 w-3.5 text-amber-400" />
+                    Live White-Label Sidebar &amp; Header Preview
+                  </span>
+                  <span className="rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 text-[10px] px-2 py-0.5 font-bold">
+                    Active Preview
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-2.5 px-4 backdrop-blur-md">
+                    <img
+                      src={logoUrl || '/Simats-logo.png'}
+                      alt={companyName || 'DevTrack'}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/Simats-logo.png';
+                      }}
+                      className="h-9 w-9 rounded-xl object-contain bg-white p-1 shrink-0 shadow-sm ring-1 ring-white/30"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black tracking-tight text-white">
+                          {companyName || 'DevTrack Workspace'}
+                        </span>
+                        <span className="rounded-full bg-blue-500/20 text-blue-400 border border-blue-400/30 text-[9px] px-1.5 py-0.5 font-extrabold uppercase tracking-wider">
+                          {brandTagline || 'Pro'}
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-semibold text-slate-400">
+                        {companyName ? `${companyName} Engineering Suite` : 'Internal Engineering Command Center'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-right text-xs text-slate-400 hidden sm:block">
+                    <p className="font-semibold text-slate-300">Client Timesheet Header:</p>
+                    <p className="text-[11px] font-mono text-slate-400">
+                      &copy; {new Date().getFullYear()} {companyName || 'DevTrack'} &middot; Official Audit Record
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 border-t border-slate-200/50 dark:border-white/5 pt-4">
+                <div>
+                  <label htmlFor="shift-model" className="mb-1.5 block text-xs font-bold text-navy dark:text-white">
+                    Engineering Shift Schedule Model
+                  </label>
+                  <Select
+                    size="lg"
+                    fullWidth
+                    value={shiftSchedule}
+                    onChange={(val) => setShiftSchedule(val as any)}
+                    options={[
+                      { value: 'standard_9_6', label: 'Standard Tech Shift (9:00 AM – 6:00 PM)' },
+                      { value: 'early_8_5', label: 'Early Core Shift (8:00 AM – 5:00 PM)' },
+                      { value: 'flexible', label: 'Flexible Async Model (Focus on total active hours)' }
+                    ]}
+                  />
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Adjusts work blocks, notification schedules, and check-in timeline expectation.
+                  </p>
+                </div>
+
+                <div className="flex flex-col justify-between rounded-2xl border border-slate-200/60 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] p-4">
+                  <div>
+                    <span className="text-xs font-bold text-navy dark:text-white block">
+                      Enforce Mandatory Screenshot Artifacts
+                    </span>
+                    <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                      When disabled, developers can verify check-ins using Git commits or PR links without blocking file uploads.
+                    </p>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                      {requireProof ? 'Mandatory for all logs' : 'Optional (Low friction for engineers)'}
+                    </span>
+                    <Toggle checked={requireProof} onChange={setRequireProof} label="Require Screenshot" />
+                  </div>
+                </div>
+              </div>
+            </section>
+
             <section className="glass-card rounded-3xl p-6 shadow-glass">
               <h2 className="text-sm font-bold text-navy dark:text-white">Working Hours</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">

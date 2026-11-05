@@ -24,7 +24,7 @@ export function ActiveTimerCard({ activeMinutes, firstSeen, missed }: ActiveTime
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-x-8 gap-y-6">
         <div className="flex items-center gap-4 min-w-[180px]">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 border border-brand/20 shadow-xs text-brand">
-            <ClockIcon className="h-7 w-7 animate-pulse" />
+            <ClockIcon className="h-7 w-7" />
           </div>
           <div>
             <p className="font-mono text-4xl sm:text-5xl font-extrabold tracking-tight text-navy dark:text-white">

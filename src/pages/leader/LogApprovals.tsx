@@ -274,16 +274,16 @@ export function LogApprovals() {
                 key={log.id}
                 className={`glass-card independent-card hover-tile rounded-2xl transition-all overflow-hidden ${
                   isApproved
-                    ? 'border-emerald-500/30'
+                    ? 'glass-emerald border-emerald-500/40'
                     : isChangesRequested
-                    ? 'border-amber-500/40 ring-1 ring-amber-500/20'
+                    ? 'glass-amber border-amber-500/40 ring-1 ring-amber-500/20'
                     : isRejected
-                    ? 'border-rose-500/40 ring-1 ring-rose-500/20'
+                    ? 'glass-rose border-rose-500/40 ring-1 ring-rose-500/20'
                     : isAssigned
-                    ? 'border-amber-500/50 bg-amber-500/10 ring-2 ring-amber-500/30'
+                    ? 'glass-amber border-amber-500/50 ring-2 ring-amber-500/30'
                     : isLate
-                    ? 'border-amber-500/50 ring-2 ring-amber-500/30 bg-amber-500/10'
-                    : ''
+                    ? 'glass-amber border-amber-500/50 ring-2 ring-amber-500/30'
+                    : 'glass-blue'
                 }`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/20 dark:border-white/10 px-5 py-3.5">

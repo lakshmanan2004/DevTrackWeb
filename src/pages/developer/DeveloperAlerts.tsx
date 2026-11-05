@@ -19,28 +19,28 @@ const kindMeta: Record<
 > = {
   reminder: {
     icon: <AlarmClockIcon className="h-5 w-5" />,
-    accentBorder: 'border-l-4 border-l-amber-500',
+    accentBorder: 'glass-amber border-l-4 !border-l-amber-500',
     iconWrap: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30',
     seenIconWrap: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
     label: 'Reminder'
   },
   approval: {
     icon: <CheckCircle2Icon className="h-5 w-5" />,
-    accentBorder: 'border-l-4 border-l-emerald-500',
+    accentBorder: 'glass-emerald border-l-4 !border-l-emerald-500',
     iconWrap: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30',
     seenIconWrap: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20',
     label: 'Approval'
   },
   rejection: {
     icon: <XCircleIcon className="h-5 w-5" />,
-    accentBorder: 'border-l-4 border-l-rose-500',
+    accentBorder: 'glass-rose border-l-4 !border-l-rose-500',
     iconWrap: 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30',
     seenIconWrap: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20',
     label: 'Rejection'
   },
   eod: {
     icon: <FileTextIcon className="h-5 w-5" />,
-    accentBorder: 'border-l-4 border-l-blue-500',
+    accentBorder: 'glass-blue border-l-4 !border-l-blue-500',
     iconWrap: 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30',
     seenIconWrap: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20',
     label: 'EOD'
@@ -139,7 +139,7 @@ export function DeveloperAlerts() {
                         {alert.title}
                       </h2>
                       {alert.unread && (
-                        <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-indigo-400 shadow-sm animate-pulse" aria-label="Unread" />
+                        <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-indigo-400 shadow-sm" aria-label="Unread" />
                       )}
                     </div>
                     <p className="text-xs sm:text-sm font-medium text-slate-950 dark:text-slate-100 leading-relaxed">

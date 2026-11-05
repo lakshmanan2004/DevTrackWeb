@@ -67,7 +67,7 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot, lunchSlot
     [description]
   );
   const wordsOk = wordCount >= MIN_WORDS;
-  const canSubmit = wordsOk && !!file && !fileError && effectiveProjectId !== '' && !busy;
+  const canSubmit = wordsOk && !fileError && effectiveProjectId !== '' && !busy;
 
   useEffect(() => {
     if (open) {
@@ -371,7 +371,7 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot, lunchSlot
 
           <div>
             <p className="mb-1.5 text-xs font-bold text-navy">
-              Screenshot Proof <span className="text-red-500">*</span>
+              Screenshot / Artifact Proof <span className="text-slate-400 font-normal">(Optional)</span>
             </p>
             <input
               ref={fileInputRef}
@@ -408,9 +408,9 @@ export function CheckInModal({ open, onClose, onSubmitted, targetSlot, lunchSlot
               >
                 <UploadCloudIcon className={`h-6 w-6 ${fileError ? 'text-rose-500' : 'text-slate-400'}`} aria-hidden="true" />
                 <span className="text-xs font-bold text-navy">
-                  Drop screenshot or click to browse
+                  Drop artifact / screenshot or click to browse
                 </span>
-                <span className="text-[11px] text-slate-400 font-medium">Required · PNG JPG PDF · Max 10MB</span>
+                <span className="text-[11px] text-slate-400 font-medium">Optional if Git commit or task link provided · PNG JPG PDF · Max 10MB</span>
               </button>
             )}
             {fileError && (

@@ -8,10 +8,10 @@ export const currentDeveloper = {
   name: 'Ravi Kumar',
   firstName: 'Ravi',
   initials: 'RK',
-  email: 'ravi@college.edu',
+  email: 'ravi@company.com',
   github: 'github.com/ravikumar',
   team: 'Team Alpha',
-  project: 'College ERP System',
+  project: 'FinTech Cloud Platform',
   joined: 'Aug 15 2026',
   leader: 'Karthik M',
   week: { active: '31h 20m', logs: 28, avgPerDay: '5.6', onTime: '94%' }
@@ -22,7 +22,7 @@ export const developers: Developer[] = [
   id: 'ravi',
   name: 'Ravi Kumar',
   initials: 'RK',
-  email: 'ravi@college.edu',
+  email: 'ravi@company.com',
   activeMinutes: 252,
   logs: 6,
   done: 4,
@@ -31,13 +31,13 @@ export const developers: Developer[] = [
   lastSeen: '10:46 AM',
   note: 'All logs on time',
   team: 'Team Alpha',
-  project: 'College ERP System'
+  project: 'FinTech Cloud Platform'
 },
 {
   id: 'priya',
   name: 'Priya M',
   initials: 'PM',
-  email: 'priya@college.edu',
+  email: 'priya@company.com',
   activeMinutes: 225,
   logs: 5,
   done: 3,
@@ -46,13 +46,13 @@ export const developers: Developer[] = [
   lastSeen: '10:44 AM',
   note: 'EOD missing yesterday',
   team: 'Team Alpha',
-  project: 'College ERP System'
+  project: 'FinTech Cloud Platform'
 },
 {
   id: 'sneha',
   name: 'Sneha K',
   initials: 'SK',
-  email: 'sneha@college.edu',
+  email: 'sneha@company.com',
   activeMinutes: 240,
   logs: 5,
   done: 5,
@@ -61,14 +61,14 @@ export const developers: Developer[] = [
   lastSeen: '10:47 AM',
   note: 'Top performer',
   team: 'Team Alpha',
-  project: 'College ERP System',
+  project: 'FinTech Cloud Platform',
   topPerformer: true
 },
 {
   id: 'arjun',
   name: 'Arjun J',
   initials: 'AJ',
-  email: 'arjun@college.edu',
+  email: 'arjun@company.com',
   activeMinutes: 130,
   logs: 2,
   done: 1,
@@ -77,13 +77,13 @@ export const developers: Developer[] = [
   lastSeen: '10:31 AM',
   note: 'Alert sent',
   team: 'Team Alpha',
-  project: 'College ERP System'
+  project: 'FinTech Cloud Platform'
 },
 {
   id: 'vikram',
   name: 'Vikram R',
   initials: 'VR',
-  email: 'vikram@college.edu',
+  email: 'vikram@company.com',
   activeMinutes: 0,
   logs: 0,
   done: 0,
@@ -92,7 +92,7 @@ export const developers: Developer[] = [
   lastSeen: 'Not seen today',
   note: 'No activity',
   team: 'Team Alpha',
-  project: 'College ERP System'
+  project: 'FinTech Cloud Platform'
 }];
 
 
@@ -108,7 +108,7 @@ export const teams = [
 {
   id: 'alpha',
   name: 'Team Alpha',
-  project: 'College ERP System',
+  project: 'FinTech Cloud Platform',
   leader: { name: 'Karthik M', initials: 'KM' },
   members: [
   { name: 'Ravi Kumar', initials: 'RK' },
@@ -120,7 +120,7 @@ export const teams = [
 {
   id: 'beta',
   name: 'Team Beta',
-  project: 'Attendance App',
+  project: 'Field Operations & Attendance Platform',
   leader: { name: 'Senthil K', initials: 'SK' },
   members: [
   { name: 'Vikram R', initials: 'VR' },
@@ -131,7 +131,7 @@ export const teams = [
 {
   id: 'gamma',
   name: 'Team Gamma',
-  project: 'Student Portal',
+  project: 'Client Self-Service Portal',
   leader: { name: 'Vijay S', initials: 'VS' },
   members: [
   { name: 'Anitha R', initials: 'AR' },

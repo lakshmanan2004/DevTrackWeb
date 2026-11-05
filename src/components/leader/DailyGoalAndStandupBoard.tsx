@@ -10,6 +10,7 @@ import {
 import { ProgressBar } from '../ui/ProgressBar';
 import { Badge } from '../ui/Badge';
 import { TaskStatusBadge } from '../ui/TaskStatusBadge';
+import { formatLogTitle } from '../../utils/logTitle';
 
 interface SubTaskGoal {
   id: string;
@@ -31,7 +32,7 @@ export function DailyGoalAndStandupBoard({ devName, dateLabel, logs }: Props) {
 
   const subTasks: SubTaskGoal[] = logs.map((log) => ({
     id: log.id,
-    task: log.task,
+    task: formatLogTitle(log.task, log.description),
     status: log.status === 'todo' ? 'progress' : log.status,
     hourLabel: log.hourLabel
   }));
@@ -39,8 +40,8 @@ export function DailyGoalAndStandupBoard({ devName, dateLabel, logs }: Props) {
   const completedCount = subTasks.filter((t) => t.status === 'done').length;
   const overallProgress = subTasks.length ? Math.round((completedCount / subTasks.length) * 100) : 0;
 
-  const accomplished = logs.filter((l) => l.status === 'done').map((l) => l.task);
-  const next = logs.filter((l) => l.status === 'progress').map((l) => l.task);
+  const accomplished = logs.filter((l) => l.status === 'done').map((l) => formatLogTitle(l.task, l.description));
+  const next = logs.filter((l) => l.status === 'progress').map((l) => formatLogTitle(l.task, l.description));
   const blockers = logs.filter((l) => l.status === 'blocked');
 
   const standupText = `*DevTrack Standup Summary — ${devName} (${dateLabel})*
@@ -52,7 +53,7 @@ ${accomplished.length ? accomplished.map((t) => `- ${t}`).join('\n') : '- No com
 ${next.length ? next.map((t) => `- ${t}`).join('\n') : '- Nothing in progress.'}
 
 *Current Blockers:*
-${blockers.length ? blockers.map((l) => `- ${l.task}: ${l.blocker || 'blocked'}`).join('\n') : '- None.'}`;
+${blockers.length ? blockers.map((l) => `- ${formatLogTitle(l.task, l.description)}: ${l.blocker || 'blocked'}`).join('\n') : '- None.'}`;
 
   const handleCopyStandup = () => {
     navigator.clipboard.writeText(standupText);

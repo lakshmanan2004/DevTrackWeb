@@ -39,6 +39,7 @@ app.use('/api/leaves', require('./routes/leaves'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api', require('./routes/org'));
 app.use('/api', require('./routes/reports'));
+app.use('/api/gamification', require('./routes/gamification'));
 
 // Production SPA static file serving (resolves 404 on direct URL navigation & refresh)
 const distPath = path.join(__dirname, '..', '..', 'dist');

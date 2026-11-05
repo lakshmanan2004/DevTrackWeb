@@ -147,7 +147,7 @@ export function ManagerAlerts() {
             const isUnread = alert.unread;
             const isIdle = alert.category === 'Idle';
             const accentBorder = isUnread
-              ? (isIdle ? 'border-l-4 border-l-amber-500' : 'border-l-4 border-l-rose-500')
+              ? (isIdle ? 'glass-amber border-l-4 !border-l-amber-500' : 'glass-rose border-l-4 !border-l-rose-500')
               : 'border-l-4 border-l-slate-400/40 dark:border-l-slate-600/40';
             const iconStyle = isUnread
               ? (isIdle

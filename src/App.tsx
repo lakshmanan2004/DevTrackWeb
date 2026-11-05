@@ -15,6 +15,7 @@ const EodReport = lazy(() => import('./pages/developer/EodReport').then((m) => (
 const DeveloperAlerts = lazy(() => import('./pages/developer/DeveloperAlerts').then((m) => ({ default: m.DeveloperAlerts })));
 const DeveloperProfile = lazy(() => import('./pages/developer/DeveloperProfile').then((m) => ({ default: m.DeveloperProfile })));
 const MyPendingWorks = lazy(() => import('./pages/developer/MyPendingWorks').then((m) => ({ default: m.MyPendingWorks })));
+const DeveloperBadges = lazy(() => import('./pages/developer/DeveloperBadges'));
 const DeveloperMyProjects = lazy(() => import('./pages/developer/MyProjects').then((m) => ({ default: m.MyProjects })));
 
 const LiveDashboard = lazy(() => import('./pages/leader/LiveDashboard').then((m) => ({ default: m.LiveDashboard })));
@@ -64,6 +65,24 @@ function Protected({ role, children }: { role: Role; children: React.ReactNode }
 
 export function App() {
   const [showSplash, setShowSplash] = useState(true);
+  const { settings } = useAuth();
+
+  React.useEffect(() => {
+    const company = settings?.companyName || 'DevTrack';
+    const tagline = settings?.brandTagline ? ` ${settings.brandTagline}` : '';
+    document.title = `${company}${tagline} · Engineering Suite`;
+
+    if (settings?.logoUrl) {
+      let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'shortcut icon';
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+      link.type = 'image/png';
+      link.href = settings.logoUrl;
+    }
+  }, [settings?.companyName, settings?.brandTagline, settings?.logoUrl]);
 
   return (
     <>
@@ -88,6 +107,7 @@ export function App() {
               <Route path="/developer/commits" element={<MyCommits />} />
               <Route path="/developer/eod" element={<EodReport />} />
               <Route path="/developer/alerts" element={<DeveloperAlerts />} />
+              <Route path="/developer/badges" element={<DeveloperBadges />} />
               <Route path="/developer/profile" element={<DeveloperProfile />} />
             </Route>
 

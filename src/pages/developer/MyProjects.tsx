@@ -37,7 +37,15 @@ export function MyProjects() {
           {projects.map((proj: any) => (
             <article
               key={proj.id}
-              className="glass-card project-container-card rounded-3xl p-6 space-y-5"
+              className={`glass-card project-container-card rounded-3xl p-6 space-y-5 ${
+                proj.status === 'completed'
+                  ? 'glass-emerald border-emerald-500/30'
+                  : proj.health === 'Behind'
+                  ? 'glass-rose border-rose-500/30'
+                  : proj.health === 'Slightly Behind'
+                  ? 'glass-amber border-amber-500/30'
+                  : 'glass-blue border-blue-500/30'
+              }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-hairline pb-4">
                 <div>

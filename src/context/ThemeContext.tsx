@@ -65,6 +65,9 @@ interface ThemeContextType {
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   isDark: boolean;
+  isLiteMode: boolean;
+  toggleLiteMode: () => void;
+  setLiteMode: (enabled: boolean) => void;
   wallpaper: string;
   setWallpaper: (file: string) => void;
   isWallpaperModalOpen: boolean;
@@ -76,6 +79,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'devtrack-theme';
 const WALLPAPER_STORAGE_KEY = 'devtrack-wallpaper';
+const LITE_MODE_STORAGE_KEY = 'devtrack-lite-mode';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
@@ -93,6 +97,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return 'light';
   });
 
+  const [isLiteMode, setIsLiteModeState] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem(LITE_MODE_STORAGE_KEY);
+      return stored === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const [wallpaper, setWallpaperState] = useState<string>(() => {
     try {
       const stored = localStorage.getItem(WALLPAPER_STORAGE_KEY);
@@ -106,6 +119,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
 
   useEffect(() => {
+    // Disable all CSS transitions globally during theme class flip to prevent awkward mid-transition lag
+    const css = document.createElement('style');
+    css.appendChild(
+      document.createTextNode(
+        `*, *::before, *::after {
+          -webkit-transition: none !important;
+          -moz-transition: none !important;
+          -o-transition: none !important;
+          -ms-transition: none !important;
+          transition: none !important;
+        }`
+      )
+    );
+    document.head.appendChild(css);
+
     const root = document.documentElement;
     if (theme === 'dark') {
       root.classList.add('dark');
@@ -118,12 +146,53 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.setAttribute('data-theme', 'light');
       root.style.colorScheme = 'light';
     }
+
+    // Force layout reflow so the browser registers the theme change with transitions disabled
+    (() => window.getComputedStyle(document.body).opacity)();
+
+    // Re-enable normal UI transitions on the next animation frame
+    const timer = setTimeout(() => {
+      if (css.parentNode) {
+        css.parentNode.removeChild(css);
+      }
+    }, 20);
+
     try {
       localStorage.setItem(STORAGE_KEY, theme);
     } catch {
       // Ignore storage errors
     }
+
+    return () => {
+      clearTimeout(timer);
+      if (css.parentNode) {
+        css.parentNode.removeChild(css);
+      }
+    };
   }, [theme]);
+
+  // Synchronize Lite Mode class on root element and localStorage
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isLiteMode) {
+      root.classList.add('lite-mode');
+    } else {
+      root.classList.remove('lite-mode');
+    }
+    try {
+      localStorage.setItem(LITE_MODE_STORAGE_KEY, String(isLiteMode));
+    } catch {
+      // Ignore
+    }
+  }, [isLiteMode]);
+
+  const toggleLiteMode = () => {
+    setIsLiteModeState((prev) => !prev);
+  };
+
+  const setLiteMode = (enabled: boolean) => {
+    setIsLiteModeState(enabled);
+  };
 
   const setWallpaper = (file: string) => {
     setWallpaperState(file);
@@ -163,6 +232,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         setTheme,
         toggleTheme,
         isDark: theme === 'dark',
+        isLiteMode,
+        toggleLiteMode,
+        setLiteMode,
         wallpaper,
         setWallpaper,
         isWallpaperModalOpen,

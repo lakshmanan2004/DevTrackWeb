@@ -19,7 +19,8 @@ import {
   PaletteIcon,
   ImageIcon,
   Volume2Icon,
-  PlayIcon
+  PlayIcon,
+  ZapIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Avatar } from '../../components/ui/Avatar';
@@ -53,7 +54,7 @@ const roleTones: Record<string, 'blue' | 'purple' | 'red' | 'green'> = {
 
 export function UserProfile() {
   const { user, refresh } = useAuth();
-  const { openWallpaperModal } = useTheme();
+  const { openWallpaperModal, isLiteMode, toggleLiteMode } = useTheme();
   const role = user?.role || 'leader';
 
   const [isSoundModalOpen, setIsSoundModalOpen] = useState(false);
@@ -224,7 +225,7 @@ export function UserProfile() {
                   <button
                     type="button"
                     onClick={openWallpaperModal}
-                    className="glass-surface inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-blue-500 dark:text-blue-400 hover:bg-white/10 transition-all cursor-pointer shadow-xs"
+                    className="glass-surface inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-blue-500 dark:text-blue-400 hover:-translate-y-0.5 active:translate-y-0 transition-transform cursor-pointer shadow-xs"
                   >
                     <PaletteIcon className="h-3.5 w-3.5" />
                     <span>Theme</span>
@@ -334,7 +335,7 @@ export function UserProfile() {
                     <button
                       type="button"
                       onClick={openWallpaperModal}
-                      className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold text-blue-500 dark:text-blue-400 hover:bg-white/10 transition-colors cursor-pointer"
+                      className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold text-blue-500 dark:text-blue-400 hover:-translate-y-0.5 active:translate-y-0 transition-transform cursor-pointer"
                     >
                       <PaletteIcon className="h-3.5 w-3.5" />
                       <span>Choose Theme</span>
@@ -348,6 +349,33 @@ export function UserProfile() {
                       <span>Appearance Mode</span>
                     </span>
                     <ThemeToggle variant="pill" />
+                  </div>
+
+                  {/* Lite Mode (Performance: Disables Blur & Canvas for 60fps on low-power devices) */}
+                  <div className="list-row px-3 -mx-3 flex items-center justify-between gap-4 py-2 border-t border-white/10 dark:border-white/5">
+                    <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0 font-medium">
+                      <ZapIcon className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <div>
+                        <span>Lite Mode</span>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">Disables blur &amp; starfield for ultra-low power</p>
+                      </div>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={toggleLiteMode}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        isLiteMode ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'
+                      }`}
+                      role="switch"
+                      aria-checked={isLiteMode}
+                      title={isLiteMode ? 'Disable Lite Mode' : 'Enable Lite Mode'}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                          isLiteMode ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
                   </div>
 
                   {/* Notification Alert Sound */}
@@ -365,7 +393,7 @@ export function UserProfile() {
                       <button
                         type="button"
                         onClick={() => playMelodiousSound(selectedSoundId)}
-                        className="glass-surface inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-white/10 transition-colors cursor-pointer"
+                        className="glass-surface inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:-translate-y-0.5 active:translate-y-0 transition-transform cursor-pointer"
                         title="Preview sound"
                       >
                         <PlayIcon className="h-3 w-3 fill-current text-amber-500" />
@@ -374,7 +402,7 @@ export function UserProfile() {
                       <button
                         type="button"
                         onClick={() => setIsSoundModalOpen(true)}
-                        className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold text-indigo-500 dark:text-indigo-400 hover:bg-white/10 transition-colors cursor-pointer"
+                        className="glass-surface inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold text-indigo-500 dark:text-indigo-400 hover:-translate-y-0.5 active:translate-y-0 transition-transform cursor-pointer"
                       >
                         <Volume2Icon className="h-3.5 w-3.5" />
                         <span>Choose Sound</span>
@@ -540,10 +568,10 @@ export function UserProfile() {
                       <button
                         type="button"
                         onClick={() => setLunchSlot(11)}
-                        className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all ${
+                        className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all hover:-translate-y-0.5 active:translate-y-0 ${
                           lunchSlot === 11
                             ? 'border-amber-500/50 bg-amber-500/20 text-amber-900 dark:text-amber-200 ring-2 ring-amber-500/40 shadow-sm'
-                            : 'glass-surface text-slate-600 dark:text-slate-300 hover:bg-white/10'
+                            : 'glass-surface text-slate-600 dark:text-slate-300'
                         }`}
                       >
                         <span>🍱</span>
@@ -552,10 +580,10 @@ export function UserProfile() {
                       <button
                         type="button"
                         onClick={() => setLunchSlot(12)}
-                        className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all ${
+                        className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all hover:-translate-y-0.5 active:translate-y-0 ${
                           lunchSlot === 12
                             ? 'border-amber-500/50 bg-amber-500/20 text-amber-900 dark:text-amber-200 ring-2 ring-amber-500/40 shadow-sm'
-                            : 'glass-surface text-slate-600 dark:text-slate-300 hover:bg-white/10'
+                            : 'glass-surface text-slate-600 dark:text-slate-300'
                         }`}
                       >
                         <span>🍱</span>

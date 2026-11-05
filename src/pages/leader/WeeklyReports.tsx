@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { AlertTriangleIcon, UserIcon, CalendarIcon } from 'lucide-react';
+import { AlertTriangleIcon, UserIcon, CalendarIcon, DownloadIcon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { StatCard } from '../../components/ui/StatCard';
 import { Banner } from '../../components/ui/Banner';
 import { Select } from '../../components/ui/Select';
+import { Button } from '../../components/ui/Button';
+import { ExportTimesheetModal } from '../../components/common/ExportTimesheetModal';
 import { useWeeklyReport, useDevelopers } from '../../hooks/useLive';
 
 const MAX_HOURS = 8;
@@ -20,6 +22,7 @@ export function WeeklyReports() {
   const developers = devData?.developers || [];
   const [developer, setDeveloper] = useState<string>('');
   const [week, setWeek] = useState(0);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   const { data: report } = useWeeklyReport(developer || null, week);
   const selectedDev = developers.find((d: any) => d.id === developer);
@@ -69,6 +72,14 @@ export function WeeklyReports() {
                 />
               </div>
             )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setExportModalOpen(true)}
+              icon={<DownloadIcon className="h-4 w-4 text-blue-600 dark:text-sky-400" />}
+            >
+              Export Timesheet
+            </Button>
           </div>
         }
       />
@@ -161,6 +172,7 @@ export function WeeklyReports() {
               <h2 className="border-b border-hairline px-6 py-4 text-sm font-bold text-navy dark:text-white">
                 Daily breakdown
               </h2>
+              <div className="overflow-x-auto relative z-10 w-full">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-hairline text-xs uppercase tracking-wide text-slate-400">
@@ -211,10 +223,17 @@ export function WeeklyReports() {
                   })}
                 </tbody>
               </table>
+              </div>
             </section>
           </>
         )}
       </div>
+
+      <ExportTimesheetModal
+        open={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        defaultDeveloperId={developer}
+      />
     </>
   );
 }

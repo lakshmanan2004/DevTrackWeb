@@ -1,13 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BellIcon } from 'lucide-react';
+import { BellIcon, SparklesIcon, RadioIcon, UsersIcon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
+import { Button } from '../../components/ui/Button';
 import { DeveloperCard } from '../../components/leader/DeveloperCard';
 import { DeveloperDetailPanel } from '../../components/leader/DeveloperDetailPanel';
 import { ProjectModulesSection } from '../../components/project/ProjectModulesSection';
+import { AiExecutiveDigestModal } from '../../components/common/AiExecutiveDigestModal';
 import { useDevelopers, useDeveloperDetail, useAlerts, useProjects } from '../../hooks/useLive';
 import { useAuth } from '../../context/AuthContext';
-import { useSocketConnected } from '../../api/socket';
+import { useSocketConnected, onSocketEvent } from '../../api/socket';
+
+const CommandDeckRadar = lazy(() =>
+  import('../../components/leader/CommandDeckRadar').then((m) => ({ default: m.CommandDeckRadar }))
+);
 
 export function LiveDashboard() {
   const { user } = useAuth();
@@ -20,7 +26,9 @@ export function LiveDashboard() {
   const leaderProjects = projData?.projects || [];
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
-  const activeProject = selectedProjectId ? leaderProjects.find((p: any) => p.id === selectedProjectId) : null;
+  const activeProject = selectedProjectId
+    ? leaderProjects.find((p: any) => p.id === selectedProjectId)
+    : null;
 
   const developers = data?.developers || [];
   const unreadAlerts = (alertData?.alerts || []).filter((a: any) => a.unread).length;
@@ -28,8 +36,30 @@ export function LiveDashboard() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'on-track' | 'missed' | 'commits'>('all');
+  const [aiDigestOpen, setAiDigestOpen] = useState(false);
+  const [showRadar, setShowRadar] = useState<boolean>(() => {
+    const saved = localStorage.getItem('devtrack_leader_show_radar');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [lastApprovedLogAt, setLastApprovedLogAt] = useState<number | undefined>(undefined);
+
+  const toggleRadar = (val: boolean) => {
+    setShowRadar(val);
+    localStorage.setItem('devtrack_leader_show_radar', String(val));
+  };
+
   const { data: detail, refetch: refetchDetail } = useDeveloperDetail(selectedId);
   const selected = developers.find((dev) => dev.id === selectedId) ?? null;
+
+  // Listen to live socket approval events to trigger Mission Cleared radar animation
+  useEffect(() => {
+    const off = onSocketEvent('log:review', (payload: any) => {
+      if (payload?.review === 'approved' || payload?.action === 'approve') {
+        setLastApprovedLogAt(Date.now());
+      }
+    });
+    return () => off();
+  }, []);
 
   useEffect(() => {
     if (devParam && developers.length > 0) {
@@ -59,11 +89,26 @@ export function LiveDashboard() {
 
   const pills = [
     { id: 'all', label: 'All Developers', value: developers.length, tone: 'text-navy dark:text-white' },
-    { id: 'on-track', label: 'On Track', value: developers.filter((d: any) => d.missed === 0).length, tone: 'text-emerald-600 dark:text-emerald-400' },
-    { id: 'missed', label: 'Missed Logs', value: developers.filter((d: any) => d.missed > 0).length, tone: 'text-rose-600 dark:text-rose-400' },
-    { id: 'commits', label: 'Commits Today', value: developers.filter((d: any) => d.commits > 0).length, tone: 'text-navy dark:text-white' },
+    {
+      id: 'on-track',
+      label: 'On Track',
+      value: developers.filter((d: any) => d.missed === 0).length,
+      tone: 'text-emerald-600 dark:text-emerald-400'
+    },
+    {
+      id: 'missed',
+      label: 'Missed Logs',
+      value: developers.filter((d: any) => d.missed > 0).length,
+      tone: 'text-rose-600 dark:text-rose-400'
+    },
+    {
+      id: 'commits',
+      label: 'Commits Today',
+      value: developers.filter((d: any) => d.commits > 0).length,
+      tone: 'text-navy dark:text-white'
+    },
     { label: 'Alerts', value: unreadAlerts, tone: 'text-rose-600 dark:text-rose-400' },
-    { label: 'Logs Today', value: logsToday, tone: 'text-navy dark:text-white' },
+    { label: 'Logs Today', value: logsToday, tone: 'text-navy dark:text-white' }
   ];
 
   const connected = useSocketConnected();
@@ -72,11 +117,52 @@ export function LiveDashboard() {
     <>
       <PageHeader
         title="Live Dashboard"
-        subtitle="Real-time developer attendance, hourly check-in timeline, and active work monitoring"
+        subtitle="Real-time developer attendance, orbital radar telemetry, and active work monitoring"
         actions={
           <>
+            {/* View Mode Toggle: Radar Deck vs Developer Cards */}
+            <div className="flex items-center gap-1 rounded-2xl p-1 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300/70 dark:border-white/15 shadow-sm">
+              <button
+                type="button"
+                onClick={() => toggleRadar(true)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  showRadar
+                    ? 'bg-brand text-white shadow-sm'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Orbital Command Deck Radar view"
+              >
+                <RadioIcon className="h-3.5 w-3.5" />
+                <span>Radar Deck</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleRadar(false)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  !showRadar
+                    ? 'bg-brand text-white shadow-sm'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Hide Radar and view Developer Cards only"
+              >
+                <UsersIcon className="h-3.5 w-3.5" />
+                <span>Developer Cards</span>
+              </button>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setAiDigestOpen(true)}
+              className="!bg-gradient-to-r !from-indigo-600/10 !to-purple-600/10 hover:!from-indigo-600/20 hover:!to-purple-600/20 !border-purple-500/30 text-purple-700 dark:text-purple-300 font-bold"
+              icon={<SparklesIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
+            >
+              AI Executive Digest
+            </Button>
             <span className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-danger-soft px-3 py-1.5 text-xs font-bold text-danger">
-              <span className={`dt-live h-1.5 w-1.5 rounded-full bg-danger ${connected ? '' : 'bg-gray-400'}`} aria-hidden="true" />
+              <span
+                className={`dt-live h-1.5 w-1.5 rounded-full bg-danger ${connected ? '' : 'bg-gray-400'}`}
+                aria-hidden="true"
+              />
               {connected ? 'LIVE' : 'CONNECTING…'}
             </span>
             <span className="text-xs font-semibold text-gray-500">
@@ -92,10 +178,30 @@ export function LiveDashboard() {
               <span className="sr-only">{unreadAlerts} unread alerts</span>
             </span>
           </>
-        } />
-
+        }
+      />
 
       <div className="flex-1 space-y-5 p-6">
+        {/* COMMAND DECK RADAR (LAZY-LOADED) */}
+        {showRadar && (
+          <Suspense
+            fallback={
+              <div className="glass-card rounded-3xl p-16 text-center shadow-glass flex flex-col items-center justify-center min-h-[380px]">
+                <div className="h-8 w-8 rounded-full border-2 border-brand/30 border-t-brand animate-spin mb-3" />
+                <p className="text-xs font-bold text-slate-500">Calibrating Command Deck Radar...</p>
+              </div>
+            }
+          >
+            <CommandDeckRadar
+              developers={developers}
+              selectedDeveloperId={selectedId}
+              onSelectDeveloper={(id) => {
+                setSelectedId(id);
+              }}
+              lastApprovedLogAt={lastApprovedLogAt}
+            />
+          </Suspense>
+        )}
 
         <ProjectModulesSection
           project={activeProject}
@@ -116,19 +222,23 @@ export function LiveDashboard() {
             return (
               <div
                 key={pill.label}
-                onClick={() => isClickable ? setFilter(pill.id as typeof filter) : undefined}
+                onClick={() => (isClickable ? setFilter(pill.id as typeof filter) : undefined)}
                 role={isClickable ? 'button' : undefined}
                 tabIndex={isClickable ? 0 : undefined}
                 className={`glass-pill rounded-2xl px-4 py-2 ${
                   isClickable ? 'cursor-pointer' : '!cursor-default'
-                } ${
-                  isSelected
-                    ? 'glass-pill-active !text-white'
-                    : ''
-                }`}
+                } ${isSelected ? 'glass-pill-active !text-white' : ''}`}
               >
-                <dt className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-slate-700 dark:text-slate-200'}`}>{pill.label}</dt>
-                <dd className={`text-sm font-bold tabular-nums ${isSelected ? 'text-white' : pill.tone}`}>{pill.value}</dd>
+                <dt
+                  className={`text-xs font-semibold ${
+                    isSelected ? 'text-white' : 'text-slate-700 dark:text-slate-200'
+                  }`}
+                >
+                  {pill.label}
+                </dt>
+                <dd className={`text-sm font-bold tabular-nums ${isSelected ? 'text-white' : pill.tone}`}>
+                  {pill.value}
+                </dd>
               </div>
             );
           })}
@@ -167,13 +277,14 @@ export function LiveDashboard() {
             </div>
           </section>
 
-          <div className="sticky top-20">
+          <div id="developer-detail-panel" className="sticky top-20">
             {selected ? (
               <DeveloperDetailPanel
                 developer={selected}
                 detail={detail}
                 onClose={() => setSelectedId(null)}
                 onChanged={() => {
+                  setLastApprovedLogAt(Date.now());
                   refetch();
                   refetchDetail();
                 }}
@@ -189,6 +300,12 @@ export function LiveDashboard() {
           </div>
         </div>
       </div>
+
+      <AiExecutiveDigestModal
+        open={aiDigestOpen}
+        onClose={() => setAiDigestOpen(false)}
+        defaultProjectId={selectedProjectId || ''}
+      />
     </>
   );
 }

@@ -173,12 +173,12 @@ export function WorkLogs() {
               key={log.id}
               className={`glass-card rounded-2xl p-5 shadow-glass transition-all ${
                 isLate || log.review === 'changes_requested'
-                  ? 'border-l-4 border-l-amber-500'
+                  ? 'glass-amber border-l-4 !border-l-amber-500'
                   : log.status === 'blocked' || log.review === 'rejected'
-                  ? 'border-l-4 border-l-rose-500'
+                  ? 'glass-rose border-l-4 !border-l-rose-500'
                   : log.review === 'approved'
-                  ? 'border-l-4 border-l-emerald-500'
-                  : 'border-l-4 border-l-brand'
+                  ? 'glass-emerald border-l-4 !border-l-emerald-500'
+                  : 'glass-blue border-l-4 !border-l-brand'
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -375,8 +375,8 @@ export function WorkLogs() {
           );})} 
           {!loading && visible.length === 0 && (
             <div className="glass-card rounded-2xl border-dashed border-gray-300 dark:border-white/10 p-12 text-center">
-              <p className="text-sm font-semibold text-navy dark:text-white">No logs for this date</p>
-              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Submit a work block check-in from your dashboard or click below.</p>
+              <p className="text-base font-bold text-navy dark:text-white">{date === todayStr ? "No logs yet, start today's mission" : "No logs for this date"}</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">{date === todayStr ? "Complete your active sprint check-in to start gaining engineering XP and maintain your daily streak." : "Submit a work block check-in from your dashboard or click below."}</p>
               <div className="mt-4 flex justify-center">
                 <Button size="sm" onClick={() => setModalOpen(true)} icon={<PlusIcon className="h-4 w-4" />}>
                   Log Work Now

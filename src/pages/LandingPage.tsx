@@ -31,12 +31,16 @@ import { useAuth } from '../context/AuthContext';
 import { usePublicStats } from '../hooks/useLive';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { HeaderClock } from '../components/layout/HeaderClock';
+import { StarfieldBackground } from '../components/space/StarfieldBackground';
 import { Role } from '../types';
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const { user, login, logout } = useAuth();
+  const { user, login, logout, settings } = useAuth();
   const { data: stats } = usePublicStats();
+  const companyName = (stats as any)?.companyName || settings?.companyName || 'DevTrack';
+  const brandTagline = (stats as any)?.brandTagline || settings?.brandTagline || 'PRO';
+  const logoUrl = (stats as any)?.logoUrl || settings?.logoUrl || '/Simats-logo.png';
   const [activeRoleTab, setActiveRoleTab] = useState<Role>('developer');
 
   // Login states
@@ -226,11 +230,9 @@ export function LandingPage() {
   const activeRole = roleDetails[activeRoleTab];
 
   return (
-    <div className="fixed inset-0 h-full w-full overflow-y-auto overflow-x-hidden overscroll-y-contain bg-[#E0EFFF] dark:bg-[#07090e] text-slate-900 dark:text-[#F5F5F5] selection:bg-brand/20 selection:text-brand transition-colors duration-500">
-      {/* Background Fluid Ambient Glowing Blobs */}
-      <div className="pointer-events-none fixed -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-400/20 via-sky-300/15 to-transparent blur-[140px] dark:from-[#1683FF]/15 dark:via-transparent z-0" />
-      <div className="pointer-events-none fixed top-1/3 right-0 w-[650px] h-[650px] rounded-full bg-radial from-indigo-300/15 via-purple-300/10 to-transparent blur-[150px] dark:from-[#1683FF]/08 dark:via-transparent z-0" />
-      <div className="pointer-events-none fixed -bottom-40 left-1/4 w-[700px] h-[700px] rounded-full bg-gradient-to-tl from-blue-400/15 via-teal-300/10 to-transparent blur-[160px] dark:from-[#1683FF]/10 dark:via-transparent z-0" />
+    <div className="fixed inset-0 h-full w-full overflow-y-auto overflow-x-hidden overscroll-y-contain bg-[#E0EFFF] dark:bg-[#07090e] text-slate-900 dark:text-[#F5F5F5] selection:bg-brand/20 selection:text-brand">
+      {/* Space Mission Starfield & Nebulae Background */}
+      <StarfieldBackground />
 
       {/* LANDING PAGE FIXED TOP STICKY HEADER — 68px HEIGHT MATCHING BACKGROUND */}
       <header
@@ -243,20 +245,27 @@ export function LandingPage() {
           width: '100%',
           boxSizing: 'border-box'
         }}
-        className="sticky top-0 z-50 flex h-[68px] w-full shrink-0 items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6 select-none bg-[#E0EFFF]/85 dark:bg-[#07090e]/85 backdrop-blur-2xl border-b border-blue-200/50 dark:border-white/10 shadow-xs dark:shadow-glass transition-colors duration-300"
+        className="sticky top-0 z-50 flex h-[68px] w-full shrink-0 items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6 select-none bg-[#E0EFFF]/85 dark:bg-[#07090e]/85 backdrop-blur-2xl border-b border-blue-200/50 dark:border-white/10 shadow-xs dark:shadow-glass"
       >
         {/* Left Side: Brand Logo & App Title */}
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="flex items-center gap-2.5">
             <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white p-1 shadow-md ring-1 ring-blue-500/20 dark:ring-white/30 shrink-0">
-              <img src="/Simats-logo.png" alt="DevTrack Logo" className="h-full w-full object-contain" />
+              <img
+                src={logoUrl}
+                alt={companyName}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/Simats-logo.png';
+                }}
+                className="h-full w-full object-contain"
+              />
               <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-sm sm:text-base font-black tracking-tight text-slate-900 dark:text-white leading-tight">DevTrack</span>
+                <span className="text-sm sm:text-base font-black tracking-tight text-slate-900 dark:text-white leading-tight">{companyName}</span>
                 <span className="rounded-full bg-blue-500/15 dark:bg-[#1683FF]/20 border border-blue-500/30 px-1.5 py-0.2 text-[9px] font-extrabold text-blue-600 dark:text-[#5AA9FF] uppercase tracking-wider">
-                  PRO
+                  {brandTagline}
                 </span>
               </div>
               <span className="hidden sm:block text-[10px] font-semibold text-slate-500 dark:text-slate-400 leading-tight">
@@ -419,7 +428,7 @@ export function LandingPage() {
 
           {/* Right Column: Floating Elevated Liquid Glass Authentication Card */}
           <div className="lg:col-span-5" id="signin-card">
-            <div className="rounded-3xl border border-white/80 dark:border-white/10 bg-white/85 dark:bg-[#101319]/90 backdrop-blur-3xl p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.6)] space-y-5 transition-all">
+            <div className="rounded-3xl border border-white/80 dark:border-white/10 bg-white/85 dark:bg-[#101319]/90 backdrop-blur-3xl p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.6)] space-y-5">
               
               {user ? (
                 /* Authenticated State Quick Launcher */
@@ -512,7 +521,7 @@ export function LandingPage() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="glass-input h-11 w-full pl-10 pr-3.5 text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400"
-                          placeholder="name@saveetha.com"
+                          placeholder="name@company.com"
                           required
                         />
                       </div>
@@ -584,7 +593,7 @@ export function LandingPage() {
 
                   <div className="pt-2 text-center border-t border-slate-200/50 dark:border-white/5">
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                      Support: <span className="font-bold text-slate-700 dark:text-slate-300">admin.sse@saveetha.com</span>
+                      Support: <span className="font-bold text-slate-700 dark:text-slate-300">support@devtrack.io</span>
                     </p>
                   </div>
                 </>
@@ -865,7 +874,14 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-500 dark:text-slate-400 font-medium">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 p-1">
-              <img src="/Simats-logo.png" alt="DevTrack Logo" className="h-full w-full object-contain" />
+              <img
+                src={logoUrl}
+                alt={companyName}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/Simats-logo.png';
+                }}
+                className="h-full w-full object-contain"
+              />
             </div>
             <div>
               <span className="font-bold text-slate-800 dark:text-slate-200">DevTrack Pro</span>
@@ -913,11 +929,11 @@ export function LandingPage() {
             >
               Sign In
             </button>
-            <span className="text-slate-400">Admin: admin.sse@saveetha.com</span>
+            <span className="text-slate-400">Admin: admin@devtrack.io</span>
           </div>
 
           <div>
-            &copy; {new Date().getFullYear()} SIMATS DevTrack. All rights reserved.
+            &copy; {new Date().getFullYear()} DevTrack Enterprise. All rights reserved.
           </div>
         </div>
       </footer>
@@ -944,7 +960,7 @@ export function LandingPage() {
 
             <div className="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
               <p>
-                To maintain verified academic and enterprise integrity, passwords are reset through the workspace <strong className="text-slate-900 dark:text-white">Administrator</strong>.
+                To maintain verified enterprise organizational security, passwords are reset through the workspace <strong className="text-slate-900 dark:text-white">Administrator</strong>.
               </p>
 
               <div className="rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-blue-50/60 dark:bg-blue-950/30 p-3.5 space-y-2">
@@ -960,7 +976,7 @@ export function LandingPage() {
                 <MailIcon className="h-4 w-4 text-blue-500 shrink-0" />
                 <div className="min-w-0">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">Workspace Admin Email</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">admin.sse@saveetha.com</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">admin@devtrack.io</span>
                 </div>
               </div>
             </div>
@@ -1117,11 +1133,11 @@ export function LandingPage() {
                   <div className="space-y-1">
                     <h4 className="text-sm font-black text-slate-900 dark:text-white">3. Data Retention &amp; Inquiries</h4>
                     <p>
-                      Project telemetry is retained across the project sprint lifecycle and archived for semester governance. For data inquiries or account deactivations, contact:
+                      Project telemetry is retained across the project sprint lifecycle and archived for corporate governance and audit compliance. For data inquiries or account deactivations, contact:
                     </p>
                     <div className="flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-white/5 p-2.5 font-bold text-slate-800 dark:text-slate-200 mt-2">
                       <MailIcon className="h-4 w-4 text-blue-500 shrink-0" />
-                      <span>admin.sse@saveetha.com</span>
+                      <span>admin@devtrack.io</span>
                     </div>
                   </div>
                 </div>

@@ -46,7 +46,7 @@ export const leaderAlerts: LeaderAlert[] = [
   who: 'Arjun J',
   title: 'Arjun J — Missed Check-in',
   body: '9:00 AM log not submitted',
-  meta: '10:02 AM · College ERP · Team Alpha',
+  meta: '10:02 AM · FinTech Cloud · Team Alpha',
   detection:
   'Cron job at 10:00 AM found no WorkLog for Arjun hourSlot:9. Alert pushed via Socket.IO.',
   unread: true,
@@ -60,7 +60,7 @@ export const leaderAlerts: LeaderAlert[] = [
   who: 'Arjun J',
   title: 'Arjun J — Batch Submission',
   body: '5 logs submitted in 8 minutes',
-  meta: 'Yesterday 4:49 PM · College ERP · Team Alpha',
+  meta: 'Yesterday 4:49 PM · FinTech Cloud · Team Alpha',
   detection: 'Submission timestamps compared. 3+ logs in 10 min = batch alert.',
   unread: true,
   actions: ['Review Logs', 'Reject All', 'Mark Seen'],
@@ -79,7 +79,7 @@ export const leaderAlerts: LeaderAlert[] = [
   who: 'Vikram R',
   title: 'Vikram R — No logs today',
   body: '8 AM, 9 AM and 10 AM slots all empty',
-  meta: '10:05 AM · College ERP · Team Alpha',
+  meta: '10:05 AM · FinTech Cloud · Team Alpha',
   detection:
   'Three consecutive empty hourSlots with no session heartbeat. Escalated to Team Leader automatically.',
   unread: true,
@@ -92,7 +92,7 @@ export const leaderAlerts: LeaderAlert[] = [
   who: 'Priya M',
   title: 'Priya M — EOD Missing',
   body: 'No EOD report submitted for Sep 7 2026',
-  meta: 'Yesterday 4:35 PM · College ERP · Team Alpha',
+  meta: 'Yesterday 4:35 PM · FinTech Cloud · Team Alpha',
   detection: 'Nightly job at 4:35 PM found no EODReport document for Sep 7.',
   unread: false,
   actions: ['View Priya', 'Mark Seen']
@@ -105,7 +105,7 @@ export const leaderAlerts: LeaderAlert[] = [
   who: 'Priya M',
   title: 'Priya M — Missed Check-in',
   body: '3:00 PM log not submitted',
-  meta: 'Yesterday 4:02 PM · College ERP · Team Alpha',
+  meta: 'Yesterday 4:02 PM · FinTech Cloud · Team Alpha',
   detection: 'Cron job at 4:00 PM found no WorkLog for Priya hourSlot:15.',
   unread: false,
   actions: ['View Priya', 'Mark Seen']
@@ -117,7 +117,7 @@ export const leaderAlerts: LeaderAlert[] = [
   who: 'Vikram R',
   title: 'Vikram R — EOD Missing',
   body: 'No EOD report submitted for Sep 5 2026',
-  meta: 'Sep 5 4:35 PM · College ERP · Team Alpha',
+  meta: 'Sep 5 4:35 PM · FinTech Cloud · Team Alpha',
   detection: 'Nightly job at 4:35 PM found no EODReport document for Sep 5.',
   unread: false,
   actions: ['View Vikram', 'Mark Seen']

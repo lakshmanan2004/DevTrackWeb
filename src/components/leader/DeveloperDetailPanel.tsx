@@ -14,6 +14,7 @@ import { ReviewLogFeedbackModal } from './ReviewLogFeedbackModal';
 import { Developer } from '../../types';
 import { api } from '../../api/client';
 import { Button } from '../ui/Button';
+import { formatLogTitle } from '../../utils/logTitle';
 
 type Tab = 'activity' | 'logs' | 'commits' | 'eod';
 
@@ -176,8 +177,8 @@ export function DeveloperDetailPanel({ developer, detail, onClose, onChanged }: 
                         <span className="shrink-0 rounded-xl bg-slate-200 dark:bg-slate-700/80 px-2.5 py-1 text-xs font-black tabular-nums text-slate-800 dark:text-white border border-slate-300/60 dark:border-white/10">
                           {log.hourLabel}
                         </span>
-                        <p className="truncate text-xs sm:text-sm font-bold text-navy dark:text-white" title={log.task}>
-                          {log.task}
+                        <p className="truncate text-xs sm:text-sm font-bold text-navy dark:text-white" title={formatLogTitle(log.task, log.description)}>
+                          {formatLogTitle(log.task, log.description)}
                         </p>
                       </div>
 

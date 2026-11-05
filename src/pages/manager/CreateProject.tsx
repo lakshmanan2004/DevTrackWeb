@@ -124,7 +124,7 @@ export function CreateProject() {
                   id="cp-name"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="e.g. College ERP System"
+                  placeholder="e.g. Cloud Infrastructure Platform"
                   className="glass-input h-10 w-full px-3.5 text-xs font-semibold text-navy placeholder:text-slate-400"
                 />
               </div>

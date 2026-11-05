@@ -3,8 +3,8 @@ import { Project } from '../types';
 export const projects: Project[] = [
   {
     id: 'erp',
-    name: 'College ERP System',
-    description: 'Centralized enterprise platform for student administration, course registrations, timetable generation, and department workflow automation.',
+    name: 'FinTech Cloud Platform',
+    description: 'Centralized enterprise platform for automated transaction clearing, multi-currency wallets, merchant compliance, and ledger reconciliation.',
     status: 'ongoing',
     manager: 'Senthil P',
     leader: 'Karthik M',
@@ -21,16 +21,16 @@ export const projects: Project[] = [
     inProgress: 2,
     modules: [
       { id: 'm1', name: 'Database & Architecture Design', description: 'ER diagrams, PostgreSQL schemas & indexing strategy', weightPercentage: 20, status: 'completed' },
-      { id: 'm2', name: 'UI / UX Wireframing', description: 'Figma prototypes for student and admin dashboard', weightPercentage: 15, status: 'completed' },
-      { id: 'm3', name: 'Backend API Development', description: 'REST APIs for registration, timetable & grading', weightPercentage: 30, status: 'completed' },
-      { id: 'm4', name: 'Frontend UI Implementation', description: 'React screens for registration & timetable modules', weightPercentage: 25, status: 'in_progress' },
+      { id: 'm2', name: 'UI / UX Wireframing', description: 'Figma prototypes for customer portal and admin dashboard', weightPercentage: 15, status: 'completed' },
+      { id: 'm3', name: 'Backend API Development', description: 'REST APIs for transactions, ledgers & webhook dispatch', weightPercentage: 30, status: 'completed' },
+      { id: 'm4', name: 'Frontend UI Implementation', description: 'React screens for payments & transaction settlement', weightPercentage: 25, status: 'in_progress' },
       { id: 'm5', name: 'UAT & Deployment', description: 'User acceptance testing, security audit & production launch', weightPercentage: 10, status: 'todo' }
     ]
   },
   {
     id: 'attendance',
-    name: 'Attendance App',
-    description: 'Biometric & QR-based mobile attendance tracker for students and faculty with real-time sync and automated anomaly alerts.',
+    name: 'Field Operations & Attendance Platform',
+    description: 'Biometric & geofenced mobile workforce attendance tracker with real-time sync, offline caching, and automated anomaly alerts.',
     status: 'ongoing',
     manager: 'Senthil P',
     leader: 'Senthil K',

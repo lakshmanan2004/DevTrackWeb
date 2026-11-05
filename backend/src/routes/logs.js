@@ -6,7 +6,7 @@ const { WorkLog, Commit, Task, Alert, Team, Project, User, Setting, Leave } = re
 const { authRequired, attachUser, requireRole, ah } = require('../middleware/auth');
 const { workLogDto, dayStats } = require('../util/dto');
 const { scopeFor } = require('../util/scope');
-const { dayStr, fromDayStr, slotForNow, hourLabel, fmtTime, fmtDateMDY, fmtDateLong, requiredSlots, fmtDuration, isWorkday, getHolidayInfo, initialsOf, makeTaskTitle } = require('../util/time');
+const { dayStr, fromDayStr, slotForNow, hourLabel, fmtTime, fmtDateMDY, fmtDateLong, requiredSlots, fmtDuration, isWorkday, getHolidayInfo, initialsOf, makeTaskTitle, resolveTaskTitle } = require('../util/time');
 const { currentBlockSlot, isLogLate, blockLabel, getWorkBlocks, isLogForBlock, isAnyLogForBlock } = require('../util/workBlocks');
 const { emitToRoles, emitToUser } = require('../sockets');
 
@@ -182,7 +182,6 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
   if (words < settings.minWords) {
     return res.status(400).json({ error: `Description must be at least ${settings.minWords} words (currently ${words})` });
   }
-  if (!req.file) return res.status(400).json({ error: 'Screenshot proof is required' });
 
   const project = await Project.findById(projectId);
   if (!project) return res.status(404).json({ error: 'Project not found' });
@@ -196,7 +195,7 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
   const devLunchSlot = req.user.lunchSlot || 12;
   const hourSlot = req.body.hourSlot ? Number(req.body.hourSlot) : currentBlockSlot(devLunchSlot, new Date());
 
-  const attachment = await saveUpload(req.file);
+  const attachment = req.file ? await saveUpload(req.file) : { name: '', url: '' };
 
   let commitsCount = 0;
   let sha = '';
@@ -229,8 +228,8 @@ router.post('/', requireRole('developer'), upload.single('attachment'), ah(async
     description: String(description).trim(),
     submittedAt: new Date(),
     activeMinutes: Number(minutes) || 0,
-    attachmentName: attachment.name || 'screenshot.png',
-    attachmentUrl: attachment.url,
+    attachmentName: attachment.name || '',
+    attachmentUrl: attachment.url || '',
     commitsCount,
     commitUrl: commitUrl || '',
     review: 'pending',
@@ -650,7 +649,8 @@ router.get('/pending-works', requireRole('developer'), ah(async (req, res) => {
       logId: String(log._id),
       projectId: log.project ? String(log.project._id || log.project) : userProjectId,
       dateStr: fmtDateMDY(new Date(`${log.date}T12:00:00`)),
-      taskTitle: log.task,
+      taskTitle: resolveTaskTitle(log.task, log.description),
+      description: log.description,
       hourLabel: `${hourLabel(log.hourSlot)} Slot`,
       assignedBy: isRevision ? 'Team Lead' : 'Self (Check-in)',
       assignerRole: 'TL',
@@ -702,7 +702,7 @@ router.get('/pending-works', requireRole('developer'), ah(async (req, res) => {
       taskId: String(t._id),
       projectId: userProjectId,
       dateStr: fmtDateMDY(t.createdAt),
-      taskTitle: t.title,
+      taskTitle: resolveTaskTitle(t.title, t.description),
       hourLabel: isSubmittedPending ? 'Awaiting Approval' : 'Assigned Task',
       assignedBy: t.assignedByName,
       assignerRole: t.assignedByRole,
@@ -905,7 +905,8 @@ router.get('/team-calendar', ah(async (req, res) => {
           developerId: logDevId,
           developerName: dev.name,
           initials: dev.initials || initialsOf(dev.name),
-          taskTitle: log.task,
+          taskTitle: resolveTaskTitle(log.task, log.description),
+          description: log.description,
           projectName: log.project ? log.project.name : 'Project',
           hourLabel: `${hourLabel(log.hourSlot)} Slot`,
           status: isChangesReq
@@ -1004,7 +1005,7 @@ router.get('/team-calendar', ah(async (req, res) => {
           developerId: logDevId,
           developerName: dev.name,
           initials: dev.initials || initialsOf(dev.name),
-          taskTitle: l.task,
+          taskTitle: resolveTaskTitle(l.task, l.description),
           projectName: l.project ? l.project.name : 'Project',
           hourLabel: `${hourLabel(l.hourSlot)} Slot`,
           status: l.status,

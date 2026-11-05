@@ -56,8 +56,11 @@ const rolePortals: Record<
 
 export function Login() {
   const navigate = useNavigate();
-  const { login, user, loading } = useAuth();
+  const { login, user, loading, settings } = useAuth();
   const { data: stats } = usePublicStats();
+  const companyName = (stats as any)?.companyName || settings?.companyName || 'DevTrack';
+  const brandTagline = (stats as any)?.brandTagline || settings?.brandTagline || 'Pro';
+  const logoUrl = (stats as any)?.logoUrl || settings?.logoUrl || '/Simats-logo.png';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -125,7 +128,7 @@ export function Login() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col lg:flex-row items-center justify-between bg-gradient-to-br from-[#f8faff] via-[#f2f6fc] to-[#eaf1fb] dark:from-[#06080c] dark:via-[#0c0f15] dark:to-[#11151d] text-slate-900 dark:text-[#F5F5F5] overflow-x-hidden selection:bg-brand/20 selection:text-brand transition-colors duration-500">
+    <div className="relative min-h-screen w-full flex flex-col lg:flex-row items-center justify-between bg-gradient-to-br from-[#f8faff] via-[#f2f6fc] to-[#eaf1fb] dark:from-[#06080c] dark:via-[#0c0f15] dark:to-[#11151d] text-slate-900 dark:text-[#F5F5F5] overflow-x-hidden selection:bg-brand/20 selection:text-brand">
       {/* Soft Seamless Ambient Fluid Glow Layers — No Dividers, No Harsh Lines */}
       <div className="pointer-events-none absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-400/20 via-sky-300/15 to-transparent blur-[120px] dark:from-[#1683FF]/15 dark:via-transparent" />
       <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-radial from-blue-300/15 via-indigo-200/10 to-transparent blur-[140px] dark:from-[#1683FF]/08 dark:via-transparent" />
@@ -143,22 +146,25 @@ export function Login() {
             <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-blue-400/20 to-indigo-400/20 blur-xl opacity-75 group-hover:opacity-100 transition-opacity" />
             <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white/90 dark:bg-white/10 backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_8px_30px_rgba(59,130,246,0.12)] p-2.5 transition-transform duration-300 group-hover:scale-105">
               <img
-                src="/Simats-logo.png"
-                alt="DevTrack Logo"
+                src={logoUrl}
+                alt={companyName}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/Simats-logo.png';
+                }}
                 className="h-full w-full object-contain rounded-xl drop-shadow-xs"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-[#F5F5F5] block leading-tight">
-                  DevTrack
+                  {companyName}
                 </span>
                 <span className="rounded-full bg-blue-500/15 dark:bg-[#1683FF]/20 border border-blue-500/30 dark:border-[rgba(22,131,255,0.35)] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-[#5AA9FF]">
-                  Pro
+                  {brandTagline}
                 </span>
               </div>
               <span className="text-xs font-semibold tracking-wide text-indigo-600/90 dark:text-[#A1A1AA]">
-                Developer Productivity &amp; Work Log Platform
+                {companyName ? `${companyName} Engineering Portal` : 'Developer Productivity & Work Log Platform'}
               </span>
             </div>
           </Link>
@@ -390,7 +396,7 @@ export function Login() {
                 </span>
                 <ol className="list-decimal list-inside space-y-1 text-slate-600 dark:text-slate-300 font-medium">
                   <li>Contact your DevTrack workspace Administrator.</li>
-                  <li>Provide your registered college/work email address.</li>
+                  <li>Provide your registered work email address.</li>
                   <li>The Admin will issue a temporary password via User Management.</li>
                   <li>Log in with the temporary password and change it anytime in your Profile.</li>
                 </ol>
@@ -400,7 +406,7 @@ export function Login() {
                 <MailIcon className="h-4 w-4 text-blue-500 shrink-0" />
                 <div className="min-w-0">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">Workspace Admin Email</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">admin.sse@saveetha.com</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">admin@devtrack.io</span>
                 </div>
               </div>
             </div>

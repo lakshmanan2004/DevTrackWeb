@@ -15,7 +15,7 @@ export const todayLogs: WorkLog[] = [
   commits: 1,
   review: 'approved',
   reviewNote: 'Approved by Karthik (Team Lead)',
-  project: 'College ERP System',
+  project: 'FinTech Cloud Platform',
   wordCount: 38
 },
 {
@@ -41,7 +41,7 @@ export const todayLogs: WorkLog[] = [
       createdAt: '10:15 AM'
     }
   ],
-  project: 'College ERP System',
+  project: 'FinTech Cloud Platform',
   wordCount: 42
 },
 {
@@ -57,7 +57,7 @@ export const todayLogs: WorkLog[] = [
   attachment: 'jwt-fix.png',
   commits: 1,
   review: 'pending',
-  project: 'College ERP System',
+  project: 'FinTech Cloud Platform',
   wordCount: 40
 },
 {
@@ -67,30 +67,30 @@ export const todayLogs: WorkLog[] = [
   task: 'Payment gateway integration',
   status: 'blocked',
   description:
-  'Started wiring the Razorpay checkout flow into the fee module. Created the order endpoint and the client handler, but cannot complete verification without working sandbox credentials from the college account.',
+  'Started wiring the Stripe checkout flow into the billing module. Created the order endpoint and the client webhook handler, but cannot complete verification without working sandbox API keys from the master account.',
   submittedAt: '11:47 AM',
   activeMinutes: 30,
   attachment: 'error.png',
   commits: 0,
   review: 'pending',
-  blocker: 'Razorpay sandbox API key not working. Waiting for access from the college account owner.',
-  project: 'College ERP System',
+  blocker: 'Stripe sandbox API key revoked. Waiting for access from the enterprise account owner.',
+  project: 'FinTech Cloud Platform',
   wordCount: 34
 },
 {
   id: 'l12',
   hourLabel: '12 PM',
   hourSlot: 12,
-  task: 'Student dashboard API contract',
+  task: 'Executive dashboard API contract',
   status: 'progress',
   description:
-  'Drafted the response schema for the student dashboard endpoint together with Priya, mapped every field to the ERP tables and listed the three aggregations that need a database view instead of a runtime join.',
+  'Drafted the response schema for the executive analytics endpoint together with Priya, mapped every field to the ledger tables and listed the three aggregations that need a materialized database view instead of a runtime join.',
   submittedAt: '12:52 PM',
   activeMinutes: 44,
   attachment: 'schema.png',
   commits: 0,
   review: 'pending',
-  project: 'College ERP System',
+  project: 'FinTech Cloud Platform',
   wordCount: 39
 },
 {
@@ -107,7 +107,7 @@ export const todayLogs: WorkLog[] = [
   commits: 0,
   review: 'approved',
   reviewNote: 'Approved by Karthik (Team Lead)',
-  project: 'College ERP System',
+  project: 'FinTech Cloud Platform',
   wordCount: 36
 }];
 
@@ -116,14 +116,14 @@ export const recentActivity = [
 { date: 'Sep 8', task: 'JWT token expiry fix', status: 'done' as const, onTime: true },
 { date: 'Sep 8', task: 'JWT Authentication module', status: 'progress' as const, onTime: true },
 { date: 'Sep 8', task: 'Setup development environment', status: 'done' as const, onTime: true },
-{ date: 'Sep 5', task: 'Fee module validation', status: 'done' as const, onTime: true },
-{ date: 'Sep 5', task: 'Razorpay sandbox setup', status: 'blocked' as const, onTime: false }];
+{ date: 'Sep 5', task: 'Billing module validation', status: 'done' as const, onTime: true },
+{ date: 'Sep 5', task: 'Stripe sandbox setup', status: 'blocked' as const, onTime: false }];
 
 
 export const pastEodReports = [
-{ date: 'Sep 5 2026', summary: 'Fee module validation + Razorpay sandbox attempts', rating: 4, time: '4:22 PM' },
-{ date: 'Sep 4 2026', summary: 'Student dashboard API and query optimisation', rating: 5, time: '4:11 PM' },
-{ date: 'Sep 3 2026', summary: 'Half day — power outage in the lab', rating: 2, time: '5:12 PM' },
+{ date: 'Sep 5 2026', summary: 'Billing module validation + Stripe sandbox integration', rating: 4, time: '4:22 PM' },
+{ date: 'Sep 4 2026', summary: 'Executive dashboard API and query optimisation', rating: 5, time: '4:11 PM' },
+{ date: 'Sep 3 2026', summary: 'Half day — scheduled cloud infrastructure maintenance', rating: 3, time: '5:12 PM' },
 { date: 'Sep 2 2026', summary: 'Auth middleware, role guards, unit tests', rating: 4, time: '4:18 PM' },
 { date: 'Sep 1 2026', summary: 'Database schema review with Karthik', rating: 4, time: '4:29 PM' }];
 

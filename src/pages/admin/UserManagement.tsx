@@ -412,7 +412,7 @@ export function UserManagement() {
                   autoComplete="off"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="meena@college.edu"
+                  placeholder="meena@company.com"
                   className="glass-input h-10 w-full px-3.5 text-xs font-medium text-navy placeholder:text-slate-400"
                 />
               </div>

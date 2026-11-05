@@ -1,4 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Suspense, lazy } from 'react';
+
+const AdminControlRoom = lazy(() =>
+  import('../../components/admin/AdminControlRoom').then((m) => ({ default: m.AdminControlRoom }))
+);
 import { 
   BarChart3Icon, 
   SearchIcon, 
@@ -113,6 +117,7 @@ export function EmployeePerformance() {
   const [selectedProject, setSelectedProject] = useState<string>('All Projects');
   const [selectedDevId, setSelectedDevId] = useState<string>('');
   const [chartMode, setChartMode] = useState<'daily' | 'weekly'>('daily');
+  const [adminView, setAdminView] = useState<'control-room' | 'individual'>('control-room');
 
   // Live performance data computed from real work logs, commits, EODs and tasks
   const { data: perfData } = usePerformance();

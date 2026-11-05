@@ -13,6 +13,7 @@ import { Button } from '../ui/Button';
 import { TaskStatusBadge } from '../ui/TaskStatusBadge';
 import { useCalendar, useMyLogs } from '../../hooks/useLive';
 import { TaskStatus } from '../../types';
+import { formatLogTitle } from '../../utils/logTitle';
 
 export interface CalendarDayStatus {
   dateNum: number;
@@ -111,7 +112,7 @@ export function DeveloperCalendarWidget() {
               className={`flex items-start justify-between gap-3 p-3.5 transition-all duration-200 ${
                 log.review === 'changes_requested'
                   ? 'glass-subcard hover-tile rounded-2xl border border-amber-300/80 bg-amber-50/70 dark:bg-amber-950/40 shadow-glass'
-                  : 'glass-subcard hover-tile hover:bg-white/70 hover:shadow-glass'
+                  : 'glass-subcard hover-tile'
               }`}
             >
               <div className="min-w-0 flex-1">
@@ -119,7 +120,9 @@ export function DeveloperCalendarWidget() {
                   <span className="rounded-lg bg-slate-900/5 px-2 py-0.5 text-[11px] font-bold text-navy">
                     {log.hourLabel}
                   </span>
-                  <h3 className="truncate text-xs font-bold text-navy">{log.task}</h3>
+                  <h3 className="truncate text-xs font-bold text-navy" title={formatLogTitle(log.task, log.description)}>
+                    {formatLogTitle(log.task, log.description)}
+                  </h3>
                 </div>
                 <div className="mt-1.5 flex items-center gap-2 text-[11px] text-slate-500">
                   <span>{log.wordCount} words</span>

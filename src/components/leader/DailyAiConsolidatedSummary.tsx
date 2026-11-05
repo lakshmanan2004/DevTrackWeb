@@ -17,6 +17,7 @@ import {
 import { Badge } from '../ui/Badge';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { useDailyAiSummary } from '../../hooks/useLive';
+import { formatLogTitle } from '../../utils/logTitle';
 
 interface Props {
   developerId?: string;
@@ -270,7 +271,7 @@ ${pendingText || 'No pending tasks or blockers reported.'}
                   summary.mainModulesAndFocusAreas.map((m: any, idx: number) => (
                     <div
                       key={idx}
-                      className="glass-subcard rounded-2xl p-4 space-y-2.5 hover:bg-white/80 dark:hover:bg-white/10 transition-all"
+                      className="glass-subcard rounded-2xl p-4 space-y-2.5 transition-all"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
@@ -381,8 +382,8 @@ ${pendingText || 'No pending tasks or blockers reported.'}
 
                       {/* Full Task Description */}
                       <div>
-                        <h5 className="text-xs sm:text-sm font-bold text-navy dark:text-white leading-snug">
-                          {p.task}
+                        <h5 className="text-xs sm:text-sm font-bold text-navy dark:text-white leading-snug break-words">
+                          {formatLogTitle(p.task, p.description)}
                         </h5>
                       </div>
 

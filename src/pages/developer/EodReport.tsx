@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AlarmClockIcon, CheckCircle2Icon, StarIcon } from 'lucide-react';
+import { AlarmClockIcon, CheckCircle2Icon, StarIcon, SparklesIcon } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Banner } from '../../components/ui/Banner';
 import { Button } from '../../components/ui/Button';
@@ -19,6 +19,7 @@ export function EodReport() {
   const [blockers, setBlockers] = useState('');
   const [rating, setRating] = useState(4);
   const [busy, setBusy] = useState(false);
+  const [generatingAi, setGeneratingAi] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -58,6 +59,29 @@ export function EodReport() {
       setError(err.message || 'Failed to submit EOD report');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleAiGenerate = async () => {
+    setGeneratingAi(true);
+    setError('');
+    setMessage('');
+    try {
+      const res = await api<any>('/api/ai/generate-dev-eod', {
+        method: 'POST',
+        body: {}
+      });
+      if (res?.summary) {
+        setSummary(res.summary);
+        if (res.carryForward) setCarry(res.carryForward);
+        if (res.blockers !== undefined) setBlockers(res.blockers);
+        if (res.rating) setRating(res.rating);
+        setMessage(res.aiPowered ? '✨ EOD draft generated with AI from your check-ins and commits!' : 'EOD draft generated from today\'s check-in activity.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to auto-generate EOD draft. Ensure you have submitted work logs today.');
+    } finally {
+      setGeneratingAi(false);
     }
   };
 
@@ -114,16 +138,29 @@ export function EodReport() {
             }}
           >
             <div>
-              <label htmlFor="eod-summary" className="mb-1.5 block text-xs font-bold text-navy">
-                Day Summary <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="eod-summary" className="block text-xs font-bold text-navy">
+                  Day Summary <span className="text-red-500">*</span>
+                </label>
+                {!alreadySubmitted && (
+                  <button
+                    type="button"
+                    onClick={handleAiGenerate}
+                    disabled={generatingAi}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 px-2.5 py-1 rounded-xl transition-all shadow-2xs hover:shadow-xs cursor-pointer disabled:opacity-50"
+                  >
+                    <SparklesIcon className={`h-3.5 w-3.5 text-purple-600 dark:text-purple-400 ${generatingAi ? 'animate-spin' : ''}`} />
+                    {generatingAi ? 'Generating draft with AI…' : '✨ 1-Click AI Draft'}
+                  </button>
+                )}
+              </div>
               <textarea
                 id="eod-summary"
                 rows={5}
                 value={alreadySubmitted ? data.today.summary : summary}
                 onChange={(event) => setSummary(event.target.value)}
                 disabled={alreadySubmitted}
-                placeholder="Describe everything you accomplished today (min 50 words)…"
+                placeholder="Describe everything you accomplished today (min 50 words)… or click '1-Click AI Draft' to generate from your check-ins"
                 className="glass-input w-full p-3.5 text-xs leading-relaxed text-navy font-medium placeholder:text-slate-400 disabled:opacity-60"
               />
 
@@ -225,6 +262,7 @@ export function EodReport() {
             <h2 className="border-b border-slate-200/60 px-6 py-4 text-xs font-black uppercase tracking-wider text-navy">
               Past Reports
             </h2>
+            <div className="overflow-x-auto relative z-10 w-full">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-200/60 bg-slate-50/50 text-[10px] uppercase tracking-wider text-slate-400 font-bold">
@@ -257,6 +295,7 @@ export function EodReport() {
                 )}
               </tbody>
             </table>
+            </div>
           </section>
         </div>
       </div>

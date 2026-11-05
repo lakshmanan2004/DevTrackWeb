@@ -72,7 +72,7 @@ export function CheckInAlertModal({
                 }`}
               >
                 <span
-                  className={`h-1.5 w-1.5 rounded-full animate-pulse ${
+                  className={`h-1.5 w-1.5 rounded-full ${
                     isUrgent ? 'bg-rose-500' : isTest ? 'bg-amber-500' : 'bg-blue-500'
                   }`}
                 />

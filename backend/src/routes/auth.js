@@ -189,6 +189,10 @@ router.get('/me', authRequired, attachUser, ah(async (req, res) => {
     serverDate: fmtDateLong(new Date()),
     currentSlot: slotForNow(settings),
     settings: {
+      companyName: settings.companyName || 'DevTrack Workspace',
+      logoUrl: settings.logoUrl || '',
+      brandTagline: settings.brandTagline || 'Pro',
+      supportEmail: settings.supportEmail || 'admin@devtrack.io',
       workStartHour: settings.workStartHour,
       workEndHour: settings.workEndHour,
       minWords: settings.minWords,
@@ -199,6 +203,7 @@ router.get('/me', authRequired, attachUser, ah(async (req, res) => {
 
 // GET /api/auth/stats/public -> live numbers for the login screen
 router.get('/stats/public', ah(async (_req, res) => {
+  const settings = await Setting.get();
   const today = dayStr();
   const developers = await User.countDocuments({ role: 'developer', active: true });
   const logsToday = await WorkLog.countDocuments({ date: today });
@@ -213,7 +218,14 @@ router.get('/stats/public', ah(async (_req, res) => {
     }).length;
     onTimeRate = Math.round((onTime / logs.length) * 100);
   }
-  res.json({ developers, logsToday, onTimeRate });
+  res.json({
+    developers,
+    logsToday,
+    onTimeRate,
+    companyName: settings.companyName || 'DevTrack Workspace',
+    logoUrl: settings.logoUrl || '',
+    brandTagline: settings.brandTagline || 'Pro'
+  });
 }));
 
 module.exports = router;

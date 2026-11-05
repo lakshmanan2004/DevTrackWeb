@@ -7,7 +7,7 @@ const variants: Record<Variant, string> = {
   primary:
     'bg-gradient-to-b from-[#1683FF]/90 to-[#0066DB]/95 text-white shadow-[0_4px_16px_rgba(22,131,255,0.32)] backdrop-blur-md hover:from-[#3595FF] hover:to-[#1683FF] hover:shadow-[0_6px_22px_rgba(22,131,255,0.42)] border border-white/35 dark:border-white/20',
   secondary:
-    'bg-white/50 hover:bg-white/75 text-slate-800 border border-white/60 backdrop-blur-md hover:border-white/85 shadow-2xs hover:shadow-md dark:!bg-white/[0.08] dark:hover:!bg-white/[0.14] dark:!text-[#F5F5F5] dark:border-white/15 dark:hover:border-white/25 dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)]',
+    'bg-white/50 text-slate-800 border border-white/60 backdrop-blur-md shadow-2xs hover:shadow-md dark:!bg-white/[0.08] dark:hover:!bg-white/[0.08] dark:!text-[#F5F5F5] dark:border-white/15 dark:hover:border-white/25 hover:-translate-y-0.5 active:translate-y-0',
   ghost:
     'bg-transparent text-slate-600 hover:bg-slate-900/5 hover:text-slate-900 border border-transparent dark:text-slate-200 dark:hover:!bg-white/[0.06] dark:hover:!text-[#F5F5F5] dark:hover:border-white/10',
   outline:

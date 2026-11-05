@@ -19,9 +19,9 @@ export function WallpaperModal({ isOpen, onClose }: WallpaperModalProps) {
       aria-modal="true"
       aria-labelledby="wallpaper-modal-title"
     >
-      <div className="glass-modal relative w-full max-w-5xl overflow-hidden rounded-3xl border border-white/40 dark:border-white/15 p-6 sm:p-8 shadow-2xl">
+      <div className="glass-modal relative w-full max-w-5xl overflow-hidden rounded-3xl p-6 sm:p-8 shadow-2xl">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-white/20 dark:border-white/10 pb-4">
+        <div className="flex items-start justify-between gap-4 border-b border-black/5 dark:border-white/10 pb-4">
           <div>
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-500/15 text-blue-500 ring-1 ring-blue-500/20 shadow-xs">
@@ -54,10 +54,10 @@ export function WallpaperModal({ isOpen, onClose }: WallpaperModalProps) {
               <div
                 key={item.id}
                 onClick={() => setWallpaper(item.file)}
-                className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-200 cursor-pointer text-left ${
+                className={`glass-subcard hover-tile group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-200 cursor-pointer text-left ${
                   isSelected
-                    ? 'border-blue-500 ring-2 ring-blue-500/60 shadow-xl shadow-blue-500/20 bg-white/70 dark:bg-slate-900/80'
-                    : 'border-white/30 dark:border-white/10 bg-white/45 dark:bg-slate-900/50 hover:border-white/60 hover:bg-white/70 dark:hover:bg-slate-900/70 shadow-sm hover:shadow-md'
+                    ? '!border-blue-500 ring-2 ring-blue-500/60 shadow-xl shadow-blue-500/20'
+                    : 'shadow-xs hover:shadow-md'
                 }`}
               >
                 {/* Thumbnail Preview */}

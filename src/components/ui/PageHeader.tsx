@@ -25,16 +25,18 @@ export const PageHeader = React.memo(function PageHeader({
         maxHeight: '68px',
         width: '100%',
         boxSizing: 'border-box',
-        flexShrink: 0
+        flexShrink: 0,
+        borderRadius: 0,
+        margin: 0
       }}
-      className="glass-header sticky top-0 z-40 flex h-[68px] w-full shrink-0 items-center justify-between gap-4 px-6 select-none"
+      className="glass-header sticky top-0 z-40 flex h-[68px] w-full shrink-0 items-center justify-between gap-4 px-6 select-none rounded-none border-b border-slate-200/80 dark:border-white/10"
     >
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-lg font-black tracking-tight text-white leading-tight">
+        <h1 className="truncate text-lg font-black tracking-tight text-slate-900 dark:text-white leading-tight">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-0.5 truncate text-xs font-semibold text-slate-300 dark:text-slate-400">
+          <p className="mt-0.5 truncate text-xs font-semibold text-slate-600 dark:text-slate-400">
             {subtitle}
           </p>
         )}

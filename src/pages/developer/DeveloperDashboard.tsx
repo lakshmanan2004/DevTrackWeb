@@ -29,6 +29,7 @@ import { CheckInAlertModal } from '../../components/developer/CheckInAlertModal'
 import { ApplyLeaveModal } from '../../components/developer/ApplyLeaveModal';
 import { NewScheduleAnnouncementModal } from '../../components/developer/NewScheduleAnnouncementModal';
 import { DeveloperCalendarWidget } from '../../components/developer/DeveloperCalendarWidget';
+import { PlayerCard } from '../../components/developer/PlayerCard';
 import { useAuth } from '../../context/AuthContext';
 import { useMyLogs, useProjects, usePendingWorks, useLeaves } from '../../hooks/useLive';
 import { playAlertSound, showWindowsNotification } from '../../utils/audioAlerts';
@@ -355,9 +356,12 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
           </div>
         </section>
 
+        {/* GAMIFICATION: COMPACT PLAYER CARD */}
+        <PlayerCard />
+
         {/* 4. INVOLVED PROJECT CARD */}
         {activeProject ? (
-          <section className="glass-surface independent-card rounded-3xl p-5 sm:p-6 shadow-glass space-y-3">
+          <section className="glass-card glass-blue independent-card rounded-3xl p-5 sm:p-6 shadow-glass space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-4 min-w-0">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/10 dark:bg-[rgba(22,131,255,0.16)] border border-brand/20 dark:border-[rgba(22,131,255,0.35)] text-brand dark:text-[#5AA9FF] shadow-glass shrink-0">
@@ -384,7 +388,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
                     href={activeProject.repoUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="glass-subcard inline-flex h-9 items-center gap-1.5 px-3.5 text-xs font-bold text-brand dark:text-[#5AA9FF] hover:bg-white/80 dark:hover:bg-white/10 shadow-glass transition-all"
+                    className="glass-subcard inline-flex h-9 items-center gap-1.5 px-3.5 text-xs font-bold text-brand dark:text-[#5AA9FF] hover:-translate-y-0.5 active:translate-y-0 shadow-glass transition-transform"
                   >
                     <GitBranchIcon className="h-3.5 w-3.5 text-slate-500 dark:text-[#A1A1AA]" />
                     <span>Repo</span>
@@ -415,7 +419,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
 
         {/* 5. DEDICATED WORK STATUS & ALERT SECTION */}
         {isHoliday ? (
-          <div className="glass-surface rounded-2xl border border-purple-300/60 dark:border-purple-500/30 bg-purple-50/40 dark:bg-purple-950/20 p-5 shadow-glass">
+          <div className="glass-card glass-purple rounded-2xl border p-5 shadow-glass">
             <div className="flex items-center gap-3.5">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-500/15 text-2xl">
                 🎉
@@ -436,7 +440,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
             </div>
           </div>
         ) : isBeforeWork ? (
-          <div className="glass-surface rounded-2xl border border-blue-300/60 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/20 p-4 sm:p-5 shadow-glass">
+          <div className="glass-card glass-blue rounded-2xl border p-4 sm:p-5 shadow-glass">
             <div className="flex items-center gap-3.5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400">
                 <AlarmClockIcon className="h-5 w-5" />
@@ -452,7 +456,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
             </div>
           </div>
         ) : isAfterWork ? (
-          <div className="glass-surface rounded-2xl border border-emerald-300/60 dark:border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 sm:p-5 shadow-glass">
+          <div className="glass-card glass-emerald rounded-2xl border p-4 sm:p-5 shadow-glass">
             <div className="flex items-center gap-3.5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2Icon className="h-5 w-5" />
@@ -468,14 +472,14 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
             </div>
           </div>
         ) : (
-          <div className={`glass-surface rounded-2xl border p-4 sm:p-5 shadow-glass flex items-center justify-between gap-4 ${
+          <div className={`glass-card rounded-2xl border p-4 sm:p-5 shadow-glass flex items-center justify-between gap-4 ${
             isLunchSlot
-              ? 'border-amber-300/60 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20'
+              ? 'glass-amber'
               : hasLoggedCurrentSlot
-              ? 'border-emerald-300/60 dark:border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20'
+              ? 'glass-emerald'
               : minutesLeft <= 5
-              ? 'border-rose-300/60 dark:border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/20'
-              : 'border-amber-300/60 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20'
+              ? 'glass-rose'
+              : 'glass-blue'
           }`}>
             <div className="flex items-center gap-3.5">
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
@@ -517,7 +521,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
 
         {/* Pending Revisions Banner (if TL requested changes) */}
         {pendingRevisionsCount > 0 && (
-          <div className="glass-surface rounded-2xl border border-amber-300/70 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/25 p-4 sm:p-5 shadow-glass flex flex-wrap items-center justify-between gap-4">
+          <div className="glass-card glass-amber rounded-2xl border p-4 sm:p-5 shadow-glass flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
                 <AlertTriangleIcon className="h-5 w-5" />
@@ -557,7 +561,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
           <StatCard
             label="Tasks Logged"
             value={String(logs.length)}
-            hint={logs.length ? `Last: ${logs[logs.length - 1].submittedAt}` : (isHoliday ? 'Holiday today' : 'No logs yet today')}
+            hint={logs.length ? `Last: ${logs[logs.length - 1].submittedAt}` : (isHoliday ? 'Holiday today' : "No logs yet, start today's mission")}
             tone="blue"
             icon={<ListChecksIcon className="h-4 w-4" />}
           />

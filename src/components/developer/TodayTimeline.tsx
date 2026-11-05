@@ -16,6 +16,7 @@ import {
 import { Button } from '../ui/Button';
 import { TaskStatusBadge } from '../ui/TaskStatusBadge';
 import { isLogLate } from '../../utils/logTimeliness';
+import { formatLogTitle } from '../../utils/logTitle';
 import { useAuth } from '../../context/AuthContext';
 import {
   getWorkBlocks,
@@ -66,12 +67,14 @@ function LogCard({ log, lunchSlot = 12 }: { log: any; lunchSlot?: number }) {
           ? 'border-amber-300/80 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20'
           : log.review === 'changes_requested'
           ? 'border-amber-300/80 dark:border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/20'
-          : 'border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 hover:bg-white/90 dark:hover:bg-slate-800/90'
+          : 'border-white/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80'
       }`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h4 className="text-sm font-bold tracking-tight text-navy dark:text-white">{log.task}</h4>
+          <h4 className="text-sm font-bold tracking-tight text-navy dark:text-white break-words">
+            {formatLogTitle(log.task, log.description)}
+          </h4>
           {isLate && (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 dark:bg-amber-500/25 border border-amber-500/30 dark:border-amber-500/40 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-2xs">
               ⚠️ Late Submission
@@ -230,8 +233,8 @@ export function TodayTimeline({
                 status.isBeforeWork || status.isAfterWork
                   ? 'bg-slate-400'
                   : status.isLunch
-                  ? 'bg-amber-500 animate-pulse'
-                  : 'bg-blue-600 dark:bg-blue-400 animate-pulse'
+                  ? 'bg-amber-500'
+                  : 'bg-blue-600 dark:bg-blue-400 shadow-[0_0_8px_rgba(37,99,235,0.6)]'
               }`} />
               <span>
                 {status.isBeforeWork
@@ -263,6 +266,30 @@ export function TodayTimeline({
           <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium">
             The standard workday has concluded (5:00 PM). Review your completed blocks below and make sure to submit your End-of-Day (EOD) summary report.
           </p>
+        </div>
+      )}
+
+      {/* Mission-style empty state */}
+      {logs.length === 0 && !isHoliday && !status.isBeforeWork && (
+        <div className="mt-4 p-4 rounded-2xl bg-brand/5 dark:bg-brand/10 border border-brand/20 dark:border-brand/30 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">🎯</span>
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                No logs yet, start today&apos;s mission
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Check in your active sprint block or submit a work log to earn XP and extend your daily streak!
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => onLog(_propCurrentSlot ?? status.currentSlot)}
+            className="shrink-0 cursor-pointer"
+          >
+            Start Mission
+          </Button>
         </div>
       )}
 
@@ -301,8 +328,8 @@ export function TodayTimeline({
             // Dot tone indicator
             const dotTone = isCurrent
               ? isLunch
-                ? 'bg-amber-500 ring-4 ring-amber-400/40 dark:ring-amber-500/30 animate-pulse'
-                : 'bg-brand ring-4 ring-blue-400/40 dark:ring-blue-500/30 animate-pulse'
+                ? 'bg-amber-500 ring-4 ring-amber-400/60 dark:ring-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.8)] scale-110'
+                : 'bg-blue-600 ring-4 ring-blue-400/80 dark:ring-blue-400/80 shadow-[0_0_18px_rgba(37,99,235,0.95)] scale-110'
               : isPast
               ? isLunch
                 ? 'bg-slate-300 dark:bg-slate-600 ring-4 ring-slate-100 dark:ring-slate-800'
@@ -340,13 +367,13 @@ export function TodayTimeline({
                   {/* Clear status pill */}
                   <div className="mt-1">
                     {isCurrent ? (
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm ${
                         isLunch
-                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200 border border-amber-300 dark:border-amber-500/30'
-                          : 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200 border border-blue-300 dark:border-blue-500/30'
+                          ? 'bg-amber-500 text-slate-950 font-black shadow-[0_0_12px_rgba(245,158,11,0.5)] ring-1 ring-amber-400'
+                          : 'bg-blue-600 text-white shadow-[0_0_14px_rgba(37,99,235,0.6)] ring-1 ring-blue-400'
                       }`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${isLunch ? 'bg-amber-500 animate-ping' : 'bg-brand animate-ping'}`} />
-                        {isLunch ? 'Lunch' : 'Active'}
+                        <span className="h-1.5 w-1.5 rounded-full bg-white opacity-90" />
+                        {isLunch ? 'Lunch Active' : 'Live Now'}
                       </span>
                     ) : isPast ? (
                       isLunch ? (
@@ -384,14 +411,15 @@ export function TodayTimeline({
                   {isLunch ? (
                     isCurrent ? (
                       /* Active Lunch Break */
-                      <article className="hover-tile rounded-2xl border-2 border-amber-400/80 dark:border-amber-500/50 bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-white dark:from-amber-950/50 dark:via-slate-900/60 dark:to-slate-900/80 p-5 shadow-glass">
+                      <article className="hover-tile rounded-2xl border-2 border-amber-500/80 dark:border-amber-400/90 bg-gradient-to-r from-amber-50/95 via-orange-50/60 to-white dark:from-amber-950/60 dark:via-slate-900/80 dark:to-slate-900/90 p-5 sm:p-6 shadow-glass ring-1 ring-amber-400/40 shadow-[0_0_24px_rgba(245,158,11,0.20)]">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-900/70 text-amber-900 dark:text-amber-100 text-xl shadow-inner">
                               🍱
                             </div>
                             <div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
                                 <h3 className="text-sm sm:text-base font-bold text-amber-950 dark:text-amber-100">
                                   Lunch Break & Recharge ({lunch.label})
                                 </h3>
@@ -404,7 +432,8 @@ export function TodayTimeline({
                               </p>
                             </div>
                           </div>
-                          <span className="text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-100/90 dark:bg-amber-900/50 px-3 py-1.5 rounded-xl border border-amber-300/60 dark:border-amber-500/30">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100/90 dark:bg-amber-900/50 border border-amber-300/60 dark:border-amber-500/30 text-amber-800 dark:text-amber-200">
+                            <ClockIcon className="h-3.5 w-3.5" />
                             {status.minutesLeftInBlock}m remaining
                           </span>
                         </div>
@@ -455,33 +484,32 @@ export function TodayTimeline({
                       {hasLogs ? (
                         /* Active block with logs submitted */
                         <>
-                          <div className="rounded-2xl border-2 border-emerald-400/80 dark:border-emerald-500/40 bg-emerald-50/80 dark:bg-emerald-950/40 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 shadow-glass">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="relative flex h-2.5 w-2.5">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                                </span>
-                                <h4 className="text-sm sm:text-base font-black text-emerald-950 dark:text-emerald-100 tracking-tight">
-                                  Current Block: {mainTitle}
-                                </h4>
-                                <span className="rounded-full bg-emerald-100 dark:bg-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-500/30">
-                                  ✓ {slotLogs.length} log{slotLogs.length > 1 ? 's' : ''} submitted
-                                </span>
+                          <article className="hover-tile rounded-2xl border-2 border-emerald-500/80 dark:border-emerald-400/90 bg-gradient-to-r from-emerald-50/95 via-teal-50/60 to-white dark:from-emerald-950/60 dark:via-slate-900/80 dark:to-slate-900/90 p-5 sm:p-6 shadow-glass ring-1 ring-emerald-500/40 shadow-[0_0_24px_rgba(16,185,129,0.20)] relative overflow-hidden">
+                            <div className="flex flex-wrap items-center justify-between gap-4">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+                                  <h4 className="text-base sm:text-lg font-black text-emerald-950 dark:text-emerald-100 tracking-tight">
+                                    Current Block: {mainTitle}
+                                  </h4>
+                                  <span className="rounded-full bg-emerald-100 dark:bg-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-500/30">
+                                    ✓ {slotLogs.length} log{slotLogs.length > 1 ? 's' : ''} submitted
+                                  </span>
+                                </div>
+                                <p className="mt-1 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-medium">
+                                  Log submitted for this session. You can add more updates before {item.block.deadlineStr} ({status.minutesLeftInBlock}m left).
+                                </p>
                               </div>
-                              <p className="mt-1 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-medium">
-                                Log submitted for this session. You can add more updates before {item.block.deadlineStr} ({status.minutesLeftInBlock}m left).
-                              </p>
+                              <Button
+                                size="sm"
+                                onClick={() => onLog(item.slot)}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-4 shadow-glass font-bold flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <PlusIcon className="h-3.5 w-3.5" />
+                                <span>Add Another Update</span>
+                              </Button>
                             </div>
-                            <Button
-                              size="sm"
-                              onClick={() => onLog(item.slot)}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-4 shadow-glass font-bold flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <PlusIcon className="h-3.5 w-3.5" />
-                              <span>Add Another Update</span>
-                            </Button>
-                          </div>
+                          </article>
                           <div className="space-y-3">
                             {slotLogs.map((log, lIdx) => (
                               <LogCard key={log.id || log._id || lIdx} log={log} lunchSlot={activeLunchSlot} />
@@ -490,15 +518,12 @@ export function TodayTimeline({
                         </>
                       ) : (
                         /* Active block awaiting check-in */
-                        <article className="hover-tile rounded-2xl border-2 border-brand/50 dark:border-blue-500/50 bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-white/90 dark:from-blue-950/40 dark:via-slate-900/60 dark:to-slate-900/80 p-5 shadow-glass">
+                        <article className="hover-tile rounded-2xl border-2 border-blue-500/80 dark:border-blue-400/90 bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-white/90 dark:from-blue-950/60 dark:via-slate-900/80 dark:to-slate-900/90 p-5 sm:p-6 shadow-glass ring-1 ring-blue-500/40 shadow-[0_0_28px_rgba(37,99,235,0.25)] relative overflow-hidden">
                           <div className="flex flex-wrap items-start justify-between gap-4">
-                            <div>
+                            <div className="flex-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="relative flex h-2.5 w-2.5">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand"></span>
-                                </span>
-                                <h3 className="text-sm sm:text-base font-black text-navy dark:text-white tracking-tight">
+                                <span className="h-2 w-2 rounded-full bg-blue-500 dark:bg-blue-400 shrink-0" />
+                                <h3 className="text-base sm:text-lg font-black text-navy dark:text-white tracking-tight">
                                   Current Block in Progress: {mainTitle}
                                 </h3>
                                 {subtitle && (
@@ -526,8 +551,9 @@ export function TodayTimeline({
                             </div>
 
                             <Button
+                              size="md"
                               onClick={() => onLog(item.slot)}
-                              className="btn-glass-primary shadow-glass text-xs sm:text-sm py-2.5 px-5 flex items-center gap-2 cursor-pointer font-bold"
+                              className="btn-glass-primary shadow-glass text-xs sm:text-sm py-2.5 px-5 flex items-center gap-2 cursor-pointer font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]"
                             >
                               <span>Check-In for Block</span>
                               <ArrowRightIcon className="h-4 w-4" />
@@ -590,7 +616,7 @@ export function TodayTimeline({
 
                   {/* ==================== 4. UPCOMING WORK BLOCK ==================== */}
                   {!isLunch && isUpcoming ? (
-                    <article className="hover-tile rounded-2xl border border-dashed border-slate-200/90 dark:border-white/10 bg-slate-50/40 dark:bg-slate-900/30 p-4 transition-all hover:bg-slate-50/80 dark:hover:bg-slate-900/50">
+                    <article className="hover-tile rounded-2xl border border-dashed border-slate-200/90 dark:border-white/10 bg-slate-50/40 dark:bg-slate-900/30 p-4 transition-all">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-3">
                           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500">

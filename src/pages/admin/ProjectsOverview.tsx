@@ -10,7 +10,9 @@ import {
   LayersIcon,
   FolderKanbanIcon,
   CheckCircle2Icon,
-  ClockIcon
+  ClockIcon,
+  DownloadIcon,
+  SparklesIcon
 } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Banner } from '../../components/ui/Banner';
@@ -18,6 +20,8 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Select } from '../../components/ui/Select';
+import { ExportTimesheetModal } from '../../components/common/ExportTimesheetModal';
+import { AiExecutiveDigestModal } from '../../components/common/AiExecutiveDigestModal';
 import { useProjects } from '../../hooks/useLive';
 import { Project } from '../../types';
 import { api } from '../../api/client';
@@ -180,6 +184,8 @@ export function ProjectsOverview() {
   const projects = (data?.projects || []) as unknown as Project[];
   const [filterTab, setFilterTab] = useState<string>('all');
   const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [aiDigestOpen, setAiDigestOpen] = useState(false);
 
   const { ongoing, completed, hold, uniqueTeamsCount } = React.useMemo(() => {
     const ong: Project[] = [];
@@ -239,6 +245,27 @@ export function ProjectsOverview() {
       <PageHeader
         title="Projects Overview"
         subtitle="Company-wide project details, milestones, and administration"
+        actions={
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setAiDigestOpen(true)}
+              className="!bg-gradient-to-r !from-indigo-600/10 !to-purple-600/10 hover:!from-indigo-600/20 hover:!to-purple-600/20 !border-purple-500/30 text-purple-700 dark:text-purple-300 font-bold"
+              icon={<SparklesIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
+            >
+              AI Executive Digest
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setExportModalOpen(true)}
+              icon={<DownloadIcon className="h-4 w-4 text-blue-600 dark:text-sky-400" />}
+            >
+              Export Organization Timesheet
+            </Button>
+          </div>
+        }
       />
 
       <div className="flex-1 space-y-6 p-6">
@@ -334,6 +361,17 @@ export function ProjectsOverview() {
           Admin views all project status and has authorization to permanently delete and dissolve projects if required.
         </Banner>
       </div>
+
+      <ExportTimesheetModal
+        open={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+      />
+
+      <AiExecutiveDigestModal
+        open={aiDigestOpen}
+        onClose={() => setAiDigestOpen(false)}
+        defaultProjectId={selectedProjectId !== 'all' ? selectedProjectId : undefined}
+      />
     </>
   );
 }

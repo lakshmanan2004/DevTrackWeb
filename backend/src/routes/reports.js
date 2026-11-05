@@ -268,4 +268,128 @@ router.get('/reports/performance', ah(async (req, res) => {
   res.json({ developers: out, teamAvg });
 }));
 
+// GET /api/reports/timesheet?projectId=&developerId=&startDate=&endDate=&status=
+router.get('/reports/timesheet', ah(async (req, res) => {
+  const scope = await scopeFor(req.user);
+  const mongoose = require('mongoose');
+  const toObjId = (id) => (id && mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : null);
+
+  const filter = {};
+
+  // Role scoping
+  if (req.user.role === 'developer') {
+    filter.developer = req.user._id;
+  } else if (req.query.developerId) {
+    const devId = toObjId(req.query.developerId);
+    if (devId) filter.developer = devId;
+  } else if (req.user.role !== 'admin') {
+    if (scope.developerIds && scope.developerIds.length) {
+      filter.developer = { $in: scope.developerIds };
+    }
+  }
+
+  if (req.query.projectId) {
+    const projId = toObjId(req.query.projectId);
+    if (projId) filter.project = projId;
+  }
+
+  if (req.query.startDate && req.query.endDate) {
+    filter.date = { $gte: req.query.startDate, $lte: req.query.endDate };
+  } else if (req.query.startDate) {
+    filter.date = { $gte: req.query.startDate };
+  } else if (req.query.endDate) {
+    filter.date = { $lte: req.query.endDate };
+  }
+
+  if (req.query.status && req.query.status !== 'all') {
+    filter.review = req.query.status;
+  }
+
+  const settings = await Setting.get();
+  const rawLogs = await WorkLog.find(filter)
+    .sort({ date: -1, hourSlot: -1, submittedAt: -1 })
+    .populate('developer', 'name email initials')
+    .populate('project', 'name')
+    .populate('team', 'name')
+    .limit(1000);
+
+  let totalMinutes = 0;
+  let approvedCount = 0;
+  let rejectedCount = 0;
+  let pendingCount = 0;
+  let verifiedCommitsCount = 0;
+  let blockersCount = 0;
+
+  const logs = rawLogs.map((l) => {
+    const mins = l.activeMinutes || 0;
+    totalMinutes += mins;
+    if (l.review === 'approved') approvedCount++;
+    else if (l.review === 'pending') pendingCount++;
+    else if (l.review === 'rejected' || l.review === 'changes_requested') rejectedCount++;
+
+    if (l.commitUrl || l.commitsCount > 0) verifiedCommitsCount++;
+    if (l.status === 'blocked' || l.blocker) blockersCount++;
+
+    const dev = l.developer || {};
+    const proj = l.project || {};
+    const team = l.team || {};
+
+    return {
+      id: String(l._id),
+      date: l.date,
+      hourSlot: l.hourSlot,
+      hourLabel: hourLabel(l.hourSlot),
+      developerName: dev.name || 'Unknown Developer',
+      developerEmail: dev.email || '',
+      developerInitials: dev.initials || '',
+      projectName: proj.name || 'General Project',
+      teamName: team.name || '',
+      moduleName: l.moduleName || '',
+      task: l.task || '',
+      description: l.description || '',
+      status: l.status || 'progress',
+      activeMinutes: mins,
+      durationFormatted: fmtDuration(mins),
+      review: l.review || 'pending',
+      reviewNote: l.reviewNote || '',
+      commitUrl: l.commitUrl || '',
+      commitsCount: l.commitsCount || 0,
+      attachmentUrl: l.attachmentUrl || '',
+      attachmentName: l.attachmentName || '',
+      blocker: l.blocker || '',
+      isLate: !!l.isLate,
+      submittedAt: l.submittedAt
+    };
+  });
+
+  const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
+
+  res.json({
+    companyName: settings.companyName || 'DevTrack Enterprise',
+    logoUrl: settings.logoUrl || '',
+    brandTagline: settings.brandTagline || 'Pro',
+    supportEmail: settings.supportEmail || 'admin@devtrack.io',
+    generatedAt: new Date().toISOString(),
+    filter: {
+      projectId: req.query.projectId || null,
+      developerId: req.query.developerId || null,
+      startDate: req.query.startDate || null,
+      endDate: req.query.endDate || null,
+      status: req.query.status || 'all'
+    },
+    summary: {
+      totalLogs: logs.length,
+      totalMinutes,
+      totalHours,
+      approvedCount,
+      pendingCount,
+      rejectedCount,
+      verifiedCommitsCount,
+      blockersCount,
+      approvalRate: logs.length ? Math.round((approvedCount / logs.length) * 100) : 0
+    },
+    logs
+  });
+}));
+
 module.exports = router;

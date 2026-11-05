@@ -1,4 +1,4 @@
-const { dayStr, fromDayStr, fmtTime, fmtDuration, hourLabel, fmtDateMDY, fmtDateLong, slotForNow, requiredSlots, isWorkday, getHolidayInfo, makeTaskTitle } = require('./time');
+const { dayStr, fromDayStr, fmtTime, fmtDuration, hourLabel, fmtDateMDY, fmtDateLong, slotForNow, requiredSlots, isWorkday, getHolidayInfo, makeTaskTitle, resolveTaskTitle } = require('./time');
 const { isLogLate, blockLabel, getWorkBlocks, isAnyLogForBlock } = require('./workBlocks');
 const { Setting } = require('../models');
 
@@ -25,10 +25,8 @@ function workLogDto(log, extra = {}) {
     resolvedTask = log.assignedTaskTitle
       ? (log.assignedTaskTitle.startsWith('[Assigned Task]') ? log.assignedTaskTitle : `[Assigned Task] ${log.assignedTaskTitle}`)
       : (rawTask || 'Assigned Task');
-  } else if (!rawTask || (desc && desc.length > rawTask.length && desc.startsWith(rawTask) && !rawTask.endsWith('...'))) {
-    resolvedTask = makeTaskTitle(desc);
   } else {
-    resolvedTask = makeTaskTitle(rawTask);
+    resolvedTask = resolveTaskTitle(rawTask, desc);
   }
 
   return {

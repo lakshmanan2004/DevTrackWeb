@@ -167,3 +167,6 @@ export const useLeaves = (date?: string, month?: string) =>
   );
 
 
+
+export const useGamification = () =>
+  useLive<any>('/api/gamification/stats', ['log:new', 'log:review', 'eod:new', 'commit:new'], 30000);

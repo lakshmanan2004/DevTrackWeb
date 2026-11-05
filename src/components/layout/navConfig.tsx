@@ -16,8 +16,9 @@ import {
   TrendingUpIcon,
   UserIcon,
   UsersIcon,
-  UsersRoundIcon } from
-'lucide-react';
+  UsersRoundIcon,
+  TrophyIcon
+} from 'lucide-react';
 import { Role } from '../../types';
 
 export interface NavItem {
@@ -45,6 +46,7 @@ export function navFor(role: Role, badges: Badges = { alerts: 0, approvals: 0, p
       { to: '/developer/logs', label: 'My Work Logs', icon: <ListChecksIcon className={size} /> },
       { to: '/developer/commits', label: 'My Commits', icon: <GitCommitVerticalIcon className={size} /> },
       { to: '/developer/eod', label: 'EOD Report', icon: <FileTextIcon className={size} /> },
+      { to: '/developer/badges', label: 'Achievements', icon: <TrophyIcon className={size} /> },
       { to: '/developer/alerts', label: 'My Alerts', icon: <BellIcon className={size} />, badge: badges.alerts > 0 ? String(badges.alerts) : undefined },
       { to: '/developer/profile', label: 'My Profile', icon: <UserIcon className={size} /> }
     ];

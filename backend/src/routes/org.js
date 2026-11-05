@@ -907,13 +907,24 @@ router.delete('/users/:id', requireRole('admin'), ah(async (req, res) => {
 
 // ======================= SETTINGS (admin) =======================
 
+// GET /api/settings/public — Public tenant branding for all users & guest screens
+router.get('/settings/public', ah(async (_req, res) => {
+  const settings = await Setting.get();
+  res.json({
+    companyName: settings.companyName || 'DevTrack Workspace',
+    logoUrl: settings.logoUrl || '',
+    brandTagline: settings.brandTagline || 'Pro',
+    supportEmail: settings.supportEmail || 'admin@devtrack.io'
+  });
+}));
+
 router.get('/settings', requireRole('admin'), ah(async (_req, res) => {
   res.json({ settings: await Setting.get() });
 }));
 
 router.put('/settings', requireRole('admin'), ah(async (req, res) => {
   const settings = await Setting.get();
-  const allowed = ['workStartHour', 'workEndHour', 'workEndMinute', 'workDays', 'intervalMinutes', 'minWords', 'graceMinutes', 'idleMinutes', 'batchThreshold', 'notifications', 'eodDeadline', 'holidays'];
+  const allowed = ['companyName', 'logoUrl', 'brandTagline', 'supportEmail', 'shiftSchedule', 'requireProofAttachment', 'workStartHour', 'workEndHour', 'workEndMinute', 'workDays', 'intervalMinutes', 'minWords', 'graceMinutes', 'idleMinutes', 'batchThreshold', 'notifications', 'eodDeadline', 'holidays'];
   for (const key of allowed) {
     if (req.body[key] !== undefined) settings[key] = req.body[key];
   }
@@ -921,7 +932,13 @@ router.put('/settings', requireRole('admin'), ah(async (req, res) => {
     settings.markModified('holidays');
   }
   await settings.save();
-  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'setting:update', { holidays: settings.holidays });
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'setting:update', {
+    companyName: settings.companyName,
+    logoUrl: settings.logoUrl,
+    brandTagline: settings.brandTagline,
+    supportEmail: settings.supportEmail,
+    holidays: settings.holidays
+  });
   res.json({ settings });
 }));
 
@@ -940,7 +957,13 @@ router.post('/settings/holidays', requireRole('admin'), ah(async (req, res) => {
   });
   settings.markModified('holidays');
   await settings.save();
-  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'setting:update', { holidays: settings.holidays });
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'setting:update', {
+    companyName: settings.companyName,
+    logoUrl: settings.logoUrl,
+    brandTagline: settings.brandTagline,
+    supportEmail: settings.supportEmail,
+    holidays: settings.holidays
+  });
   res.json({ settings });
 }));
 
@@ -950,7 +973,13 @@ router.delete('/settings/holidays/:date', requireRole('admin'), ah(async (req, r
   settings.holidays = (settings.holidays || []).filter((h) => h.date !== req.params.date);
   settings.markModified('holidays');
   await settings.save();
-  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'setting:update', { holidays: settings.holidays });
+  emitToRoles(['admin', 'manager', 'leader', 'developer'], 'setting:update', {
+    companyName: settings.companyName,
+    logoUrl: settings.logoUrl,
+    brandTagline: settings.brandTagline,
+    supportEmail: settings.supportEmail,
+    holidays: settings.holidays
+  });
   res.json({ settings });
 }));
 

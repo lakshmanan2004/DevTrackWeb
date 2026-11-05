@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CheckCircle2Icon, TrophyIcon } from 'lucide-react';
+import { CheckCircle2Icon, TrophyIcon, DownloadIcon, SparklesIcon } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { CloseProjectModal } from '../../components/project/CloseProjectModal';
+import { ExportTimesheetModal } from '../../components/common/ExportTimesheetModal';
+import { AiExecutiveDigestModal } from '../../components/common/AiExecutiveDigestModal';
 import {
   InfoIcon,
   FolderKanbanIcon,
@@ -45,6 +47,8 @@ export function ProjectOverview() {
   const activeId = selectedProjectId || urlProjectId || (projects.length === 1 ? projects[0]?.id : '');
   const { data: overview, refetch: refetchOverview } = useProjectOverview(activeId || null);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [aiDigestOpen, setAiDigestOpen] = useState(false);
 
   const selectedProject = projects.find((p: any) => p.id === activeId);
 
@@ -119,6 +123,25 @@ export function ProjectOverview() {
               </button>
             )}
 
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setAiDigestOpen(true)}
+              className="!bg-gradient-to-r !from-indigo-600/10 !to-purple-600/10 hover:!from-indigo-600/20 hover:!to-purple-600/20 !border-purple-500/30 text-purple-700 dark:text-purple-300 font-bold"
+              icon={<SparklesIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
+            >
+              AI Executive Digest
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setExportModalOpen(true)}
+              icon={<DownloadIcon className="h-4 w-4 text-blue-600 dark:text-sky-400" />}
+            >
+              Export Timesheet
+            </Button>
+
             {selectedProject && (
               <Button
                 size="sm"
@@ -190,6 +213,7 @@ export function ProjectOverview() {
             <div className="border-b border-hairline dark:border-white/10 px-5 py-4 flex items-center justify-between">
               <h2 className="text-sm font-bold text-navy dark:text-white">Weekly Delivery Breakdown</h2>
             </div>
+            <div className="overflow-x-auto relative z-10 w-full">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-hairline dark:border-white/10 bg-slate-50/70 dark:bg-slate-950/60 text-xs uppercase tracking-wide text-gray-500 dark:text-slate-400">
@@ -223,6 +247,7 @@ export function ProjectOverview() {
                 )}
               </tbody>
             </table>
+            </div>
           </section>
 
           <section className="glass-card h-fit overflow-hidden rounded-2xl shadow-glass">
@@ -268,6 +293,19 @@ export function ProjectOverview() {
           refetch();
           refetchOverview();
         }}
+      />
+
+      <ExportTimesheetModal
+        open={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        defaultProjectId={activeId}
+        projectName={selectedProject?.name}
+      />
+
+      <AiExecutiveDigestModal
+        open={aiDigestOpen}
+        onClose={() => setAiDigestOpen(false)}
+        defaultProjectId={activeId}
       />
     </div>
   </>

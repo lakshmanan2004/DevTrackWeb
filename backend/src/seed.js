@@ -6,7 +6,7 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const { User, Team, Project, WorkLog, Commit, EodReport, Task, Alert, Setting } = require('./models');
 
-const ADMIN_EMAIL = 'admin@college.edu';
+const ADMIN_EMAIL = 'admin@devtrack.io';
 const ADMIN_PASSWORD = 'devtrack@2026';
 
 async function seedIfEmpty() {

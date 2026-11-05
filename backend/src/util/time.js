@@ -137,12 +137,12 @@ function weekStart(d = new Date()) {
 }
 
 // Cleanly format/truncate task title up to word or char limit without breaking words
-function makeTaskTitle(text, maxWords = 10, maxChars = 75) {
+function makeTaskTitle(text, maxWords = 16, maxChars = 120) {
   if (!text) return 'Work Log';
   const clean = String(text).trim().replace(/\s+/g, ' ');
   const words = clean.split(' ');
   if (words.length <= maxWords && clean.length <= maxChars) {
-    return clean;
+    return clean.replace(/[,;:\-.\s]+$/, '');
   }
   const result = [];
   let currentLen = 0;
@@ -150,16 +150,39 @@ function makeTaskTitle(text, maxWords = 10, maxChars = 75) {
     if (result.length >= maxWords) break;
     const addedLen = currentLen === 0 ? w.length : w.length + 1;
     if (currentLen + addedLen > maxChars) {
-      if (result.length === 0) {
-        return w.slice(0, maxChars).trim() + '...';
-      }
       break;
     }
     result.push(w);
     currentLen += addedLen;
   }
+  if (result.length === 0) {
+    return words[0].slice(0, maxChars).trim() + '...';
+  }
   const joined = result.join(' ').replace(/[,;:\-.\s]+$/, '');
   return `${joined}...`;
+}
+
+// Safely resolve task title from raw task and full description,
+// recovering any title that was cut mid-word by legacy slicing (e.g. "With V" -> "With Vite")
+function resolveTaskTitle(rawTask, description, maxWords = 16, maxChars = 120) {
+  const task = (rawTask || '').trim();
+  const desc = (description || '').trim();
+
+  if (desc) {
+    // If task is empty, or task is a prefix of description
+    const isPrefix = Boolean(task && desc.startsWith(task));
+    const cutMidWord = Boolean(isPrefix && desc.length > task.length && !/\s|[.,;:!?\-]/.test(desc[task.length]));
+
+    if (!task || cutMidWord || (isPrefix && !task.endsWith('...') && desc.length > task.length)) {
+      return makeTaskTitle(desc, maxWords, maxChars);
+    }
+  }
+
+  if (task) {
+    return makeTaskTitle(task, maxWords, maxChars);
+  }
+
+  return 'Work Log';
 }
 
 module.exports = {
@@ -182,5 +205,6 @@ module.exports = {
   isWorkday,
   getHolidayInfo,
   weekStart,
-  makeTaskTitle
+  makeTaskTitle,
+  resolveTaskTitle
 };
