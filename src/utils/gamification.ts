@@ -62,7 +62,19 @@ export async function triggerConfettiBurst(): Promise<void> {
  */
 export async function acknowledgeBadge(badgeId: string): Promise<void> {
   try {
-    await api.post('/api/gamification/ack-badge', { badgeId });
+    const key = 'devtrack_acked_badges';
+    try {
+      const stored = JSON.parse(localStorage.getItem(key) || '[]');
+      if (Array.isArray(stored) && !stored.includes(badgeId)) {
+        stored.push(badgeId);
+        localStorage.setItem(key, JSON.stringify(stored));
+      }
+    } catch (_) {}
+
+    await api('/api/gamification/ack-badge', {
+      method: 'POST',
+      body: { badgeId }
+    });
   } catch (err) {
     console.debug('[Ack badge failed]', err);
   }
