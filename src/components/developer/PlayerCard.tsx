@@ -24,8 +24,11 @@ export const PlayerCard = React.memo(function PlayerCard() {
         <div className="flex items-center gap-4 min-w-0">
           <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand/10 dark:bg-[rgba(22,131,255,0.16)] border border-brand/20 dark:border-[rgba(22,131,255,0.35)] text-brand dark:text-[#5AA9FF] font-black text-xl shadow-glass">
             <span>L{level}</span>
-            <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/80 dark:bg-slate-100 text-[10px] text-white dark:text-slate-900 font-bold border border-white/20 shadow-2xs">
-              <AwardIcon className="h-3 w-3" />
+            <div
+              className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-amber-950 font-black shadow-sm ring-2 ring-white dark:ring-[#14171A]"
+              title={`Level ${level} Engineering Rank`}
+            >
+              <AwardIcon className="h-3 w-3 text-amber-950 stroke-[2.5]" />
             </div>
           </div>
 
