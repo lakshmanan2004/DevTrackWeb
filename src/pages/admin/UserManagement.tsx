@@ -257,34 +257,45 @@ export function UserManagement() {
           ]}
         />
 
-        <section className="glass-card overflow-hidden rounded-3xl border border-white/80 p-0 shadow-glass">
+        <section className="glass-card overflow-hidden rounded-3xl border border-white/80 dark:border-white/10 p-2 sm:p-3 shadow-glass">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs border-separate border-spacing-y-1">
               <thead>
-                <tr className="border-b border-slate-200/60 bg-slate-50/50 text-[11px] uppercase tracking-wider text-slate-500 font-bold">
-                  <th scope="col" className="px-6 py-4 font-bold">User</th>
-                  <th scope="col" className="px-4 py-4 font-bold">Email</th>
-                  <th scope="col" className="px-4 py-4 font-bold">Role</th>
-                  <th scope="col" className="px-4 py-4 font-bold">Status</th>
-                  <th scope="col" className="px-4 py-4 font-bold">Joined</th>
-                  <th scope="col" className="px-6 py-4 text-right font-bold">Actions</th>
+                <tr className="border-b border-slate-200/60 dark:border-white/10 text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-400 font-bold">
+                  <th scope="col" className="px-5 py-3 font-bold">User</th>
+                  <th scope="col" className="px-4 py-3 font-bold">Email</th>
+                  <th scope="col" className="px-4 py-3 font-bold">Role</th>
+                  <th scope="col" className="px-4 py-3 font-bold">Status</th>
+                  <th scope="col" className="px-4 py-3 font-bold">Joined</th>
+                  <th scope="col" className="px-5 py-3 text-right font-bold">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200/60">
+              <tbody>
                 {visible.map((user: any) => (
-                  <tr key={user.id || user._id} className={`transition-colors hover:bg-white/40 ${user.active ? '' : 'bg-slate-50/30 opacity-75'}`}>
-                    <td className="px-6 py-4">
+                  <tr
+                    key={user.id || user._id}
+                    className={`ios-hover-row group select-none ${
+                      user.active ? '' : 'opacity-65 hover:opacity-95'
+                    }`}
+                  >
+                    <td className="px-5 py-3.5 transition-colors">
                       <div className="flex items-center gap-3">
-                        <Avatar
-                          initials={user.initials}
-                          size="sm"
-                          tone={user.active ? avatarTone[user.role as Role] : 'grey'}
-                        />
-                        <span className="font-bold text-navy">{user.name}</span>
+                        <div className="transition-transform duration-200 group-hover:scale-105 shrink-0">
+                          <Avatar
+                            initials={user.initials}
+                            size="sm"
+                            tone={user.active ? avatarTone[user.role as Role] : 'grey'}
+                          />
+                        </div>
+                        <span className="font-bold text-navy dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          {user.name}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-slate-600 font-medium">{user.email}</td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-3.5 text-slate-600 dark:text-slate-300 font-medium transition-colors">
+                      {user.email}
+                    </td>
+                    <td className="px-4 py-3.5 transition-colors">
                       <div className="w-40 relative">
                         <Select
                           size="sm"
@@ -304,21 +315,27 @@ export function UserManagement() {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-3.5 transition-colors">
                       <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-bold ${
-                          user.active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                          user.active
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                            : 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-slate-500/20'
                         }`}
                       >
                         <span
-                          className={`h-2 w-2 rounded-full ${user.active ? 'bg-emerald-500 ring-2 ring-emerald-400/30' : 'bg-slate-400'}`}
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            user.active ? 'bg-emerald-500 ring-2 ring-emerald-400/30' : 'bg-slate-400'
+                          }`}
                           aria-hidden="true"
                         />
                         {user.active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-500 font-medium">{user.joined}</td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="whitespace-nowrap px-4 py-3.5 text-slate-500 dark:text-slate-400 font-medium transition-colors">
+                      {user.joined}
+                    </td>
+                    <td className="px-5 py-3.5 text-right transition-colors">
                       <div className="inline-flex items-center gap-2">
                         <Button
                           size="sm"
@@ -330,7 +347,7 @@ export function UserManagement() {
                           }}
                           icon={<KeyIcon className="h-3.5 w-3.5 text-amber-500" />}
                           title="Reset User Password"
-                          className="hover:bg-amber-500/10 text-slate-600 dark:text-slate-300"
+                          className="hover:bg-amber-500/10 text-slate-600 dark:text-slate-300 transition-colors"
                         >
                           Reset Pass
                         </Button>

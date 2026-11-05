@@ -173,97 +173,99 @@ export function AllDevelopers() {
           </div>
         </div>
 
-        <section className="glass-card overflow-hidden rounded-3xl shadow-glass">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-hairline text-xs uppercase tracking-wide text-slate-400">
-                <th scope="col" className="px-6 py-3.5 font-semibold">Developer</th>
-                <th scope="col" className="px-3 py-3.5 font-semibold">Coverage</th>
-                <th scope="col" className="px-3 py-3.5 font-semibold">Logs</th>
-                <th scope="col" className="px-3 py-3.5 font-semibold">Missed</th>
-                <th scope="col" className="px-3 py-3.5 font-semibold">Commits</th>
-                <th scope="col" className="px-6 py-3.5 text-right font-semibold">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-hairline">
-              {visible.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
-                    <div className="mx-auto flex max-w-sm flex-col items-center justify-center text-center">
-                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400">
-                        <UsersIcon className="h-6 w-6" />
-                      </div>
-                      <p className="text-sm font-bold text-navy dark:text-white">No developers found</p>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                        No team developers match the current search or filter selection.
-                      </p>
-                      {(selectedDevId !== 'all' || selectedProjectId !== 'all' || filter !== 'all') && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedDevId('all');
-                            setSelectedProjectId('all');
-                            setFilter('all');
-                          }}
-                          className="mt-3 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-                        >
-                          Clear all filters
-                        </button>
-                      )}
-                    </div>
-                  </td>
+        <section className="glass-card overflow-hidden rounded-3xl border border-white/80 dark:border-white/10 p-2 sm:p-3 shadow-glass">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-separate border-spacing-y-1">
+              <thead>
+                <tr className="border-b border-hairline text-xs uppercase tracking-wide text-slate-400 font-semibold">
+                  <th scope="col" className="px-5 py-3 font-semibold">Developer</th>
+                  <th scope="col" className="px-3 py-3 font-semibold">Coverage</th>
+                  <th scope="col" className="px-3 py-3 font-semibold">Logs</th>
+                  <th scope="col" className="px-3 py-3 font-semibold">Missed</th>
+                  <th scope="col" className="px-3 py-3 font-semibold">Commits</th>
+                  <th scope="col" className="px-5 py-3 text-right font-semibold">Action</th>
                 </tr>
-              ) : (
-                visible.map((dev: any) => (
-                  <tr key={dev.id} className="hover:bg-slate-500/5 transition-colors">
-                    <td className="px-6 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <span className="relative">
-                          <Avatar initials={dev.initials} size="sm" />
-                          {dev.online && (
-                            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-[#101726] bg-emerald-500 shadow-sm" title="Online now" />
-                          )}
-                        </span>
-                        <div>
-                          <p className="font-semibold text-navy dark:text-white">{dev.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{dev.email} · last seen {dev.lastSeen}</p>
+              </thead>
+              <tbody>
+                {visible.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center">
+                      <div className="mx-auto flex max-w-sm flex-col items-center justify-center text-center">
+                        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400">
+                          <UsersIcon className="h-6 w-6" />
                         </div>
-                      </div>
-                    </td>
-                    <td className="w-32 px-3 py-3.5">
-                      <ProgressBar
-                        value={Math.round((dev.activeMinutes / 480) * 100)}
-                        label={`${dev.name} coverage`}
-                      />
-                    </td>
-                    <td className="px-3 py-3.5 tabular-nums text-slate-600 dark:text-slate-300">{dev.logs}</td>
-                    <td className="px-3 py-3.5">
-                      <span
-                        className={`font-semibold tabular-nums ${
-                          dev.missed > 0 ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-500 dark:text-emerald-400'
-                        }`}
-                      >
-                        {dev.missed}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3.5 tabular-nums text-slate-600 dark:text-slate-300">{dev.commits}</td>
-                    <td className="px-6 py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleOpenAssign(dev.id)}
-                          className="btn-glass-primary !from-amber-500 !to-orange-500 hover:!from-amber-600 hover:!to-orange-600 text-white font-bold border-none"
-                          icon={<PlusIcon className="h-3.5 w-3.5" />}
-                        >
-                          Assign Task
-                        </Button>
+                        <p className="text-sm font-bold text-navy dark:text-white">No developers found</p>
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                          No team developers match the current search or filter selection.
+                        </p>
+                        {(selectedDevId !== 'all' || selectedProjectId !== 'all' || filter !== 'all') && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedDevId('all');
+                              setSelectedProjectId('all');
+                              setFilter('all');
+                            }}
+                            className="mt-3 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                          >
+                            Clear all filters
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  visible.map((dev: any) => (
+                    <tr key={dev.id} className="ios-hover-row group select-none">
+                      <td className="px-5 py-3.5 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className="relative transition-transform duration-200 group-hover:scale-105 shrink-0">
+                            <Avatar initials={dev.initials} size="sm" />
+                            {dev.online && (
+                              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-[#101726] bg-emerald-500 shadow-sm" title="Online now" />
+                            )}
+                          </span>
+                          <div>
+                            <p className="font-semibold text-navy dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{dev.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{dev.email} · last seen {dev.lastSeen}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="w-32 px-3 py-3.5 transition-colors">
+                        <ProgressBar
+                          value={Math.round((dev.activeMinutes / 480) * 100)}
+                          label={`${dev.name} coverage`}
+                        />
+                      </td>
+                      <td className="px-3 py-3.5 tabular-nums text-slate-600 dark:text-slate-300 transition-colors">{dev.logs}</td>
+                      <td className="px-3 py-3.5 transition-colors">
+                        <span
+                          className={`font-semibold tabular-nums ${
+                            dev.missed > 0 ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-500 dark:text-emerald-400'
+                          }`}
+                        >
+                          {dev.missed}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3.5 tabular-nums text-slate-600 dark:text-slate-300 transition-colors">{dev.commits}</td>
+                      <td className="px-5 py-3.5 text-right transition-colors">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleOpenAssign(dev.id)}
+                            className="btn-glass-primary !from-amber-500 !to-orange-500 hover:!from-amber-600 hover:!to-orange-600 text-white font-bold border-none"
+                            icon={<PlusIcon className="h-3.5 w-3.5" />}
+                          >
+                            Assign Task
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
 
