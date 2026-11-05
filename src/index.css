@@ -1807,7 +1807,8 @@ section.glass-card,
 .glass-subcard,
 .glass-inner-tile {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
   will-change: transform;
 }
 
@@ -1834,6 +1835,7 @@ section.glass-card,
   .glass-subcard.clickable:hover {
     transform: translateY(-2.5px) scale(1.002);
     box-shadow: 0 14px 32px -4px rgba(15, 23, 42, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.95);
   }
 
   .dark .glass-card:not(:has(.hover-tile, .glass-subcard, .glass-inner-tile)):hover,
@@ -1857,6 +1859,7 @@ section.glass-card,
   .dark .glass-subcard.clickable:hover {
     transform: translateY(-2.5px) scale(1.002);
     box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.50) !important;
+    border-color: rgba(255, 255, 255, 0.28);
   }
 }
 
@@ -1972,45 +1975,68 @@ section.glass-card,
    iOS WEB STYLE LIST & TABLE ROW HOVER (MATTE, TRANSLUCENT CAPSULE PILL)
    ========================================================================== */
 .ios-hover-row {
-  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.12s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  will-change: background-color, box-shadow;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
   cursor: pointer;
 }
 
+.ios-hover-row > td {
+  background-color: transparent;
+  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  border-left: none;
+  border-right: none;
+}
+
+/* Rounded Capsule ends on outer table cells */
+.ios-hover-row > td:first-child {
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+  border-left: 1px solid transparent;
+}
+.ios-hover-row > td:last-child {
+  border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+  border-right: 1px solid transparent;
+}
+
 /* Light Mode iOS Pill Hover */
-.ios-hover-row:hover {
+.ios-hover-row:hover > td {
   background-color: rgba(255, 255, 255, 0.85) !important;
-  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.07),
-              inset 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  border-top-color: rgba(0, 0, 0, 0.06) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+}
+.ios-hover-row:hover > td:first-child {
+  border-left-color: rgba(0, 0, 0, 0.06) !important;
+}
+.ios-hover-row:hover > td:last-child {
+  border-right-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 /* Dark Mode iOS Pill Hover */
-.dark .ios-hover-row:hover {
+.dark .ios-hover-row:hover > td {
   background-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.45),
-              inset 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
+  border-top-color: rgba(255, 255, 255, 0.12) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+}
+.dark .ios-hover-row:hover > td:first-child {
+  border-left-color: rgba(255, 255, 255, 0.12) !important;
+}
+.dark .ios-hover-row:hover > td:last-child {
+  border-right-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 /* iOS Active Tactile Feedback (Spring micro-press) */
-.ios-hover-row:active {
-  transform: scale(0.997) !important;
-  background-color: rgba(255, 255, 255, 0.92) !important;
+.ios-hover-row:active > td {
+  background-color: rgba(255, 255, 255, 0.95) !important;
 }
-.dark .ios-hover-row:active {
-  transform: scale(0.997) !important;
+.dark .ios-hover-row:active > td {
   background-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-/* Rounded Capsule ends for table row cells */
-.ios-hover-row > td:first-child {
-  border-top-left-radius: 16px;
-  border-bottom-left-radius: 16px;
-}
-.ios-hover-row > td:last-child {
-  border-top-right-radius: 16px;
-  border-bottom-right-radius: 16px;
 }
 
 /* Table headers never show any hover overlay, background shift, or tile split */

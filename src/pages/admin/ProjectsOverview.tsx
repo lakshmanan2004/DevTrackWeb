@@ -55,7 +55,7 @@ const ProjectCard = React.memo(function ProjectCard({ project, onDelete }: { pro
   };
 
   return (
-    <div className="glass-card independent-card flex flex-col justify-between rounded-3xl p-6 space-y-5">
+    <div className="glass-card hover-card project-container-card flex flex-col justify-between rounded-3xl p-6 space-y-5">
       {/* TOP: TITLE, STATUS BADGES & DELETE ACTION */}
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">

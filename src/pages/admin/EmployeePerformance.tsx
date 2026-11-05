@@ -346,7 +346,7 @@ export function EmployeePerformance() {
         {/* INTERACTIVE GRAPHICAL ANALYSIS SECTION (2 COLUMNS) */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* GRAPH 1: DAILY PERFORMANCE & ABSENCE/WORK HOURS GRAPH */}
-          <div className="glass-card rounded-3xl p-6 shadow-glass space-y-4">
+          <div className="glass-card hover-card rounded-3xl p-6 shadow-glass space-y-4">
             <div className="flex items-center justify-between border-b border-hairline pb-3">
               <div className="flex items-center gap-2">
                 <TrendingUpIcon className="h-4 w-4 text-brand dark:text-indigo-400" />
@@ -459,7 +459,7 @@ export function EmployeePerformance() {
           </div>
 
           {/* GRAPH 2: CATEGORY BREAKDOWN VS TEAM AVERAGE */}
-          <div className="glass-card rounded-3xl p-6 shadow-glass space-y-4">
+          <div className="glass-card hover-card rounded-3xl p-6 shadow-glass space-y-4">
             <div className="flex items-center justify-between border-b border-hairline pb-3">
               <div className="flex items-center gap-2">
                 <ZapIcon className="h-4 w-4 text-purple-500 dark:text-purple-400" />
@@ -802,7 +802,7 @@ export function EmployeePerformance() {
     )}
 
         {/* HOW SCORE IS CALCULATED FOOTER (4 CORE METRICS x 25% WEIGHT) */}
-        <div className="glass-card rounded-3xl p-6 shadow-glass space-y-4">
+        <div className="glass-card hover-card rounded-3xl p-6 shadow-glass space-y-4">
           <h3 className="text-sm font-bold text-navy dark:text-white flex items-center gap-2">
             <BarChart3Icon className="h-4 w-4 text-brand dark:text-indigo-400" />
             How is the overall score calculated?
