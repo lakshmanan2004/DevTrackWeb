@@ -33,7 +33,7 @@ import { PlayerCard } from '../../components/developer/PlayerCard';
 import { useAuth } from '../../context/AuthContext';
 import { useMyLogs, useProjects, usePendingWorks, useLeaves } from '../../hooks/useLive';
 import { playAlertSound, showWindowsNotification } from '../../utils/audioAlerts';
-import { getCurrentBlockStatus, isLogForBlock } from '../../utils/workBlocks';
+import { getCurrentBlockStatus, isLogForBlock, isBlockExcusedByLeave, getClientHolidayInfo } from '../../utils/workBlocks';
 
 function fmtDuration(min: number) {
   const h = Math.floor(min / 60);
@@ -46,16 +46,18 @@ interface DeveloperDashboardProps {
 }
 
 export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashboardProps) {
-  const { user } = useAuth();
+  const { user, settings, isHoliday: authIsHoliday, holiday: authHoliday } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { data, refetch: refetchLogs } = useMyLogs();
   const { data: projectData } = useProjects('mine');
   const { data: pendingData } = usePendingWorks();
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   const { data: leaveData, refetch: refetchLeaves } = useLeaves(todayStr);
-  const todayLeave = leaveData?.leaves?.find((l: any) => l.date === todayStr);
+  const todayLeave = leaveData?.leaves?.find((l: any) => l.date === todayStr && l.status !== 'rejected');
 
   const isSubmitRequested = initialOpenSubmit || location.pathname === '/developer/submit' || location.search.includes('submit=true');
   const [modalOpen, setModalOpen] = useState(isSubmitRequested);
@@ -103,7 +105,6 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
   const pendingRevisionsCount = pendingItems.length;
 
   const devLunchSlot = user?.lunchSlot ?? 12;
-  const now = new Date();
   const blockStatus = getCurrentBlockStatus(now, devLunchSlot);
   const isBeforeWork = blockStatus.isBeforeWork;
   const isAfterWork = blockStatus.isAfterWork;
@@ -112,6 +113,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
   const minutesLeft = blockStatus.minutesLeftInBlock;
   const currentSlot = blockStatus.currentSlot;
   const hasLoggedCurrentSlot = logs.some((log: any) => isLogForBlock(log, currentSlot, devLunchSlot));
+  const isCurrentBlockExcused = isBlockExcusedByLeave(todayLeave, currentSlot, blockStatus.activeBlock, devLunchSlot);
   const currentSlotLabel = `${blockStatus.activeBlock.shortLabel} (${blockStatus.activeBlock.label})`;
   const lunchSlotLabel = blockStatus.lunchLabel;
   const lunchEndLabel = devLunchSlot === 11 ? '12:00 PM' : '1:00 PM';
@@ -147,8 +149,22 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
     });
   };
 
-  const isHoliday = !!(data as any)?.isHoliday || !!stats?.isHoliday;
-  const holidayName = (data as any)?.holiday?.name || stats?.holidayName || 'Holiday';
+  const clientHoliday = getClientHolidayInfo(
+    now,
+    (settings as any)?.holidays || [],
+    (settings as any)?.workDays || [1, 2, 3, 4, 5]
+  );
+  const isHoliday =
+    clientHoliday.isHoliday ||
+    !!(data as any)?.isHoliday ||
+    !!stats?.isHoliday ||
+    !!authIsHoliday;
+  const holidayName =
+    (data as any)?.holiday?.name ||
+    stats?.holidayName ||
+    authHoliday?.name ||
+    clientHoliday.holidayName ||
+    'Holiday';
 
   // Automated background milestone check-in monitor (20m, 10m, 5m, deadline)
   useEffect(() => {
@@ -160,6 +176,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
     }
 
     const checkMilestoneAlerts = () => {
+      if (isHoliday) return;
       const d = new Date();
       const status = getCurrentBlockStatus(d, devLunchSlot);
 
@@ -169,9 +186,8 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
       const slot = status.currentSlot;
 
       // Suppress alert if developer has an approved leave/half-day covering this slot
-      if (todayLeave) {
-        if (todayLeave.type === 'full_day') return;
-        if (todayLeave.slots && todayLeave.slots.includes(slot)) return;
+      if (isBlockExcusedByLeave(todayLeave, slot, status.activeBlock, devLunchSlot)) {
+        return;
       }
 
       const remainingMins = status.minutesLeftInBlock;
@@ -180,7 +196,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
       if (!unlogged) return;
 
       const slotLabel = `${status.activeBlock.shortLabel} (${status.activeBlock.label})`;
-      const todayKey = d.toISOString().slice(0, 10);
+      const todayKey = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
       const triggerMilestone = (
         milestoneKey: '20m' | '10m' | '5m' | 'deadline',
@@ -471,6 +487,26 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
               </div>
             </div>
           </div>
+        ) : isCurrentBlockExcused ? (
+          <div className="glass-card glass-amber rounded-2xl border border-amber-300/60 dark:border-amber-500/30 p-4 sm:p-5 shadow-glass flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                <span className="text-base">🌴</span>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {todayLeave?.type === 'full_day' ? 'Full-Day Leave Active' : 'Half-Day Leave Active'} — {blockStatus.activeBlock.displayTitle} Excused
+                </h3>
+                <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">
+                  You are excused for this session under approved leave. Work log check-in alerts are paused.
+                </p>
+              </div>
+            </div>
+            <span className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+              <CheckCircle2Icon className="h-3.5 w-3.5" />
+              <span>Excused (Leave)</span>
+            </span>
+          </div>
         ) : (
           <div className={`glass-card rounded-2xl border p-4 sm:p-5 shadow-glass flex items-center justify-between gap-4 ${
             isLunchSlot
@@ -608,6 +644,7 @@ export function DeveloperDashboard({ initialOpenSubmit = false }: DeveloperDashb
           lunchSlot={devLunchSlot}
           isHoliday={isHoliday}
           holidayName={holidayName}
+          todayLeave={todayLeave}
           onLog={handleOpenLog}
         />
       </div>

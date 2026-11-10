@@ -1,7 +1,7 @@
 // Automated detection jobs (node-cron). All alerts are deduped via Alert.dedupeKey.
 const cron = require('node-cron');
 const { WorkLog, EodReport, Alert, User, Team, Project, Setting, Leave } = require('../models');
-const { dayStr, hourLabel, fmtTime, fmtDateMDY, slotForNow, requiredSlots, isWorkday } = require('../util/time');
+const { dayStr, hourLabel, fmtTime, fmtDateMDY, slotForNow, requiredSlots, isWorkday, getHolidayInfo } = require('../util/time');
 const { emitToRoles, emitToUser } = require('../sockets');
 
 const { getWorkBlocks, getLunchBreak, isAnyLogForBlock, blockLabel } = require('../util/workBlocks');
@@ -50,7 +50,7 @@ async function reminderCheck() {
   const timeFloat = now.getHours() + now.getMinutes() / 60;
   if (timeFloat < 8.0 || timeFloat >= 17.0) return;
   const settings = await Setting.get();
-  if (!isWorkday(now, settings)) return;
+  if (!isWorkday(now, settings) || getHolidayInfo(now, settings).isHoliday) return;
   const devs = await activeDevelopers();
   const date = dayStr(now);
 
@@ -64,9 +64,12 @@ async function reminderCheck() {
     if (!activeBlock) continue;
 
     // Check if developer is on leave for this slot
-    const leave = await Leave.findOne({ developer: dev._id, date, status: 'approved' });
-    if (leave && (leave.type === 'full_day' || (leave.slots && leave.slots.includes(activeBlock.slot)))) {
-      continue; // Excused: on leave / half-day
+    const leave = await Leave.findOne({ developer: dev._id, date, status: { $ne: 'rejected' } });
+    if (leave) {
+      if (leave.type === 'full_day') continue; // Excused: full day leave
+      if (leave.type === 'half_day_morning' && (activeBlock.slot <= (devLunchSlot === 11 ? 1 : 2) || activeBlock.startHour < 12)) continue;
+      if (leave.type === 'half_day_afternoon' && (activeBlock.slot >= (devLunchSlot === 11 ? 2 : 3) || activeBlock.startHour >= 12)) continue;
+      if (leave.slots && (leave.slots.includes(activeBlock.slot) || leave.slots.includes(Math.floor(activeBlock.startHour)))) continue;
     }
 
     const minutesLeft = Math.round((activeBlock.endHour - timeFloat) * 60);
@@ -104,7 +107,7 @@ async function missedLogCheck() {
   const timeFloat = now.getHours() + now.getMinutes() / 60;
   if (timeFloat < 8.0) return;
   const settings = await Setting.get();
-  if (!isWorkday(now, settings)) return;
+  if (!isWorkday(now, settings) || getHolidayInfo(now, settings).isHoliday) return;
 
   const date = dayStr(now);
   const devs = await activeDevelopers();
@@ -116,15 +119,22 @@ async function missedLogCheck() {
     if (!team) continue;
 
     // Check for approved leave/half-day on this date
-    const leave = await Leave.findOne({ developer: dev._id, date, status: 'approved' });
+    const leave = await Leave.findOne({ developer: dev._id, date, status: { $ne: 'rejected' } });
     if (leave && leave.type === 'full_day') continue; // Entire day is excused
-    const excusedSlots = new Set(leave && leave.slots ? leave.slots : []);
+    const isBlockExcused = (block) => {
+      if (!leave) return false;
+      if (leave.type === 'full_day') return true;
+      if (leave.type === 'half_day_morning' && (block.slot <= (devLunchSlot === 11 ? 1 : 2) || block.startHour < 12)) return true;
+      if (leave.type === 'half_day_afternoon' && (block.slot >= (devLunchSlot === 11 ? 2 : 3) || block.startHour >= 12)) return true;
+      if (leave.slots && (leave.slots.includes(block.slot) || leave.slots.includes(Math.floor(block.startHour)))) return true;
+      return false;
+    };
 
     const devLogs = await WorkLog.find({ developer: dev._id, date });
 
     // Block is closed and past grace period (15 minutes after deadline)
     const closedBlocks = blocks.filter(
-      (b) => timeFloat >= (b.endHour + 0.24) && !excusedSlots.has(b.slot)
+      (b) => timeFloat >= (b.endHour + 0.24) && !isBlockExcused(b)
     );
 
     for (const block of closedBlocks) {
@@ -173,7 +183,7 @@ async function eodMissingCheck() {
   if (new Date().getHours() >= 17) return;
   const settings = await Setting.get();
   const now = new Date();
-  if (!isWorkday(now, settings)) return;
+  if (!isWorkday(now, settings) || getHolidayInfo(now, settings).isHoliday) return;
   const date = dayStr(now);
 
   const devs = await activeDevelopers();
@@ -182,7 +192,7 @@ async function eodMissingCheck() {
     if (!team) continue;
 
     // If on full day leave or afternoon leave, skip EOD missing alert
-    const leave = await Leave.findOne({ developer: dev._id, date, status: 'approved' });
+    const leave = await Leave.findOne({ developer: dev._id, date, status: { $ne: 'rejected' } });
     if (leave && (leave.type === 'full_day' || leave.type === 'half_day_afternoon')) {
       continue;
     }
@@ -220,9 +230,10 @@ async function idleCheck() {
   const now = new Date();
   if (now.getHours() >= 17) return; // Skip after 5 PM
   const settings = await Setting.get();
-  if (!isWorkday(now, settings)) return;
+  if (!isWorkday(now, settings) || getHolidayInfo(now, settings).isHoliday) return;
   const date = dayStr(now);
   const currentHour = now.getHours();
+  const timeFloat = now.getHours() + now.getMinutes() / 60;
 
   const devs = await activeDevelopers();
   for (const dev of devs) {
@@ -230,6 +241,15 @@ async function idleCheck() {
     if (currentHour === devLunchSlot) continue; // Skip during developer's lunch break
     const team = dev.team;
     if (!team) continue;
+
+    // Skip if developer is on approved leave today (full-day or current half-day)
+    const leave = await Leave.findOne({ developer: dev._id, date, status: { $ne: 'rejected' } });
+    if (leave) {
+      if (leave.type === 'full_day') continue;
+      if (leave.type === 'half_day_morning' && (currentHour < 13 || timeFloat < 13.0)) continue;
+      if (leave.type === 'half_day_afternoon' && (currentHour >= 12 || timeFloat >= 12.0)) continue;
+      if (leave.slots && (leave.slots.includes(currentHour) || (devLunchSlot === 11 ? (timeFloat < 11 && leave.slots.includes(1)) : (timeFloat < 12 && (leave.slots.includes(1) || leave.slots.includes(2)))))) continue;
+    }
     const seenAt = dev.lastSeenAt;
     const idleMinutes = seenAt ? Math.floor((now.getTime() - seenAt.getTime()) / 60000) : 999;
     const threshold = settings.idleMinutes;

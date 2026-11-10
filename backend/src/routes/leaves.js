@@ -65,13 +65,18 @@ router.post('/', requireRole('developer', 'leader', 'admin'), ah(async (req, res
   let slots = [];
   if (type === 'half_day_morning') {
     // 8 AM to 12/1 PM (morning half)
-    slots = allReqSlots.filter((s) => s < 13);
+    const morningHours = allReqSlots.filter((s) => s < 13);
+    const morningBlocks = devLunch === 11 ? [1] : [1, 2];
+    slots = [...morningBlocks, ...morningHours];
   } else if (type === 'half_day_afternoon') {
     // 1 PM/2 PM to 5 PM (afternoon half)
-    slots = allReqSlots.filter((s) => s >= 13);
+    const afternoonHours = allReqSlots.filter((s) => s >= 13);
+    const afternoonBlocks = devLunch === 11 ? [2, 3] : [3, 4];
+    slots = [...afternoonBlocks, ...afternoonHours];
   } else {
     // full_day
-    slots = allReqSlots;
+    const allBlocks = devLunch === 11 ? [1, 2, 3] : [1, 2, 3, 4];
+    slots = [...allBlocks, ...allReqSlots];
   }
 
   const team = dev.team;
@@ -96,10 +101,17 @@ router.post('/', requireRole('developer', 'leader', 'admin'), ah(async (req, res
 
   const typeLabel =
     type === 'half_day_morning'
-      ? 'Half-Day (Morning 9 AM – 1 PM)'
+      ? 'Half-Day (Morning)'
       : type === 'half_day_afternoon'
-      ? 'Half-Day (Afternoon 2 PM – 6 PM)'
+      ? 'Half-Day (Afternoon)'
       : 'Full-Day Leave';
+
+  const excusedDescription =
+    type === 'full_day'
+      ? 'All work block check-ins are excused.'
+      : type === 'half_day_morning'
+      ? 'Morning check-ins (8:00 AM – 12:00 PM) are excused.'
+      : 'Afternoon check-ins (1:00 PM – 5:00 PM) are excused.';
 
   // Notify Team Leader & Project Manager
   if (team) {
@@ -113,7 +125,7 @@ router.post('/', requireRole('developer', 'leader', 'admin'), ah(async (req, res
         severity: 'flag',
         who: dev.name,
         title: `${dev.name} — Marked ${typeLabel}`,
-        body: `Date: ${date} · Reason: "${reason.trim()}". Check-ins for ${slots.map(hourLabel).join(', ')} are excused.`,
+        body: `Date: ${date} · Reason: "${reason.trim()}". ${excusedDescription}`,
         meta: `${date} · ${dev.name} · ${team.name}`,
         detection: `Developer self-service leave submission on ${new Date().toLocaleDateString()}. Alerts suppressed.`,
         actions: [`View ${dev.name.split(' ')[0]}`, 'Mark Seen']
@@ -132,7 +144,7 @@ router.post('/', requireRole('developer', 'leader', 'admin'), ah(async (req, res
         severity: 'flag',
         who: dev.name,
         title: `${dev.name} — Marked ${typeLabel}`,
-        body: `Date: ${date} · Reason: "${reason.trim()}". Check-in requirement excused.`,
+        body: `Date: ${date} · Reason: "${reason.trim()}". ${excusedDescription}`,
         meta: `${date} · ${dev.name} · ${project.name}`,
         detection: `Leave notice registered in system.`,
         actions: ['Mark Seen']

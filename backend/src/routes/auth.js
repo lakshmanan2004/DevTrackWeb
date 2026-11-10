@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { User, Team, Project, WorkLog, Alert, Task } = require('../models');
 const { sign, authRequired, attachUser, ah } = require('../middleware/auth');
-const { dayStr, slotForNow, fmtDateLong } = require('../util/time');
+const { dayStr, slotForNow, fmtDateLong, isWorkday, getHolidayInfo } = require('../util/time');
 const { Setting } = require('../models');
 
 const router = express.Router();
@@ -183,11 +183,17 @@ async function badgeCounts(user) {
 // GET /api/auth/me  -> { user, badges, serverDate }
 router.get('/me', authRequired, attachUser, ah(async (req, res) => {
   const settings = await Setting.get();
+  const now = new Date();
+  const isWork = isWorkday(now, settings);
+  const holidayInfo = getHolidayInfo(now, settings);
   res.json({
     user: await mePayload(req.user),
     badges: await badgeCounts(req.user),
-    serverDate: fmtDateLong(new Date()),
+    serverDate: fmtDateLong(now),
     currentSlot: slotForNow(settings),
+    isWorkday: isWork,
+    isHoliday: holidayInfo.isHoliday,
+    holiday: holidayInfo,
     settings: {
       companyName: settings.companyName || 'DevTrack Workspace',
       logoUrl: settings.logoUrl || '',
@@ -196,7 +202,9 @@ router.get('/me', authRequired, attachUser, ah(async (req, res) => {
       workStartHour: settings.workStartHour,
       workEndHour: settings.workEndHour,
       minWords: settings.minWords,
-      eodDeadline: settings.eodDeadline
+      eodDeadline: settings.eodDeadline,
+      workDays: settings.workDays || [1, 2, 3, 4, 5],
+      holidays: settings.holidays || []
     }
   });
 }));

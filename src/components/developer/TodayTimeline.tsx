@@ -22,7 +22,8 @@ import {
   getWorkBlocks,
   getLunchBreak,
   isLogForBlock,
-  getCurrentBlockStatus
+  getCurrentBlockStatus,
+  isBlockExcusedByLeave
 } from '../../utils/workBlocks';
 
 interface TodayTimelineProps {
@@ -32,6 +33,7 @@ interface TodayTimelineProps {
   lunchSlot?: number;
   isHoliday?: boolean;
   holidayName?: string;
+  todayLeave?: any;
   onLog: (targetSlot?: number) => void;
 }
 
@@ -145,6 +147,7 @@ export function TodayTimeline({
   lunchSlot: propLunchSlot,
   isHoliday,
   holidayName,
+  todayLeave,
   onLog
 }: TodayTimelineProps) {
   const { user } = useAuth();
@@ -178,7 +181,12 @@ export function TodayTimeline({
   const totalWorkBlocks = blocks.length;
   const completedBlocksCount = blocks.filter((b) => logs.some((l) => isLogForBlock(l, b.slot, activeLunchSlot))).length;
   const elapsedWorkBlocks = blocks.filter((b) => timeFloat >= b.endHour);
-  const missedBlocksCount = elapsedWorkBlocks.filter((b) => !logs.some((l) => isLogForBlock(l, b.slot, activeLunchSlot))).length;
+  const missedBlocksCount = isHoliday
+    ? 0
+    : elapsedWorkBlocks.filter((b) => {
+        const isExcused = isBlockExcusedByLeave(todayLeave, b.slot, b, activeLunchSlot);
+        return !isExcused && !logs.some((l) => isLogForBlock(l, b.slot, activeLunchSlot));
+      }).length;
 
   return (
     <section aria-label="Today's timeline" className="glass-card rounded-3xl p-6 sm:p-7 shadow-glass">
@@ -195,6 +203,11 @@ export function TodayTimeline({
             {isHoliday && (
               <span className="rounded-full bg-purple-500/10 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30 text-[10px] font-bold px-3 py-0.5 shadow-2xs">
                 🎉 Holiday: {holidayName || 'Holiday'}
+              </span>
+            )}
+            {todayLeave && (
+              <span className="rounded-full bg-amber-500/10 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 text-[10px] font-bold px-3 py-0.5 shadow-2xs">
+                🌴 {todayLeave.type === 'full_day' ? 'Full-Day Leave' : 'Half-Day Leave'}
               </span>
             )}
           </div>
@@ -270,7 +283,7 @@ export function TodayTimeline({
       )}
 
       {/* Mission-style empty state */}
-      {logs.length === 0 && !isHoliday && !status.isBeforeWork && (
+      {logs.length === 0 && !isHoliday && !status.isBeforeWork && !isBlockExcusedByLeave(todayLeave, status.currentSlot, status.activeBlock, activeLunchSlot) && todayLeave?.type !== 'full_day' && (
         <div className="mt-4 p-4 rounded-2xl bg-brand/5 dark:bg-brand/10 border border-brand/20 dark:border-brand/30 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-xl">🎯</span>
@@ -308,6 +321,7 @@ export function TodayTimeline({
             const isLunch = item.type === 'lunch';
             const slotLogs = !isLunch ? logs.filter((entry) => isLogForBlock(entry, item.slot, activeLunchSlot)) : [];
             const hasLogs = slotLogs.length > 0;
+            const isExcused = !isLunch && (isHoliday || isBlockExcusedByLeave(todayLeave, item.slot, item.block, activeLunchSlot));
 
             // Clear, unambiguous timeline state resolution:
             // Exactly one of isCurrent, isPast, or isUpcoming is true for every item.
@@ -329,6 +343,8 @@ export function TodayTimeline({
             const dotTone = isCurrent
               ? isLunch
                 ? 'bg-amber-500 ring-4 ring-amber-400/60 dark:ring-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.8)] scale-110'
+                : isExcused
+                ? 'bg-amber-500 ring-4 ring-amber-400/80 dark:ring-amber-500/80 shadow-[0_0_12px_rgba(245,158,11,0.8)] scale-110'
                 : 'bg-blue-600 ring-4 ring-blue-400/80 dark:ring-blue-400/80 shadow-[0_0_18px_rgba(37,99,235,0.95)] scale-110'
               : isPast
               ? isLunch
@@ -341,6 +357,8 @@ export function TodayTimeline({
                   : slotLogs.some((l) => isLogLate(l, activeLunchSlot))
                   ? 'bg-amber-500 ring-4 ring-amber-200 dark:ring-amber-950/60'
                   : 'bg-emerald-500 ring-4 ring-emerald-200 dark:ring-emerald-950/60'
+                : isExcused
+                ? 'bg-amber-400 dark:bg-amber-500 ring-4 ring-amber-200 dark:ring-amber-950/60'
                 : 'bg-rose-500 ring-4 ring-rose-200 dark:ring-rose-950/60'
               : 'bg-slate-300 dark:bg-slate-700 ring-4 ring-slate-100 dark:ring-slate-800';
 
@@ -368,12 +386,14 @@ export function TodayTimeline({
                   <div className="mt-1">
                     {isCurrent ? (
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm ${
-                        isLunch
-                          ? 'bg-amber-500 text-slate-950 font-black shadow-[0_0_12px_rgba(245,158,11,0.5)] ring-1 ring-amber-400'
+                        isLunch || isExcused
+                          ? isHoliday
+                            ? 'bg-purple-600 text-white font-black shadow-[0_0_12px_rgba(168,85,247,0.5)] ring-1 ring-purple-400'
+                            : 'bg-amber-500 text-slate-950 font-black shadow-[0_0_12px_rgba(245,158,11,0.5)] ring-1 ring-amber-400'
                           : 'bg-blue-600 text-white shadow-[0_0_14px_rgba(37,99,235,0.6)] ring-1 ring-blue-400'
                       }`}>
                         <span className="h-1.5 w-1.5 rounded-full bg-white opacity-90" />
-                        {isLunch ? 'Lunch Active' : 'Live Now'}
+                        {isLunch ? 'Lunch Active' : isHoliday ? 'Holiday' : isExcused ? 'On Leave' : 'Live Now'}
                       </span>
                     ) : isPast ? (
                       isLunch ? (
@@ -383,6 +403,14 @@ export function TodayTimeline({
                       ) : hasLogs ? (
                         <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-100/90 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-500/30">
                           Logged
+                        </span>
+                      ) : isExcused ? (
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                          isHoliday
+                            ? 'text-purple-800 dark:text-purple-200 bg-purple-100/90 dark:bg-purple-950/60 border border-purple-300 dark:border-purple-500/30'
+                            : 'text-amber-800 dark:text-amber-200 bg-amber-100/90 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-500/30'
+                        }`}>
+                          {isHoliday ? 'Holiday' : 'Excused'}
                         </span>
                       ) : (
                         <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold text-rose-800 dark:text-rose-200 bg-rose-100/90 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-500/30">
@@ -516,6 +544,44 @@ export function TodayTimeline({
                             ))}
                           </div>
                         </>
+                      ) : isExcused ? (
+                        /* Active block excused by holiday or approved leave */
+                        <article className={`hover-tile rounded-2xl border-2 p-5 sm:p-6 shadow-glass relative overflow-hidden ${
+                          isHoliday
+                            ? 'border-purple-400/80 dark:border-purple-500/50 bg-gradient-to-br from-purple-50/90 via-indigo-50/30 to-white/90 dark:from-purple-950/40 dark:via-slate-900/80 dark:to-slate-900/90'
+                            : 'border-amber-400/80 dark:border-amber-500/50 bg-gradient-to-br from-amber-50/90 via-orange-50/30 to-white/90 dark:from-amber-950/40 dark:via-slate-900/80 dark:to-slate-900/90'
+                        }`}>
+                          <div className="flex flex-wrap items-center justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className={`h-2 w-2 rounded-full shrink-0 ${isHoliday ? 'bg-purple-500' : 'bg-amber-500'}`} />
+                                <h3 className={`text-base sm:text-lg font-black tracking-tight ${isHoliday ? 'text-purple-950 dark:text-purple-100' : 'text-amber-950 dark:text-amber-100'}`}>
+                                  Current Block: {mainTitle} ({isHoliday ? 'Holiday' : 'Excused'})
+                                </h3>
+                                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                                  isHoliday
+                                    ? 'bg-purple-100 dark:bg-purple-950/60 border border-purple-300/80 dark:border-purple-500/40 text-purple-800 dark:text-purple-200'
+                                    : 'bg-amber-100 dark:bg-amber-950/60 border border-amber-300/80 dark:border-amber-500/40 text-amber-800 dark:text-amber-200'
+                                }`}>
+                                  {isHoliday ? (holidayName || 'Holiday') : 'On Approved Leave'}
+                                </span>
+                              </div>
+                              <p className={`mt-1.5 text-xs sm:text-sm leading-relaxed max-w-xl ${isHoliday ? 'text-purple-900/80 dark:text-purple-200/80' : 'text-amber-900/80 dark:text-amber-200/80'}`}>
+                                {isHoliday
+                                  ? 'Check-ins and work logs are paused for the organization holiday. All alerts are silenced.'
+                                  : `This session (${item.label}) is excused under your approved leave. No check-in is required and all alerts are silenced.`}
+                              </p>
+                            </div>
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
+                              isHoliday
+                                ? 'bg-purple-100 dark:bg-purple-900/60 border border-purple-300/60 dark:border-purple-500/40 text-purple-800 dark:text-purple-200'
+                                : 'bg-amber-100 dark:bg-amber-900/60 border border-amber-300/60 dark:border-amber-500/40 text-amber-800 dark:text-amber-200'
+                            }`}>
+                              <CheckCircle2Icon className={`h-4 w-4 ${isHoliday ? 'text-purple-600 dark:text-purple-400' : 'text-amber-600 dark:text-amber-400'}`} />
+                              <span>{isHoliday ? 'Holiday' : 'Excused'}</span>
+                            </span>
+                          </div>
+                        </article>
                       ) : (
                         /* Active block awaiting check-in */
                         <article className="hover-tile rounded-2xl border-2 border-blue-500/80 dark:border-blue-400/90 bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-white/90 dark:from-blue-950/60 dark:via-slate-900/80 dark:to-slate-900/90 p-5 sm:p-6 shadow-glass ring-1 ring-blue-500/40 shadow-[0_0_28px_rgba(37,99,235,0.25)] relative overflow-hidden">
@@ -580,6 +646,45 @@ export function TodayTimeline({
                             <LogCard key={log.id || log._id || lIdx} log={log} lunchSlot={activeLunchSlot} />
                           ))}
                         </>
+                      ) : isExcused ? (
+                        /* Excused past block (holiday or leave) */
+                        <article className={`hover-tile rounded-2xl border p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 shadow-glass ${
+                          isHoliday
+                            ? 'border-purple-200/80 dark:border-purple-500/30 bg-purple-50/40 dark:bg-purple-950/20'
+                            : 'border-amber-200/80 dark:border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20'
+                        }`}>
+                          <div className="flex items-start gap-3">
+                            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                              isHoliday
+                                ? 'bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-200'
+                                : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-200'
+                            }`}>
+                              <span className="text-lg">{isHoliday ? '🎉' : '🌴'}</span>
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className={`text-sm font-bold ${isHoliday ? 'text-purple-950 dark:text-purple-100' : 'text-amber-950 dark:text-amber-100'}`}>
+                                  {mainTitle} ({isHoliday ? 'Holiday' : 'Excused'})
+                                </h3>
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                  isHoliday
+                                    ? 'bg-purple-200/80 dark:bg-purple-900/60 text-purple-900 dark:text-purple-200'
+                                    : 'bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200'
+                                }`}>
+                                  {isHoliday ? (holidayName || 'Holiday') : 'Approved Leave'}
+                                </span>
+                              </div>
+                              <p className={`mt-0.5 text-xs font-medium ${isHoliday ? 'text-purple-800/80 dark:text-purple-300/80' : 'text-amber-800/80 dark:text-amber-300/80'}`}>
+                                {isHoliday
+                                  ? 'Check-ins are paused for the organization holiday. No missed log penalty applied.'
+                                  : `Excused from check-in (${item.label}). No missed log penalty applied.`}
+                              </p>
+                            </div>
+                          </div>
+                          <span className={`text-xs font-bold ${isHoliday ? 'text-purple-700 dark:text-purple-300' : 'text-amber-700 dark:text-amber-300'}`}>
+                            {isHoliday ? 'Holiday' : 'Excused Session'}
+                          </span>
+                        </article>
                       ) : (
                         /* Missed Check-in Alert */
                         <article className="hover-tile rounded-2xl border-2 border-rose-300 dark:border-rose-500/40 bg-rose-50/70 dark:bg-rose-950/40 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 shadow-glass">

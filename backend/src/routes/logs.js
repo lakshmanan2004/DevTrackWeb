@@ -479,9 +479,9 @@ router.get('/calendar', ah(async (req, res) => {
         // Excused: full-day or half-day leave
         if (dayLeave) {
           if (dayLeave.type === 'full_day') continue;
-          if (dayLeave.type === 'half_day_morning' && b.startHour < 13) continue;
-          if (dayLeave.type === 'half_day_afternoon' && b.startHour >= 12) continue;
-          if (dayLeave.slots && (dayLeave.slots.includes(b.slot) || (devLunchSlot === 11 ? (b.slot === 1 && [8, 9, 10].some((s) => dayLeave.slots.includes(s))) : (b.slot === 1 && [8, 9].some((s) => dayLeave.slots.includes(s)))))) {
+          if (dayLeave.type === 'half_day_morning' && (b.slot <= (devLunchSlot === 11 ? 1 : 2) || b.startHour < 13)) continue;
+          if (dayLeave.type === 'half_day_afternoon' && (b.slot >= (devLunchSlot === 11 ? 2 : 3) || b.startHour >= 12)) continue;
+          if (dayLeave.slots && (dayLeave.slots.includes(b.slot) || dayLeave.slots.includes(Math.floor(b.startHour)))) {
             continue;
           }
         }
@@ -814,9 +814,9 @@ router.get('/team-calendar', ah(async (req, res) => {
       const unexcusedBlocks = applicableBlocks.filter((b) => {
         if (!devLeave) return true;
         if (devLeave.type === 'full_day') return false;
-        if (devLeave.type === 'half_day_morning' && b.startHour < 13) return false;
-        if (devLeave.type === 'half_day_afternoon' && b.startHour >= 12) return false;
-        if (dayLeave && dayLeave.slots && (dayLeave.slots.includes(b.slot) || (devLunchSlot === 11 ? (b.slot === 1 && [8, 9, 10].some((s) => dayLeave.slots.includes(s))) : (b.slot === 1 && [8, 9].some((s) => dayLeave.slots.includes(s)))))) {
+        if (devLeave.type === 'half_day_morning' && (b.slot <= (devLunchSlot === 11 ? 1 : 2) || b.startHour < 13)) return false;
+        if (devLeave.type === 'half_day_afternoon' && (b.slot >= (devLunchSlot === 11 ? 2 : 3) || b.startHour >= 12)) return false;
+        if (devLeave.slots && (devLeave.slots.includes(b.slot) || devLeave.slots.includes(Math.floor(b.startHour)))) {
           return false;
         }
         return true;

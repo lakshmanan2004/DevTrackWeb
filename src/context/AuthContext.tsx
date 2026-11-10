@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import { api, getToken, onUnauthorized, setToken } from '../api/client';
 import { connectSocket, disconnectSocket, onSocketEvent } from '../api/socket';
 import { playAlertSound, showWindowsNotification } from '../utils/audioAlerts';
+import { getClientHolidayInfo } from '../utils/workBlocks';
 
 export interface AuthUser {
   id: string;
@@ -32,6 +33,8 @@ export interface OrgBrandingSettings {
   workEndHour?: number;
   minWords?: number;
   eodDeadline?: string;
+  workDays?: number[];
+  holidays?: any[];
 }
 
 interface MeResponse {
@@ -39,6 +42,9 @@ interface MeResponse {
   badges: Badges;
   serverDate: string;
   currentSlot: number;
+  isWorkday?: boolean;
+  isHoliday?: boolean;
+  holiday?: any;
   settings: OrgBrandingSettings;
 }
 
@@ -46,6 +52,9 @@ interface AuthContextValue {
   user: AuthUser | null;
   badges: Badges;
   settings: MeResponse['settings'] | null;
+  isHoliday?: boolean;
+  isWorkday?: boolean;
+  holiday?: any;
   loading: boolean;
   login: (email: string, password: string, remember?: boolean) => Promise<AuthUser>;
   logout: () => void;
@@ -56,6 +65,9 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   badges: { alerts: 0, approvals: 0, pendingWorks: 0 },
   settings: null,
+  isHoliday: false,
+  isWorkday: true,
+  holiday: null,
   loading: true,
   login: async () => {
     throw new Error('AuthContext not ready');
@@ -68,6 +80,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [badges, setBadges] = useState<Badges>({ alerts: 0, approvals: 0, pendingWorks: 0 });
   const [settings, setSettings] = useState<MeResponse['settings'] | null>(null);
+  const [isHoliday, setIsHoliday] = useState<boolean>(false);
+  const [isWorkday, setIsWorkday] = useState<boolean>(true);
+  const [holiday, setHoliday] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const isRefreshingRef = useRef(false);
@@ -86,6 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isRefreshingRef.current = true;
     try {
       const me = await api<MeResponse>('/api/auth/me');
+      if (me.isHoliday !== undefined) setIsHoliday(!!me.isHoliday);
+      if (me.isWorkday !== undefined) setIsWorkday(!!me.isWorkday);
+      if (me.holiday !== undefined) setHoliday(me.holiday);
       
       setUser((prev) => {
         if (!prev && !me.user) return null;
@@ -182,7 +200,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const isDevWorkHours = () => {
       if (user.role !== 'developer') return false;
-      const h = new Date().getHours();
+      const now = new Date();
+      const holidayInfo = getClientHolidayInfo(
+        now,
+        (settings as any)?.holidays || [],
+        (settings as any)?.workDays || [1, 2, 3, 4, 5]
+      );
+      if (holidayInfo.isHoliday || isHoliday) return false;
+      const h = now.getHours();
       return h >= 8 && h < 17; // Strictly 8:00 AM to 5:00 PM
     };
 
@@ -297,8 +322,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, badges, settings, loading, login, logout, refresh }),
-    [user, badges, settings, loading, login, logout, refresh]
+    () => ({ user, badges, settings, isHoliday, isWorkday, holiday, loading, login, logout, refresh }),
+    [user, badges, settings, isHoliday, isWorkday, holiday, loading, login, logout, refresh]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -205,6 +205,133 @@ export function isLogForBlock(log: any, blockSlot: number, lunchSlot: number = 1
   return false;
 }
 
+export interface LeaveInfo {
+  type?: 'full_day' | 'half_day_morning' | 'half_day_afternoon' | string;
+  slots?: number[];
+  status?: string;
+  reason?: string;
+  date?: string;
+}
+
+/**
+ * Determines whether a specific work block or slot is excused by an approved leave.
+ * Handles full-day leaves, half-day leaves (morning / afternoon), slot numbers (1-4),
+ * and legacy hourly slots (8-16) for both 11 AM and 12 PM lunch schedules.
+ */
+export function isBlockExcusedByLeave(
+  leave: LeaveInfo | null | undefined,
+  slot: number,
+  block?: WorkBlock | null,
+  lunchSlot: number = 12
+): boolean {
+  if (!leave) return false;
+  if (leave.status && leave.status === 'rejected') return false;
+
+  // Full-day leave excuses all blocks
+  if (leave.type === 'full_day') return true;
+
+  // Resolve start/end hour from block if available, or compute from slot
+  const startHour = block
+    ? block.startHour
+    : lunchSlot === 11
+    ? slot === 1
+      ? 8
+      : slot === 2
+      ? 12
+      : 14.5
+    : slot === 1
+    ? 8
+    : slot === 2
+    ? 10
+    : slot === 3
+    ? 13
+    : 15;
+  const endHour = block
+    ? block.endHour
+    : lunchSlot === 11
+    ? slot === 1
+      ? 11
+      : slot === 2
+      ? 14.5
+      : 17
+    : slot === 1
+    ? 10
+    : slot === 2
+    ? 12
+    : slot === 3
+    ? 15
+    : 17;
+
+  // Half-day morning excuses morning slots (before lunch: slots 1 & 2 for 12 lunch; slot 1 for 11 lunch)
+  if (leave.type === 'half_day_morning') {
+    if (endHour <= 13 || startHour < 12) return true;
+    if (lunchSlot === 11 && slot === 1) return true;
+    if (lunchSlot === 12 && (slot === 1 || slot === 2)) return true;
+  }
+
+  // Half-day afternoon excuses afternoon slots (after lunch: slots 3 & 4 for 12 lunch; slots 2 & 3 for 11 lunch)
+  if (leave.type === 'half_day_afternoon') {
+    if (startHour >= 12) return true;
+    if (lunchSlot === 11 && (slot === 2 || slot === 3)) return true;
+    if (lunchSlot === 12 && (slot === 3 || slot === 4)) return true;
+  }
+
+  // Slot array checks (direct block slot 1..4 or hour slot 8..16)
+  if (Array.isArray(leave.slots) && leave.slots.length > 0) {
+    if (leave.slots.includes(slot)) return true;
+    const blockStart = Math.floor(startHour);
+    const blockEnd = Math.ceil(endHour);
+    for (let h = blockStart; h < blockEnd; h++) {
+      if (leave.slots.includes(h)) return true;
+    }
+  }
+
+  return false;
+}
+
+export interface HolidayEntry {
+  date: string;
+  name?: string;
+  type?: string;
+  isWorkingOverride?: boolean;
+}
+
+export function isThirdSaturday(d: Date = new Date()): boolean {
+  return d.getDay() === 6 && d.getDate() >= 15 && d.getDate() <= 21;
+}
+
+export function getClientHolidayInfo(
+  d: Date = new Date(),
+  holidays: HolidayEntry[] = [],
+  workDays: number[] = [1, 2, 3, 4, 5]
+): { isHoliday: boolean; holidayName: string; type: 'org' | 'weekend' | 'override' | 'work' } {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+  // 1. Explicit holiday or working override entry
+  const entry = holidays.find((h) => h.date === dateStr);
+  if (entry) {
+    if (entry.isWorkingOverride) {
+      return { isHoliday: false, holidayName: entry.name || 'Working Day Override', type: 'override' };
+    }
+    return { isHoliday: true, holidayName: entry.name || 'Organization Holiday', type: 'org' };
+  }
+
+  // 2. 3rd Saturday rule
+  if (isThirdSaturday(d)) {
+    return { isHoliday: true, holidayName: '3rd Saturday Holiday', type: 'org' };
+  }
+
+  // 3. Weekend (if not in workDays)
+  const dayOfWeek = d.getDay();
+  if (!workDays.includes(dayOfWeek)) {
+    const name = dayOfWeek === 0 ? 'Sunday' : 'Saturday';
+    return { isHoliday: true, holidayName: name, type: 'weekend' };
+  }
+
+  return { isHoliday: false, holidayName: '', type: 'work' };
+}
+
 export interface CurrentBlockStatus {
   isBeforeWork: boolean;
   isAfterWork: boolean;

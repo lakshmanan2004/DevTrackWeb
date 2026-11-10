@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIcon, BellIcon, BellRingIcon } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAlerts } from '../../hooks/useLive';
+import { useAuth } from '../../context/AuthContext';
 import { onSocketEvent } from '../../api/socket';
+import { getClientHolidayInfo } from '../../utils/workBlocks';
 
 interface BrowserNotificationPermissionValue {
   denied: boolean;
@@ -13,6 +15,7 @@ interface BrowserNotificationPermissionValue {
 // Live reminder card backed by real alerts + real browser notifications.
 export function RealtimeAlertsCard() {
   const { data, refetch } = useAlerts();
+  const { isHoliday: authIsHoliday, settings } = useAuth();
   const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>(
     typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
   );
@@ -20,13 +23,20 @@ export function RealtimeAlertsCard() {
     (a: any) => a.unread && (a.kind === 'reminder' || a.kind === 'eod' || a.kind === 'rejection' || a.kind === 'approval')
   );
 
-  // Real browser notifications when an alert arrives over the socket.
+  // Real browser notifications when an alert arrives over the socket (suppressed on holidays/weekends).
   useEffect(() => {
     const off = onSocketEvent('alert:new', () => {
       refetch();
+      const holidayInfo = getClientHolidayInfo(
+        new Date(),
+        (settings as any)?.holidays || [],
+        (settings as any)?.workDays || [1, 2, 3, 4, 5]
+      );
+      if (holidayInfo.isHoliday || authIsHoliday) return;
+
       if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
         // give the refetch a moment, then surface the newest unread alert
-        setTimeout(async () => {
+        setTimeout(async () => {  
           try {
             const token = localStorage.getItem('devtrack_token');
             const res = await fetch('/api/alerts', {
@@ -47,7 +57,7 @@ export function RealtimeAlertsCard() {
       }
     });
     return off;
-  }, [refetch]);
+  }, [refetch, settings, authIsHoliday]);
 
   const enable = async () => {
     if (typeof Notification === 'undefined') return;

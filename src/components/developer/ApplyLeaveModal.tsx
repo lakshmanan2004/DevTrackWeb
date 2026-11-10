@@ -47,7 +47,9 @@ export function ApplyLeaveModal({
   existingLeave
 }: ApplyLeaveModalProps) {
   const { user } = useAuth();
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
   const [date, setDate] = useState(initialDate || existingLeave?.date || todayStr);
   const [leaveType, setLeaveType] = useState<'half_day_morning' | 'half_day_afternoon' | 'full_day'>(

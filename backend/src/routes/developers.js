@@ -47,12 +47,18 @@ router.get('/', ah(async (req, res) => {
     if (devLeave) {
       if (devLeave.type === 'full_day') {
         missedCount = 0;
-      } else if (devLeave.slots && devLeave.slots.length) {
-        const excusedSet = new Set(devLeave.slots);
+      } else {
         const devLunch = dev.lunchSlot || 12;
         const blocks = getWorkBlocks(devLunch);
         const timeFloat = new Date().getHours() + new Date().getMinutes() / 60;
-        const elapsedBlocks = blocks.filter((b) => timeFloat >= (b.endHour + 0.24) && !excusedSet.has(b.slot));
+        const isBlockExcused = (b) => {
+          if (devLeave.type === 'full_day') return true;
+          if (devLeave.type === 'half_day_morning' && (b.slot <= (devLunch === 11 ? 1 : 2) || b.startHour < 12)) return true;
+          if (devLeave.type === 'half_day_afternoon' && (b.slot >= (devLunch === 11 ? 2 : 3) || b.startHour >= 12)) return true;
+          if (devLeave.slots && (devLeave.slots.includes(b.slot) || devLeave.slots.includes(Math.floor(b.startHour)))) return true;
+          return false;
+        };
+        const elapsedBlocks = blocks.filter((b) => timeFloat >= (b.endHour + 0.24) && !isBlockExcused(b));
         missedCount = elapsedBlocks.filter((b) => !isAnyLogForBlock(s.logs, b.slot, devLunch)).length;
       }
     }
